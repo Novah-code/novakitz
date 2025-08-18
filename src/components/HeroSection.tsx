@@ -10,7 +10,7 @@ export default function HeroSection() {
           <h1 className="hero-title">Turn Your Dreams Into Personal Growth</h1>
           <p className="hero-subtitle">AI-powered dream interpretation that actually makes sense</p>
           <p className="hero-description">
-            Stop wondering what your dreams mean. Nova Dream uses advanced AI to decode your subconscious mind, 
+            Stop wondering what your dreams mean. Nova Kitz uses advanced AI to decode your subconscious mind, 
             giving you personalized insights that help you understand yourself better and grow as a person.
           </p>
           
