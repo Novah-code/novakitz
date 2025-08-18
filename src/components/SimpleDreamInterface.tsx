@@ -376,6 +376,15 @@ export default function SimpleDreamInterface() {
           pointer-events: none;
         }
         
+        .orb-text {
+          background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5));
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255,255,255,0.2);
+          text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        
         @keyframes float {
           0% { transform: translateY(0px); opacity: 0.7; }
           50% { transform: translateY(-20px); opacity: 0.3; }
@@ -433,13 +442,7 @@ export default function SimpleDreamInterface() {
               <div className="smoke-layer-2"></div>
               <div className="smoke-layer-3"></div>
             </div>
-            <span className="text-xl font-bold text-white text-center transition-opacity duration-500 z-30 relative px-4 py-2 rounded-full" style={{
-              background: 'linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5))',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-            }}>
+            <span className="text-xl font-bold text-white text-center transition-opacity duration-500 z-30 relative px-4 py-2 rounded-full orb-text">
               {showResponse ? "Click to see the message" : "What's your dream?"}
             </span>
           </div>
