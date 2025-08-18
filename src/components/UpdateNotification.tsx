@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from 'react';
 
-interface UpdateNotificationProps {
-  onUpdate: () => void;
-}
+interface UpdateNotificationProps {}
 
-export default function UpdateNotification({ onUpdate }: UpdateNotificationProps) {
+export default function UpdateNotification({}: UpdateNotificationProps = {}) {
   const [showUpdate, setShowUpdate] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -49,7 +47,7 @@ export default function UpdateNotification({ onUpdate }: UpdateNotificationProps
           navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
         });
         
-        onUpdate();
+        console.log('App updated!');
         window.location.reload();
       }
     } catch (error) {

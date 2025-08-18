@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import PWAInstall from "./pwa-install";
@@ -14,9 +14,6 @@ export const metadata: Metadata = {
   description: "Discover the hidden messages in your dreams with Nova Kitz - your AI-powered dream interpretation companion with modern design.",
   keywords: "dream interpretation, AI dreams, dream analysis, Nova Kitz, subconscious, personal growth",
   manifest: "/manifest.json",
-  themeColor: "#7fb069",
-  colorScheme: "dark light",
-  viewport: "width=device-width, initial-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -43,6 +40,14 @@ export const metadata: Metadata = {
   }
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  userScalable: false,
+  themeColor: "#7fb069",
+  colorScheme: "dark light"
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -60,7 +65,7 @@ export default function RootLayout({
           <div className="particle particle-6"></div>
         </div>
         <PWAInstall />
-        <UpdateNotification onUpdate={() => console.log('App updated!')} />
+        <UpdateNotification />
         {children}
       </body>
     </html>
