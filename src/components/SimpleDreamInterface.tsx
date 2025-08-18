@@ -9,24 +9,15 @@ export default function SimpleDreamInterface() {
   const [showResponse, setShowResponse] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
-  // Enhanced animated turbulence effect
+  // Smooth turbulence animation
   useEffect(() => {
     let frame = 0;
     const animateTurbulence = () => {
       if (turbulenceRef.current) {
-        const time = frame * 0.0008;
-        const freqX = 0.015 + Math.sin(time) * 0.008 + Math.cos(time * 1.3) * 0.004;
-        const freqY = 0.025 + Math.cos(time * 0.7) * 0.010 + Math.sin(time * 1.7) * 0.005;
+        const time = frame * 0.0005;
+        const freqX = 0.012 + Math.sin(time) * 0.006;
+        const freqY = 0.018 + Math.cos(time * 1.1) * 0.007;
         turbulenceRef.current.setAttribute("baseFrequency", `${freqX} ${freqY}`);
-        
-        // Also animate secondary filters
-        const filters = document.querySelectorAll('#liquid-motion-2 feTurbulence, #wave-distort feTurbulence');
-        filters.forEach((filter, index) => {
-          const offset = index * 0.5;
-          const fx = 0.02 + Math.sin(time + offset) * 0.006;
-          const fy = 0.03 + Math.cos(time * 1.2 + offset) * 0.008;
-          filter.setAttribute("baseFrequency", `${fx} ${fy}`);
-        });
       }
       frame++;
       requestAnimationFrame(animateTurbulence);
@@ -127,77 +118,69 @@ export default function SimpleDreamInterface() {
         
         .orb-gradient {
           position: absolute;
-          top: -20%; left: -20%;
-          width: 140%; height: 140%;
+          top: -10%; left: -10%;
+          width: 120%; height: 120%;
           background: 
-            radial-gradient(ellipse at 30% 20%, rgba(127, 176, 105, 0.8) 0%, transparent 50%),
-            radial-gradient(ellipse at 70% 80%, rgba(168, 213, 168, 0.7) 0%, transparent 45%),
-            radial-gradient(ellipse at 20% 70%, rgba(135, 169, 107, 0.6) 0%, transparent 40%),
-            linear-gradient(45deg, rgba(127, 176, 105, 0.4), rgba(247, 243, 233, 0.3), rgba(168, 213, 168, 0.5));
-          animation: gradientFlow 12s ease-in-out infinite;
+            radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
+            radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
+            linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5), rgba(127, 176, 105, 0.3));
+          animation: gradientFlow 15s ease-in-out infinite;
         }
 
         .orb-layer-1 {
           position: absolute;
-          top: -15%; left: -15%;
-          width: 130%; height: 130%;
+          top: -5%; left: -5%;
+          width: 110%; height: 110%;
           background: 
-            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.3) 0%, transparent 30%),
-            radial-gradient(circle at 20% 80%, rgba(127, 176, 105, 0.4) 0%, transparent 40%);
-          animation: rotate 20s linear infinite;
-          filter: url(#liquid-motion-2);
+            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.6) 0%, rgba(127, 176, 105, 0.3) 20%, transparent 50%),
+            radial-gradient(circle at 20% 80%, rgba(168, 213, 168, 0.5) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 60%);
+          animation: rotate 25s linear infinite;
+          mix-blend-mode: overlay;
         }
 
         .orb-layer-2 {
           position: absolute;
-          top: -25%; left: -25%;
-          width: 150%; height: 150%;
+          top: -8%; left: -8%;
+          width: 116%; height: 116%;
           background: 
-            conic-gradient(from 0deg, 
-              rgba(168, 213, 168, 0.2) 0deg,
-              rgba(127, 176, 105, 0.3) 90deg,
-              rgba(247, 243, 233, 0.2) 180deg,
-              rgba(135, 169, 107, 0.3) 270deg,
-              rgba(168, 213, 168, 0.2) 360deg);
-          animation: rotate 30s linear infinite reverse;
-          filter: url(#wave-distort);
+            linear-gradient(45deg, 
+              rgba(255, 255, 255, 0.4) 0%,
+              rgba(168, 213, 168, 0.3) 25%,
+              rgba(127, 176, 105, 0.2) 50%,
+              rgba(247, 243, 233, 0.3) 75%,
+              rgba(255, 255, 255, 0.4) 100%);
+          animation: rotate 35s linear infinite reverse;
+          mix-blend-mode: soft-light;
         }
 
         @keyframes gradientFlow {
           0% { 
             transform: rotate(0deg) scale(1);
             background: 
-              radial-gradient(ellipse at 30% 20%, rgba(127, 176, 105, 0.8) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(168, 213, 168, 0.7) 0%, transparent 45%),
-              linear-gradient(45deg, rgba(127, 176, 105, 0.4), rgba(247, 243, 233, 0.3));
+              radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
+              radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
+              linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5));
           }
-          25% {
-            transform: rotate(90deg) scale(1.1);
+          33% {
+            transform: rotate(120deg) scale(1.03);
             background: 
-              radial-gradient(ellipse at 80% 30%, rgba(168, 213, 168, 0.9) 0%, transparent 55%),
-              radial-gradient(ellipse at 20% 70%, rgba(135, 169, 107, 0.8) 0%, transparent 50%),
-              linear-gradient(135deg, rgba(168, 213, 168, 0.5), rgba(127, 176, 105, 0.4));
+              radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.8) 0%, rgba(168, 213, 168, 0.7) 35%, transparent 75%),
+              radial-gradient(circle at 20% 30%, rgba(127, 176, 105, 0.6) 0%, rgba(255, 255, 255, 0.5) 45%, transparent 85%),
+              linear-gradient(225deg, rgba(168, 213, 168, 0.6), rgba(247, 243, 233, 0.4));
           }
-          50% {
-            transform: rotate(180deg) scale(0.9);
+          66% {
+            transform: rotate(240deg) scale(0.97);
             background: 
-              radial-gradient(ellipse at 50% 90%, rgba(135, 169, 107, 0.7) 0%, transparent 45%),
-              radial-gradient(ellipse at 40% 10%, rgba(247, 243, 233, 0.6) 0%, transparent 40%),
-              linear-gradient(225deg, rgba(135, 169, 107, 0.3), rgba(168, 213, 168, 0.4));
-          }
-          75% {
-            transform: rotate(270deg) scale(1.05);
-            background: 
-              radial-gradient(ellipse at 10% 50%, rgba(247, 243, 233, 0.8) 0%, transparent 50%),
-              radial-gradient(ellipse at 90% 50%, rgba(127, 176, 105, 0.7) 0%, transparent 45%),
-              linear-gradient(315deg, rgba(247, 243, 233, 0.4), rgba(135, 169, 107, 0.5));
+              radial-gradient(circle at 50% 90%, rgba(247, 243, 233, 0.9) 0%, rgba(135, 169, 107, 0.5) 32%, transparent 72%),
+              radial-gradient(circle at 40% 10%, rgba(255, 255, 255, 0.7) 0%, rgba(168, 213, 168, 0.6) 38%, transparent 78%),
+              linear-gradient(315deg, rgba(135, 169, 107, 0.4), rgba(255, 255, 255, 0.6));
           }
           100% { 
             transform: rotate(360deg) scale(1);
             background: 
-              radial-gradient(ellipse at 30% 20%, rgba(127, 176, 105, 0.8) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(168, 213, 168, 0.7) 0%, transparent 45%),
-              linear-gradient(45deg, rgba(127, 176, 105, 0.4), rgba(247, 243, 233, 0.3));
+              radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
+              radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
+              linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5));
           }
         }
 
@@ -306,52 +289,19 @@ export default function SimpleDreamInterface() {
             <feTurbulence 
               ref={turbulenceRef}
               type="fractalNoise" 
-              baseFrequency="0.015 0.025" 
-              numOctaves="4" 
+              baseFrequency="0.012 0.018" 
+              numOctaves="3" 
               result="noise" 
             />
             <feDisplacementMap 
               in="SourceGraphic" 
               in2="noise" 
-              scale="220" 
+              scale="120" 
               xChannelSelector="R" 
               yChannelSelector="G" 
             />
-            <feGaussianBlur stdDeviation="1" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-          </filter>
-          
-          <filter id="liquid-motion-2">
-            <feTurbulence 
-              type="turbulence" 
-              baseFrequency="0.02 0.03" 
-              numOctaves="3" 
-              result="noise2" 
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="noise2" 
-              scale="150" 
-              xChannelSelector="G" 
-              yChannelSelector="B" 
-            />
-          </filter>
-          
-          <filter id="wave-distort">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency="0.008 0.012" 
-              numOctaves="2" 
-              result="wave" 
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="wave" 
-              scale="100" 
-              xChannelSelector="R" 
-              yChannelSelector="G" 
-            />
-            <feGaussianBlur stdDeviation="0.5"/>
+            <feGaussianBlur stdDeviation="0.5" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="screen"/>
           </filter>
         </svg>
 
@@ -365,7 +315,7 @@ export default function SimpleDreamInterface() {
               <div className="orb-layer-1"></div>
               <div className="orb-layer-2"></div>
             </div>
-            <span className="text-2xl font-bold text-white text-center transition-opacity duration-500 drop-shadow-lg z-10">
+            <span className="text-xl font-bold text-white text-center transition-opacity duration-500 drop-shadow-xl z-20 relative">
               {showResponse ? "Click to see the message" : "What's your dream?"}
             </span>
           </div>
