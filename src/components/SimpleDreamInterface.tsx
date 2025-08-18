@@ -401,12 +401,13 @@ export default function SimpleDreamInterface() {
         }
         
         .orb-text {
-          background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5));
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255,255,255,0.2);
-          text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+          background: transparent;
+          text-shadow: 
+            0 0 10px rgba(0,0,0,0.9),
+            0 0 20px rgba(0,0,0,0.8),
+            2px 2px 4px rgba(0,0,0,0.7),
+            -2px -2px 4px rgba(0,0,0,0.7);
+          font-weight: 900;
         }
         
         @keyframes float {
