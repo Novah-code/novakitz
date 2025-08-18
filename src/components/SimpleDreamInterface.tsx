@@ -52,40 +52,6 @@ export default function SimpleDreamInterface() {
     };
   }, []);
 
-  // Particle background
-  useEffect(() => {
-    const createParticles = () => {
-      try {
-        const particleContainer = document.getElementById('particle-container');
-        if (particleContainer) {
-          // Clear existing particles
-          particleContainer.innerHTML = '';
-          
-          for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            const size = Math.random() * 2 + 0.5;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.top = `${Math.random() * 100}%`;
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.animationDelay = `${Math.random() * 20}s`;
-            particle.style.animationDuration = `${Math.random() * 15 + 15}s`;
-            particleContainer.appendChild(particle);
-          }
-        }
-      } catch (error) {
-        console.error('Particle creation error:', error);
-      }
-    };
-
-    // Create particles after a short delay to ensure DOM is ready
-    const timeoutId = setTimeout(createParticles, 200);
-    
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
 
 
   const handleAnalyze = async () => {
@@ -390,16 +356,6 @@ export default function SimpleDreamInterface() {
           100% { transform: rotate(360deg); }
         }
         
-        .particle {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.3);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          animation: float 20s ease-in-out infinite;
-          pointer-events: none;
-        }
-        
         .orb-text {
           background: transparent;
           text-shadow: 
@@ -408,12 +364,6 @@ export default function SimpleDreamInterface() {
             2px 2px 4px rgba(0,0,0,0.7),
             -2px -2px 4px rgba(0,0,0,0.7);
           font-weight: 900;
-        }
-        
-        @keyframes float {
-          0% { transform: translateY(0px); opacity: 0.7; }
-          50% { transform: translateY(-20px); opacity: 0.3; }
-          100% { transform: translateY(0px); opacity: 0.7; }
         }
       `}</style>
 
@@ -456,7 +406,6 @@ export default function SimpleDreamInterface() {
           </filter>
         </svg>
 
-        <div id="particle-container" className="absolute inset-0 z-0 overflow-hidden"></div>
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           
@@ -508,9 +457,6 @@ export default function SimpleDreamInterface() {
             </div>
           )}
 
-          <footer className="mt-12 text-center text-stone-500 fade-in" style={{animationDelay: '1s'}}>
-            <p>Made with dreams and good vibes ✨</p>
-          </footer>
         </main>
       </div>
     </>
