@@ -467,9 +467,6 @@ export default function SimpleDreamInterface() {
               <div className="smoke-layer-2"></div>
               <div className="smoke-layer-3"></div>
             </div>
-            <span className="text-xl font-bold text-white text-center transition-opacity duration-500 z-30 relative px-4 py-2 rounded-full orb-text">
-              {showResponse ? "Click to see the message" : "What's your dream?"}
-            </span>
           </div>
 
           <div className="w-full glass-pane p-6 rounded-2xl fade-in" style={{animationDelay: '0.5s'}}>
