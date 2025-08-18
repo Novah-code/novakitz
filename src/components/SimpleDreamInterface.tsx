@@ -12,57 +12,81 @@ export default function SimpleDreamInterface() {
   // Smoke-like turbulence animation
   useEffect(() => {
     let frame = 0;
+    let animationId: number;
+    
     const animateSmoke = () => {
-      if (turbulenceRef.current) {
-        const time = frame * 0.002;
-        // Create upward flowing smoke motion
-        const smokeX = 0.012 + Math.sin(time * 0.8) * 0.005;
-        const smokeY = 0.018 + Math.cos(time * 0.6) * 0.008 + Math.sin(time * 1.2) * 0.003;
-        
-        turbulenceRef.current.setAttribute("baseFrequency", `${smokeX} ${smokeY}`);
-        
-        // Animate smoke distort filter
-        const smokeFilter = document.querySelector('#smoke-distort feTurbulence');
-        if (smokeFilter) {
-          const smokeFreqX = 0.02 + Math.cos(time * 0.7) * 0.008;
-          const smokeFreqY = 0.08 + Math.sin(time * 0.9) * 0.015;
-          smokeFilter.setAttribute("baseFrequency", `${smokeFreqX} ${smokeFreqY}`);
+      try {
+        if (turbulenceRef.current) {
+          const time = frame * 0.002;
+          // Create upward flowing smoke motion
+          const smokeX = 0.012 + Math.sin(time * 0.8) * 0.005;
+          const smokeY = 0.018 + Math.cos(time * 0.6) * 0.008 + Math.sin(time * 1.2) * 0.003;
+          
+          turbulenceRef.current.setAttribute("baseFrequency", `${smokeX} ${smokeY}`);
+          
+          // Animate smoke distort filter
+          const smokeFilter = document.querySelector('#smoke-distort feTurbulence');
+          if (smokeFilter) {
+            const smokeFreqX = 0.02 + Math.cos(time * 0.7) * 0.008;
+            const smokeFreqY = 0.08 + Math.sin(time * 0.9) * 0.015;
+            smokeFilter.setAttribute("baseFrequency", `${smokeFreqX} ${smokeFreqY}`);
+          }
         }
+        frame++;
+        animationId = requestAnimationFrame(animateSmoke);
+      } catch (error) {
+        console.error('Animation error:', error);
       }
-      frame++;
-      requestAnimationFrame(animateSmoke);
     };
-    animateSmoke();
+    
+    // Start animation after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      animateSmoke();
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
   }, []);
 
   // Particle background
   useEffect(() => {
-    const particleContainer = document.getElementById('particle-container');
-    if (particleContainer) {
-      // Clear existing particles
-      particleContainer.innerHTML = '';
-      
-      for (let i = 0; i < 50; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 2 + 0.5;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 20}s`;
-        particle.style.animationDuration = `${Math.random() * 15 + 15}s`;
-        particleContainer.appendChild(particle);
+    const createParticles = () => {
+      try {
+        const particleContainer = document.getElementById('particle-container');
+        if (particleContainer) {
+          // Clear existing particles
+          particleContainer.innerHTML = '';
+          
+          for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const size = Math.random() * 2 + 0.5;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDelay = `${Math.random() * 20}s`;
+            particle.style.animationDuration = `${Math.random() * 15 + 15}s`;
+            particleContainer.appendChild(particle);
+          }
+        }
+      } catch (error) {
+        console.error('Particle creation error:', error);
       }
-    }
+    };
+
+    // Create particles after a short delay to ensure DOM is ready
+    const timeoutId = setTimeout(createParticles, 200);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
-  const adjustColor = (color: string, amount: number): string => {
-    if (!color || typeof color !== 'string' || color.length < 7) return '#F7F3E9';
-    return '#' + color.replace(/^#/, '').replace(/../g, c => 
-      ('0' + Math.min(255, Math.max(0, parseInt(c, 16) + amount)).toString(16)).substr(-2)
-    );
-  };
 
   const handleAnalyze = async () => {
     if (!dreamKeywords.trim()) {
