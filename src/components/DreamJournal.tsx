@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, Dream } from '../lib/supabase';
+import DreamCalendar from './DreamCalendar';
 
 interface DreamJournalProps {
   user: User | null;
