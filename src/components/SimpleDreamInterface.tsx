@@ -9,20 +9,44 @@ export default function SimpleDreamInterface() {
   const [showResponse, setShowResponse] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
-  // Smooth turbulence animation
+  // Natural wave-like turbulence
   useEffect(() => {
     let frame = 0;
-    const animateTurbulence = () => {
+    const animateWaves = () => {
       if (turbulenceRef.current) {
-        const time = frame * 0.0005;
-        const freqX = 0.012 + Math.sin(time) * 0.006;
-        const freqY = 0.018 + Math.cos(time * 1.1) * 0.007;
+        const time = frame * 0.003;
+        // Create wave-like motion with sine waves
+        const wave1 = Math.sin(time) * 0.004;
+        const wave2 = Math.cos(time * 0.7) * 0.003;
+        const wave3 = Math.sin(time * 1.3) * 0.002;
+        
+        const freqX = 0.008 + wave1 + wave3;
+        const freqY = 0.012 + wave2 + wave1;
+        
         turbulenceRef.current.setAttribute("baseFrequency", `${freqX} ${freqY}`);
+        
+        // Also update CSS custom properties for wave layers
+        const waveLayer = document.querySelector('.wave-layer') as HTMLElement;
+        const waveLayer2 = document.querySelector('.wave-layer-2') as HTMLElement;
+        
+        if (waveLayer) {
+          const x = 50 + Math.sin(time * 0.8) * 20;
+          const y = 50 + Math.cos(time * 0.6) * 25;
+          waveLayer.style.setProperty('--x', `${x}%`);
+          waveLayer.style.setProperty('--y', `${y}%`);
+        }
+        
+        if (waveLayer2) {
+          const x2 = 50 + Math.cos(time * 0.5) * 30;
+          const y2 = 50 + Math.sin(time * 0.9) * 20;
+          waveLayer2.style.setProperty('--x2', `${x2}%`);
+          waveLayer2.style.setProperty('--y2', `${y2}%`);
+        }
       }
       frame++;
-      requestAnimationFrame(animateTurbulence);
+      requestAnimationFrame(animateWaves);
     };
-    animateTurbulence();
+    animateWaves();
   }, []);
 
   // Particle background
@@ -118,13 +142,40 @@ export default function SimpleDreamInterface() {
         
         .orb-gradient {
           position: absolute;
-          top: -10%; left: -10%;
-          width: 120%; height: 120%;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
           background: 
-            radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
-            radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
-            linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5), rgba(127, 176, 105, 0.3));
-          animation: gradientFlow 15s ease-in-out infinite;
+            linear-gradient(45deg, 
+              #7FB069 0%, 
+              #A8D5A8 25%, 
+              #F7F3E9 50%, 
+              #A8D5A8 75%, 
+              #7FB069 100%);
+          animation: waveMotion 8s ease-in-out infinite;
+        }
+
+        .wave-layer {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: 
+            radial-gradient(ellipse at var(--x, 50%) var(--y, 50%), 
+              rgba(255, 255, 255, 0.6) 0%, 
+              rgba(127, 176, 105, 0.4) 30%, 
+              transparent 60%);
+          animation: wave1 6s ease-in-out infinite;
+        }
+
+        .wave-layer-2 {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: 
+            radial-gradient(ellipse at var(--x2, 50%) var(--y2, 50%), 
+              rgba(168, 213, 168, 0.5) 0%, 
+              rgba(255, 255, 255, 0.3) 40%, 
+              transparent 70%);
+          animation: wave2 9s ease-in-out infinite reverse;
         }
 
         .orb-layer-1 {
@@ -153,34 +204,68 @@ export default function SimpleDreamInterface() {
           mix-blend-mode: soft-light;
         }
 
-        @keyframes gradientFlow {
+        @keyframes waveMotion {
           0% { 
-            transform: rotate(0deg) scale(1);
-            background: 
-              radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
-              radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
-              linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5));
+            background-position: 0% 0%;
+            transform: scale(1) rotate(0deg);
           }
-          33% {
-            transform: rotate(120deg) scale(1.03);
-            background: 
-              radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.8) 0%, rgba(168, 213, 168, 0.7) 35%, transparent 75%),
-              radial-gradient(circle at 20% 30%, rgba(127, 176, 105, 0.6) 0%, rgba(255, 255, 255, 0.5) 45%, transparent 85%),
-              linear-gradient(225deg, rgba(168, 213, 168, 0.6), rgba(247, 243, 233, 0.4));
+          25% { 
+            background-position: 100% 25%;
+            transform: scale(1.02) rotate(3deg);
           }
-          66% {
-            transform: rotate(240deg) scale(0.97);
-            background: 
-              radial-gradient(circle at 50% 90%, rgba(247, 243, 233, 0.9) 0%, rgba(135, 169, 107, 0.5) 32%, transparent 72%),
-              radial-gradient(circle at 40% 10%, rgba(255, 255, 255, 0.7) 0%, rgba(168, 213, 168, 0.6) 38%, transparent 78%),
-              linear-gradient(315deg, rgba(135, 169, 107, 0.4), rgba(255, 255, 255, 0.6));
+          50% { 
+            background-position: 0% 50%;
+            transform: scale(0.98) rotate(0deg);
+          }
+          75% { 
+            background-position: -50% 75%;
+            transform: scale(1.01) rotate(-2deg);
           }
           100% { 
-            transform: rotate(360deg) scale(1);
-            background: 
-              radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(127, 176, 105, 0.6) 30%, transparent 70%),
-              radial-gradient(circle at 70% 80%, rgba(168, 213, 168, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 80%),
-              linear-gradient(135deg, rgba(247, 243, 233, 0.7), rgba(168, 213, 168, 0.5));
+            background-position: 0% 0%;
+            transform: scale(1) rotate(0deg);
+          }
+        }
+
+        @keyframes wave1 {
+          0% { 
+            --x: 20%; --y: 30%;
+            transform: scale(1);
+          }
+          25% { 
+            --x: 70%; --y: 20%;
+            transform: scale(1.1);
+          }
+          50% { 
+            --x: 80%; --y: 70%;
+            transform: scale(0.9);
+          }
+          75% { 
+            --x: 30%; --y: 80%;
+            transform: scale(1.05);
+          }
+          100% { 
+            --x: 20%; --y: 30%;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes wave2 {
+          0% { 
+            --x2: 60%; --y2: 70%;
+            opacity: 0.7;
+          }
+          33% { 
+            --x2: 30%; --y2: 40%;
+            opacity: 0.9;
+          }
+          66% { 
+            --x2: 80%; --y2: 30%;
+            opacity: 0.6;
+          }
+          100% { 
+            --x2: 60%; --y2: 70%;
+            opacity: 0.7;
           }
         }
 
@@ -312,8 +397,8 @@ export default function SimpleDreamInterface() {
           <div className="dream-orb flex items-center justify-center mb-8 fade-in">
             <div className="orb-motion">
               <div className="orb-gradient"></div>
-              <div className="orb-layer-1"></div>
-              <div className="orb-layer-2"></div>
+              <div className="wave-layer"></div>
+              <div className="wave-layer-2"></div>
             </div>
             <span className="text-xl font-bold text-white text-center transition-opacity duration-500 drop-shadow-xl z-20 relative">
               {showResponse ? "Click to see the message" : "What's your dream?"}
