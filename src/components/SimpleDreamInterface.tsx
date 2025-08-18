@@ -9,44 +9,30 @@ export default function SimpleDreamInterface() {
   const [showResponse, setShowResponse] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
-  // Natural wave-like turbulence
+  // Smoke-like turbulence animation
   useEffect(() => {
     let frame = 0;
-    const animateWaves = () => {
+    const animateSmoke = () => {
       if (turbulenceRef.current) {
-        const time = frame * 0.003;
-        // Create wave-like motion with sine waves
-        const wave1 = Math.sin(time) * 0.004;
-        const wave2 = Math.cos(time * 0.7) * 0.003;
-        const wave3 = Math.sin(time * 1.3) * 0.002;
+        const time = frame * 0.002;
+        // Create upward flowing smoke motion
+        const smokeX = 0.012 + Math.sin(time * 0.8) * 0.005;
+        const smokeY = 0.018 + Math.cos(time * 0.6) * 0.008 + Math.sin(time * 1.2) * 0.003;
         
-        const freqX = 0.008 + wave1 + wave3;
-        const freqY = 0.012 + wave2 + wave1;
+        turbulenceRef.current.setAttribute("baseFrequency", `${smokeX} ${smokeY}`);
         
-        turbulenceRef.current.setAttribute("baseFrequency", `${freqX} ${freqY}`);
-        
-        // Also update CSS custom properties for wave layers
-        const waveLayer = document.querySelector('.wave-layer') as HTMLElement;
-        const waveLayer2 = document.querySelector('.wave-layer-2') as HTMLElement;
-        
-        if (waveLayer) {
-          const x = 50 + Math.sin(time * 0.8) * 20;
-          const y = 50 + Math.cos(time * 0.6) * 25;
-          waveLayer.style.setProperty('--x', `${x}%`);
-          waveLayer.style.setProperty('--y', `${y}%`);
-        }
-        
-        if (waveLayer2) {
-          const x2 = 50 + Math.cos(time * 0.5) * 30;
-          const y2 = 50 + Math.sin(time * 0.9) * 20;
-          waveLayer2.style.setProperty('--x2', `${x2}%`);
-          waveLayer2.style.setProperty('--y2', `${y2}%`);
+        // Animate smoke distort filter
+        const smokeFilter = document.querySelector('#smoke-distort feTurbulence');
+        if (smokeFilter) {
+          const smokeFreqX = 0.02 + Math.cos(time * 0.7) * 0.008;
+          const smokeFreqY = 0.08 + Math.sin(time * 0.9) * 0.015;
+          smokeFilter.setAttribute("baseFrequency", `${smokeFreqX} ${smokeFreqY}`);
         }
       }
       frame++;
-      requestAnimationFrame(animateWaves);
+      requestAnimationFrame(animateSmoke);
     };
-    animateWaves();
+    animateSmoke();
   }, []);
 
   // Particle background
@@ -140,42 +126,55 @@ export default function SimpleDreamInterface() {
           overflow: hidden;
         }
         
-        .orb-gradient {
+        .smoke-base {
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
           background: 
-            linear-gradient(45deg, 
+            radial-gradient(ellipse 60% 80% at 50% 100%, 
               #7FB069 0%, 
-              #A8D5A8 25%, 
-              #F7F3E9 50%, 
-              #A8D5A8 75%, 
-              #7FB069 100%);
-          animation: waveMotion 8s ease-in-out infinite;
+              #A8D5A8 30%, 
+              #F7F3E9 60%, 
+              transparent 100%);
         }
 
-        .wave-layer {
+        .smoke-layer-1 {
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
           background: 
-            radial-gradient(ellipse at var(--x, 50%) var(--y, 50%), 
-              rgba(255, 255, 255, 0.6) 0%, 
-              rgba(127, 176, 105, 0.4) 30%, 
-              transparent 60%);
-          animation: wave1 6s ease-in-out infinite;
+            radial-gradient(ellipse 40% 70% at 45% 90%, 
+              rgba(255, 255, 255, 0.8) 0%, 
+              rgba(127, 176, 105, 0.4) 40%, 
+              transparent 80%);
+          animation: smokeRise1 8s ease-out infinite;
+          filter: url(#smoke-distort);
         }
 
-        .wave-layer-2 {
+        .smoke-layer-2 {
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
           background: 
-            radial-gradient(ellipse at var(--x2, 50%) var(--y2, 50%), 
-              rgba(168, 213, 168, 0.5) 0%, 
-              rgba(255, 255, 255, 0.3) 40%, 
-              transparent 70%);
-          animation: wave2 9s ease-in-out infinite reverse;
+            radial-gradient(ellipse 50% 60% at 55% 85%, 
+              rgba(168, 213, 168, 0.6) 0%, 
+              rgba(255, 255, 255, 0.3) 50%, 
+              transparent 90%);
+          animation: smokeRise2 10s ease-out infinite;
+          filter: url(#smoke-distort);
+        }
+
+        .smoke-layer-3 {
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: 
+            radial-gradient(ellipse 35% 50% at 50% 80%, 
+              rgba(247, 243, 233, 0.7) 0%, 
+              rgba(168, 213, 168, 0.4) 60%, 
+              transparent 100%);
+          animation: smokeRise3 12s ease-out infinite;
+          filter: url(#smoke-distort);
         }
 
         .orb-layer-1 {
@@ -204,68 +203,84 @@ export default function SimpleDreamInterface() {
           mix-blend-mode: soft-light;
         }
 
-        @keyframes waveMotion {
+        @keyframes smokeRise1 {
           0% { 
-            background-position: 0% 0%;
-            transform: scale(1) rotate(0deg);
+            transform: translateY(0%) scale(1) rotate(0deg);
+            opacity: 0;
           }
-          25% { 
-            background-position: 100% 25%;
-            transform: scale(1.02) rotate(3deg);
+          20% {
+            transform: translateY(-10%) scale(1.1) rotate(2deg);
+            opacity: 0.8;
           }
-          50% { 
-            background-position: 0% 50%;
-            transform: scale(0.98) rotate(0deg);
-          }
-          75% { 
-            background-position: -50% 75%;
-            transform: scale(1.01) rotate(-2deg);
-          }
-          100% { 
-            background-position: 0% 0%;
-            transform: scale(1) rotate(0deg);
-          }
-        }
-
-        @keyframes wave1 {
-          0% { 
-            --x: 20%; --y: 30%;
-            transform: scale(1);
-          }
-          25% { 
-            --x: 70%; --y: 20%;
-            transform: scale(1.1);
-          }
-          50% { 
-            --x: 80%; --y: 70%;
-            transform: scale(0.9);
-          }
-          75% { 
-            --x: 30%; --y: 80%;
-            transform: scale(1.05);
-          }
-          100% { 
-            --x: 20%; --y: 30%;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes wave2 {
-          0% { 
-            --x2: 60%; --y2: 70%;
-            opacity: 0.7;
-          }
-          33% { 
-            --x2: 30%; --y2: 40%;
-            opacity: 0.9;
-          }
-          66% { 
-            --x2: 80%; --y2: 30%;
+          40% {
+            transform: translateY(-25%) scale(1.3) rotate(-1deg);
             opacity: 0.6;
           }
+          60% {
+            transform: translateY(-45%) scale(1.6) rotate(3deg);
+            opacity: 0.4;
+          }
+          80% {
+            transform: translateY(-70%) scale(2.1) rotate(-2deg);
+            opacity: 0.2;
+          }
           100% { 
-            --x2: 60%; --y2: 70%;
+            transform: translateY(-100%) scale(2.5) rotate(1deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes smokeRise2 {
+          0% { 
+            transform: translateY(0%) scale(0.8) rotate(0deg);
+            opacity: 0;
+          }
+          15% {
+            transform: translateY(-8%) scale(1) rotate(-2deg);
+            opacity: 0.6;
+          }
+          35% {
+            transform: translateY(-20%) scale(1.2) rotate(1deg);
+            opacity: 0.5;
+          }
+          55% {
+            transform: translateY(-40%) scale(1.5) rotate(-3deg);
+            opacity: 0.3;
+          }
+          75% {
+            transform: translateY(-65%) scale(1.9) rotate(2deg);
+            opacity: 0.15;
+          }
+          100% { 
+            transform: translateY(-95%) scale(2.3) rotate(-1deg);
+            opacity: 0;
+          }
+        }
+
+        @keyframes smokeRise3 {
+          0% { 
+            transform: translateY(0%) scale(0.9) rotate(0deg);
+            opacity: 0;
+          }
+          25% {
+            transform: translateY(-12%) scale(1.1) rotate(3deg);
             opacity: 0.7;
+          }
+          45% {
+            transform: translateY(-30%) scale(1.4) rotate(-1deg);
+            opacity: 0.5;
+          }
+          65% {
+            transform: translateY(-55%) scale(1.8) rotate(2deg);
+            opacity: 0.3;
+          }
+          85% {
+            transform: translateY(-80%) scale(2.2) rotate(-2deg);
+            opacity: 0.1;
+          }
+          100% { 
+            transform: translateY(-110%) scale(2.6) rotate(1deg);
+            opacity: 0;
           }
         }
 
@@ -381,12 +396,29 @@ export default function SimpleDreamInterface() {
             <feDisplacementMap 
               in="SourceGraphic" 
               in2="noise" 
-              scale="120" 
+              scale="80" 
               xChannelSelector="R" 
               yChannelSelector="G" 
             />
-            <feGaussianBlur stdDeviation="0.5" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="screen"/>
+            <feGaussianBlur stdDeviation="1" result="blur"/>
+          </filter>
+          
+          <filter id="smoke-distort">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.02 0.08" 
+              numOctaves="4" 
+              result="smokeNoise" 
+            />
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="smokeNoise" 
+              scale="60" 
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+            />
+            <feGaussianBlur stdDeviation="2" result="smokeBlur"/>
+            <feComposite in="SourceGraphic" in2="smokeBlur" operator="multiply"/>
           </filter>
         </svg>
 
@@ -396,9 +428,10 @@ export default function SimpleDreamInterface() {
           
           <div className="dream-orb flex items-center justify-center mb-8 fade-in">
             <div className="orb-motion">
-              <div className="orb-gradient"></div>
-              <div className="wave-layer"></div>
-              <div className="wave-layer-2"></div>
+              <div className="smoke-base"></div>
+              <div className="smoke-layer-1"></div>
+              <div className="smoke-layer-2"></div>
+              <div className="smoke-layer-3"></div>
             </div>
             <span className="text-xl font-bold text-white text-center transition-opacity duration-500 drop-shadow-xl z-20 relative">
               {showResponse ? "Click to see the message" : "What's your dream?"}
