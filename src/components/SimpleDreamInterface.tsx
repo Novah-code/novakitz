@@ -418,29 +418,6 @@ export default function SimpleDreamInterface() {
             </div>
           </div>
 
-          <div className="w-full glass-pane p-6 rounded-2xl fade-in" style={{animationDelay: '0.5s'}}>
-            <h1 className="text-3xl sm:text-4xl font-black matcha-gradient-text mb-4">
-              Nova Kitz - What's brewing in your dreams?
-            </h1>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input 
-                type="text" 
-                value={dreamKeywords}
-                onChange={(e) => setDreamKeywords(e.target.value)}
-                placeholder="e.g., flying, ocean, white horse" 
-                className="w-full px-4 py-3 rounded-lg border-2 border-stone-300 focus:ring-2 focus:ring-green-400 focus:border-green-400 transition duration-300 bg-white/80 placeholder-stone-400 text-stone-700"
-                onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-              />
-              <button 
-                onClick={handleAnalyze}
-                disabled={isLoading}
-                className="w-full sm:w-auto px-6 py-3 rounded-lg font-bold matcha-btn whitespace-nowrap flex items-center justify-center gap-2"
-              >
-                <span className={isLoading ? 'hidden' : ''}>Brew Analysis</span>
-                <div className={`spinner ${isLoading ? '' : 'hidden'}`}></div>
-              </button>
-            </div>
-          </div>
 
           {showResponse && (
             <div className="w-full mt-6 glass-pane p-6 rounded-2xl text-left flex items-start space-x-4 fade-in">
