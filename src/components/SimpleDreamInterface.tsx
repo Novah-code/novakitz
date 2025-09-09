@@ -6,6 +6,8 @@ export default function SimpleDreamInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [novaResponse, setNovaResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [dreamText, setDreamText] = useState('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Smoke-like turbulence animation
@@ -54,7 +56,28 @@ export default function SimpleDreamInterface() {
 
 
   const handleAnalyze = async () => {
-    // Removed response functionality - orb click does nothing now
+    setShowInput(true);
+  };
+
+  const handleSubmitDream = async () => {
+    if (!dreamText.trim()) return;
+    
+    setIsLoading(true);
+    setShowResponse(false);
+
+    try {
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setNovaResponse(`Dream about "${dreamText}" analyzed! ✨ Your subconscious is revealing interesting patterns.`);
+      setShowResponse(true);
+    } catch (error) {
+      console.error('Error during dream analysis:', error);
+      setNovaResponse("Analysis temporarily unavailable. Please try again later.");
+      setShowResponse(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -344,6 +367,35 @@ export default function SimpleDreamInterface() {
             -2px -2px 4px rgba(0,0,0,0.7);
           font-weight: 900;
         }
+        
+        .dream-input {
+          width: 100%;
+          min-height: 120px;
+          padding: 20px;
+          border: none;
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          font-size: 16px;
+          font-family: inherit;
+          resize: none;
+          outline: none;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+          transition: all 0.3s ease;
+        }
+        
+        .dream-input:focus {
+          box-shadow: 
+            0 8px 32px rgba(127, 176, 105, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .dream-input::placeholder {
+          color: rgba(45, 55, 72, 0.6);
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -398,6 +450,62 @@ export default function SimpleDreamInterface() {
           </div>
 
 
+
+          {showInput && (
+            <div className="w-full mt-6 glass-pane p-6 rounded-2xl fade-in">
+              <h3 className="text-xl font-bold matcha-gradient-text mb-4 text-center">
+                Describe your dream ✨
+              </h3>
+              <textarea
+                className="dream-input"
+                value={dreamText}
+                onChange={(e) => setDreamText(e.target.value)}
+                placeholder="Tell me about your dream... What did you see, feel, or experience?"
+                rows={4}
+              />
+              <div className="flex gap-3 mt-4 justify-center">
+                <button
+                  onClick={handleSubmitDream}
+                  disabled={!dreamText.trim() || isLoading}
+                  className={`matcha-btn px-6 py-3 rounded-full font-medium ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="spinner inline-block mr-2"></div>
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Analyze Dream 🔮'
+                  )}
+                </button>
+                <button
+                  onClick={() => {setShowInput(false); setDreamText('');}}
+                  className="px-6 py-3 rounded-full font-medium bg-gray-200 hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showResponse && (
+            <div className="w-full mt-6 glass-pane p-6 rounded-2xl fade-in">
+              <div className="text-center">
+                <h3 className="text-xl font-bold matcha-gradient-text mb-3">
+                  Dream Analysis 🌙
+                </h3>
+                <p className="text-stone-700 text-lg">{novaResponse}</p>
+              </div>
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => {setShowResponse(false); setShowInput(false); setDreamText('');}}
+                  className="matcha-btn px-6 py-3 rounded-full font-medium"
+                >
+                  Analyze Another Dream
+                </button>
+              </div>
+            </div>
+          )}
 
         </main>
       </div>
