@@ -34,7 +34,7 @@ export default function SimpleDreamInterface() {
       id: Date.now().toString(),
       text: dreamText,
       response: response,
-      date: new Date().toLocaleDateString('ko-KR', {
+      date: new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -560,20 +560,26 @@ export default function SimpleDreamInterface() {
         }
         
         .dream-history {
-          margin-top: 32px;
-          padding: 24px;
-          background: rgba(255, 255, 255, 0.9);
-          border-radius: 16px;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          max-width: 800px;
-          width: 100%;
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #f8fafc;
+          z-index: 2000;
+          overflow-y: auto;
+          padding: 40px 20px 80px 20px;
+        }
+        
+        .dream-history-container {
+          max-width: 1200px;
+          margin: 0 auto;
         }
         
         .dream-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
         }
         
         @media (max-width: 768px) {
@@ -586,6 +592,34 @@ export default function SimpleDreamInterface() {
           .dream-grid {
             grid-template-columns: repeat(2, 1fr);
           }
+        }
+        
+        @media (max-width: 1400px) and (min-width: 1025px) {
+          .dream-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        
+        .journal-close-btn {
+          position: fixed;
+          bottom: 30px;
+          right: 30px;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          border: none;
+          border-radius: 20px;
+          padding: 8px 16px;
+          font-size: 14px;
+          cursor: pointer;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          z-index: 2001;
+          transition: all 0.2s ease;
+        }
+        
+        .journal-close-btn:hover {
+          background: rgba(0, 0, 0, 0.9);
+          transform: scale(1.05);
         }
         
         .dream-entry {
@@ -785,17 +819,13 @@ export default function SimpleDreamInterface() {
 
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold matcha-gradient-text">
-                  Dream Journal 📝
-                </h3>
-                <button
-                  onClick={() => {setShowHistory(false);}}
-                  className="btn-secondary px-4 py-2 rounded-full text-sm"
-                >
-                  Close
-                </button>
-              </div>
+              <div className="dream-history-container">
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    Dream Journal
+                  </h1>
+                  <p className="text-gray-600">{savedDreams.length} dreams recorded</p>
+                </div>
               <div className="dream-grid">
                 {savedDreams.slice(0, 9).map((dream, index) => {
                   const gradients = [
@@ -836,12 +866,19 @@ export default function SimpleDreamInterface() {
                     </div>
                   );
                 })}
-              </div>
-              {savedDreams.length === 0 && (
-                <div className="text-center text-gray-500 py-8">
-                  🌙 No dreams recorded yet
                 </div>
-              )}
+                {savedDreams.length === 0 && (
+                  <div className="text-center text-gray-500 py-8">
+                    🌙 No dreams recorded yet
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => {setShowHistory(false);}}
+                className="journal-close-btn"
+              >
+                Close
+              </button>
             </div>
           )}
 
