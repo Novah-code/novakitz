@@ -546,34 +546,17 @@ export default function SimpleDreamInterface() {
           {showInput && (
             <div className="modal-overlay">
               <div className="modal-content">
-                <div className="modal-header">
-                  <div className="flex items-center">
-                    <div className="user-avatar">
-                      🌙
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">Nova Dreams</h3>
-                      <p className="text-gray-500 text-sm">What's brewing in your dreams?</p>
-                    </div>
-                  </div>
-                </div>
                 <div className="modal-body">
                   <textarea
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder="Describe your dream in detail..."
+                    placeholder="What's brewing in your dreams?"
                     rows={4}
                     autoFocus
                   />
                 </div>
                 <div className="modal-actions">
-                  <button
-                    onClick={() => {setShowInput(false); setDreamText('');}}
-                    className="btn-secondary"
-                  >
-                    Cancel
-                  </button>
                   <button
                     onClick={handleSubmitDream}
                     disabled={!dreamText.trim() || isLoading}
