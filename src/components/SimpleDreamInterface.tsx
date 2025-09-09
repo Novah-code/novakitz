@@ -71,10 +71,12 @@ export default function SimpleDreamInterface() {
       
       setNovaResponse(`Dream about "${dreamText}" analyzed! ✨ Your subconscious is revealing interesting patterns.`);
       setShowResponse(true);
+      setShowInput(false); // Close the input modal
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Analysis temporarily unavailable. Please try again later.");
       setShowResponse(true);
+      setShowInput(false); // Close the input modal even on error
     } finally {
       setIsLoading(false);
     }
@@ -429,7 +431,7 @@ export default function SimpleDreamInterface() {
         }
         
         .btn-primary {
-          background: #2563eb;
+          background: #7FB069;
           color: white;
           border: none;
           padding: 10px 20px;
@@ -441,11 +443,11 @@ export default function SimpleDreamInterface() {
         }
         
         .btn-primary:hover {
-          background: #1d4ed8;
+          background: #5A8449;
         }
         
         .btn-primary:disabled {
-          background: #cbd5e1;
+          background: #A8D5A8;
           cursor: not-allowed;
         }
         
