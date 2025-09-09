@@ -398,7 +398,7 @@ export default function SimpleDreamInterface() {
           border-bottom: 1px solid #f1f5f9;
         }
         
-        .modal-body {
+        .modal-header {\n          padding: 24px 24px 8px 24px;\n          border-bottom: 1px solid #f1f5f9;\n        }\n        \n        .modal-body {
           padding: 16px 24px 24px 24px;
         }
         
@@ -472,8 +472,39 @@ export default function SimpleDreamInterface() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
           margin-right: 12px;
+          position: relative;
+        }
+        
+        .loading-dots {
+          display: flex;
+          gap: 3px;
+        }
+        
+        .loading-dot {
+          width: 4px;
+          height: 4px;
+          background: #ffffff;
+          border-radius: 50%;
+          animation: loadingPulse 1.4s ease-in-out infinite both;
+        }
+        
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0; }
+        .loading-dot:nth-child(4) { animation-delay: 0.16s; }
+        .loading-dot:nth-child(5) { animation-delay: 0.32s; }
+        .loading-dot:nth-child(6) { animation-delay: 0.48s; }
+        
+        @keyframes loadingPulse {
+          0%, 80%, 100% {
+            transform: scale(0.8);
+            opacity: 0.5;
+          }
+          40% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
         
         @keyframes modalSlideIn {
@@ -546,6 +577,24 @@ export default function SimpleDreamInterface() {
           {showInput && (
             <div className="modal-overlay">
               <div className="modal-content">
+                <div className="modal-header">
+                  <div className="flex items-center">
+                    <div className="user-avatar">
+                      <div className="loading-dots">
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-lg">Nova Dreams</h3>
+                      <p className="text-gray-500 text-sm">What's brewing in your dreams?</p>
+                    </div>
+                  </div>
+                </div>
                 <div className="modal-body">
                   <textarea
                     className="dream-input"
@@ -562,7 +611,7 @@ export default function SimpleDreamInterface() {
                     disabled={!dreamText.trim() || isLoading}
                     className="btn-primary"
                   >
-                    {isLoading ? 'Analyzing...' : 'Analyze Dream'}
+                    {isLoading ? 'Brewing...' : 'Brew'}
                   </button>
                 </div>
               </div>
