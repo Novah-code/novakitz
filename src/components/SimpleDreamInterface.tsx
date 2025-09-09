@@ -2,13 +2,50 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+interface DreamEntry {
+  id: string;
+  text: string;
+  response: string;
+  date: string;
+  timestamp: number;
+}
+
 export default function SimpleDreamInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [novaResponse, setNovaResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
+  const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
+
+  // Load saved dreams from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('novaDreams');
+    if (saved) {
+      setSavedDreams(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save dreams to localStorage
+  const saveDream = (dreamText: string, response: string) => {
+    const newDream: DreamEntry = {
+      id: Date.now().toString(),
+      text: dreamText,
+      response: response,
+      date: new Date().toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      timestamp: Date.now()
+    };
+    
+    const updatedDreams = [newDream, ...savedDreams];
+    setSavedDreams(updatedDreams);
+    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+  };
 
   // Smoke-like turbulence animation
   useEffect(() => {
@@ -69,9 +106,11 @@ export default function SimpleDreamInterface() {
       // Simulate API call for now
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setNovaResponse(`Dream about "${dreamText}" analyzed! ✨ Your subconscious is revealing interesting patterns.`);
+      const response = `Dream about "${dreamText}" analyzed! ✨ Your subconscious is revealing interesting patterns.`;
+      setNovaResponse(response);
       setShowResponse(true);
       setShowInput(false); // Close the input modal
+      saveDream(dreamText, response); // Save the dream
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Analysis temporarily unavailable. Please try again later.");
@@ -520,6 +559,61 @@ export default function SimpleDreamInterface() {
             transform: translateY(0) scale(1);
           }
         }
+        
+        .dream-history {
+          margin-top: 32px;
+          padding: 24px;
+          background: rgba(255, 255, 255, 0.9);
+          border-radius: 16px;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          max-width: 800px;
+          width: 100%;
+        }
+        
+        .dream-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        
+        @media (max-width: 768px) {
+          .dream-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        
+        @media (max-width: 1024px) and (min-width: 769px) {
+          .dream-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        
+        .dream-entry {
+          padding: 16px;
+          background: rgba(255, 255, 255, 0.6);
+          border-radius: 12px;
+          border-left: 4px solid #7FB069;
+          min-height: 120px;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .dream-date {
+          font-size: 12px;
+          color: #64748b;
+          margin-bottom: 8px;
+        }
+        
+        .dream-preview {
+          font-family: Georgia, serif;
+          color: #334155;
+          margin-bottom: 8px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -625,14 +719,63 @@ export default function SimpleDreamInterface() {
                 </h3>
                 <p className="text-stone-700 text-lg">{novaResponse}</p>
               </div>
-              <div className="mt-4 text-center">
+              <div className="mt-4 text-center flex gap-3 justify-center">
                 <button
                   onClick={() => {setShowResponse(false); setShowInput(false); setDreamText('');}}
                   className="matcha-btn px-6 py-3 rounded-full font-medium"
                 >
                   Analyze Another Dream
                 </button>
+                <button
+                  onClick={() => {setShowResponse(false); setShowHistory(true);}}
+                  className="btn-secondary px-6 py-3 rounded-full font-medium"
+                >
+                  View Dream Journal
+                </button>
               </div>
+            </div>
+          )}
+
+          {showHistory && savedDreams.length > 0 && (
+            <div className="dream-history fade-in">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold matcha-gradient-text">
+                  Dream Journal 📝
+                </h3>
+                <button
+                  onClick={() => {setShowHistory(false);}}
+                  className="btn-secondary px-4 py-2 rounded-full text-sm"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="dream-grid">
+                {savedDreams.slice(0, 9).map((dream) => (
+                  <div key={dream.id} className="dream-entry">
+                    <div className="dream-date">{dream.date}</div>
+                    <div className="dream-preview flex-1">{dream.text}</div>
+                    <div className="text-xs text-gray-500 mt-auto">
+                      ✨ Analyzed
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {savedDreams.length === 0 && (
+                <div className="text-center text-gray-500 py-8">
+                  🌙 No dreams recorded yet
+                </div>
+              )}
+            </div>
+          )}
+
+          {!showInput && !showResponse && !showHistory && savedDreams.length > 0 && (
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => setShowHistory(true)}
+                className="btn-secondary px-6 py-3 rounded-full font-medium"
+              >
+                View Dream Journal ({savedDreams.length})
+              </button>
             </div>
           )}
 
