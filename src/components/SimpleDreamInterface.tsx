@@ -440,14 +440,16 @@ export default function SimpleDreamInterface() {
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           
-          <div className="dream-orb flex items-center justify-center mb-8 fade-in" onClick={handleAnalyze} style={{cursor: 'pointer'}}>
-            <div className="orb-motion">
-              <div className="smoke-base"></div>
-              <div className="smoke-layer-1"></div>
-              <div className="smoke-layer-2"></div>
-              <div className="smoke-layer-3"></div>
+          {!showInput && !showResponse && (
+            <div className="dream-orb flex items-center justify-center mb-8 fade-in" onClick={handleAnalyze} style={{cursor: 'pointer'}}>
+              <div className="orb-motion">
+                <div className="smoke-base"></div>
+                <div className="smoke-layer-1"></div>
+                <div className="smoke-layer-2"></div>
+                <div className="smoke-layer-3"></div>
+              </div>
             </div>
-          </div>
+          )}
 
 
 
