@@ -405,14 +405,14 @@ export default function SimpleDreamInterface() {
         }
         
         .dream-input {
-          width: calc(100% - 32px);
+          width: calc(100% - 64px);
           min-height: 120px;
-          margin: 0 16px;
-          padding: 16px 0;
+          margin: 0 32px;
+          padding: 20px 16px;
           border: none;
           outline: none;
           font-size: 16px;
-          font-family: inherit;
+          font-family: Georgia, serif;
           resize: none;
           background: transparent;
           color: #334155;
@@ -599,7 +599,7 @@ export default function SimpleDreamInterface() {
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder="What's brewing in your dreams?"
+                    placeholder=" What's brewing in your dreams?"
                     rows={4}
                     autoFocus
                   />
