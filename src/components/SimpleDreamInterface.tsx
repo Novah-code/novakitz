@@ -18,6 +18,7 @@ export default function SimpleDreamInterface() {
   const [dreamText, setDreamText] = useState('');
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -561,19 +562,22 @@ export default function SimpleDreamInterface() {
         
         .dream-history {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          top: 20px;
+          left: 20px;
+          right: 20px;
+          bottom: 20px;
           background: #f8fafc;
           z-index: 2000;
           overflow-y: auto;
-          padding: 40px 20px 80px 20px;
+          padding: 40px;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
         .dream-history-container {
           max-width: 1200px;
           margin: 0 auto;
+          position: relative;
         }
         
         .dream-grid {
@@ -601,25 +605,23 @@ export default function SimpleDreamInterface() {
         }
         
         .journal-close-btn {
-          position: fixed;
-          bottom: 30px;
-          right: 30px;
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          border: none;
-          border-radius: 20px;
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
           padding: 8px 16px;
           font-size: 14px;
           cursor: pointer;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          z-index: 2001;
           transition: all 0.2s ease;
+          font-weight: 500;
         }
         
         .journal-close-btn:hover {
-          background: rgba(0, 0, 0, 0.9);
-          transform: scale(1.05);
+          background: #e2e8f0;
+          color: #475569;
         }
         
         .dream-entry {
@@ -718,6 +720,104 @@ export default function SimpleDreamInterface() {
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+        
+        .dream-detail-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 3000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        
+        .dream-detail-modal {
+          background: white;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow: hidden;
+          animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        .dream-detail-header {
+          padding: 24px;
+          border-bottom: 1px solid #f1f5f9;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+        
+        .dream-detail-body {
+          padding: 24px;
+          max-height: 60vh;
+          overflow-y: auto;
+        }
+        
+        .dream-detail-title {
+          font-size: 24px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .dream-detail-date {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+        
+        .dream-detail-content {
+          font-family: Georgia, serif;
+          font-size: 16px;
+          line-height: 1.7;
+          color: #374151;
+          margin-bottom: 24px;
+        }
+        
+        .dream-detail-response {
+          background: #f8fafc;
+          padding: 20px;
+          border-radius: 16px;
+          border-left: 4px solid #7FB069;
+        }
+        
+        .dream-detail-response-title {
+          font-weight: 600;
+          color: #7FB069;
+          margin-bottom: 12px;
+          font-size: 16px;
+        }
+        
+        .dream-detail-response-text {
+          color: #64748b;
+          line-height: 1.6;
+        }
+        
+        .dream-detail-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 18px;
+          transition: all 0.2s ease;
+        }
+        
+        .dream-detail-close:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
       `}</style>
 
@@ -840,13 +940,13 @@ export default function SimpleDreamInterface() {
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry">
+                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
                       <div className="dream-image" style={{background: gradients[index % gradients.length]}}>
                         <div className="dream-actions">
-                          <button className="action-btn" title="Share">
+                          <button className="action-btn" title="Share" onClick={(e) => e.stopPropagation()}>
                             🔗
                           </button>
-                          <button className="action-btn" title="Delete">
+                          <button className="action-btn" title="Delete" onClick={(e) => e.stopPropagation()}>
                             🗑️
                           </button>
                         </div>
@@ -879,6 +979,31 @@ export default function SimpleDreamInterface() {
               >
                 Close
               </button>
+            </div>
+          )}
+
+          {selectedDream && (
+            <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
+              <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                  <button className="dream-detail-close" onClick={() => setSelectedDream(null)}>
+                    ×
+                  </button>
+                  <div className="dream-detail-title">Dream Entry</div>
+                  <div className="dream-detail-date">{selectedDream.date} • Somewhere special</div>
+                </div>
+                <div className="dream-detail-body">
+                  <div className="dream-detail-content">
+                    {selectedDream.text}
+                  </div>
+                  <div className="dream-detail-response">
+                    <div className="dream-detail-response-title">✨ Dream Analysis</div>
+                    <div className="dream-detail-response-text">
+                      {selectedDream.response}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
