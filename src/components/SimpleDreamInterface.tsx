@@ -106,15 +106,14 @@ export default function SimpleDreamInterface() {
       // Simulate API call for now
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const response = `Dream about "${dreamText}" analyzed! ✨ Your subconscious is revealing interesting patterns.`;
+      const response = `Your dream has been analyzed! ✨`;
       setNovaResponse(response);
-      setShowResponse(true);
       setShowInput(false); // Close the input modal
       saveDream(dreamText, response); // Save the dream
+      setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Analysis temporarily unavailable. Please try again later.");
-      setShowResponse(true);
       setShowInput(false); // Close the input modal even on error
     } finally {
       setIsLoading(false);
@@ -711,30 +710,6 @@ export default function SimpleDreamInterface() {
             </div>
           )}
 
-          {showResponse && (
-            <div className="w-full mt-6 glass-pane p-6 rounded-2xl fade-in">
-              <div className="text-center">
-                <h3 className="text-xl font-bold matcha-gradient-text mb-3">
-                  Dream Analysis 🌙
-                </h3>
-                <p className="text-stone-700 text-lg">{novaResponse}</p>
-              </div>
-              <div className="mt-4 text-center flex gap-3 justify-center">
-                <button
-                  onClick={() => {setShowResponse(false); setShowInput(false); setDreamText('');}}
-                  className="matcha-btn px-6 py-3 rounded-full font-medium"
-                >
-                  Analyze Another Dream
-                </button>
-                <button
-                  onClick={() => {setShowResponse(false); setShowHistory(true);}}
-                  className="btn-secondary px-6 py-3 rounded-full font-medium"
-                >
-                  View Dream Journal
-                </button>
-              </div>
-            </div>
-          )}
 
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
