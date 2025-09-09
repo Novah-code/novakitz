@@ -394,8 +394,8 @@ export default function SimpleDreamInterface() {
         }
         
         .modal-header {
-          padding: 24px 24px 8px 24px;
-          border-bottom: 1px solid #f1f5f9;
+          padding: 24px 24px 16px 24px;
+          border-bottom: none;
         }
         
         .modal-header {\n          padding: 24px 24px 8px 24px;\n          border-bottom: 1px solid #f1f5f9;\n        }\n        \n        .modal-body {
@@ -404,8 +404,8 @@ export default function SimpleDreamInterface() {
         
         .dream-input {
           width: 100%;
-          min-height: 100px;
-          padding: 12px 0;
+          min-height: 120px;
+          padding: 0;
           border: none;
           outline: none;
           font-size: 16px;
@@ -414,6 +414,7 @@ export default function SimpleDreamInterface() {
           background: transparent;
           color: #334155;
           line-height: 1.5;
+          box-sizing: border-box;
         }
         
         .dream-input::placeholder {
@@ -472,7 +473,6 @@ export default function SimpleDreamInterface() {
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 12px;
           position: relative;
         }
         
@@ -578,7 +578,7 @@ export default function SimpleDreamInterface() {
             <div className="modal-overlay">
               <div className="modal-content">
                 <div className="modal-header">
-                  <div className="flex items-center">
+                  <div className="flex justify-center">
                     <div className="user-avatar">
                       <div className="loading-dots">
                         <div className="loading-dot"></div>
@@ -588,10 +588,6 @@ export default function SimpleDreamInterface() {
                         <div className="loading-dot"></div>
                         <div className="loading-dot"></div>
                       </div>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">Nova Dreams</h3>
-                      <p className="text-gray-500 text-sm">What's brewing in your dreams?</p>
                     </div>
                   </div>
                 </div>
