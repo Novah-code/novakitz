@@ -368,33 +368,123 @@ export default function SimpleDreamInterface() {
           font-weight: 900;
         }
         
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        
+        .modal-content {
+          background: white;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          max-width: 480px;
+          max-height: 90vh;
+          overflow: hidden;
+          animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        .modal-header {
+          padding: 24px 24px 8px 24px;
+          border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .modal-body {
+          padding: 16px 24px 24px 24px;
+        }
+        
         .dream-input {
           width: 100%;
-          min-height: 120px;
-          padding: 20px;
+          min-height: 100px;
+          padding: 12px 0;
           border: none;
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.9);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          outline: none;
           font-size: 16px;
           font-family: inherit;
           resize: none;
-          outline: none;
-          box-shadow: 
-            0 8px 32px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.6);
-          transition: all 0.3s ease;
-        }
-        
-        .dream-input:focus {
-          box-shadow: 
-            0 8px 32px rgba(127, 176, 105, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          background: transparent;
+          color: #334155;
+          line-height: 1.5;
         }
         
         .dream-input::placeholder {
-          color: rgba(45, 55, 72, 0.6);
+          color: #94a3b8;
+        }
+        
+        .modal-actions {
+          padding: 16px 24px 24px 24px;
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+        
+        .btn-primary {
+          background: #2563eb;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+          background: #1d4ed8;
+        }
+        
+        .btn-primary:disabled {
+          background: #cbd5e1;
+          cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+          background: #f8fafc;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+          background: #f1f5f9;
+        }
+        
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #7FB069, #A8D5A8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          margin-right: 12px;
+        }
+        
+        @keyframes modalSlideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
       `}</style>
 
@@ -454,38 +544,44 @@ export default function SimpleDreamInterface() {
 
 
           {showInput && (
-            <div className="w-full mt-6 glass-pane p-6 rounded-2xl fade-in">
-              <h3 className="text-xl font-bold matcha-gradient-text mb-4 text-center">
-                Describe your dream ✨
-              </h3>
-              <textarea
-                className="dream-input"
-                value={dreamText}
-                onChange={(e) => setDreamText(e.target.value)}
-                placeholder="Tell me about your dream... What did you see, feel, or experience?"
-                rows={4}
-              />
-              <div className="flex gap-3 mt-4 justify-center">
-                <button
-                  onClick={handleSubmitDream}
-                  disabled={!dreamText.trim() || isLoading}
-                  className={`matcha-btn px-6 py-3 rounded-full font-medium ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="spinner inline-block mr-2"></div>
-                      Analyzing...
-                    </>
-                  ) : (
-                    'Analyze Dream 🔮'
-                  )}
-                </button>
-                <button
-                  onClick={() => {setShowInput(false); setDreamText('');}}
-                  className="px-6 py-3 rounded-full font-medium bg-gray-200 hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <div className="flex items-center">
+                    <div className="user-avatar">
+                      🌙
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-lg">Nova Dreams</h3>
+                      <p className="text-gray-500 text-sm">What's brewing in your dreams?</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-body">
+                  <textarea
+                    className="dream-input"
+                    value={dreamText}
+                    onChange={(e) => setDreamText(e.target.value)}
+                    placeholder="Describe your dream in detail..."
+                    rows={4}
+                    autoFocus
+                  />
+                </div>
+                <div className="modal-actions">
+                  <button
+                    onClick={() => {setShowInput(false); setDreamText('');}}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitDream}
+                    disabled={!dreamText.trim() || isLoading}
+                    className="btn-primary"
+                  >
+                    {isLoading ? 'Analyzing...' : 'Analyze Dream'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
