@@ -1,1 +1,16 @@
 node_modules
+.next
+.env
+.env.local
+.env.production
+.env.development
+.vercel
+*.log
+dist/
+build/
+
+# Mobile app folders
+NovaKitzFinal/
+NovaKitzMobile/
+NovaKitzNew/
+NovaKitzTest/
