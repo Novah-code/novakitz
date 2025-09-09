@@ -406,17 +406,23 @@ export default function SimpleDreamInterface() {
         
         .dream-input {
           width: 100%;
-          min-height: 120px;
-          padding: 0;
-          border: none;
+          min-height: 100px;
+          padding: 12px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
           outline: none;
           font-size: 16px;
           font-family: inherit;
           resize: none;
-          background: transparent;
+          background: #f8fafc;
           color: #334155;
           line-height: 1.5;
           box-sizing: border-box;
+        }
+        
+        .dream-input:focus {
+          border-color: #7FB069;
+          background: white;
         }
         
         .dream-input::placeholder {
