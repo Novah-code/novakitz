@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 
 export default function SimpleDreamInterface() {
-  const [dreamKeywords, setDreamKeywords] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [novaResponse, setNovaResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
@@ -55,11 +54,6 @@ export default function SimpleDreamInterface() {
 
 
   const handleAnalyze = async () => {
-    if (!dreamKeywords.trim()) {
-      alert('Spill your dream tea! Please enter some keywords.');
-      return;
-    }
-
     setIsLoading(true);
     setShowResponse(false);
 
@@ -67,11 +61,11 @@ export default function SimpleDreamInterface() {
       // Simulate API call for now
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      setNovaResponse(`Okay bestie, here's the tea... 🍵 Your dreams about "${dreamKeywords}" are brewing with creative energy! ✨ This suggests your subconscious is processing new ideas and possibilities. 🌱 Trust the process and let your imagination flow! 🌙`);
+      setNovaResponse(`Welcome to Nova Dreams ✨ Your journey into dream interpretation begins here. Click the orb to explore the mysteries of your subconscious mind! 🌙`);
       setShowResponse(true);
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setNovaResponse("Sorry bestie, the tea leaves are a bit cloudy right now. Please try again later.");
+      setNovaResponse("The dream realm is temporarily unavailable. Please try again later.");
       setShowResponse(true);
     } finally {
       setIsLoading(false);
@@ -409,7 +403,7 @@ export default function SimpleDreamInterface() {
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           
-          <div className="dream-orb flex items-center justify-center mb-8 fade-in">
+          <div className="dream-orb flex items-center justify-center mb-8 fade-in" onClick={handleAnalyze} style={{cursor: 'pointer'}}>
             <div className="orb-motion">
               <div className="smoke-base"></div>
               <div className="smoke-layer-1"></div>
