@@ -589,13 +589,85 @@ export default function SimpleDreamInterface() {
         }
         
         .dream-entry {
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.6);
-          border-radius: 12px;
-          border-left: 4px solid #7FB069;
-          min-height: 120px;
+          background: white;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          cursor: pointer;
+        }
+        
+        .dream-entry:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dream-image {
+          width: 100%;
+          height: 200px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .dream-actions {
+          position: absolute;
+          top: 16px;
+          right: 16px;
           display: flex;
-          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .action-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+          background: white;
+          transform: scale(1.1);
+        }
+        
+        .dream-content {
+          padding: 20px;
+        }
+        
+        .dream-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        
+        .dream-icon {
+          font-size: 18px;
+        }
+        
+        .dream-title-text {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+        
+        .dream-meta {
+          font-size: 14px;
+          color: #6b7280;
+          margin-bottom: 16px;
+        }
+        
+        .dream-text {
+          font-size: 16px;
+          line-height: 1.6;
+          color: #374151;
+          font-family: Georgia, serif;
         }
         
         .dream-date {
@@ -657,7 +729,7 @@ export default function SimpleDreamInterface() {
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           
-          {!showInput && !showResponse && (
+          {!showInput && !showResponse && !showHistory && (
             <div className="dream-orb flex items-center justify-center mb-8 fade-in" onClick={handleAnalyze} style={{cursor: 'pointer'}}>
               <div className="orb-motion">
                 <div className="smoke-base"></div>
@@ -725,15 +797,45 @@ export default function SimpleDreamInterface() {
                 </button>
               </div>
               <div className="dream-grid">
-                {savedDreams.slice(0, 9).map((dream) => (
-                  <div key={dream.id} className="dream-entry">
-                    <div className="dream-date">{dream.date}</div>
-                    <div className="dream-preview flex-1">{dream.text}</div>
-                    <div className="text-xs text-gray-500 mt-auto">
-                      ✨ Analyzed
+                {savedDreams.slice(0, 9).map((dream, index) => {
+                  const gradients = [
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                    'linear-gradient(135deg, #ff8a80 0%, #ea4c46 100%)',
+                    'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
+                  ];
+                  return (
+                    <div key={dream.id} className="dream-entry">
+                      <div className="dream-image" style={{background: gradients[index % gradients.length]}}>
+                        <div className="dream-actions">
+                          <button className="action-btn" title="Share">
+                            🔗
+                          </button>
+                          <button className="action-btn" title="Delete">
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      <div className="dream-content">
+                        <div className="dream-title">
+                          <span className="dream-icon">📝</span>
+                          <span className="dream-title-text">Dream Entry</span>
+                        </div>
+                        <div className="dream-meta">
+                          {dream.date} • Somewhere special
+                        </div>
+                        <div className="dream-text">
+                          {dream.text}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {savedDreams.length === 0 && (
                 <div className="text-center text-gray-500 py-8">
