@@ -147,22 +147,37 @@ export default function SimpleDreamInterface() {
 
 전문 용어는 피하고, 마치 친구가 대화하듯 따뜻하고 이해하기 쉽게 설명해주세요.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
           }]
-        }]
-      })
-    });
+        })
+      });
 
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data); // 디버깅용 로그
+
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+        return data.candidates[0].content.parts[0].text;
+      } else {
+        throw new Error('Invalid API response structure');
+      }
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      throw error;
+    }
   };
 
   const handleSubmitDream = async () => {
