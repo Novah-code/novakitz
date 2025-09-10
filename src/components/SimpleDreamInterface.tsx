@@ -8,6 +8,7 @@ interface DreamEntry {
   response: string;
   date: string;
   timestamp: number;
+  title?: string;
 }
 
 export default function SimpleDreamInterface() {
@@ -16,9 +17,13 @@ export default function SimpleDreamInterface() {
   const [showResponse, setShowResponse] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
+  const [dreamTitle, setDreamTitle] = useState('');
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
+  const [editingDream, setEditingDream] = useState<DreamEntry | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editText, setEditText] = useState('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -35,6 +40,7 @@ export default function SimpleDreamInterface() {
       id: Date.now().toString(),
       text: dreamText,
       response: response,
+      title: dreamTitle || 'Dream Entry',
       date: new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -111,14 +117,49 @@ export default function SimpleDreamInterface() {
       setNovaResponse(response);
       setShowInput(false); // Close the input modal
       saveDream(dreamText, response); // Save the dream
+      setDreamText(''); // Reset dream text
+      setDreamTitle(''); // Reset dream title
       setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Analysis temporarily unavailable. Please try again later.");
       setShowInput(false); // Close the input modal even on error
+      setDreamText(''); // Reset dream text
+      setDreamTitle(''); // Reset dream title
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const startEditDream = (dream: DreamEntry) => {
+    setEditingDream(dream);
+    setEditTitle(dream.title || '');
+    setEditText(dream.text);
+    setSelectedDream(null); // Close detail modal
+  };
+
+  const saveEditDream = () => {
+    if (!editingDream) return;
+    
+    const updatedDreams = savedDreams.map(dream => 
+      dream.id === editingDream.id 
+        ? { ...dream, title: editTitle || 'Dream Entry', text: editText }
+        : dream
+    );
+    
+    setSavedDreams(updatedDreams);
+    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+    
+    // Reset edit state
+    setEditingDream(null);
+    setEditTitle('');
+    setEditText('');
+  };
+
+  const cancelEditDream = () => {
+    setEditingDream(null);
+    setEditTitle('');
+    setEditText('');
   };
 
   return (
@@ -463,6 +504,33 @@ export default function SimpleDreamInterface() {
           color: #94a3b8;
         }
         
+        .dream-title-input {
+          width: calc(100% - 64px);
+          margin: 0 32px 16px 32px;
+          padding: 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          outline: none;
+          font-size: 18px;
+          font-weight: 600;
+          font-family: Georgia, serif;
+          background: #f8fafc;
+          color: #334155;
+          box-sizing: border-box;
+          transition: all 0.2s ease;
+        }
+        
+        .dream-title-input:focus {
+          border-color: #7FB069;
+          background: white;
+          box-shadow: 0 0 0 3px rgba(127, 176, 105, 0.1);
+        }
+        
+        .dream-title-input::placeholder {
+          color: #94a3b8;
+          font-weight: normal;
+        }
+        
         .modal-actions {
           padding: 16px 24px 24px 24px;
           display: flex;
@@ -606,7 +674,7 @@ export default function SimpleDreamInterface() {
         
         .journal-close-btn {
           position: absolute;
-          top: 20px;
+          bottom: 20px;
           right: 20px;
           background: #f1f5f9;
           color: #64748b;
@@ -617,6 +685,7 @@ export default function SimpleDreamInterface() {
           cursor: pointer;
           transition: all 0.2s ease;
           font-weight: 500;
+          z-index: 10;
         }
         
         .journal-close-btn:hover {
@@ -819,6 +888,106 @@ export default function SimpleDreamInterface() {
         .dream-detail-close:hover {
           background: rgba(255, 255, 255, 0.3);
         }
+        
+        .edit-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 3000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        
+        .edit-modal-content {
+          background: white;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow: hidden;
+          animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        .edit-modal-header {
+          padding: 24px 24px 16px 24px;
+          border-bottom: 1px solid #f1f5f9;
+          background: #7FB069;
+          color: white;
+        }
+        
+        .edit-modal-body {
+          padding: 24px;
+          max-height: 60vh;
+          overflow-y: auto;
+        }
+        
+        .edit-input {
+          width: 100%;
+          margin-bottom: 16px;
+          padding: 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          outline: none;
+          font-size: 16px;
+          font-family: Georgia, serif;
+          box-sizing: border-box;
+          transition: all 0.2s ease;
+        }
+        
+        .edit-input:focus {
+          border-color: #7FB069;
+          box-shadow: 0 0 0 3px rgba(127, 176, 105, 0.1);
+        }
+        
+        .edit-textarea {
+          min-height: 150px;
+          resize: vertical;
+        }
+        
+        .edit-actions {
+          padding: 16px 24px 24px 24px;
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        }
+        
+        .btn-save {
+          background: #7FB069;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .btn-save:hover {
+          background: #5A8449;
+        }
+        
+        .btn-cancel {
+          background: #f8fafc;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          padding: 10px 20px;
+          border-radius: 12px;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        
+        .btn-cancel:hover {
+          background: #f1f5f9;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -894,6 +1063,13 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
                 <div className="modal-body">
+                  <input
+                    type="text"
+                    className="dream-title-input"
+                    value={dreamTitle}
+                    onChange={(e) => setDreamTitle(e.target.value)}
+                    placeholder="Give your dream a title..."
+                  />
                   <textarea
                     className="dream-input"
                     value={dreamText}
@@ -918,8 +1094,8 @@ export default function SimpleDreamInterface() {
 
 
           {showHistory && savedDreams.length > 0 && (
-            <div className="dream-history fade-in">
-              <div className="dream-history-container">
+            <div className="dream-history fade-in" onClick={() => setShowHistory(false)}>
+              <div className="dream-history-container" onClick={(e) => e.stopPropagation()}>
                 <div className="mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     Dream Journal
@@ -940,11 +1116,11 @@ export default function SimpleDreamInterface() {
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
+                    <div key={dream.id} className="dream-entry" onClick={() => startEditDream(dream)}>
                       <div className="dream-image" style={{background: gradients[index % gradients.length]}}>
                         <div className="dream-actions">
-                          <button className="action-btn" title="Share" onClick={(e) => e.stopPropagation()}>
-                            🔗
+                          <button className="action-btn" title="View Details" onClick={(e) => { e.stopPropagation(); setSelectedDream(dream); }}>
+                            👁️
                           </button>
                           <button className="action-btn" title="Delete" onClick={(e) => e.stopPropagation()}>
                             🗑️
@@ -954,10 +1130,10 @@ export default function SimpleDreamInterface() {
                       <div className="dream-content">
                         <div className="dream-title">
                           <span className="dream-icon">📝</span>
-                          <span className="dream-title-text">Dream Entry</span>
+                          <span className="dream-title-text">{dream.title || 'Dream Entry'}</span>
                         </div>
                         <div className="dream-meta">
-                          {dream.date} • Somewhere special
+                          {dream.date}
                         </div>
                         <div className="dream-text">
                           {dream.text}
@@ -982,6 +1158,39 @@ export default function SimpleDreamInterface() {
             </div>
           )}
 
+          {editingDream && (
+            <div className="edit-modal-overlay" onClick={cancelEditDream}>
+              <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="edit-modal-header">
+                  <div className="edit-modal-title">Edit Dream</div>
+                </div>
+                <div className="edit-modal-body">
+                  <input
+                    type="text"
+                    className="edit-input"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    placeholder="Dream title..."
+                  />
+                  <textarea
+                    className="edit-input edit-textarea"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    placeholder="Describe your dream..."
+                  />
+                </div>
+                <div className="edit-actions">
+                  <button onClick={cancelEditDream} className="btn-cancel">
+                    Cancel
+                  </button>
+                  <button onClick={saveEditDream} className="btn-save">
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {selectedDream && (
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -989,8 +1198,8 @@ export default function SimpleDreamInterface() {
                   <button className="dream-detail-close" onClick={() => setSelectedDream(null)}>
                     ×
                   </button>
-                  <div className="dream-detail-title">Dream Entry</div>
-                  <div className="dream-detail-date">{selectedDream.date} • Somewhere special</div>
+                  <div className="dream-detail-title">{selectedDream.title || 'Dream Entry'}</div>
+                  <div className="dream-detail-date">{selectedDream.date}</div>
                 </div>
                 <div className="dream-detail-body">
                   <div className="dream-detail-content">
