@@ -148,7 +148,7 @@ export default function SimpleDreamInterface() {
 전문 용어는 피하고, 마치 친구가 대화하듯 따뜻하고 이해하기 쉽게 설명해주세요.`;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1262,7 +1262,7 @@ export default function SimpleDreamInterface() {
               yChannelSelector="G" 
             />
             <feGaussianBlur stdDeviation="2" result="smokeBlur"/>
-            <feComposite in="SourceGraphic" in2="smokeBlur" operator="multiply"/>
+            <feComposite in="SourceGraphic" in2="smokeBlur" operator="over"/>
           </filter>
         </svg>
 
