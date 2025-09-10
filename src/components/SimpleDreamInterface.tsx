@@ -24,6 +24,7 @@ export default function SimpleDreamInterface() {
   const [editingDream, setEditingDream] = useState<DreamEntry | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -33,6 +34,21 @@ export default function SimpleDreamInterface() {
       setSavedDreams(JSON.parse(saved));
     }
   }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveMenu(null);
+    };
+    
+    if (activeMenu) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [activeMenu]);
 
   // Save dreams to localStorage
   const saveDream = (dreamText: string, response: string) => {
@@ -160,6 +176,27 @@ export default function SimpleDreamInterface() {
     setEditingDream(null);
     setEditTitle('');
     setEditText('');
+  };
+
+  const deleteDream = (dreamId: string) => {
+    const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
+    setSavedDreams(updatedDreams);
+    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+    setActiveMenu(null);
+  };
+
+  const shareDream = (dream: DreamEntry) => {
+    const shareText = `${dream.title || 'My Dream'}\n\n${dream.text}\n\nShared from Nova Kitz`;
+    if (navigator.share) {
+      navigator.share({
+        title: dream.title || 'My Dream',
+        text: shareText
+      });
+    } else {
+      navigator.clipboard.writeText(shareText);
+      // You could add a toast notification here
+    }
+    setActiveMenu(null);
   };
 
   return (
@@ -630,21 +667,27 @@ export default function SimpleDreamInterface() {
         
         .dream-history {
           position: fixed;
-          top: 20px;
-          left: 20px;
-          right: 20px;
-          bottom: 20px;
-          background: #f8fafc;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, #7FB069 0%, #5A8449 100%);
           z-index: 2000;
-          overflow-y: auto;
-          padding: 40px;
-          border-radius: 24px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
         }
         
         .dream-history-container {
           max-width: 1200px;
-          margin: 0 auto;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          background: #f8fafc;
+          border-radius: 24px;
+          padding: 40px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           position: relative;
         }
         
@@ -723,23 +766,6 @@ export default function SimpleDreamInterface() {
           gap: 8px;
         }
         
-        .action-btn {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.9);
-          border: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        
-        .action-btn:hover {
-          background: white;
-          transform: scale(1.1);
-        }
         
         .dream-content {
           padding: 20px;
@@ -988,6 +1014,73 @@ export default function SimpleDreamInterface() {
         .btn-cancel:hover {
           background: #f1f5f9;
         }
+        
+        .dots-menu-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          position: relative;
+        }
+        
+        .dots-menu-btn:hover {
+          background: white;
+          transform: scale(1.1);
+        }
+        
+        .dots-menu {
+          position: absolute;
+          top: 45px;
+          right: 0;
+          background: white;
+          border-radius: 16px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+          border: 1px solid #e2e8f0;
+          min-width: 180px;
+          z-index: 1000;
+          overflow: hidden;
+        }
+        
+        .menu-item {
+          width: 100%;
+          padding: 12px 16px;
+          border: none;
+          background: none;
+          text-align: left;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 14px;
+          color: #374151;
+          transition: all 0.2s ease;
+        }
+        
+        .menu-item:hover {
+          background: #f8fafc;
+        }
+        
+        .menu-item.danger {
+          color: #dc2626;
+        }
+        
+        .menu-item.danger:hover {
+          background: #fef2f2;
+        }
+        
+        .menu-icon {
+          width: 16px;
+          height: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1100,7 +1193,6 @@ export default function SimpleDreamInterface() {
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     Dream Journal
                   </h1>
-                  <p className="text-gray-600">{savedDreams.length} dreams recorded</p>
                 </div>
               <div className="dream-grid">
                 {savedDreams.slice(0, 9).map((dream, index) => {
@@ -1116,14 +1208,62 @@ export default function SimpleDreamInterface() {
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => startEditDream(dream)}>
+                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
                       <div className="dream-image" style={{background: gradients[index % gradients.length]}}>
                         <div className="dream-actions">
-                          <button className="action-btn" title="View Details" onClick={(e) => { e.stopPropagation(); setSelectedDream(dream); }}>
-                            👁️
-                          </button>
-                          <button className="action-btn" title="Delete" onClick={(e) => e.stopPropagation()}>
-                            🗑️
+                          <button 
+                            className="dots-menu-btn" 
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              setActiveMenu(activeMenu === dream.id ? null : dream.id);
+                            }}
+                          >
+                            ⋮
+                            {activeMenu === dream.id && (
+                              <div className="dots-menu">
+                                <button 
+                                  className="menu-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedDream(dream);
+                                    setActiveMenu(null);
+                                  }}
+                                >
+                                  <span className="menu-icon">👁️</span>
+                                  View Details
+                                </button>
+                                <button 
+                                  className="menu-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    shareDream(dream);
+                                  }}
+                                >
+                                  <span className="menu-icon">🔗</span>
+                                  Share
+                                </button>
+                                <button 
+                                  className="menu-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    startEditDream(dream);
+                                  }}
+                                >
+                                  <span className="menu-icon">✏️</span>
+                                  Edit
+                                </button>
+                                <button 
+                                  className="menu-item danger"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteDream(dream.id);
+                                  }}
+                                >
+                                  <span className="menu-icon">🗑️</span>
+                                  Delete
+                                </button>
+                              </div>
+                            )}
                           </button>
                         </div>
                       </div>
