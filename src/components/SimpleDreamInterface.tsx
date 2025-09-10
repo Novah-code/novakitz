@@ -10,6 +10,7 @@ interface DreamEntry {
   timestamp: number;
   title?: string;
   image?: string;
+  isPrivate?: boolean;
 }
 
 export default function SimpleDreamInterface() {
@@ -148,7 +149,7 @@ export default function SimpleDreamInterface() {
 전문 용어는 피하고, 마치 친구가 대화하듯 따뜻하고 이해하기 쉽게 설명해주세요.`;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,6 +287,18 @@ export default function SimpleDreamInterface() {
       navigator.clipboard.writeText(shareText);
       // You could add a toast notification here
     }
+    setActiveMenu(null);
+  };
+
+  const togglePrivacy = (dreamId: string) => {
+    const updatedDreams = savedDreams.map(dream => 
+      dream.id === dreamId 
+        ? { ...dream, isPrivate: !dream.isPrivate }
+        : dream
+    );
+    
+    setSavedDreams(updatedDreams);
+    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
     setActiveMenu(null);
   };
 
@@ -1373,6 +1386,28 @@ export default function SimpleDreamInterface() {
                             ⋮
                             {activeMenu === dream.id && (
                               <div className="dots-menu">
+                                <button 
+                                  className="menu-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePrivacy(dream.id);
+                                  }}
+                                >
+                                  <span className="menu-icon">
+                                    {dream.isPrivate ? (
+                                      <svg viewBox="0 0 24 24">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                      </svg>
+                                    ) : (
+                                      <svg viewBox="0 0 24 24">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                                      </svg>
+                                    )}
+                                  </span>
+                                  {dream.isPrivate ? 'Make Public' : 'Make Private'}
+                                </button>
                                 <button 
                                   className="menu-item"
                                   onClick={(e) => {
