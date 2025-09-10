@@ -188,9 +188,11 @@ export default function SimpleDreamInterface() {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Dream analysis temporarily unavailable. Please try again later. ✨");
       setShowInput(false); // Close the input modal even on error
+      saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later. ✨"); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
+      setShowHistory(true); // Show dream journal even on error
     } finally {
       setIsLoading(false);
     }
@@ -1289,25 +1291,6 @@ export default function SimpleDreamInterface() {
                     value={dreamTitle}
                     onChange={(e) => setDreamTitle(e.target.value)}
                     placeholder="Give your dream a title..."
-                  />
-                  <div 
-                    className={`image-upload-container ${dreamImage ? 'has-image' : ''}`}
-                    onClick={() => document.getElementById('dream-image-input')?.click()}
-                  >
-                    {dreamImage ? (
-                      <img src={dreamImage} alt="Dream" className="uploaded-image" />
-                    ) : (
-                      <div className="upload-placeholder">
-                        📸 Add an image to your dream (optional)
-                      </div>
-                    )}
-                  </div>
-                  <input
-                    id="dream-image-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="upload-input"
                   />
                   <textarea
                     className="dream-input"
