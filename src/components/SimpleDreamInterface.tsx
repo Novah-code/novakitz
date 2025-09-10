@@ -119,6 +119,48 @@ export default function SimpleDreamInterface() {
     setShowInput(true);
   };
 
+  const analyzeDreamWithGemini = async (dreamText: string) => {
+    const prompt = `당신은 칼 융의 분석심리학을 전문으로 하는 꿈 해석가입니다. 다음 꿈을 친근하고 이해하기 쉽게 분석해주세요.
+
+꿈 내용: "${dreamText}"
+
+다음 형식으로 분석해주세요:
+
+🔮 **첫인상과 전체적 분위기**
+꿈의 전반적인 느낌과 감정을 간단히 설명해주세요.
+
+💫 **주요 상징들의 의미**
+꿈에 나타난 중요한 인물, 장소, 사물들이 당신의 내면에서 무엇을 의미하는지 설명해주세요.
+
+⚖️ **마음의 균형과 메시지**
+현재 당신의 의식과 무의식이 전하고자 하는 메시지를 설명해주세요.
+
+🌱 **성장을 위한 힌트**
+이 꿈이 당신의 개인적 성장과 자기실현을 위해 주는 조언을 알려주세요.
+
+✨ **일상에서의 실천**
+꿈의 메시지를 일상생활에서 어떻게 활용할 수 있는지 구체적인 제안을 해주세요.
+
+전문 용어는 피하고, 마치 친구가 대화하듯 따뜻하고 이해하기 쉽게 설명해주세요.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  };
+
   const handleSubmitDream = async () => {
     if (!dreamText.trim()) return;
     
@@ -126,19 +168,16 @@ export default function SimpleDreamInterface() {
     setShowResponse(false);
 
     try {
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const response = `Your dream has been analyzed! ✨`;
-      setNovaResponse(response);
+      const analysis = await analyzeDreamWithGemini(dreamText);
+      setNovaResponse(analysis);
       setShowInput(false); // Close the input modal
-      saveDream(dreamText, response); // Save the dream
+      saveDream(dreamText, analysis); // Save the dream
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setNovaResponse("Analysis temporarily unavailable. Please try again later.");
+      setNovaResponse("꿈 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. ✨");
       setShowInput(false); // Close the input modal even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
