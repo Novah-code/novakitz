@@ -667,27 +667,21 @@ export default function SimpleDreamInterface() {
         
         .dream-history {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.6);
+          top: 20px;
+          left: 20px;
+          right: 20px;
+          bottom: 20px;
+          background: #f8fafc;
           z-index: 2000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
+          overflow-y: auto;
+          padding: 40px;
+          border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
         .dream-history-container {
           max-width: 1200px;
-          width: 100%;
-          max-height: 90vh;
-          overflow-y: auto;
-          background: #f8fafc;
-          border-radius: 24px;
-          padding: 40px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          margin: 0 auto;
           position: relative;
         }
         
@@ -1187,8 +1181,8 @@ export default function SimpleDreamInterface() {
 
 
           {showHistory && savedDreams.length > 0 && (
-            <div className="dream-history fade-in" onClick={() => setShowHistory(false)}>
-              <div className="dream-history-container" onClick={(e) => e.stopPropagation()}>
+            <div className="dream-history fade-in">
+              <div className="dream-history-container">
                 <div className="mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     Dream Journal
