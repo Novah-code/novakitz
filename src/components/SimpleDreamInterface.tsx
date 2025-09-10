@@ -750,6 +750,7 @@ export default function SimpleDreamInterface() {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           position: relative;
           overflow: visible;
+          border-radius: 16px 16px 0 0;
         }
         
         .dream-actions {
@@ -1075,6 +1076,16 @@ export default function SimpleDreamInterface() {
           align-items: center;
           justify-content: center;
         }
+        
+        .menu-icon svg {
+          width: 16px;
+          height: 16px;
+          stroke: currentColor;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1223,7 +1234,12 @@ export default function SimpleDreamInterface() {
                                     setActiveMenu(null);
                                   }}
                                 >
-                                  <span className="menu-icon">👁️</span>
+                                  <span className="menu-icon">
+                                    <svg viewBox="0 0 24 24">
+                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                      <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                  </span>
                                   View Details
                                 </button>
                                 <button 
@@ -1233,7 +1249,13 @@ export default function SimpleDreamInterface() {
                                     shareDream(dream);
                                   }}
                                 >
-                                  <span className="menu-icon">🔗</span>
+                                  <span className="menu-icon">
+                                    <svg viewBox="0 0 24 24">
+                                      <path d="M18 8.5c0-.8.7-1.5 1.5-1.5S21 7.7 21 8.5 20.3 10 19.5 10 18 9.3 18 8.5zM4.5 12c-.8 0-1.5.7-1.5 1.5S3.7 15 4.5 15 6 14.3 6 13.5 5.3 12 4.5 12zM18 16.5c0-.8.7-1.5 1.5-1.5s1.5.7 1.5 1.5-.7 1.5-1.5 1.5-1.5-.7-1.5-1.5z"/>
+                                      <line x1="6" y1="13.5" x2="18" y2="8.5"/>
+                                      <line x1="6" y1="13.5" x2="18" y2="16.5"/>
+                                    </svg>
+                                  </span>
                                   Share
                                 </button>
                                 <button 
@@ -1243,7 +1265,12 @@ export default function SimpleDreamInterface() {
                                     startEditDream(dream);
                                   }}
                                 >
-                                  <span className="menu-icon">✏️</span>
+                                  <span className="menu-icon">
+                                    <svg viewBox="0 0 24 24">
+                                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                  </span>
                                   Edit
                                 </button>
                                 <button 
@@ -1253,7 +1280,14 @@ export default function SimpleDreamInterface() {
                                     deleteDream(dream.id);
                                   }}
                                 >
-                                  <span className="menu-icon">🗑️</span>
+                                  <span className="menu-icon">
+                                    <svg viewBox="0 0 24 24">
+                                      <polyline points="3,6 5,6 21,6"/>
+                                      <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"/>
+                                      <line x1="10" y1="11" x2="10" y2="17"/>
+                                      <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                  </span>
                                   Delete
                                 </button>
                               </div>
