@@ -7,6 +7,8 @@ import UpdateNotification from "../src/components/UpdateNotification";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
