@@ -162,7 +162,11 @@ export default function SimpleDreamInterface() {
   };
 
   const handleSubmitDream = async () => {
-    if (!dreamText.trim()) return;
+    const trimmedText = dreamText.trim();
+    if (!trimmedText || trimmedText.length < 10) {
+      alert('꿈을 더 자세히 설명해주세요. 최소 10글자 이상 입력해주세요. 💭');
+      return;
+    }
     
     setIsLoading(true);
     setShowResponse(false);
@@ -578,6 +582,17 @@ export default function SimpleDreamInterface() {
         
         .dream-input::placeholder {
           color: #94a3b8;
+        }
+        
+        .char-counter {
+          font-size: 12px;
+          color: #94a3b8;
+          text-align: right;
+          margin: 8px 32px 0 32px;
+        }
+        
+        .char-counter.sufficient {
+          color: #7FB069;
         }
         
         .dream-title-input {
@@ -1211,15 +1226,18 @@ export default function SimpleDreamInterface() {
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder=" What's brewing in your dreams?"
+                    placeholder=" What's brewing in your dreams? (최소 10글자 이상 자세히 적어주세요)"
                     rows={4}
                     autoFocus
                   />
+                  <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
+                    {dreamText.trim().length}/10글자 {dreamText.trim().length >= 10 ? '✓' : ''}
+                  </div>
                 </div>
                 <div className="modal-actions">
                   <button
                     onClick={handleSubmitDream}
-                    disabled={!dreamText.trim() || isLoading}
+                    disabled={!dreamText.trim() || dreamText.trim().length < 10 || isLoading}
                     className="btn-primary"
                   >
                     {isLoading ? 'Brewing...' : 'Brew'}
