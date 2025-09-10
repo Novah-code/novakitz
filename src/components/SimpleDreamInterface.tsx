@@ -688,7 +688,7 @@ export default function SimpleDreamInterface() {
         .dream-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
+          gap: 24px;
         }
         
         @media (max-width: 768px) {
@@ -733,7 +733,7 @@ export default function SimpleDreamInterface() {
         .dream-entry {
           background: white;
           border-radius: 16px;
-          overflow: hidden;
+          overflow: visible;
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
           cursor: pointer;
@@ -749,7 +749,7 @@ export default function SimpleDreamInterface() {
           height: 200px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           position: relative;
-          overflow: hidden;
+          overflow: visible;
         }
         
         .dream-actions {
@@ -1037,7 +1037,7 @@ export default function SimpleDreamInterface() {
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
           border: 1px solid #e2e8f0;
           min-width: 180px;
-          z-index: 1000;
+          z-index: 3000;
           overflow: hidden;
         }
         
@@ -1183,7 +1183,7 @@ export default function SimpleDreamInterface() {
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
               <div className="dream-history-container">
-                <div className="mb-8">
+                <div className="mb-12">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">
                     Dream Journal
                   </h1>
