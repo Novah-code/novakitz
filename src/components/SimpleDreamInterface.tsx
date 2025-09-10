@@ -1355,7 +1355,7 @@ export default function SimpleDreamInterface() {
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
+                    <div key={dream.id} className="dream-entry" onClick={() => startEditDream(dream)}>
                       <div className="dream-image" style={{
                         background: dream.image ? 'none' : gradients[index % gradients.length],
                         backgroundImage: dream.image ? `url(${dream.image})` : 'none',
@@ -1373,22 +1373,6 @@ export default function SimpleDreamInterface() {
                             ⋮
                             {activeMenu === dream.id && (
                               <div className="dots-menu">
-                                <button 
-                                  className="menu-item"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedDream(dream);
-                                    setActiveMenu(null);
-                                  }}
-                                >
-                                  <span className="menu-icon">
-                                    <svg viewBox="0 0 24 24">
-                                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                      <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                  </span>
-                                  View Details
-                                </button>
                                 <button 
                                   className="menu-item"
                                   onClick={(e) => {
