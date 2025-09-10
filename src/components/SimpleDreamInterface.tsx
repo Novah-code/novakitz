@@ -164,7 +164,7 @@ export default function SimpleDreamInterface() {
   const handleSubmitDream = async () => {
     const trimmedText = dreamText.trim();
     if (!trimmedText || trimmedText.length < 10) {
-      alert('꿈을 더 자세히 설명해주세요. 최소 10글자 이상 입력해주세요. 💭');
+      alert('Please describe your dream in more detail. Minimum 10 characters required. 💭');
       return;
     }
     
@@ -181,7 +181,7 @@ export default function SimpleDreamInterface() {
       setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setNovaResponse("꿈 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. ✨");
+      setNovaResponse("Dream analysis temporarily unavailable. Please try again later. ✨");
       setShowInput(false); // Close the input modal even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
@@ -1226,12 +1226,12 @@ export default function SimpleDreamInterface() {
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder=" What's brewing in your dreams? (최소 10글자 이상 자세히 적어주세요)"
+                    placeholder=" What's brewing in your dreams? (Please write at least 10 characters)"
                     rows={4}
                     autoFocus
                   />
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
-                    {dreamText.trim().length}/10글자 {dreamText.trim().length >= 10 ? '✓' : ''}
+                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? '✓' : ''}
                   </div>
                 </div>
                 <div className="modal-actions">
