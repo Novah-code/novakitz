@@ -671,7 +671,7 @@ export default function SimpleDreamInterface() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(135deg, #7FB069 0%, #5A8449 100%);
+          background: rgba(0, 0, 0, 0.6);
           z-index: 2000;
           display: flex;
           align-items: center;
