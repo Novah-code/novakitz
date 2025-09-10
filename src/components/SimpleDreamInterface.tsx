@@ -149,10 +149,11 @@ export default function SimpleDreamInterface() {
 전문 용어는 피하고, 마치 친구가 대화하듯 따뜻하고 이해하기 쉽게 설명해주세요.`;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-goog-api-key': 'AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U',
         },
         body: JSON.stringify({
           contents: [{
