@@ -9,6 +9,7 @@ interface DreamEntry {
   date: string;
   timestamp: number;
   title?: string;
+  image?: string;
 }
 
 export default function SimpleDreamInterface() {
@@ -25,6 +26,8 @@ export default function SimpleDreamInterface() {
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [dreamImage, setDreamImage] = useState<string>('');
+  const [editImage, setEditImage] = useState<string>('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -57,6 +60,7 @@ export default function SimpleDreamInterface() {
       text: dreamText,
       response: response,
       title: dreamTitle || 'Dream Entry',
+      image: dreamImage || undefined,
       date: new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -178,6 +182,7 @@ export default function SimpleDreamInterface() {
       saveDream(dreamText, analysis); // Save the dream
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamImage(''); // Reset dream image
       setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
@@ -185,8 +190,31 @@ export default function SimpleDreamInterface() {
       setShowInput(false); // Close the input modal even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamImage(''); // Reset dream image
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setDreamImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleEditImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEditImage(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -194,6 +222,7 @@ export default function SimpleDreamInterface() {
     setEditingDream(dream);
     setEditTitle(dream.title || '');
     setEditText(dream.text);
+    setEditImage(dream.image || '');
     setSelectedDream(null); // Close detail modal
   };
 
@@ -202,7 +231,7 @@ export default function SimpleDreamInterface() {
     
     const updatedDreams = savedDreams.map(dream => 
       dream.id === editingDream.id 
-        ? { ...dream, title: editTitle || 'Dream Entry', text: editText }
+        ? { ...dream, title: editTitle || 'Dream Entry', text: editText, image: editImage || undefined }
         : dream
     );
     
@@ -219,6 +248,7 @@ export default function SimpleDreamInterface() {
     setEditingDream(null);
     setEditTitle('');
     setEditText('');
+    setEditImage('');
   };
 
   const deleteDream = (dreamId: string) => {
@@ -1064,6 +1094,44 @@ export default function SimpleDreamInterface() {
           background: #f1f5f9;
         }
         
+        .image-upload-container {
+          margin: 0 32px 16px 32px;
+          border: 2px dashed #e2e8f0;
+          border-radius: 12px;
+          padding: 20px;
+          text-align: center;
+          background: #f8fafc;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        
+        .image-upload-container:hover {
+          border-color: #7FB069;
+          background: #f0f9f0;
+        }
+        
+        .image-upload-container.has-image {
+          padding: 0;
+          border: none;
+          background: none;
+        }
+        
+        .uploaded-image {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          border-radius: 12px;
+        }
+        
+        .upload-placeholder {
+          color: #94a3b8;
+          font-size: 14px;
+        }
+        
+        .upload-input {
+          display: none;
+        }
+        
         .dots-menu-btn {
           width: 36px;
           height: 36px;
@@ -1222,6 +1290,25 @@ export default function SimpleDreamInterface() {
                     onChange={(e) => setDreamTitle(e.target.value)}
                     placeholder="Give your dream a title..."
                   />
+                  <div 
+                    className={`image-upload-container ${dreamImage ? 'has-image' : ''}`}
+                    onClick={() => document.getElementById('dream-image-input')?.click()}
+                  >
+                    {dreamImage ? (
+                      <img src={dreamImage} alt="Dream" className="uploaded-image" />
+                    ) : (
+                      <div className="upload-placeholder">
+                        📸 Add an image to your dream (optional)
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    id="dream-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="upload-input"
+                  />
                   <textarea
                     className="dream-input"
                     value={dreamText}
@@ -1271,7 +1358,12 @@ export default function SimpleDreamInterface() {
                   ];
                   return (
                     <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
-                      <div className="dream-image" style={{background: gradients[index % gradients.length]}}>
+                      <div className="dream-image" style={{
+                        background: dream.image ? 'none' : gradients[index % gradients.length],
+                        backgroundImage: dream.image ? `url(${dream.image})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}>
                         <div className="dream-actions">
                           <button 
                             className="dots-menu-btn" 
@@ -1396,6 +1488,25 @@ export default function SimpleDreamInterface() {
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     placeholder="Dream title..."
+                  />
+                  <div 
+                    className={`image-upload-container ${editImage ? 'has-image' : ''}`}
+                    onClick={() => document.getElementById('edit-image-input')?.click()}
+                  >
+                    {editImage ? (
+                      <img src={editImage} alt="Dream" className="uploaded-image" />
+                    ) : (
+                      <div className="upload-placeholder">
+                        📸 Add or change dream image (optional)
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    id="edit-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleEditImageUpload}
+                    className="upload-input"
                   />
                   <textarea
                     className="edit-input edit-textarea"
