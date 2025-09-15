@@ -1374,14 +1374,74 @@ export default function SimpleDreamInterface() {
           padding: 40px 20px;
         }
         
-        .loading-spinner {
-          width: 60px;
-          height: 60px;
-          border: 4px solid #f1f5f9;
-          border-top: 4px solid #7FB069;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 24px;
+        .matcha-brewing {
+          margin: 0 auto 32px;
+          display: flex;
+          justify-content: center;
+        }
+        
+        .matcha-bowl {
+          filter: drop-shadow(0 8px 16px rgba(127, 176, 105, 0.2));
+        }
+        
+        .whisk-head {
+          transform-origin: 60px 55px;
+          animation: whiskStir 2s ease-in-out infinite;
+        }
+        
+        .matcha-swirl {
+          opacity: 0.8;
+          animation: swirl 3s ease-in-out infinite;
+          transform-origin: 60px 70px;
+        }
+        
+        .matcha-swirl-2 {
+          opacity: 0.6;
+          animation: swirl 3s ease-in-out infinite reverse;
+          animation-delay: 0.5s;
+          transform-origin: 60px 70px;
+        }
+        
+        .matcha-base {
+          animation: liquidPulse 2s ease-in-out infinite;
+        }
+        
+        .bubble {
+          animation: bubbleFloat 2.5s ease-in-out infinite;
+        }
+        
+        .bubble-1 {
+          animation-delay: 0s;
+        }
+        
+        .bubble-2 {
+          animation-delay: 0.8s;
+        }
+        
+        .bubble-3 {
+          animation-delay: 1.6s;
+        }
+        
+        @keyframes whiskStir {
+          0%, 100% { transform: rotate(-15deg); }
+          50% { transform: rotate(15deg); }
+        }
+        
+        @keyframes swirl {
+          0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.8; }
+          50% { transform: rotate(180deg) scale(1.1); opacity: 0.4; }
+        }
+        
+        @keyframes liquidPulse {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.05); }
+        }
+        
+        @keyframes bubbleFloat {
+          0% { transform: translateY(0) scale(1); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: translateY(-8px) scale(0.8); opacity: 0; }
         }
         
         .loading-title {
@@ -1400,25 +1460,6 @@ export default function SimpleDreamInterface() {
           font-style: italic;
         }
         
-        .loading-dots-container {
-          display: flex;
-          justify-content: center;
-          gap: 8px;
-        }
-        
-        .loading-analysis .loading-dot {
-          width: 8px;
-          height: 8px;
-          background: #7FB069;
-          border-radius: 50%;
-          animation: loadingPulse 1.4s ease-in-out infinite both;
-        }
-        
-        .loading-analysis .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loading-analysis .loading-dot:nth-child(2) { animation-delay: -0.16s; }
-        .loading-analysis .loading-dot:nth-child(3) { animation-delay: 0; }
-        .loading-analysis .loading-dot:nth-child(4) { animation-delay: 0.16s; }
-        .loading-analysis .loading-dot:nth-child(5) { animation-delay: 0.32s; }
         
         .tags-section {
           margin-top: 20px;
@@ -2058,16 +2099,48 @@ export default function SimpleDreamInterface() {
                 <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
                   {isLoading ? (
                     <div className="loading-analysis">
-                      <div className="loading-spinner"></div>
-                      <h3 className="loading-title">✨ Analyzing your dream...</h3>
-                      <p className="loading-subtitle">novakitz is exploring the depths of your subconscious</p>
-                      <div className="loading-dots-container">
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
+                      <div className="matcha-brewing">
+                        <svg width="120" height="120" viewBox="0 0 120 120" className="matcha-bowl">
+                          {/* Bowl */}
+                          <circle cx="60" cy="70" r="35" fill="#f8fafc" stroke="#7FB069" strokeWidth="3"/>
+                          
+                          {/* Matcha liquid */}
+                          <circle cx="60" cy="70" r="30" fill="#7FB069" opacity="0.3" className="matcha-base"/>
+                          
+                          {/* Swirling matcha */}
+                          <path 
+                            d="M 35 70 Q 50 55 65 70 T 85 70" 
+                            fill="none" 
+                            stroke="#7FB069" 
+                            strokeWidth="4" 
+                            strokeLinecap="round"
+                            className="matcha-swirl"
+                          />
+                          <path 
+                            d="M 40 75 Q 55 60 70 75 T 80 75" 
+                            fill="none" 
+                            stroke="#5A8449" 
+                            strokeWidth="3" 
+                            strokeLinecap="round"
+                            className="matcha-swirl-2"
+                          />
+                          
+                          {/* Bubbles */}
+                          <circle cx="50" cy="65" r="2" fill="#A8D5A8" className="bubble bubble-1"/>
+                          <circle cx="70" cy="68" r="1.5" fill="#A8D5A8" className="bubble bubble-2"/>
+                          <circle cx="65" cy="72" r="1" fill="#A8D5A8" className="bubble bubble-3"/>
+                          
+                          {/* Whisk handle */}
+                          <rect x="58" y="30" width="4" height="25" fill="#8B4513" rx="2"/>
+                          
+                          {/* Whisk head */}
+                          <g className="whisk-head">
+                            <path d="M 55 55 L 57 50 M 59 55 L 59 50 M 61 55 L 61 50 M 63 55 L 65 50" stroke="#8B4513" strokeWidth="1.5" strokeLinecap="round"/>
+                          </g>
+                        </svg>
                       </div>
+                      <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
+                      <p className="loading-subtitle">Whisking up wisdom from your subconscious</p>
                     </div>
                   ) : (
                     <div className="analysis-content">
