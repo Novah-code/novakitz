@@ -1409,71 +1409,155 @@ export default function SimpleDreamInterface() {
           justify-content: center;
         }
         
-        .matcha-bowl {
-          filter: drop-shadow(0 8px 16px rgba(127, 176, 105, 0.2));
+        .matcha-latte-animation {
+          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
+          animation: gentleBob 3s ease-in-out infinite;
         }
         
-        .whisk-head {
-          animation: whiskStir 1.5s ease-in-out infinite !important;
+        .whisk-animation {
+          animation: whiskStirring 1.2s ease-in-out infinite;
+          transform-origin: 100px 90px;
         }
         
-        .matcha-swirl {
-          animation: swirl 4s linear infinite !important;
-          transform-origin: 75px 85px !important;
+        .bristles {
+          animation: bristleFlexing 1.2s ease-in-out infinite;
         }
         
-        .matcha-base {
-          animation: liquidPulse 2s ease-in-out infinite !important;
+        .swirl-container {
+          animation: swirlRotation 4s linear infinite;
+          transform-origin: 100px 150px;
         }
         
-        .bubbles .bubble {
-          animation: bubbleFloat 3s ease-in-out infinite !important;
+        .swirl-1 {
+          animation: pathMorph1 3s ease-in-out infinite;
         }
         
-        .bubble-1 { animation-delay: 0s !important; }
-        .bubble-2 { animation-delay: 0.5s !important; }
-        .bubble-3 { animation-delay: 1s !important; }
-        .bubble-4 { animation-delay: 1.5s !important; }
-        
-        @keyframes whiskStir {
-          0% { transform: rotate(-20deg); }
-          25% { transform: rotate(20deg); }
-          50% { transform: rotate(-20deg); }
-          75% { transform: rotate(20deg); }
-          100% { transform: rotate(-20deg); }
+        .swirl-2 {
+          animation: pathMorph2 3s ease-in-out infinite 0.5s;
         }
         
-        @keyframes swirl {
+        .liquid-base {
+          animation: liquidBubble 2.5s ease-in-out infinite;
+        }
+        
+        .foam-layer {
+          animation: foamPulse 2s ease-in-out infinite;
+        }
+        
+        .bubble-group .bubble {
+          animation: bubbleRise 2.5s ease-in-out infinite;
+        }
+        
+        .b1 { animation-delay: 0s; }
+        .b2 { animation-delay: 0.3s; }
+        .b3 { animation-delay: 0.6s; }
+        .b4 { animation-delay: 0.9s; }
+        .b5 { animation-delay: 1.2s; }
+        
+        .steam path {
+          animation: steamRise 3s ease-in-out infinite;
+        }
+        
+        .steam-1 { animation-delay: 0s; }
+        .steam-2 { animation-delay: 0.5s; }
+        .steam-3 { animation-delay: 1s; }
+        
+        @keyframes gentleBob {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+        
+        @keyframes whiskStirring {
+          0% { transform: rotate(-25deg); }
+          25% { transform: rotate(25deg); }
+          50% { transform: rotate(-25deg); }
+          75% { transform: rotate(25deg); }
+          100% { transform: rotate(-25deg); }
+        }
+        
+        @keyframes bristleFlexing {
+          0%, 100% { transform: scaleX(1); }
+          50% { transform: scaleX(1.1); }
+        }
+        
+        @keyframes swirlRotation {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
         
-        @keyframes liquidPulse {
+        @keyframes pathMorph1 {
           0%, 100% { 
-            opacity: 0.4; 
-            transform: scale(1); 
+            d: path("M 65 150 Q 85 135 105 150 Q 125 165 135 150");
+            opacity: 0.8;
           }
           50% { 
-            opacity: 0.7; 
-            transform: scale(1.03); 
+            opacity: 0.4;
           }
         }
         
-        @keyframes bubbleFloat {
+        @keyframes pathMorph2 {
+          0%, 100% { 
+            d: path("M 70 155 Q 90 145 110 155 Q 125 165 130 155");
+            opacity: 0.6;
+          }
+          50% { 
+            opacity: 0.3;
+          }
+        }
+        
+        @keyframes liquidBubble {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.9;
+          }
+          50% { 
+            transform: scale(1.02);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes foamPulse {
+          0%, 100% { 
+            transform: scale(1) translateY(0);
+            opacity: 0.7;
+          }
+          50% { 
+            transform: scale(1.05) translateY(-1px);
+            opacity: 0.9;
+          }
+        }
+        
+        @keyframes bubbleRise {
           0% { 
-            transform: translateY(0) scale(1); 
-            opacity: 0; 
+            transform: translateY(0) scale(0.8);
+            opacity: 0;
           }
-          20% { 
-            opacity: 1; 
+          30% { 
+            opacity: 1;
           }
-          80% { 
-            opacity: 0.8; 
-            transform: translateY(-15px) scale(1.2); 
+          70% { 
+            opacity: 0.8;
           }
           100% { 
-            transform: translateY(-20px) scale(0.5); 
-            opacity: 0; 
+            transform: translateY(-15px) scale(1.2);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes steamRise {
+          0% { 
+            opacity: 0;
+            transform: translateY(0) scaleY(1);
+          }
+          20% { 
+            opacity: 0.5;
+          }
+          80% { 
+            opacity: 0.3;
+          }
+          100% { 
+            opacity: 0;
+            transform: translateY(-10px) scaleY(0.8);
           }
         }
         
@@ -2123,46 +2207,83 @@ export default function SimpleDreamInterface() {
                 <div className="loading-container">
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
-                      <svg width="150" height="150" viewBox="0 0 150 150" className="matcha-bowl">
-                        {/* Bowl */}
-                        <circle cx="75" cy="85" r="45" fill="#ffffff" stroke="#7FB069" strokeWidth="4"/>
+                      <svg width="200" height="200" viewBox="0 0 200 200" className="matcha-latte-animation">
+                        {/* Tea cup base */}
+                        <ellipse cx="100" cy="160" rx="60" ry="8" fill="#e2e8f0" opacity="0.3"/>
                         
-                        {/* Matcha liquid base */}
-                        <circle cx="75" cy="85" r="38" fill="#7FB069" opacity="0.4" className="matcha-base"/>
+                        {/* Cup body */}
+                        <path d="M 50 160 Q 50 110 70 110 L 130 110 Q 150 110 150 160 L 150 170 Q 150 180 140 180 L 60 180 Q 50 180 50 170 Z" 
+                              fill="#ffffff" stroke="#7FB069" strokeWidth="3"/>
                         
-                        {/* Swirling matcha patterns */}
-                        <g className="matcha-swirl">
-                          <path 
-                            d="M 40 85 Q 60 70 80 85 T 110 85" 
-                            fill="none" 
-                            stroke="#7FB069" 
-                            strokeWidth="5" 
-                            strokeLinecap="round"
-                          />
-                          <path 
-                            d="M 45 90 Q 65 75 85 90 T 105 90" 
-                            fill="none" 
-                            stroke="#5A8449" 
-                            strokeWidth="4" 
-                            strokeLinecap="round"
-                          />
+                        {/* Cup handle */}
+                        <path d="M 150 130 Q 170 130 170 150 Q 170 170 150 170" 
+                              fill="none" stroke="#7FB069" strokeWidth="3" strokeLinecap="round"/>
+                        
+                        {/* Matcha liquid with gradient */}
+                        <defs>
+                          <radialGradient id="matchaGradient" cx="50%" cy="30%" r="70%">
+                            <stop offset="0%" stopColor="#A8D5A8" stopOpacity="0.8"/>
+                            <stop offset="50%" stopColor="#7FB069" stopOpacity="0.9"/>
+                            <stop offset="100%" stopColor="#5A8449" stopOpacity="1"/>
+                          </radialGradient>
+                          <radialGradient id="foamGradient" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9"/>
+                            <stop offset="100%" stopColor="#f0f9f0" stopOpacity="0.7"/>
+                          </radialGradient>
+                        </defs>
+                        
+                        {/* Base liquid */}
+                        <ellipse cx="100" cy="155" rx="42" ry="20" fill="url(#matchaGradient)" className="liquid-base"/>
+                        
+                        {/* Foam layer */}
+                        <ellipse cx="100" cy="145" rx="38" ry="15" fill="url(#foamGradient)" className="foam-layer"/>
+                        
+                        {/* Swirling patterns */}
+                        <g className="swirl-container">
+                          <path d="M 65 150 Q 85 135 105 150 Q 125 165 135 150" 
+                                fill="none" stroke="#ffffff" strokeWidth="3" 
+                                strokeLinecap="round" opacity="0.8" className="swirl-1"/>
+                          <path d="M 70 155 Q 90 145 110 155 Q 125 165 130 155" 
+                                fill="none" stroke="#f0f9f0" strokeWidth="2" 
+                                strokeLinecap="round" opacity="0.6" className="swirl-2"/>
                         </g>
                         
-                        {/* Floating bubbles */}
-                        <g className="bubbles">
-                          <circle cx="60" cy="80" r="3" fill="#A8D5A8" className="bubble bubble-1"/>
-                          <circle cx="85" cy="82" r="2" fill="#A8D5A8" className="bubble bubble-2"/>
-                          <circle cx="90" cy="88" r="2.5" fill="#A8D5A8" className="bubble bubble-3"/>
-                          <circle cx="65" cy="88" r="1.5" fill="#A8D5A8" className="bubble bubble-4"/>
+                        {/* Bubbles with varying sizes */}
+                        <g className="bubble-group">
+                          <circle cx="80" cy="150" r="2" fill="#ffffff" opacity="0.7" className="bubble b1"/>
+                          <circle cx="95" cy="148" r="1.5" fill="#ffffff" opacity="0.8" className="bubble b2"/>
+                          <circle cx="110" cy="152" r="1" fill="#ffffff" opacity="0.9" className="bubble b3"/>
+                          <circle cx="85" cy="155" r="1.2" fill="#ffffff" opacity="0.6" className="bubble b4"/>
+                          <circle cx="115" cy="148" r="0.8" fill="#ffffff" opacity="0.8" className="bubble b5"/>
                         </g>
                         
-                        {/* Whisk handle */}
-                        <rect x="73" y="25" width="4" height="35" fill="#8B4513" rx="2"/>
+                        {/* Whisk with detailed bristles */}
+                        <g className="whisk-animation">
+                          {/* Handle */}
+                          <rect x="98" y="40" width="4" height="50" fill="#8B4513" rx="2"/>
+                          <rect x="97" y="42" width="6" height="3" fill="#A0522D" rx="1"/>
+                          
+                          {/* Whisk bristles */}
+                          <g className="bristles">
+                            <path d="M 92 90 Q 94 85 96 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M 95 90 Q 97 85 99 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M 98 90 Q 100 85 102 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M 101 90 Q 103 85 105 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                            <path d="M 104 90 Q 106 85 108 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+                          </g>
+                        </g>
                         
-                        {/* Whisk head with animation */}
-                        <g className="whisk-head" style={{transformOrigin: '75px 60px'}}>
-                          <path d="M 70 60 L 72 55 M 75 60 L 75 55 M 78 60 L 80 55 M 75 60 L 75 55" 
-                                stroke="#8B4513" strokeWidth="2" strokeLinecap="round"/>
+                        {/* Steam rising */}
+                        <g className="steam">
+                          <path d="M 85 110 Q 87 100 85 90 Q 83 80 85 70" 
+                                stroke="#f0f9f0" strokeWidth="2" opacity="0.4" 
+                                fill="none" strokeLinecap="round" className="steam-1"/>
+                          <path d="M 100 110 Q 98 100 100 90 Q 102 80 100 70" 
+                                stroke="#f0f9f0" strokeWidth="2" opacity="0.5" 
+                                fill="none" strokeLinecap="round" className="steam-2"/>
+                          <path d="M 115 110 Q 117 100 115 90 Q 113 80 115 70" 
+                                stroke="#f0f9f0" strokeWidth="2" opacity="0.3" 
+                                fill="none" strokeLinecap="round" className="steam-3"/>
                         </g>
                       </svg>
                     </div>
