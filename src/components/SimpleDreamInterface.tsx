@@ -1704,34 +1704,32 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                   <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                        Dream Journal
-                      </h1>
-                      
-                      {/* Search and Filter Controls - Top Left */}
-                      <div className="flex gap-3">
-                        <div className="search-container">
-                          <input
-                            type="text"
-                            placeholder="Search dreams..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="search-input"
-                          />
-                        </div>
-                        <div className="filter-container">
-                          <select
-                            value={selectedTag}
-                            onChange={(e) => setSelectedTag(e.target.value)}
-                            className="filter-select"
-                          >
-                            <option value="">All Tags</option>
-                            {allTags.map(tag => (
-                              <option key={tag} value={tag}>#{tag}</option>
-                            ))}
-                          </select>
-                        </div>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
+                    
+                    {/* Search and Filter Controls - Top Right */}
+                    <div className="flex gap-3">
+                      <div className="search-container">
+                        <input
+                          type="text"
+                          placeholder="Search dreams..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="search-input"
+                        />
+                      </div>
+                      <div className="filter-container">
+                        <select
+                          value={selectedTag}
+                          onChange={(e) => setSelectedTag(e.target.value)}
+                          className="filter-select"
+                        >
+                          <option value="">All Tags</option>
+                          {allTags.map(tag => (
+                            <option key={tag} value={tag}>#{tag}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
