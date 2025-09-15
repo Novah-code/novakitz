@@ -1444,21 +1444,22 @@ export default function SimpleDreamInterface() {
         }
         
         .frame-1 {
-          animation-delay: 0s;
+          animation: frameToggle1 1.2s ease-in-out infinite !important;
         }
         
         .frame-2 {
-          animation-delay: 0.4s;
+          animation: frameToggle2 1.2s ease-in-out infinite !important;
         }
         
         .loading-georgia-text {
-          font-family: Georgia, serif !important;
+          font-family: Georgia, "Times New Roman", Times, serif !important;
           font-size: 18px !important;
-          color: #7FB069 !important;
+          color: white !important;
           text-align: center !important;
           margin-top: 20px !important;
           margin-bottom: 0 !important;
           font-weight: normal !important;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
         }
         
         .dream-history-header {
@@ -1469,6 +1470,17 @@ export default function SimpleDreamInterface() {
           z-index: 10;
           padding: 20px;
           border-radius: 24px 24px 0 0;
+        }
+        
+        .journal-header-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 0 0 24px 24px;
+          margin-top: 20px;
         }
         
         .whisk-animation {
@@ -1521,11 +1533,26 @@ export default function SimpleDreamInterface() {
         .steam-2 { animation-delay: 0.5s; }
         .steam-3 { animation-delay: 1s; }
         
-        @keyframes frameToggle {
-          0%, 49% { 
+        @keyframes frameToggle1 {
+          0%, 40% { 
             opacity: 1;
           }
-          50%, 100% { 
+          50%, 90% { 
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes frameToggle2 {
+          0%, 40% { 
+            opacity: 0;
+          }
+          50%, 90% { 
+            opacity: 1;
+          }
+          100% {
             opacity: 0;
           }
         }
@@ -1866,40 +1893,18 @@ export default function SimpleDreamInterface() {
 
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
-              {/* Search and Filter Controls - Top of modal */}
               <div className="dream-history-header">
-                <div className="flex gap-3 mb-4">
-                  <div className="search-container">
-                    <input
-                      type="text"
-                      placeholder="Search dreams..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="search-input"
-                    />
-                  </div>
-                  <div className="filter-container">
-                    <select
-                      value={selectedTag}
-                      onChange={(e) => setSelectedTag(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="">All Tags</option>
-                      {allTags.map(tag => (
-                        <option key={tag} value={tag}>#{tag}</option>
-                      ))}
-                    </select>
+                <div className="mb-4">
+                  <div className="flex justify-center items-start mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
                   </div>
                 </div>
               </div>
               
               <div className="dream-history-container">
                 <div className="mb-12">
-                  <div className="flex justify-center items-start mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      Dream Journal
-                    </h1>
-                  </div>
                   
                   {searchTerm || selectedTag ? (
                     <div className="mb-4 text-sm text-gray-600">
@@ -2062,12 +2067,39 @@ export default function SimpleDreamInterface() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => {setShowHistory(false);}}
-                className="journal-close-btn"
-              >
-                Close
-              </button>
+              <div className="journal-header-controls">
+                {/* Search and Filter Controls - Same row as Close button */}
+                <div className="flex gap-3">
+                  <div className="search-container">
+                    <input
+                      type="text"
+                      placeholder="Search dreams..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                  <div className="filter-container">
+                    <select
+                      value={selectedTag}
+                      onChange={(e) => setSelectedTag(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="">All Tags</option>
+                      {allTags.map(tag => (
+                        <option key={tag} value={tag}>#{tag}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => {setShowHistory(false);}}
+                  className="journal-close-btn"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
 
