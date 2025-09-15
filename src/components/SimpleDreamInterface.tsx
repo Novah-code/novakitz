@@ -902,9 +902,6 @@ export default function SimpleDreamInterface() {
         }
         
         .journal-close-btn {
-          position: absolute;
-          bottom: 20px;
-          right: 20px;
           background: #f1f5f9;
           color: #64748b;
           border: 1px solid #e2e8f0;
@@ -914,7 +911,6 @@ export default function SimpleDreamInterface() {
           cursor: pointer;
           transition: all 0.2s ease;
           font-weight: 500;
-          z-index: 10;
         }
         
         .journal-close-btn:hover {
@@ -1894,12 +1890,21 @@ export default function SimpleDreamInterface() {
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
               <div className="dream-history-header">
-                <div className="flex justify-between items-center mb-6">
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    Dream Journal
-                  </h1>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
+                    {searchTerm || selectedTag ? (
+                      <div className="mt-2 text-sm text-gray-600">
+                        Showing {filteredDreams.length} of {savedDreams.length} dreams
+                        {searchTerm && ` matching "${searchTerm}"`}
+                        {selectedTag && ` tagged with "#${selectedTag}"`}
+                      </div>
+                    ) : null}
+                  </div>
                   
-                  {/* Search and Filter Controls - Same row as title */}
+                  {/* Search and Filter Controls - Right side with Close button */}
                   <div className="flex gap-3 items-center">
                     <div className="search-container">
                       <input
@@ -1934,14 +1939,6 @@ export default function SimpleDreamInterface() {
               
               <div className="dream-history-container">
                 <div className="mb-12">
-                  
-                  {searchTerm || selectedTag ? (
-                    <div className="mb-4 text-sm text-gray-600">
-                      Showing {filteredDreams.length} of {savedDreams.length} dreams
-                      {searchTerm && ` matching "${searchTerm}"`}
-                      {selectedTag && ` tagged with "#${selectedTag}"`}
-                    </div>
-                  ) : null}
                 </div>
               <div className="dream-grid">
                 {filteredDreams.slice(0, 9).map((dream, index) => {
