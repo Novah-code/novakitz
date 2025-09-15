@@ -1385,63 +1385,67 @@ export default function SimpleDreamInterface() {
         }
         
         .whisk-head {
-          transform-origin: 60px 55px;
-          animation: whiskStir 2s ease-in-out infinite;
+          animation: whiskStir 1.5s ease-in-out infinite !important;
         }
         
         .matcha-swirl {
-          opacity: 0.8;
-          animation: swirl 3s ease-in-out infinite;
-          transform-origin: 60px 70px;
-        }
-        
-        .matcha-swirl-2 {
-          opacity: 0.6;
-          animation: swirl 3s ease-in-out infinite reverse;
-          animation-delay: 0.5s;
-          transform-origin: 60px 70px;
+          animation: swirl 4s linear infinite !important;
+          transform-origin: 75px 85px !important;
         }
         
         .matcha-base {
-          animation: liquidPulse 2s ease-in-out infinite;
+          animation: liquidPulse 2s ease-in-out infinite !important;
         }
         
-        .bubble {
-          animation: bubbleFloat 2.5s ease-in-out infinite;
+        .bubbles .bubble {
+          animation: bubbleFloat 3s ease-in-out infinite !important;
         }
         
-        .bubble-1 {
-          animation-delay: 0s;
-        }
-        
-        .bubble-2 {
-          animation-delay: 0.8s;
-        }
-        
-        .bubble-3 {
-          animation-delay: 1.6s;
-        }
+        .bubble-1 { animation-delay: 0s !important; }
+        .bubble-2 { animation-delay: 0.5s !important; }
+        .bubble-3 { animation-delay: 1s !important; }
+        .bubble-4 { animation-delay: 1.5s !important; }
         
         @keyframes whiskStir {
-          0%, 100% { transform: rotate(-15deg); }
-          50% { transform: rotate(15deg); }
+          0% { transform: rotate(-20deg); }
+          25% { transform: rotate(20deg); }
+          50% { transform: rotate(-20deg); }
+          75% { transform: rotate(20deg); }
+          100% { transform: rotate(-20deg); }
         }
         
         @keyframes swirl {
-          0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.8; }
-          50% { transform: rotate(180deg) scale(1.1); opacity: 0.4; }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         
         @keyframes liquidPulse {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.05); }
+          0%, 100% { 
+            opacity: 0.4; 
+            transform: scale(1); 
+          }
+          50% { 
+            opacity: 0.7; 
+            transform: scale(1.03); 
+          }
         }
         
         @keyframes bubbleFloat {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { transform: translateY(-8px) scale(0.8); opacity: 0; }
+          0% { 
+            transform: translateY(0) scale(1); 
+            opacity: 0; 
+          }
+          20% { 
+            opacity: 1; 
+          }
+          80% { 
+            opacity: 0.8; 
+            transform: translateY(-15px) scale(1.2); 
+          }
+          100% { 
+            transform: translateY(-20px) scale(0.5); 
+            opacity: 0; 
+          }
         }
         
         .loading-title {
@@ -2088,54 +2092,51 @@ export default function SimpleDreamInterface() {
 
           {showResponse && (
             <div className="modal-overlay">
-              <div className="modal-content" style={{maxWidth: '600px'}}>
-                <div className="modal-header">
-                  <div className="flex justify-center">
-                    <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                      ✨ novakitz Dream Analysis
-                    </h2>
-                  </div>
-                </div>
-                <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
+              <div className="modal-content" style={{maxWidth: '600px', background: 'transparent', boxShadow: 'none'}}>
+                <div className="modal-body" style={{background: 'transparent', padding: '60px 24px', textAlign: 'center'}}>
                   {isLoading ? (
-                    <div className="loading-analysis">
+                    <div className="loading-analysis" style={{background: 'rgba(248, 250, 252, 0.95)', borderRadius: '24px', padding: '40px'}}>
                       <div className="matcha-brewing">
-                        <svg width="120" height="120" viewBox="0 0 120 120" className="matcha-bowl">
+                        <svg width="150" height="150" viewBox="0 0 150 150" className="matcha-bowl">
                           {/* Bowl */}
-                          <circle cx="60" cy="70" r="35" fill="#f8fafc" stroke="#7FB069" strokeWidth="3"/>
+                          <circle cx="75" cy="85" r="45" fill="#ffffff" stroke="#7FB069" strokeWidth="4"/>
                           
-                          {/* Matcha liquid */}
-                          <circle cx="60" cy="70" r="30" fill="#7FB069" opacity="0.3" className="matcha-base"/>
+                          {/* Matcha liquid base */}
+                          <circle cx="75" cy="85" r="38" fill="#7FB069" opacity="0.4" className="matcha-base"/>
                           
-                          {/* Swirling matcha */}
-                          <path 
-                            d="M 35 70 Q 50 55 65 70 T 85 70" 
-                            fill="none" 
-                            stroke="#7FB069" 
-                            strokeWidth="4" 
-                            strokeLinecap="round"
-                            className="matcha-swirl"
-                          />
-                          <path 
-                            d="M 40 75 Q 55 60 70 75 T 80 75" 
-                            fill="none" 
-                            stroke="#5A8449" 
-                            strokeWidth="3" 
-                            strokeLinecap="round"
-                            className="matcha-swirl-2"
-                          />
+                          {/* Swirling matcha patterns */}
+                          <g className="matcha-swirl">
+                            <path 
+                              d="M 40 85 Q 60 70 80 85 T 110 85" 
+                              fill="none" 
+                              stroke="#7FB069" 
+                              strokeWidth="5" 
+                              strokeLinecap="round"
+                            />
+                            <path 
+                              d="M 45 90 Q 65 75 85 90 T 105 90" 
+                              fill="none" 
+                              stroke="#5A8449" 
+                              strokeWidth="4" 
+                              strokeLinecap="round"
+                            />
+                          </g>
                           
-                          {/* Bubbles */}
-                          <circle cx="50" cy="65" r="2" fill="#A8D5A8" className="bubble bubble-1"/>
-                          <circle cx="70" cy="68" r="1.5" fill="#A8D5A8" className="bubble bubble-2"/>
-                          <circle cx="65" cy="72" r="1" fill="#A8D5A8" className="bubble bubble-3"/>
+                          {/* Floating bubbles */}
+                          <g className="bubbles">
+                            <circle cx="60" cy="80" r="3" fill="#A8D5A8" className="bubble bubble-1"/>
+                            <circle cx="85" cy="82" r="2" fill="#A8D5A8" className="bubble bubble-2"/>
+                            <circle cx="90" cy="88" r="2.5" fill="#A8D5A8" className="bubble bubble-3"/>
+                            <circle cx="65" cy="88" r="1.5" fill="#A8D5A8" className="bubble bubble-4"/>
+                          </g>
                           
                           {/* Whisk handle */}
-                          <rect x="58" y="30" width="4" height="25" fill="#8B4513" rx="2"/>
+                          <rect x="73" y="25" width="4" height="35" fill="#8B4513" rx="2"/>
                           
-                          {/* Whisk head */}
-                          <g className="whisk-head">
-                            <path d="M 55 55 L 57 50 M 59 55 L 59 50 M 61 55 L 61 50 M 63 55 L 65 50" stroke="#8B4513" strokeWidth="1.5" strokeLinecap="round"/>
+                          {/* Whisk head with animation */}
+                          <g className="whisk-head" style={{transformOrigin: '75px 60px'}}>
+                            <path d="M 70 60 L 72 55 M 75 60 L 75 55 M 78 60 L 80 55 M 75 60 L 75 55" 
+                                  stroke="#8B4513" strokeWidth="2" strokeLinecap="round"/>
                           </g>
                         </svg>
                       </div>
