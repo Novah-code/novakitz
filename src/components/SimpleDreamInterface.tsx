@@ -1416,12 +1416,28 @@ export default function SimpleDreamInterface() {
           align-items: center;
         }
         
-        .matcha-illustration {
+        .matcha-rotation-animation {
+          position: relative;
+          width: 200px;
+          height: 200px;
+          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
+        }
+        
+        .matcha-frame {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 200px !important;
           height: 200px !important;
-          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3)) !important;
-          animation: matchaWhisking 1.5s ease-in-out infinite !important;
-          transform-origin: center center !important;
+          animation: frameToggle 0.8s infinite !important;
+        }
+        
+        .frame-1 {
+          animation-delay: 0s;
+        }
+        
+        .frame-2 {
+          animation-delay: 0.4s;
         }
         
         .whisk-animation {
@@ -1474,18 +1490,12 @@ export default function SimpleDreamInterface() {
         .steam-2 { animation-delay: 0.5s; }
         .steam-3 { animation-delay: 1s; }
         
-        @keyframes matchaWhisking {
-          0%, 100% { 
-            transform: translateY(0px) rotate(0deg) scale(1) !important; 
+        @keyframes frameToggle {
+          0%, 49% { 
+            opacity: 1;
           }
-          25% { 
-            transform: translateY(-8px) rotate(-3deg) scale(1.05) !important; 
-          }
-          50% { 
-            transform: translateY(-12px) rotate(0deg) scale(1.1) !important; 
-          }
-          75% { 
-            transform: translateY(-8px) rotate(3deg) scale(1.05) !important; 
+          50%, 100% { 
+            opacity: 0;
           }
         }
         
@@ -2232,7 +2242,10 @@ export default function SimpleDreamInterface() {
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
                       <div className="custom-matcha-animation">
-                        <img src="/matcha-original.png" alt="Matcha preparation" className="matcha-illustration" />
+                        <div className="matcha-rotation-animation">
+                          <img src="/matcha-frame1.png" alt="Matcha preparation" className="matcha-frame frame-1" />
+                          <img src="/matcha-frame2.png" alt="Matcha preparation" className="matcha-frame frame-2" />
+                        </div>
                       </div>
                     </div>
                     <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
