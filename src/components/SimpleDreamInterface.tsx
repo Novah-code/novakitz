@@ -1848,11 +1848,7 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                   <div className="flex justify-between items-start mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      Dream Journal
-                    </h1>
-                    
-                    {/* Search and Filter Controls - Top Right */}
+                    {/* Search and Filter Controls - Top Left */}
                     <div className="flex gap-3">
                       <div className="search-container">
                         <input
@@ -1876,6 +1872,10 @@ export default function SimpleDreamInterface() {
                         </select>
                       </div>
                     </div>
+                    
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
                   </div>
                   
                   {searchTerm || selectedTag ? (
