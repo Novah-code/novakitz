@@ -187,18 +187,16 @@ export default function SimpleDreamInterface() {
     }
     
     setIsLoading(true);
-    setShowResponse(false);
+    setShowInput(false); // Close input modal immediately
+    setShowResponse(true); // Show analysis modal immediately with loading state
+    setNovaResponse(''); // Clear previous response
 
     try {
       const result = await analyzeDreamWithGemini(dreamText);
       console.log('Analysis received in handleSubmitDream:', result);
       setNovaResponse(result.analysis);
-      setShowInput(false); // Close the input modal
       console.log('About to save dream with analysis:', { dreamText, result });
       saveDreamWithTags(dreamText, result.analysis, result.autoTags || []); // Save the dream with tags
-      
-      // Show analysis result modal first
-      setShowResponse(true);
       
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
@@ -206,12 +204,10 @@ export default function SimpleDreamInterface() {
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Dream analysis temporarily unavailable. Please try again later. ✨");
-      setShowInput(false); // Close the input modal even on error
       saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later. ✨"); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
-      setShowHistory(true); // Show dream journal even on error
     } finally {
       setIsLoading(false);
     }
@@ -1337,6 +1333,57 @@ export default function SimpleDreamInterface() {
           background-size: 16px 16px;
           padding-right: 40px;
         }
+        
+        .loading-analysis {
+          text-align: center;
+          padding: 40px 20px;
+        }
+        
+        .loading-spinner {
+          width: 60px;
+          height: 60px;
+          border: 4px solid #f1f5f9;
+          border-top: 4px solid #7FB069;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 24px;
+        }
+        
+        .loading-title {
+          font-size: 20px;
+          font-weight: 600;
+          color: #7FB069;
+          margin-bottom: 8px;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .loading-subtitle {
+          font-size: 16px;
+          color: #64748b;
+          margin-bottom: 24px;
+          font-family: Georgia, serif;
+          font-style: italic;
+        }
+        
+        .loading-dots-container {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        }
+        
+        .loading-analysis .loading-dot {
+          width: 8px;
+          height: 8px;
+          background: #7FB069;
+          border-radius: 50%;
+          animation: loadingPulse 1.4s ease-in-out infinite both;
+        }
+        
+        .loading-analysis .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-analysis .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-analysis .loading-dot:nth-child(3) { animation-delay: 0; }
+        .loading-analysis .loading-dot:nth-child(4) { animation-delay: 0.16s; }
+        .loading-analysis .loading-dot:nth-child(5) { animation-delay: 0.32s; }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1786,58 +1833,75 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
                 <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
-                  <div className="analysis-content">
-                    {novaResponse.split('\n\n').map((section, index) => {
-                      if (section.startsWith('DREAM SYMBOLS:')) {
-                        return (
-                          <div key={index} className="analysis-section">
-                            <h3 className="section-title">🔮 Dream Symbols</h3>
-                            <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
-                          </div>
-                        );
-                      } else if (section.startsWith('INNER MESSAGE:')) {
-                        return (
-                          <div key={index} className="analysis-section">
-                            <h3 className="section-title">💝 Inner Message</h3>
-                            <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
-                          </div>
-                        );
-                      } else if (section.startsWith('TODAY\'S PRACTICE:')) {
-                        return (
-                          <div key={index} className="analysis-section">
-                            <h3 className="section-title">🌱 Today's Practice</h3>
-                            <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
-                          </div>
-                        );
-                      } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
-                        return (
-                          <div key={index} className="analysis-section">
-                            <h3 className="section-title">💭 Something to Reflect On</h3>
-                            <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
-                          </div>
-                        );
-                      } else if (section.trim()) {
-                        return (
-                          <div key={index} className="analysis-section">
-                            <p className="section-text">{section.trim()}</p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
+                  {isLoading ? (
+                    <div className="loading-analysis">
+                      <div className="loading-spinner"></div>
+                      <h3 className="loading-title">✨ Analyzing your dream...</h3>
+                      <p className="loading-subtitle">novakitz is exploring the depths of your subconscious</p>
+                      <div className="loading-dots-container">
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="analysis-content">
+                      {novaResponse.split('\n\n').map((section, index) => {
+                        if (section.startsWith('DREAM SYMBOLS:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h3 className="section-title">🔮 Dream Symbols</h3>
+                              <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('INNER MESSAGE:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h3 className="section-title">💝 Inner Message</h3>
+                              <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('TODAY\'S PRACTICE:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h3 className="section-title">🌱 Today's Practice</h3>
+                              <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h3 className="section-title">💭 Something to Reflect On</h3>
+                              <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.trim()) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <p className="section-text">{section.trim()}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                  )}
+                </div>
+                {!isLoading && (
+                  <div className="modal-actions">
+                    <button
+                      onClick={() => {
+                        setShowResponse(false);
+                        setShowHistory(true);
+                      }}
+                      className="btn-primary"
+                    >
+                      Save to Journal
+                    </button>
                   </div>
-                </div>
-                <div className="modal-actions">
-                  <button
-                    onClick={() => {
-                      setShowResponse(false);
-                      setShowHistory(true);
-                    }}
-                    className="btn-primary"
-                  >
-                    Save to Journal
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           )}
