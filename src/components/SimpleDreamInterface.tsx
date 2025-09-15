@@ -56,6 +56,7 @@ export default function SimpleDreamInterface() {
 
   // Save dreams to localStorage
   const saveDream = (dreamText: string, response: string) => {
+    console.log('saveDream called with:', { dreamText, response });
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
@@ -70,9 +71,12 @@ export default function SimpleDreamInterface() {
       timestamp: Date.now()
     };
     
+    console.log('Created newDream object:', newDream);
     const updatedDreams = [newDream, ...savedDreams];
+    console.log('Updated dreams array:', updatedDreams);
     setSavedDreams(updatedDreams);
     localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+    console.log('Saved to localStorage and updated state');
   };
 
   // Smoke-like turbulence animation
@@ -176,8 +180,10 @@ export default function SimpleDreamInterface() {
 
     try {
       const analysis = await analyzeDreamWithGemini(dreamText);
+      console.log('Analysis received in handleSubmitDream:', analysis);
       setNovaResponse(analysis);
       setShowInput(false); // Close the input modal
+      console.log('About to save dream with analysis:', { dreamText, analysis });
       saveDream(dreamText, analysis); // Save the dream
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
