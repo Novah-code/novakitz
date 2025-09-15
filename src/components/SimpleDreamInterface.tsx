@@ -1795,8 +1795,8 @@ export default function SimpleDreamInterface() {
 
 
           {showInput && (
-            <div className="modal-overlay">
-              <div className="modal-content">
+            <div className="modal-overlay" onClick={() => setShowInput(false)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                   <div className="flex justify-center">
                     <div className="user-avatar">
@@ -2248,9 +2248,9 @@ export default function SimpleDreamInterface() {
           )}
 
           {showResponse && (
-            <div className="modal-overlay">
+            <div className="modal-overlay" onClick={() => {setShowResponse(false); setIsLoading(false);}}>
               {isLoading ? (
-                <div className="loading-container">
+                <div className="loading-container" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
                       <div className="custom-matcha-animation">
@@ -2264,7 +2264,7 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
               ) : (
-                <div className="modal-content" style={{maxWidth: '600px'}}>
+                <div className="modal-content" style={{maxWidth: '600px'}} onClick={(e) => e.stopPropagation()}>
                   <div className="modal-header">
                     <div className="flex justify-center">
                       <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
