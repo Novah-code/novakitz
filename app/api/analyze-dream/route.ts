@@ -13,9 +13,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    // Temporary hardcoded API key for testing
+    const apiKey = 'AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U';
+    console.log('Using hardcoded API key for testing');
+    
     if (!apiKey) {
-      console.error('GOOGLE_GEMINI_API_KEY is not set');
+      console.error('API key is not available');
       return NextResponse.json(
         { error: 'API configuration error' },
         { status: 500 }
