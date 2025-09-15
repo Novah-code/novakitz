@@ -357,7 +357,7 @@ export default function SimpleDreamInterface() {
   ])].sort();
 
   return (
-    <>
+    <div>
       <style jsx global>{`
         body {
           font-family: 'Inter', sans-serif;
@@ -2239,6 +2239,6 @@ export default function SimpleDreamInterface() {
 
         </main>
       </div>
-    </>
+    </div>
   );
 }
