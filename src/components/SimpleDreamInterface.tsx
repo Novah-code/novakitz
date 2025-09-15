@@ -185,10 +185,13 @@ export default function SimpleDreamInterface() {
       setShowInput(false); // Close the input modal
       console.log('About to save dream with analysis:', { dreamText, analysis });
       saveDream(dreamText, analysis); // Save the dream
+      
+      // Show analysis result modal first
+      setShowResponse(true);
+      
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
-      setShowHistory(true); // Show dream journal directly
     } catch (error) {
       console.error('Error during dream analysis:', error);
       setNovaResponse("Dream analysis temporarily unavailable. Please try again later. ✨");
@@ -1564,6 +1567,36 @@ export default function SimpleDreamInterface() {
                       Edit Dream
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showResponse && (
+            <div className="modal-overlay">
+              <div className="modal-content" style={{maxWidth: '600px'}}>
+                <div className="modal-header">
+                  <div className="flex justify-center">
+                    <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
+                      ✨ Nova's Dream Analysis
+                    </h2>
+                  </div>
+                </div>
+                <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
+                  <div style={{whiteSpace: 'pre-line', lineHeight: '1.6', color: '#374151'}}>
+                    {novaResponse}
+                  </div>
+                </div>
+                <div className="modal-actions">
+                  <button
+                    onClick={() => {
+                      setShowResponse(false);
+                      setShowHistory(true);
+                    }}
+                    className="btn-primary"
+                  >
+                    Save to Journal
+                  </button>
                 </div>
               </div>
             </div>
