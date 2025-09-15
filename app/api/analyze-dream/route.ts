@@ -30,7 +30,7 @@ Example tags: flying, water, family, anxiety, childhood, transformation, animals
       const data = await response.json();
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
         const tagsText = data.candidates[0].content.parts[0].text.trim();
-        const tags = tagsText.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
+        const tags = tagsText.split(',').map((tag: string) => tag.trim().toLowerCase()).filter((tag: string) => tag.length > 0);
         return tags.slice(0, 5); // Limit to 5 tags
       }
     }
