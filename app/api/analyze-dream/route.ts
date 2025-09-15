@@ -81,26 +81,26 @@ export async function POST(request: NextRequest) {
 
 "${dreamText}"
 
-Please provide your analysis in this format:
+Please provide your analysis in a natural, conversational format without any markdown formatting (**bold** text). Structure your response with clear sections but use simple headings and natural paragraph breaks:
 
-**Dream Symbols**
-[Interpret 2-3 key symbols warmly and accessibly, connecting personal and universal meanings within a personal growth context]
+DREAM SYMBOLS:
+Interpret 2-3 key symbols warmly and accessibly, connecting personal and universal meanings within a personal growth context.
 
-**Inner Message**
-[Convey the dream's message for self-understanding and growth, translating Jungian wisdom into modern, friendly language. Consider what dream figures represent: Authentic Self, Hidden Self, Ideal Connection, Inner Wisdom, or Protective Care]
+INNER MESSAGE:
+Convey the dream's message for self-understanding and growth, translating Jungian wisdom into modern, friendly language. Consider what dream figures represent: Authentic Self, Hidden Self, Ideal Connection, Inner Wisdom, or Protective Care.
 
-**Today's Practice**
-[Choose ONE specific suggestion from these areas:
+TODAY'S PRACTICE:
+Choose ONE specific suggestion from these areas:
 - Personal Growth Experiment: Translate the dream into small daily actions
-- Relationship Application: Connect dream to real-life relationships
-- Self-Care: Address emotions or needs shown in the dream]
+- Relationship Application: Connect dream to real-life relationships  
+- Self-Care: Address emotions or needs shown in the dream
 
-**Something to Reflect On**
-[One warm question that connects to daily life, guiding toward self-discovery rather than providing answers]
+SOMETHING TO REFLECT ON:
+One warm question that connects to daily life, guiding toward self-discovery rather than providing answers.
 
 End with: "How does this interpretation feel to you? Add your own feelings and intuition to complete the meaning in your unique way."
 
-Write as a warm, empathetic companion on the journey - like a friend who understands. Use simple, friendly language without jargon. Be hopeful yet realistic, encouraging without being overly certain. Keep it around 250-300 words total.`
+Write as a warm, empathetic companion on the journey - like a friend who understands. Use simple, friendly language without jargon or any formatting symbols. Be hopeful yet realistic, encouraging without being overly certain. Keep it around 250-300 words total.`
             }]
           }]
         })

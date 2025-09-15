@@ -1261,6 +1261,37 @@ export default function SimpleDreamInterface() {
           stroke-linecap: round;
           stroke-linejoin: round;
         }
+        
+        .analysis-content {
+          font-family: Georgia, serif;
+        }
+        
+        .analysis-section {
+          margin-bottom: 24px;
+          padding: 0;
+        }
+        
+        .section-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: #7FB069;
+          margin-bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .section-text {
+          font-size: 16px;
+          line-height: 1.7;
+          color: #374151;
+          margin: 0;
+          padding: 16px 20px;
+          background: #f8fafc;
+          border-radius: 12px;
+          border-left: 4px solid #7FB069;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1640,8 +1671,45 @@ export default function SimpleDreamInterface() {
                   </div>
                   <div className="dream-detail-response">
                     <div className="dream-detail-response-title">✨ Dream Analysis</div>
-                    <div className="dream-detail-response-text" style={{whiteSpace: 'pre-line'}}>
-                      {selectedDream.response}
+                    <div className="analysis-content">
+                      {selectedDream.response.split('\n\n').map((section, index) => {
+                        if (section.startsWith('DREAM SYMBOLS:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h4 className="section-title">🔮 Dream Symbols</h4>
+                              <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('INNER MESSAGE:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h4 className="section-title">💝 Inner Message</h4>
+                              <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('TODAY\'S PRACTICE:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h4 className="section-title">🌱 Today's Practice</h4>
+                              <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <h4 className="section-title">💭 Something to Reflect On</h4>
+                              <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
+                            </div>
+                          );
+                        } else if (section.trim()) {
+                          return (
+                            <div key={index} className="analysis-section">
+                              <p className="section-text">{section.trim()}</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })}
                     </div>
                   </div>
                   <div style={{textAlign: 'center', marginTop: '20px'}}>
@@ -1671,8 +1739,45 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
                 <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
-                  <div style={{whiteSpace: 'pre-line', lineHeight: '1.6', color: '#374151'}}>
-                    {novaResponse}
+                  <div className="analysis-content">
+                    {novaResponse.split('\n\n').map((section, index) => {
+                      if (section.startsWith('DREAM SYMBOLS:')) {
+                        return (
+                          <div key={index} className="analysis-section">
+                            <h3 className="section-title">🔮 Dream Symbols</h3>
+                            <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
+                          </div>
+                        );
+                      } else if (section.startsWith('INNER MESSAGE:')) {
+                        return (
+                          <div key={index} className="analysis-section">
+                            <h3 className="section-title">💝 Inner Message</h3>
+                            <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
+                          </div>
+                        );
+                      } else if (section.startsWith('TODAY\'S PRACTICE:')) {
+                        return (
+                          <div key={index} className="analysis-section">
+                            <h3 className="section-title">🌱 Today's Practice</h3>
+                            <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
+                          </div>
+                        );
+                      } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
+                        return (
+                          <div key={index} className="analysis-section">
+                            <h3 className="section-title">💭 Something to Reflect On</h3>
+                            <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
+                          </div>
+                        );
+                      } else if (section.trim()) {
+                        return (
+                          <div key={index} className="analysis-section">
+                            <p className="section-text">{section.trim()}</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
                 </div>
                 <div className="modal-actions">
