@@ -902,6 +902,9 @@ export default function SimpleDreamInterface() {
         }
         
         .journal-close-btn {
+          position: absolute;
+          bottom: 20px;
+          right: 20px;
           background: #f1f5f9;
           color: #64748b;
           border: 1px solid #e2e8f0;
@@ -911,6 +914,7 @@ export default function SimpleDreamInterface() {
           cursor: pointer;
           transition: all 0.2s ease;
           font-weight: 500;
+          z-index: 10;
         }
         
         .journal-close-btn:hover {
@@ -1904,7 +1908,7 @@ export default function SimpleDreamInterface() {
                     ) : null}
                   </div>
                   
-                  {/* Search and Filter Controls - Right side with Close button */}
+                  {/* Search and Filter Controls - Right side only */}
                   <div className="flex gap-3 items-center">
                     <div className="search-container">
                       <input
@@ -1927,12 +1931,6 @@ export default function SimpleDreamInterface() {
                         ))}
                       </select>
                     </div>
-                    <button
-                      onClick={() => {setShowHistory(false);}}
-                      className="journal-close-btn"
-                    >
-                      Close
-                    </button>
                   </div>
                 </div>
               </div>
@@ -2093,6 +2091,12 @@ export default function SimpleDreamInterface() {
                   </div>
                 )}
               </div>
+              <button
+                onClick={() => {setShowHistory(false);}}
+                className="journal-close-btn"
+              >
+                Close
+              </button>
             </div>
           )}
 
