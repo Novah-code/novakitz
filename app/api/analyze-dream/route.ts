@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
+  console.log('=== API Route Called ===');
   try {
     const { dreamText } = await request.json();
+    console.log('Dream text received:', dreamText);
 
     if (!dreamText || dreamText.trim().length < 10) {
       return NextResponse.json(
