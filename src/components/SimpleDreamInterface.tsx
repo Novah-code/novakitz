@@ -1357,7 +1357,7 @@ export default function SimpleDreamInterface() {
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => startEditDream(dream)}>
+                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
                       <div className="dream-image" style={{
                         background: dream.image ? 'none' : gradients[index % gradients.length],
                         backgroundImage: dream.image ? `url(${dream.image})` : 'none',
@@ -1549,9 +1549,20 @@ export default function SimpleDreamInterface() {
                   </div>
                   <div className="dream-detail-response">
                     <div className="dream-detail-response-title">✨ Dream Analysis</div>
-                    <div className="dream-detail-response-text">
+                    <div className="dream-detail-response-text" style={{whiteSpace: 'pre-line'}}>
                       {selectedDream.response}
                     </div>
+                  </div>
+                  <div style={{textAlign: 'center', marginTop: '20px'}}>
+                    <button 
+                      onClick={() => {
+                        setSelectedDream(null);
+                        startEditDream(selectedDream);
+                      }}
+                      className="btn-primary"
+                    >
+                      Edit Dream
+                    </button>
                   </div>
                 </div>
               </div>
