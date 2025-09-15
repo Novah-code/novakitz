@@ -11,6 +11,8 @@ interface DreamEntry {
   title?: string;
   image?: string;
   isPrivate?: boolean;
+  tags?: string[];
+  autoTags?: string[];
 }
 
 export default function SimpleDreamInterface() {
@@ -29,6 +31,8 @@ export default function SimpleDreamInterface() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<string>('');
   const [editImage, setEditImage] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedTag, setSelectedTag] = useState<string>('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -56,13 +60,19 @@ export default function SimpleDreamInterface() {
 
   // Save dreams to localStorage
   const saveDream = (dreamText: string, response: string) => {
-    console.log('saveDream called with:', { dreamText, response });
+    saveDreamWithTags(dreamText, response, []);
+  };
+
+  const saveDreamWithTags = (dreamText: string, response: string, autoTags: string[]) => {
+    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags });
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
       response: response,
       title: dreamTitle || 'Dream Entry',
       image: dreamImage || undefined,
+      autoTags: autoTags,
+      tags: [], // Empty manual tags initially
       date: new Date().toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -71,7 +81,7 @@ export default function SimpleDreamInterface() {
       timestamp: Date.now()
     };
     
-    console.log('Created newDream object:', newDream);
+    console.log('Created newDream object with tags:', newDream);
     const updatedDreams = [newDream, ...savedDreams];
     console.log('Updated dreams array:', updatedDreams);
     setSavedDreams(updatedDreams);
@@ -157,7 +167,8 @@ export default function SimpleDreamInterface() {
 
       if (data.analysis) {
         console.log('Analysis result:', data.analysis);
-        return data.analysis;
+        console.log('Auto tags:', data.autoTags);
+        return data;
       } else {
         console.log('Invalid response structure:', data);
         throw new Error(`Invalid API response structure: ${JSON.stringify(data)}`);
@@ -179,12 +190,12 @@ export default function SimpleDreamInterface() {
     setShowResponse(false);
 
     try {
-      const analysis = await analyzeDreamWithGemini(dreamText);
-      console.log('Analysis received in handleSubmitDream:', analysis);
-      setNovaResponse(analysis);
+      const result = await analyzeDreamWithGemini(dreamText);
+      console.log('Analysis received in handleSubmitDream:', result);
+      setNovaResponse(result.analysis);
       setShowInput(false); // Close the input modal
-      console.log('About to save dream with analysis:', { dreamText, analysis });
-      saveDream(dreamText, analysis); // Save the dream
+      console.log('About to save dream with analysis:', { dreamText, result });
+      saveDreamWithTags(dreamText, result.analysis, result.autoTags || []); // Save the dream with tags
       
       // Show analysis result modal first
       setShowResponse(true);
@@ -293,6 +304,26 @@ export default function SimpleDreamInterface() {
     localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
     setActiveMenu(null);
   };
+
+  // Filter dreams based on search term and selected tag
+  const filteredDreams = savedDreams.filter(dream => {
+    const matchesSearch = searchTerm === '' || 
+      dream.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dream.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      dream.response.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesTag = selectedTag === '' ||
+      dream.autoTags?.includes(selectedTag) ||
+      dream.tags?.includes(selectedTag);
+    
+    return matchesSearch && matchesTag;
+  });
+
+  // Get all unique tags for filter dropdown
+  const allTags = [...new Set([
+    ...savedDreams.flatMap(dream => dream.autoTags || []),
+    ...savedDreams.flatMap(dream => dream.tags || [])
+  ])].sort();
 
   return (
     <>
@@ -1342,12 +1373,45 @@ export default function SimpleDreamInterface() {
             <div className="dream-history fade-in">
               <div className="dream-history-container">
                 <div className="mb-12">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-6">
                     Dream Journal
                   </h1>
+                  
+                  {/* Search and Filter Controls */}
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        placeholder="Search dreams..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#7FB069] transition-colors"
+                      />
+                    </div>
+                    <div className="sm:w-48">
+                      <select
+                        value={selectedTag}
+                        onChange={(e) => setSelectedTag(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#7FB069] transition-colors"
+                      >
+                        <option value="">All Tags</option>
+                        {allTags.map(tag => (
+                          <option key={tag} value={tag}>#{tag}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {searchTerm || selectedTag ? (
+                    <div className="mb-4 text-sm text-gray-600">
+                      Showing {filteredDreams.length} of {savedDreams.length} dreams
+                      {searchTerm && ` matching "${searchTerm}"`}
+                      {selectedTag && ` tagged with "#${selectedTag}"`}
+                    </div>
+                  ) : null}
                 </div>
               <div className="dream-grid">
-                {savedDreams.slice(0, 9).map((dream, index) => {
+                {filteredDreams.slice(0, 9).map((dream, index) => {
                   const gradients = [
                     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -1464,6 +1528,30 @@ export default function SimpleDreamInterface() {
                         <div className="dream-text">
                           {dream.text}
                         </div>
+                        
+                        {/* Tags Display */}
+                        {(dream.autoTags && dream.autoTags.length > 0) && (
+                          <div className="dream-tags" style={{marginTop: '12px'}}>
+                            {dream.autoTags.map(tag => (
+                              <span 
+                                key={tag}
+                                className="tag"
+                                style={{
+                                  display: 'inline-block',
+                                  background: '#7FB069',
+                                  color: 'white',
+                                  fontSize: '12px',
+                                  padding: '4px 8px',
+                                  borderRadius: '12px',
+                                  marginRight: '6px',
+                                  marginBottom: '4px'
+                                }}
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

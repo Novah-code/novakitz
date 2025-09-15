@@ -1,5 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+async function generateAutoTags(dreamText: string): Promise<string[]> {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Extract 3-5 key tags from this dream for categorization. Return only the tags separated by commas, no other text. Focus on: emotions, symbols, people, places, actions, themes.
+
+Dream: "${dreamText}"
+
+Example tags: flying, water, family, anxiety, childhood, transformation, animals, etc.`
+            }]
+          }]
+        })
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+        const tagsText = data.candidates[0].content.parts[0].text.trim();
+        const tags = tagsText.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
+        return tags.slice(0, 5); // Limit to 5 tags
+      }
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error generating auto tags:', error);
+    return [];
+  }
+}
+
 export async function POST(request: NextRequest) {
   console.log('=== API Route Called ===');
   try {
@@ -83,8 +125,14 @@ Write as a warm, empathetic companion on the journey - like a friend who underst
     console.log('Gemini API success');
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+      const analysisText = data.candidates[0].content.parts[0].text;
+      
+      // Generate auto tags from dream text
+      const autoTags = await generateAutoTags(dreamText);
+      
       return NextResponse.json({
-        analysis: data.candidates[0].content.parts[0].text
+        analysis: analysisText,
+        autoTags: autoTags
       });
     } else {
       console.error('Invalid API response structure:', data);
