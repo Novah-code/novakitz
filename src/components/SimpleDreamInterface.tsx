@@ -46,6 +46,14 @@ export default function SimpleDreamInterface() {
     }
   }, []);
 
+  // Preload matcha images
+  useEffect(() => {
+    const img1 = new Image();
+    const img2 = new Image();
+    img1.src = '/matcha-frame1.png';
+    img2.src = '/matcha-frame2.png';
+  }, []);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
@@ -1418,9 +1426,10 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 200px;
-          height: 200px;
+          width: 200px !important;
+          height: 200px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
+          overflow: hidden;
         }
         
         .matcha-frame {
@@ -1450,6 +1459,16 @@ export default function SimpleDreamInterface() {
           margin-top: 20px !important;
           margin-bottom: 0 !important;
           font-weight: normal !important;
+        }
+        
+        .dream-history-header {
+          position: sticky;
+          top: 0;
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          z-index: 10;
+          padding: 20px;
+          border-radius: 24px 24px 0 0;
         }
         
         .whisk-animation {
@@ -1847,37 +1866,39 @@ export default function SimpleDreamInterface() {
 
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
+              {/* Search and Filter Controls - Top of modal */}
+              <div className="dream-history-header">
+                <div className="flex gap-3 mb-4">
+                  <div className="search-container">
+                    <input
+                      type="text"
+                      placeholder="Search dreams..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                  <div className="filter-container">
+                    <select
+                      value={selectedTag}
+                      onChange={(e) => setSelectedTag(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="">All Tags</option>
+                      {allTags.map(tag => (
+                        <option key={tag} value={tag}>#{tag}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
               <div className="dream-history-container">
                 <div className="mb-12">
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex justify-center items-start mb-6">
                     <h1 className="text-3xl font-bold text-gray-900">
                       Dream Journal
                     </h1>
-                    
-                    {/* Search and Filter Controls - Top Right */}
-                    <div className="flex gap-3">
-                      <div className="search-container">
-                        <input
-                          type="text"
-                          placeholder="Search dreams..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="search-input"
-                        />
-                      </div>
-                      <div className="filter-container">
-                        <select
-                          value={selectedTag}
-                          onChange={(e) => setSelectedTag(e.target.value)}
-                          className="filter-select"
-                        >
-                          <option value="">All Tags</option>
-                          {allTags.map(tag => (
-                            <option key={tag} value={tag}>#{tag}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
                   </div>
                   
                   {searchTerm || selectedTag ? (
@@ -2255,8 +2276,26 @@ export default function SimpleDreamInterface() {
                     <div className="matcha-brewing">
                       <div className="custom-matcha-animation">
                         <div className="matcha-rotation-animation">
-                          <img src="/matcha-frame1.png" alt="Matcha preparation" className="matcha-frame frame-1" />
-                          <img src="/matcha-frame2.png" alt="Matcha preparation" className="matcha-frame frame-2" />
+                          <img 
+                            src="/matcha-frame1.png" 
+                            alt="Matcha preparation" 
+                            className="matcha-frame frame-1"
+                            onError={(e) => {
+                              console.log('Image 1 failed to load');
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            onLoad={() => console.log('Image 1 loaded successfully')}
+                          />
+                          <img 
+                            src="/matcha-frame2.png" 
+                            alt="Matcha preparation" 
+                            className="matcha-frame frame-2"
+                            onError={(e) => {
+                              console.log('Image 2 failed to load');
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            onLoad={() => console.log('Image 2 loaded successfully')}
+                          />
                         </div>
                       </div>
                     </div>
