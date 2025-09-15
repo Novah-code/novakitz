@@ -1440,6 +1440,16 @@ export default function SimpleDreamInterface() {
           animation-delay: 0.4s;
         }
         
+        .loading-georgia-text {
+          font-family: Georgia, serif !important;
+          font-size: 18px !important;
+          color: #7FB069 !important;
+          text-align: center !important;
+          margin-top: 20px !important;
+          margin-bottom: 0 !important;
+          font-weight: normal !important;
+        }
+        
         .whisk-animation {
           animation: whiskStirring 1.2s ease-in-out infinite;
           transform-origin: 100px 90px;
@@ -2248,8 +2258,7 @@ export default function SimpleDreamInterface() {
                         </div>
                       </div>
                     </div>
-                    <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
-                    <p className="loading-subtitle">Whisking up wisdom from your subconscious</p>
+                    <p className="loading-georgia-text">Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
