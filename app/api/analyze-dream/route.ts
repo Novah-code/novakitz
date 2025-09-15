@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -59,13 +59,16 @@ Write in a warm, encouraging tone that feels like talking to a wise friend. Keep
     );
 
     console.log('Gemini API response status:', response.status);
+    console.log('API Key exists:', !!apiKey);
+    console.log('API Key length:', apiKey?.length);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
+      console.error('Gemini API error status:', response.status);
+      console.error('Gemini API error body:', errorText);
       return NextResponse.json(
-        { error: `API request failed: ${response.status}` },
-        { status: response.status }
+        { error: `Gemini API failed: ${response.status} - ${errorText}` },
+        { status: 502 }
       );
     }
 
