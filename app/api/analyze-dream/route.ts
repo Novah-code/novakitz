@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check for actual words
-    const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
+    const words = trimmedText.split(/\s+/).filter((word: string) => word.length >= 2);
     if (words.length < 2) {
       return NextResponse.json(
         { error: 'Please describe your dream with at least a few words' },
