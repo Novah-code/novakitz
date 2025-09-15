@@ -1292,6 +1292,51 @@ export default function SimpleDreamInterface() {
           border-radius: 12px;
           border-left: 4px solid #7FB069;
         }
+        
+        .search-container, .filter-container {
+          position: relative;
+        }
+        
+        .search-input, .filter-select {
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 8px 16px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          outline: none;
+          min-width: 160px;
+        }
+        
+        .search-input:hover, .filter-select:hover {
+          background: #e2e8f0;
+          color: #475569;
+        }
+        
+        .search-input:focus, .filter-select:focus {
+          background: white;
+          border-color: #7FB069;
+          color: #374151;
+          box-shadow: 0 0 0 3px rgba(127, 176, 105, 0.1);
+        }
+        
+        .search-input::placeholder {
+          color: #94a3b8;
+          font-weight: normal;
+        }
+        
+        .filter-select {
+          cursor: pointer;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 8px center;
+          background-repeat: no-repeat;
+          background-size: 16px 16px;
+          padding-right: 40px;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1404,32 +1449,34 @@ export default function SimpleDreamInterface() {
             <div className="dream-history fade-in">
               <div className="dream-history-container">
                 <div className="mb-12">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-6">
-                    Dream Journal
-                  </h1>
-                  
-                  {/* Search and Filter Controls */}
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder="Search dreams..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#7FB069] transition-colors"
-                      />
-                    </div>
-                    <div className="sm:w-48">
-                      <select
-                        value={selectedTag}
-                        onChange={(e) => setSelectedTag(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#7FB069] transition-colors"
-                      >
-                        <option value="">All Tags</option>
-                        {allTags.map(tag => (
-                          <option key={tag} value={tag}>#{tag}</option>
-                        ))}
-                      </select>
+                  <div className="flex justify-between items-start mb-6">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
+                    
+                    {/* Search and Filter Controls - Top Right */}
+                    <div className="flex gap-3">
+                      <div className="search-container">
+                        <input
+                          type="text"
+                          placeholder="Search dreams..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="search-input"
+                        />
+                      </div>
+                      <div className="filter-container">
+                        <select
+                          value={selectedTag}
+                          onChange={(e) => setSelectedTag(e.target.value)}
+                          className="filter-select"
+                        >
+                          <option value="">All Tags</option>
+                          {allTags.map(tag => (
+                            <option key={tag} value={tag}>#{tag}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
                   
