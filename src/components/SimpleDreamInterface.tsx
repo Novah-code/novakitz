@@ -1424,12 +1424,14 @@ export default function SimpleDreamInterface() {
         }
         
         .matcha-frame {
-          position: absolute;
-          top: 0;
-          left: 0;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
           width: 200px !important;
           height: 200px !important;
+          object-fit: contain !important;
           animation: frameToggle 0.8s infinite !important;
+          display: block !important;
         }
         
         .frame-1 {
@@ -1848,7 +1850,11 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                   <div className="flex justify-between items-start mb-6">
-                    {/* Search and Filter Controls - Top Left */}
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      Dream Journal
+                    </h1>
+                    
+                    {/* Search and Filter Controls - Top Right */}
                     <div className="flex gap-3">
                       <div className="search-container">
                         <input
@@ -1872,10 +1878,6 @@ export default function SimpleDreamInterface() {
                         </select>
                       </div>
                     </div>
-                    
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      Dream Journal
-                    </h1>
                   </div>
                   
                   {searchTerm || selectedTag ? (
