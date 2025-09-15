@@ -31,6 +31,9 @@ export default function SimpleDreamInterface() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<string>('');
   const [editImage, setEditImage] = useState<string>('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
@@ -240,6 +243,9 @@ export default function SimpleDreamInterface() {
     setEditTitle(dream.title || '');
     setEditText(dream.text);
     setEditImage(dream.image || '');
+    setEditTags(dream.tags || []);
+    setEditAutoTags(dream.autoTags || []);
+    setNewTag('');
     setSelectedDream(null); // Close detail modal
   };
 
@@ -248,7 +254,14 @@ export default function SimpleDreamInterface() {
     
     const updatedDreams = savedDreams.map(dream => 
       dream.id === editingDream.id 
-        ? { ...dream, title: editTitle || 'Dream Entry', text: editText, image: editImage || undefined }
+        ? { 
+            ...dream, 
+            title: editTitle || 'Dream Entry', 
+            text: editText, 
+            image: editImage || undefined,
+            tags: editTags,
+            autoTags: editAutoTags
+          }
         : dream
     );
     
@@ -259,6 +272,10 @@ export default function SimpleDreamInterface() {
     setEditingDream(null);
     setEditTitle('');
     setEditText('');
+    setEditImage('');
+    setEditTags([]);
+    setEditAutoTags([]);
+    setNewTag('');
   };
 
   const cancelEditDream = () => {
@@ -266,6 +283,9 @@ export default function SimpleDreamInterface() {
     setEditTitle('');
     setEditText('');
     setEditImage('');
+    setEditTags([]);
+    setEditAutoTags([]);
+    setNewTag('');
   };
 
   const deleteDream = (dreamId: string) => {
@@ -299,6 +319,21 @@ export default function SimpleDreamInterface() {
     setSavedDreams(updatedDreams);
     localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
     setActiveMenu(null);
+  };
+
+  const addNewTag = () => {
+    if (newTag.trim() && !editTags.includes(newTag.trim().toLowerCase())) {
+      setEditTags([...editTags, newTag.trim().toLowerCase()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string, isAutoTag: boolean = false) => {
+    if (isAutoTag) {
+      setEditAutoTags(editAutoTags.filter(tag => tag !== tagToRemove));
+    } else {
+      setEditTags(editTags.filter(tag => tag !== tagToRemove));
+    }
   };
 
   // Filter dreams based on search term and selected tag
@@ -1384,6 +1419,120 @@ export default function SimpleDreamInterface() {
         .loading-analysis .loading-dot:nth-child(3) { animation-delay: 0; }
         .loading-analysis .loading-dot:nth-child(4) { animation-delay: 0.16s; }
         .loading-analysis .loading-dot:nth-child(5) { animation-delay: 0.32s; }
+        
+        .tags-section {
+          margin-top: 20px;
+          padding: 20px;
+          background: #f8fafc;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+        }
+        
+        .tags-section-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 16px;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .tags-group {
+          margin-bottom: 16px;
+        }
+        
+        .tags-group:last-child {
+          margin-bottom: 0;
+        }
+        
+        .tags-group-title {
+          font-size: 14px;
+          font-weight: 500;
+          color: #64748b;
+          margin-bottom: 8px;
+        }
+        
+        .tags-container {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+        
+        .tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+        
+        .auto-tag {
+          background: #e0f2fe;
+          color: #0369a1;
+          border: 1px solid #bae6fd;
+        }
+        
+        .manual-tag {
+          background: #7FB069;
+          color: white;
+          border: 1px solid #5A8449;
+        }
+        
+        .tag-remove {
+          background: none;
+          border: none;
+          color: inherit;
+          font-size: 14px;
+          font-weight: bold;
+          cursor: pointer;
+          padding: 0;
+          margin-left: 2px;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+        }
+        
+        .tag-remove:hover {
+          opacity: 1;
+        }
+        
+        .add-tag-container {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+        
+        .add-tag-input {
+          flex: 1;
+          padding: 6px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.2s ease;
+        }
+        
+        .add-tag-input:focus {
+          border-color: #7FB069;
+          box-shadow: 0 0 0 2px rgba(127, 176, 105, 0.1);
+        }
+        
+        .add-tag-btn {
+          padding: 6px 12px;
+          background: #7FB069;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+        
+        .add-tag-btn:hover {
+          background: #5A8449;
+        }
       `}</style>
 
       <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -1497,32 +1646,34 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                   <div className="flex justify-between items-start mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      Dream Journal
-                    </h1>
-                    
-                    {/* Search and Filter Controls - Top Right */}
-                    <div className="flex gap-3">
-                      <div className="search-container">
-                        <input
-                          type="text"
-                          placeholder="Search dreams..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="search-input"
-                        />
-                      </div>
-                      <div className="filter-container">
-                        <select
-                          value={selectedTag}
-                          onChange={(e) => setSelectedTag(e.target.value)}
-                          className="filter-select"
-                        >
-                          <option value="">All Tags</option>
-                          {allTags.map(tag => (
-                            <option key={tag} value={tag}>#{tag}</option>
-                          ))}
-                        </select>
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                        Dream Journal
+                      </h1>
+                      
+                      {/* Search and Filter Controls - Top Left */}
+                      <div className="flex gap-3">
+                        <div className="search-container">
+                          <input
+                            type="text"
+                            placeholder="Search dreams..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="search-input"
+                          />
+                        </div>
+                        <div className="filter-container">
+                          <select
+                            value={selectedTag}
+                            onChange={(e) => setSelectedTag(e.target.value)}
+                            className="filter-select"
+                          >
+                            <option value="">All Tags</option>
+                            {allTags.map(tag => (
+                              <option key={tag} value={tag}>#{tag}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1736,6 +1887,67 @@ export default function SimpleDreamInterface() {
                     onChange={(e) => setEditText(e.target.value)}
                     placeholder="Describe your dream..."
                   />
+                  
+                  {/* Tags Section */}
+                  <div className="tags-section">
+                    <h4 className="tags-section-title">Tags</h4>
+                    
+                    {/* AI Auto Tags */}
+                    {editAutoTags.length > 0 && (
+                      <div className="tags-group">
+                        <div className="tags-group-title">🤖 AI Tags</div>
+                        <div className="tags-container">
+                          {editAutoTags.map(tag => (
+                            <span key={tag} className="tag auto-tag">
+                              #{tag}
+                              <button 
+                                onClick={() => removeTag(tag, true)}
+                                className="tag-remove"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Manual Tags */}
+                    <div className="tags-group">
+                      <div className="tags-group-title">✏️ Your Tags</div>
+                      <div className="tags-container">
+                        {editTags.map(tag => (
+                          <span key={tag} className="tag manual-tag">
+                            #{tag}
+                            <button 
+                              onClick={() => removeTag(tag, false)}
+                              className="tag-remove"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                      
+                      {/* Add New Tag */}
+                      <div className="add-tag-container">
+                        <input
+                          type="text"
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addNewTag()}
+                          placeholder="Add new tag..."
+                          className="add-tag-input"
+                        />
+                        <button 
+                          onClick={addNewTag}
+                          className="add-tag-btn"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div className="edit-actions">
                   <button onClick={cancelEditDream} className="btn-cancel">
