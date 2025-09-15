@@ -1369,9 +1369,22 @@ export default function SimpleDreamInterface() {
           padding-right: 40px;
         }
         
+        .loading-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 60px 24px;
+        }
+        
         .loading-analysis {
           text-align: center;
-          padding: 40px 20px;
+          padding: 40px;
+          background: rgba(248, 250, 252, 0.95);
+          border-radius: 24px;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
         
         .matcha-brewing {
@@ -2092,58 +2105,60 @@ export default function SimpleDreamInterface() {
 
           {showResponse && (
             <div className="modal-overlay">
-              <div className="modal-content" style={{maxWidth: '600px', background: 'transparent', boxShadow: 'none'}}>
-                <div className="modal-body" style={{background: 'transparent', padding: '60px 24px', textAlign: 'center'}}>
-                  {isLoading ? (
-                    <div className="loading-analysis" style={{background: 'rgba(248, 250, 252, 0.95)', borderRadius: '24px', padding: '40px'}}>
-                      <div className="matcha-brewing">
-                        <svg width="150" height="150" viewBox="0 0 150 150" className="matcha-bowl">
-                          {/* Bowl */}
-                          <circle cx="75" cy="85" r="45" fill="#ffffff" stroke="#7FB069" strokeWidth="4"/>
-                          
-                          {/* Matcha liquid base */}
-                          <circle cx="75" cy="85" r="38" fill="#7FB069" opacity="0.4" className="matcha-base"/>
-                          
-                          {/* Swirling matcha patterns */}
-                          <g className="matcha-swirl">
-                            <path 
-                              d="M 40 85 Q 60 70 80 85 T 110 85" 
-                              fill="none" 
-                              stroke="#7FB069" 
-                              strokeWidth="5" 
-                              strokeLinecap="round"
-                            />
-                            <path 
-                              d="M 45 90 Q 65 75 85 90 T 105 90" 
-                              fill="none" 
-                              stroke="#5A8449" 
-                              strokeWidth="4" 
-                              strokeLinecap="round"
-                            />
-                          </g>
-                          
-                          {/* Floating bubbles */}
-                          <g className="bubbles">
-                            <circle cx="60" cy="80" r="3" fill="#A8D5A8" className="bubble bubble-1"/>
-                            <circle cx="85" cy="82" r="2" fill="#A8D5A8" className="bubble bubble-2"/>
-                            <circle cx="90" cy="88" r="2.5" fill="#A8D5A8" className="bubble bubble-3"/>
-                            <circle cx="65" cy="88" r="1.5" fill="#A8D5A8" className="bubble bubble-4"/>
-                          </g>
-                          
-                          {/* Whisk handle */}
-                          <rect x="73" y="25" width="4" height="35" fill="#8B4513" rx="2"/>
-                          
-                          {/* Whisk head with animation */}
-                          <g className="whisk-head" style={{transformOrigin: '75px 60px'}}>
-                            <path d="M 70 60 L 72 55 M 75 60 L 75 55 M 78 60 L 80 55 M 75 60 L 75 55" 
-                                  stroke="#8B4513" strokeWidth="2" strokeLinecap="round"/>
-                          </g>
-                        </svg>
-                      </div>
-                      <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
-                      <p className="loading-subtitle">Whisking up wisdom from your subconscious</p>
+              {isLoading ? (
+                <div className="loading-container">
+                  <div className="loading-analysis">
+                    <div className="matcha-brewing">
+                      <svg width="150" height="150" viewBox="0 0 150 150" className="matcha-bowl">
+                        {/* Bowl */}
+                        <circle cx="75" cy="85" r="45" fill="#ffffff" stroke="#7FB069" strokeWidth="4"/>
+                        
+                        {/* Matcha liquid base */}
+                        <circle cx="75" cy="85" r="38" fill="#7FB069" opacity="0.4" className="matcha-base"/>
+                        
+                        {/* Swirling matcha patterns */}
+                        <g className="matcha-swirl">
+                          <path 
+                            d="M 40 85 Q 60 70 80 85 T 110 85" 
+                            fill="none" 
+                            stroke="#7FB069" 
+                            strokeWidth="5" 
+                            strokeLinecap="round"
+                          />
+                          <path 
+                            d="M 45 90 Q 65 75 85 90 T 105 90" 
+                            fill="none" 
+                            stroke="#5A8449" 
+                            strokeWidth="4" 
+                            strokeLinecap="round"
+                          />
+                        </g>
+                        
+                        {/* Floating bubbles */}
+                        <g className="bubbles">
+                          <circle cx="60" cy="80" r="3" fill="#A8D5A8" className="bubble bubble-1"/>
+                          <circle cx="85" cy="82" r="2" fill="#A8D5A8" className="bubble bubble-2"/>
+                          <circle cx="90" cy="88" r="2.5" fill="#A8D5A8" className="bubble bubble-3"/>
+                          <circle cx="65" cy="88" r="1.5" fill="#A8D5A8" className="bubble bubble-4"/>
+                        </g>
+                        
+                        {/* Whisk handle */}
+                        <rect x="73" y="25" width="4" height="35" fill="#8B4513" rx="2"/>
+                        
+                        {/* Whisk head with animation */}
+                        <g className="whisk-head" style={{transformOrigin: '75px 60px'}}>
+                          <path d="M 70 60 L 72 55 M 75 60 L 75 55 M 78 60 L 80 55 M 75 60 L 75 55" 
+                                stroke="#8B4513" strokeWidth="2" strokeLinecap="round"/>
+                        </g>
+                      </svg>
                     </div>
-                  ) : (
+                    <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
+                    <p className="loading-subtitle">Whisking up wisdom from your subconscious</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="modal-content" style={{maxWidth: '600px'}}>
+                  <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
                     <div className="analysis-content">
                       {novaResponse.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
