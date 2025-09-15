@@ -1409,9 +1409,18 @@ export default function SimpleDreamInterface() {
           justify-content: center;
         }
         
-        .matcha-latte-animation {
+        .custom-matcha-animation {
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .matcha-illustration {
+          width: 200px;
+          height: 200px;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
-          animation: gentleBob 3s ease-in-out infinite;
+          animation: matchaWhisking 3s ease-in-out infinite;
         }
         
         .whisk-animation {
@@ -1430,10 +1439,12 @@ export default function SimpleDreamInterface() {
         
         .swirl-1 {
           animation: pathMorph1 3s ease-in-out infinite;
+          transform-origin: center;
         }
         
         .swirl-2 {
           animation: pathMorph2 3s ease-in-out infinite 0.5s;
+          transform-origin: center;
         }
         
         .liquid-base {
@@ -1462,9 +1473,19 @@ export default function SimpleDreamInterface() {
         .steam-2 { animation-delay: 0.5s; }
         .steam-3 { animation-delay: 1s; }
         
-        @keyframes gentleBob {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-3px); }
+        @keyframes matchaWhisking {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg) scale(1); 
+          }
+          25% { 
+            transform: translateY(-2px) rotate(-1deg) scale(1.02); 
+          }
+          50% { 
+            transform: translateY(-4px) rotate(0deg) scale(1.05); 
+          }
+          75% { 
+            transform: translateY(-2px) rotate(1deg) scale(1.02); 
+          }
         }
         
         @keyframes whiskStirring {
@@ -1487,21 +1508,23 @@ export default function SimpleDreamInterface() {
         
         @keyframes pathMorph1 {
           0%, 100% { 
-            d: path("M 65 150 Q 85 135 105 150 Q 125 165 135 150");
             opacity: 0.8;
+            transform: scale(1);
           }
           50% { 
             opacity: 0.4;
+            transform: scale(1.05);
           }
         }
         
         @keyframes pathMorph2 {
           0%, 100% { 
-            d: path("M 70 155 Q 90 145 110 155 Q 125 165 130 155");
             opacity: 0.6;
+            transform: scale(1) rotate(0deg);
           }
           50% { 
             opacity: 0.3;
+            transform: scale(1.1) rotate(1deg);
           }
         }
         
@@ -2207,85 +2230,9 @@ export default function SimpleDreamInterface() {
                 <div className="loading-container">
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
-                      <svg width="200" height="200" viewBox="0 0 200 200" className="matcha-latte-animation">
-                        {/* Tea cup base */}
-                        <ellipse cx="100" cy="160" rx="60" ry="8" fill="#e2e8f0" opacity="0.3"/>
-                        
-                        {/* Cup body */}
-                        <path d="M 50 160 Q 50 110 70 110 L 130 110 Q 150 110 150 160 L 150 170 Q 150 180 140 180 L 60 180 Q 50 180 50 170 Z" 
-                              fill="#ffffff" stroke="#7FB069" strokeWidth="3"/>
-                        
-                        {/* Cup handle */}
-                        <path d="M 150 130 Q 170 130 170 150 Q 170 170 150 170" 
-                              fill="none" stroke="#7FB069" strokeWidth="3" strokeLinecap="round"/>
-                        
-                        {/* Matcha liquid with gradient */}
-                        <defs>
-                          <radialGradient id="matchaGradient" cx="50%" cy="30%" r="70%">
-                            <stop offset="0%" stopColor="#A8D5A8" stopOpacity="0.8"/>
-                            <stop offset="50%" stopColor="#7FB069" stopOpacity="0.9"/>
-                            <stop offset="100%" stopColor="#5A8449" stopOpacity="1"/>
-                          </radialGradient>
-                          <radialGradient id="foamGradient" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9"/>
-                            <stop offset="100%" stopColor="#f0f9f0" stopOpacity="0.7"/>
-                          </radialGradient>
-                        </defs>
-                        
-                        {/* Base liquid */}
-                        <ellipse cx="100" cy="155" rx="42" ry="20" fill="url(#matchaGradient)" className="liquid-base"/>
-                        
-                        {/* Foam layer */}
-                        <ellipse cx="100" cy="145" rx="38" ry="15" fill="url(#foamGradient)" className="foam-layer"/>
-                        
-                        {/* Swirling patterns */}
-                        <g className="swirl-container">
-                          <path d="M 65 150 Q 85 135 105 150 Q 125 165 135 150" 
-                                fill="none" stroke="#ffffff" strokeWidth="3" 
-                                strokeLinecap="round" opacity="0.8" className="swirl-1"/>
-                          <path d="M 70 155 Q 90 145 110 155 Q 125 165 130 155" 
-                                fill="none" stroke="#f0f9f0" strokeWidth="2" 
-                                strokeLinecap="round" opacity="0.6" className="swirl-2"/>
-                        </g>
-                        
-                        {/* Bubbles with varying sizes */}
-                        <g className="bubble-group">
-                          <circle cx="80" cy="150" r="2" fill="#ffffff" opacity="0.7" className="bubble b1"/>
-                          <circle cx="95" cy="148" r="1.5" fill="#ffffff" opacity="0.8" className="bubble b2"/>
-                          <circle cx="110" cy="152" r="1" fill="#ffffff" opacity="0.9" className="bubble b3"/>
-                          <circle cx="85" cy="155" r="1.2" fill="#ffffff" opacity="0.6" className="bubble b4"/>
-                          <circle cx="115" cy="148" r="0.8" fill="#ffffff" opacity="0.8" className="bubble b5"/>
-                        </g>
-                        
-                        {/* Whisk with detailed bristles */}
-                        <g className="whisk-animation">
-                          {/* Handle */}
-                          <rect x="98" y="40" width="4" height="50" fill="#8B4513" rx="2"/>
-                          <rect x="97" y="42" width="6" height="3" fill="#A0522D" rx="1"/>
-                          
-                          {/* Whisk bristles */}
-                          <g className="bristles">
-                            <path d="M 92 90 Q 94 85 96 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                            <path d="M 95 90 Q 97 85 99 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                            <path d="M 98 90 Q 100 85 102 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                            <path d="M 101 90 Q 103 85 105 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                            <path d="M 104 90 Q 106 85 108 90" stroke="#8B4513" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-                          </g>
-                        </g>
-                        
-                        {/* Steam rising */}
-                        <g className="steam">
-                          <path d="M 85 110 Q 87 100 85 90 Q 83 80 85 70" 
-                                stroke="#f0f9f0" strokeWidth="2" opacity="0.4" 
-                                fill="none" strokeLinecap="round" className="steam-1"/>
-                          <path d="M 100 110 Q 98 100 100 90 Q 102 80 100 70" 
-                                stroke="#f0f9f0" strokeWidth="2" opacity="0.5" 
-                                fill="none" strokeLinecap="round" className="steam-2"/>
-                          <path d="M 115 110 Q 117 100 115 90 Q 113 80 115 70" 
-                                stroke="#f0f9f0" strokeWidth="2" opacity="0.3" 
-                                fill="none" strokeLinecap="round" className="steam-3"/>
-                        </g>
-                      </svg>
+                      <div className="custom-matcha-animation">
+                        <img src="/matcha-whisk.svg" alt="Matcha preparation" className="matcha-illustration" />
+                      </div>
                     </div>
                     <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
                     <p className="loading-subtitle">Whisking up wisdom from your subconscious</p>
