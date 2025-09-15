@@ -2172,6 +2172,13 @@ export default function SimpleDreamInterface() {
                 </div>
               ) : (
                 <div className="modal-content" style={{maxWidth: '600px'}}>
+                  <div className="modal-header">
+                    <div className="flex justify-center">
+                      <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
+                        ✨ Dream Analysis
+                      </h2>
+                    </div>
+                  </div>
                   <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
                     <div className="analysis-content">
                       {novaResponse.split('\n\n').map((section, index) => {
@@ -2222,10 +2229,9 @@ export default function SimpleDreamInterface() {
                           );
                         }
                         return null;
-                      }).filter(Boolean)}</div>
-                  )}
-                </div>
-                {!isLoading && (
+                      }).filter(Boolean)}
+                    </div>
+                  </div>
                   <div className="modal-actions">
                     <button
                       onClick={() => {
@@ -2237,8 +2243,8 @@ export default function SimpleDreamInterface() {
                       Save to Journal
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
 

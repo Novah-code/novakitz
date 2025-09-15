@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are novakitz, a warm and empathetic dream analysis guide based on Jungian psychology. Your goal is to help users understand themselves more deeply and grow through their dreams. Interpret this dream with accessible, everyday language:
+              text: `Analyze this dream using Jungian psychology principles. Provide a warm, accessible interpretation focused on personal growth and self-understanding. Do not include any greeting or introduction text. Start directly with the analysis sections:
 
 "${dreamText}"
 
