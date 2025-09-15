@@ -280,7 +280,7 @@ export default function SimpleDreamInterface() {
   };
 
   const shareDream = (dream: DreamEntry) => {
-    const shareText = `${dream.title || 'My Dream'}\n\n${dream.text}\n\nShared from Nova Kitz`;
+    const shareText = `${dream.title || 'My Dream'}\n\n${dream.text}\n\nShared from novakitz`;
     if (navigator.share) {
       navigator.share({
         title: dream.title || 'My Dream',
@@ -1781,7 +1781,7 @@ export default function SimpleDreamInterface() {
                 <div className="modal-header">
                   <div className="flex justify-center">
                     <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                      ✨ Nova's Dream Analysis
+                      ✨ novakitz Dream Analysis
                     </h2>
                   </div>
                 </div>

@@ -12,14 +12,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nova Kitz - What's brewing in your dreams?",
-  description: "Discover the hidden messages in your dreams with Nova Kitz - your AI-powered dream interpretation companion with modern design.",
-  keywords: "dream interpretation, AI dreams, dream analysis, Nova Kitz, subconscious, personal growth",
+  title: "novakitz - What's brewing in your dreams?",
+  description: "Discover the hidden messages in your dreams with novakitz - your AI-powered dream interpretation companion with modern design.",
+  keywords: "dream interpretation, AI dreams, dream analysis, novakitz, subconscious, personal growth",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Nova Kitz"
+    title: "novakitz"
   },
   icons: {
     icon: [
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "Nova Kitz",
-    "application-name": "Nova Kitz",
+    "apple-mobile-web-app-title": "novakitz",
+    "application-name": "novakitz",
     "msapplication-TileColor": "#7fb069",
     "msapplication-config": "none"
   }
