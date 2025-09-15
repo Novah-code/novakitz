@@ -48,9 +48,29 @@ export async function POST(request: NextRequest) {
     const { dreamText } = await request.json();
     console.log('Dream text received:', dreamText);
 
-    if (!dreamText || dreamText.trim().length < 10) {
+    const trimmedText = dreamText.trim();
+    
+    if (!dreamText || trimmedText.length < 10) {
       return NextResponse.json(
         { error: 'Dream text must be at least 10 characters long' },
+        { status: 400 }
+      );
+    }
+    
+    // Check for meaningful content
+    const uniqueChars = new Set(trimmedText.replace(/\s/g, '').toLowerCase()).size;
+    if (uniqueChars < 3) {
+      return NextResponse.json(
+        { error: 'Please provide a meaningful dream description' },
+        { status: 400 }
+      );
+    }
+    
+    // Check for actual words
+    const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
+    if (words.length < 2) {
+      return NextResponse.json(
+        { error: 'Please describe your dream with at least a few words' },
         { status: 400 }
       );
     }

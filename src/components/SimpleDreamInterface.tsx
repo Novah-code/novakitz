@@ -184,8 +184,24 @@ export default function SimpleDreamInterface() {
 
   const handleSubmitDream = async () => {
     const trimmedText = dreamText.trim();
+    
+    // Basic length check
     if (!trimmedText || trimmedText.length < 10) {
       alert('Please describe your dream in more detail. Minimum 10 characters required. 💭');
+      return;
+    }
+    
+    // Check for meaningful content (not just repeated characters)
+    const uniqueChars = new Set(trimmedText.replace(/\s/g, '').toLowerCase()).size;
+    if (uniqueChars < 3) {
+      alert('Please write a meaningful dream description with different words. 🌙');
+      return;
+    }
+    
+    // Check for actual words (at least 2 words with 2+ characters each)
+    const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
+    if (words.length < 2) {
+      alert('Please describe your dream with at least a few words. Tell us what happened! ✨');
       return;
     }
     
