@@ -1979,43 +1979,54 @@ export default function SimpleDreamInterface() {
                     <div className="dream-detail-response-title">✨ Dream Analysis</div>
                     <div className="analysis-content">
                       {selectedDream.response.split('\n\n').map((section, index) => {
-                        if (section.startsWith('DREAM SYMBOLS:')) {
+                        const trimmedSection = section.trim();
+                        if (!trimmedSection) return null; // Skip empty sections
+                        
+                        if (trimmedSection.startsWith('DREAM SYMBOLS:')) {
+                          const content = trimmedSection.replace('DREAM SYMBOLS:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h4 className="section-title">🔮 Dream Symbols</h4>
-                              <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('INNER MESSAGE:')) {
+                        } else if (trimmedSection.startsWith('INNER MESSAGE:')) {
+                          const content = trimmedSection.replace('INNER MESSAGE:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h4 className="section-title">💝 Inner Message</h4>
-                              <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('TODAY\'S PRACTICE:')) {
+                        } else if (trimmedSection.startsWith('TODAY\'S PRACTICE:')) {
+                          const content = trimmedSection.replace('TODAY\'S PRACTICE:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h4 className="section-title">🌱 Today's Practice</h4>
-                              <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
+                        } else if (trimmedSection.startsWith('SOMETHING TO REFLECT ON:')) {
+                          const content = trimmedSection.replace('SOMETHING TO REFLECT ON:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h4 className="section-title">💭 Something to Reflect On</h4>
-                              <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.trim()) {
+                        } else if (trimmedSection.length > 5) { // Only show if meaningful content
                           return (
                             <div key={index} className="analysis-section">
-                              <p className="section-text">{section.trim()}</p>
+                              <p className="section-text">{trimmedSection}</p>
                             </div>
                           );
                         }
                         return null;
-                      })}
+                      }).filter(Boolean)}
                     </div>
                   </div>
                   <div style={{textAlign: 'center', marginTop: '20px'}}>
@@ -2061,44 +2072,54 @@ export default function SimpleDreamInterface() {
                   ) : (
                     <div className="analysis-content">
                       {novaResponse.split('\n\n').map((section, index) => {
-                        if (section.startsWith('DREAM SYMBOLS:')) {
+                        const trimmedSection = section.trim();
+                        if (!trimmedSection) return null; // Skip empty sections
+                        
+                        if (trimmedSection.startsWith('DREAM SYMBOLS:')) {
+                          const content = trimmedSection.replace('DREAM SYMBOLS:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h3 className="section-title">🔮 Dream Symbols</h3>
-                              <p className="section-text">{section.replace('DREAM SYMBOLS:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('INNER MESSAGE:')) {
+                        } else if (trimmedSection.startsWith('INNER MESSAGE:')) {
+                          const content = trimmedSection.replace('INNER MESSAGE:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h3 className="section-title">💝 Inner Message</h3>
-                              <p className="section-text">{section.replace('INNER MESSAGE:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('TODAY\'S PRACTICE:')) {
+                        } else if (trimmedSection.startsWith('TODAY\'S PRACTICE:')) {
+                          const content = trimmedSection.replace('TODAY\'S PRACTICE:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h3 className="section-title">🌱 Today's Practice</h3>
-                              <p className="section-text">{section.replace('TODAY\'S PRACTICE:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.startsWith('SOMETHING TO REFLECT ON:')) {
+                        } else if (trimmedSection.startsWith('SOMETHING TO REFLECT ON:')) {
+                          const content = trimmedSection.replace('SOMETHING TO REFLECT ON:', '').trim();
+                          if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
                               <h3 className="section-title">💭 Something to Reflect On</h3>
-                              <p className="section-text">{section.replace('SOMETHING TO REFLECT ON:', '').trim()}</p>
+                              <p className="section-text">{content}</p>
                             </div>
                           );
-                        } else if (section.trim()) {
+                        } else if (trimmedSection.length > 5) { // Only show if meaningful content
                           return (
                             <div key={index} className="analysis-section">
-                              <p className="section-text">{section.trim()}</p>
+                              <p className="section-text">{trimmedSection}</p>
                             </div>
                           );
                         }
                         return null;
-                      })}
-                    </div>
+                      }).filter(Boolean)}</div>
                   )}
                 </div>
                 {!isLoading && (
