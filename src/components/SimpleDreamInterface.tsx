@@ -1417,10 +1417,11 @@ export default function SimpleDreamInterface() {
         }
         
         .matcha-illustration {
-          width: 200px;
-          height: 200px;
-          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
-          animation: matchaWhisking 3s ease-in-out infinite;
+          width: 200px !important;
+          height: 200px !important;
+          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3)) !important;
+          animation: matchaWhisking 1.5s ease-in-out infinite !important;
+          transform-origin: center center !important;
         }
         
         .whisk-animation {
@@ -1475,16 +1476,16 @@ export default function SimpleDreamInterface() {
         
         @keyframes matchaWhisking {
           0%, 100% { 
-            transform: translateY(0px) rotate(0deg) scale(1); 
+            transform: translateY(0px) rotate(0deg) scale(1) !important; 
           }
           25% { 
-            transform: translateY(-2px) rotate(-1deg) scale(1.02); 
+            transform: translateY(-8px) rotate(-3deg) scale(1.05) !important; 
           }
           50% { 
-            transform: translateY(-4px) rotate(0deg) scale(1.05); 
+            transform: translateY(-12px) rotate(0deg) scale(1.1) !important; 
           }
           75% { 
-            transform: translateY(-2px) rotate(1deg) scale(1.02); 
+            transform: translateY(-8px) rotate(3deg) scale(1.05) !important; 
           }
         }
         
@@ -2231,7 +2232,7 @@ export default function SimpleDreamInterface() {
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
                       <div className="custom-matcha-animation">
-                        <img src="/matcha-whisk.svg" alt="Matcha preparation" className="matcha-illustration" />
+                        <img src="/matcha-original.png" alt="Matcha preparation" className="matcha-illustration" />
                       </div>
                     </div>
                     <h3 className="loading-title">🍵 Brewing your dream insights...</h3>
