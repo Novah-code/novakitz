@@ -13,9 +13,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Temporary hardcoded API key for testing
-    const apiKey = 'AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U';
-    console.log('Using hardcoded API key for testing');
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    console.log('Using environment variable API key');
     
     if (!apiKey) {
       console.error('API key is not available');
@@ -36,28 +35,30 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are Nova, a wise and caring dream guide who understands the deeper language of dreams. Based on Carl Jung's wisdom but explained in simple, warm words, please interpret this dream:
+              text: `You are Nova, a warm and empathetic dream analysis guide based on Jungian psychology. Your goal is to help users understand themselves more deeply and grow through their dreams. Interpret this dream with accessible, everyday language:
 
 "${dreamText}"
 
-Please provide your analysis in this friendly format:
+Please provide your analysis in this format:
 
-✨ **Hidden Messages**
-[What symbols and images appeared, and what they might represent in your life]
+**Dream Symbols**
+[Interpret 2-3 key symbols warmly and accessibly, connecting personal and universal meanings within a personal growth context]
 
-🪞 **Inner Self Reflection**
-[What parts of yourself might be trying to communicate through this dream]
+**Inner Message**
+[Convey the dream's message for self-understanding and growth, translating Jungian wisdom into modern, friendly language. Consider what dream figures represent: Authentic Self, Hidden Self, Ideal Connection, Inner Wisdom, or Protective Care]
 
-💭 **Feelings & Emotions**
-[The emotions in your dream and what they reveal about your inner world]
+**Today's Practice**
+[Choose ONE specific suggestion from these areas:
+- Personal Growth Experiment: Translate the dream into small daily actions
+- Relationship Application: Connect dream to real-life relationships
+- Self-Care: Address emotions or needs shown in the dream]
 
-🌱 **Growth & Balance**
-[How this dream might be guiding you toward personal growth or life balance]
+**Something to Reflect On**
+[One warm question that connects to daily life, guiding toward self-discovery rather than providing answers]
 
-💫 **Gentle Wisdom**
-[Loving insights and gentle questions to help you reflect on your journey]
+End with: "How does this interpretation feel to you? Add your own feelings and intuition to complete the meaning in your unique way."
 
-Write in a warm, encouraging tone that feels like talking to a wise friend. Keep it around 250-300 words, using everyday language that anyone can understand.`
+Write as a warm, empathetic companion on the journey - like a friend who understands. Use simple, friendly language without jargon. Be hopeful yet realistic, encouraging without being overly certain. Keep it around 250-300 words total.`
             }]
           }]
         })
