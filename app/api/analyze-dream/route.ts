@@ -10,7 +10,7 @@ async function generateAutoTags(dreamText: string): Promise<string[]> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey,
+          'x-goog-api-key': apiKey!,
         },
         body: JSON.stringify({
           contents: [{
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': apiKey,
+          'x-goog-api-key': apiKey!,
         },
         body: JSON.stringify({
           contents: [{
