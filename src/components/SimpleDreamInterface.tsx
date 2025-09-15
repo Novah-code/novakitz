@@ -1894,11 +1894,40 @@ export default function SimpleDreamInterface() {
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
               <div className="dream-history-header">
-                <div className="mb-4">
-                  <div className="flex justify-center items-start mb-6">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      Dream Journal
-                    </h1>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    Dream Journal
+                  </h1>
+                  
+                  {/* Search and Filter Controls - Same row as title */}
+                  <div className="flex gap-3 items-center">
+                    <div className="search-container">
+                      <input
+                        type="text"
+                        placeholder="Search dreams..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input"
+                      />
+                    </div>
+                    <div className="filter-container">
+                      <select
+                        value={selectedTag}
+                        onChange={(e) => setSelectedTag(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="">All Tags</option>
+                        {allTags.map(tag => (
+                          <option key={tag} value={tag}>#{tag}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      onClick={() => {setShowHistory(false);}}
+                      className="journal-close-btn"
+                    >
+                      Close
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2066,39 +2095,6 @@ export default function SimpleDreamInterface() {
                     🌙 No dreams recorded yet
                   </div>
                 )}
-              </div>
-              <div className="journal-header-controls">
-                {/* Search and Filter Controls - Same row as Close button */}
-                <div className="flex gap-3">
-                  <div className="search-container">
-                    <input
-                      type="text"
-                      placeholder="Search dreams..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="search-input"
-                    />
-                  </div>
-                  <div className="filter-container">
-                    <select
-                      value={selectedTag}
-                      onChange={(e) => setSelectedTag(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="">All Tags</option>
-                      {allTags.map(tag => (
-                        <option key={tag} value={tag}>#{tag}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => {setShowHistory(false);}}
-                  className="journal-close-btn"
-                >
-                  Close
-                </button>
               </div>
             </div>
           )}
