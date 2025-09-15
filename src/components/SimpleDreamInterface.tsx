@@ -125,22 +125,16 @@ export default function SimpleDreamInterface() {
   };
 
   const analyzeDreamWithGemini = async (dreamText: string) => {
-    // 임시로 간단한 테스트 먼저 해보기
     console.log('Starting dream analysis for:', dreamText);
     
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
+      const response = await fetch('/api/analyze-dream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': 'AIzaSyBsiF34-AwEm1S9Ya8_QUppgMZQSf1tA1U',
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Analyze this dream briefly: ${dreamText}`
-            }]
-          }]
+          dreamText: dreamText
         })
       });
 
@@ -148,23 +142,23 @@ export default function SimpleDreamInterface() {
       console.log('Response ok:', response.ok);
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response:', errorText);
-        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+        const errorData = await response.json();
+        console.log('Error response:', errorData);
+        throw new Error(`API request failed with status ${response.status}: ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      console.log('Full API Response:', JSON.stringify(data, null, 2));
+      console.log('Dream analysis successful');
 
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-        console.log('Analysis successful:', data.candidates[0].content.parts[0].text);
-        return data.candidates[0].content.parts[0].text;
+      if (data.analysis) {
+        console.log('Analysis result:', data.analysis);
+        return data.analysis;
       } else {
         console.log('Invalid response structure:', data);
         throw new Error(`Invalid API response structure: ${JSON.stringify(data)}`);
       }
     } catch (error) {
-      console.error('Gemini API Error:', error);
+      console.error('Dream Analysis Error:', error);
       throw error;
     }
   };
