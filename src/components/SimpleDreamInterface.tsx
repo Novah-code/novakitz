@@ -143,7 +143,8 @@ export default function SimpleDreamInterface() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log('Error response:', errorData);
+        console.log('ERROR RESPONSE DETAILS:', JSON.stringify(errorData, null, 2));
+        console.log('Full error object:', errorData);
         throw new Error(`API request failed with status ${response.status}: ${errorData.error || 'Unknown error'}`);
       }
 
