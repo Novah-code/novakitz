@@ -2328,7 +2328,7 @@ export default function SimpleDreamInterface() {
                         </div>
                       </div>
                     </div>
-                    <p className="loading-georgia-text">Whisking up wisdom from your dream...</p>
+                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
@@ -2424,4 +2424,4 @@ export default function SimpleDreamInterface() {
       </div>
     </div>
   );
-}
+}/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */
