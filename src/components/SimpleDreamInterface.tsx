@@ -1526,8 +1526,8 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 150px !important;
-          height: 140px !important;
+          width: 120px !important;
+          height: 110px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
           margin: 0 auto !important;
@@ -1538,8 +1538,8 @@ export default function SimpleDreamInterface() {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 150px !important;
-          height: 140px !important;
+          width: 120px !important;
+          height: 110px !important;
           object-fit: contain !important;
           display: block !important;
         }
@@ -2423,22 +2423,24 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      height: '170px'
+                      height: '130px'
                     }}>
-                      <div className="matcha-rotation-animation">
+                      <div className="matcha-rotation-animation" style={{width: '120px', height: '110px', position: 'relative'}}>
                         <img 
-                          src="/matcha-frame1.png?v=2"
+                          src="/matcha-frame1.png?v=3"
                           alt="Matcha preparation frame 1" 
                           className="matcha-frame frame-1"
+                          style={{width: '120px', height: '110px', position: 'absolute', top: '0', left: '0', objectFit: 'contain'}}
                           onError={(e) => {
                             console.log('Image frame1 failed to load');
                             e.currentTarget.style.display = 'none';
                           }}
                         />
                         <img 
-                          src="/matcha-frame2.png?v=2"
+                          src="/matcha-frame2.png?v=3"
                           alt="Matcha preparation frame 2" 
                           className="matcha-frame frame-2"
+                          style={{width: '120px', height: '110px', position: 'absolute', top: '0', left: '0', objectFit: 'contain'}}
                           onError={(e) => {
                             console.log('Image frame2 failed to load');
                             e.currentTarget.style.display = 'none';
