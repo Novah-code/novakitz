@@ -49,29 +49,6 @@ export default function SimpleDreamInterface() {
     const saved = localStorage.getItem('novaDreams');
     if (saved) {
       setSavedDreams(JSON.parse(saved));
-    } else {
-      // Create default first dream entry with sample image
-      const defaultDream = {
-        id: 'sample-dream-1',
-        title: 'My First Dream',
-        text: 'I found myself in a peaceful garden where butterflies danced among the flowers. The sun was warm on my face and everything felt serene and magical.',
-        response: 'SYMBOLIC MEANING:\nGardens in dreams often represent personal growth and inner peace. The butterflies symbolize transformation and the beauty of change in your life.\n\nEMOTIONAL SIGNIFICANCE:\nThis dream reflects a desire for tranquility and harmony. It suggests you are in a phase of personal development and positive change.\n\nGUIDANCE:\nEmbrace the peaceful moments in your life. Trust in your personal growth journey and allow yourself to transform naturally, like a butterfly.',
-        date: new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
-        time: new Date().toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        tags: ['nature', 'peace'],
-        autoTags: ['garden', 'butterfly', 'transformation'],
-        image: '/default-dream.png',
-        timestamp: Date.now()
-      };
-      setSavedDreams([defaultDream]);
-      localStorage.setItem('novaDreams', JSON.stringify([defaultDream]));
     }
 
     // Check if user has seen voice guide
@@ -142,12 +119,17 @@ export default function SimpleDreamInterface() {
 
   const saveDreamWithTags = (dreamText: string, response: string, autoTags: string[]) => {
     console.log('saveDreamWithTags called with:', { dreamText, response, autoTags });
+    
+    // If this is the first dream and no image is selected, use default image
+    const isFirstDream = savedDreams.length === 0;
+    const defaultImage = isFirstDream && !dreamImage ? '/default-dream.png' : dreamImage;
+    
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
       response: response,
       title: dreamTitle || 'Dream Entry',
-      image: dreamImage || undefined,
+      image: defaultImage || undefined,
       autoTags: autoTags,
       tags: [], // Empty manual tags initially
       date: new Date().toLocaleDateString('en-US', {
