@@ -1446,6 +1446,8 @@ export default function SimpleDreamInterface() {
           height: 280px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
+          margin: 0 auto !important;
+          display: block !important;
         }
         
         .matcha-frame {
@@ -1483,10 +1485,12 @@ export default function SimpleDreamInterface() {
           font-size: 18px !important;
           color: white !important;
           text-align: center !important;
-          margin-top: 20px !important;
+          margin: 20px auto 0 auto !important;
           margin-bottom: 0 !important;
           font-weight: normal !important;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+          width: 100% !important;
+          display: block !important;
         }
         
         .dream-history-header {
