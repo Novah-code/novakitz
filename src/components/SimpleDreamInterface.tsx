@@ -197,7 +197,7 @@ export default function SimpleDreamInterface() {
       setShowInput(true);
       recognitionRef.current.start();
     } else {
-      alert('음성인식이 지원되지 않는 브라우저입니다.');
+      alert('Voice recognition is not supported in this browser.');
     }
   };
 
@@ -208,7 +208,7 @@ export default function SimpleDreamInterface() {
         return;
       }
       startVoiceRecording();
-    }, 800); // 0.8초 롱프레스
+    }, 800); // 0.8 second long press
   };
 
   const handleOrbMouseUp = () => {
@@ -292,7 +292,7 @@ export default function SimpleDreamInterface() {
     // Check for actual words (at least 2 words with 2+ characters each)
     const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
     if (words.length < 2) {
-      alert('Please describe your dream with at least a few words. Tell us what happened! ✨');
+      alert('Please describe your dream with at least a few words. Tell us what happened!');
       return;
     }
     
@@ -313,8 +313,8 @@ export default function SimpleDreamInterface() {
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setNovaResponse("Dream analysis temporarily unavailable. Please try again later. ✨");
-      saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later. ✨"); // Save the dream even on error
+      setNovaResponse("Dream analysis temporarily unavailable. Please try again later.");
+      saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later."); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
@@ -456,7 +456,7 @@ export default function SimpleDreamInterface() {
     <div>
       <style jsx global>{`
         body {
-          font-family: 'Inter', sans-serif;
+          font-family: Georgia, "Times New Roman", Times, serif;
           background-color: #f9fafb;
           color: #1f2937;
           overflow-x: hidden;
@@ -847,6 +847,7 @@ export default function SimpleDreamInterface() {
           border-radius: 12px;
           font-weight: 500;
           font-size: 14px;
+          font-family: Georgia, "Times New Roman", Times, serif;
           cursor: pointer;
           transition: all 0.2s ease;
         }
@@ -868,6 +869,7 @@ export default function SimpleDreamInterface() {
           border-radius: 12px;
           font-weight: 500;
           font-size: 14px;
+          font-family: Georgia, "Times New Roman", Times, serif;
           cursor: pointer;
           transition: all 0.2s ease;
         }
@@ -2003,8 +2005,8 @@ export default function SimpleDreamInterface() {
                         borderRadius: '50%',
                         animation: 'pulse 1s infinite'
                       }}></div>
-                      <span style={{color: '#7FB069', fontWeight: '600'}}>
-                        🎙️ 음성을 듣고 있습니다...
+                      <span style={{color: '#7FB069', fontWeight: '600', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
+                        Listening for your voice...
                       </span>
                     </div>
                   )}
@@ -2012,13 +2014,13 @@ export default function SimpleDreamInterface() {
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder={isRecording ? "음성 인식 중..." : " What's brewing in your dreams? (Please write at least 10 characters)"}
+                    placeholder={isRecording ? "Voice recognition in progress..." : " What's brewing in your dreams? (Please write at least 10 characters)"}
                     rows={4}
                     autoFocus={!isRecording}
                     disabled={isRecording}
                   />
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
-                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? '✓' : ''}
+                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? 'Ready' : ''}
                   </div>
                 </div>
                 <div className="modal-actions">
@@ -2131,7 +2133,7 @@ export default function SimpleDreamInterface() {
                             input.click();
                           }}
                         >
-                          <div className="camera-icon">📷</div>
+                          <div className="camera-icon">+</div>
                         </div>
                         
                         <div className="dream-actions">
@@ -2342,7 +2344,7 @@ export default function SimpleDreamInterface() {
                     {selectedDream.text}
                   </div>
                   <div className="dream-detail-response">
-                    <div className="dream-detail-response-title">✨ Dream Analysis</div>
+                    <div className="dream-detail-response-title">Dream Analysis</div>
                     <div className="analysis-content">
                       {selectedDream.response.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
@@ -2452,7 +2454,7 @@ export default function SimpleDreamInterface() {
                   <div className="modal-header">
                     <div className="flex justify-center">
                       <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                        ✨ Dream Analysis
+                        Dream Analysis
                       </h2>
                     </div>
                   </div>
@@ -2543,20 +2545,20 @@ export default function SimpleDreamInterface() {
           <div className="modal-overlay" onClick={() => setShowVoiceGuide(false)}>
             <div className="modal-content voice-guide-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                  🎤 음성 입력 안내
+                <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
+                  Voice Input Guide
                 </h2>
               </div>
-              <div className="modal-body" style={{padding: '20px', textAlign: 'center'}}>
+              <div className="modal-body" style={{padding: '20px', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
                 <div style={{marginBottom: '20px', fontSize: '16px', lineHeight: '1.6'}}>
                   <div style={{marginBottom: '15px'}}>
-                    <strong>💫 짧게 클릭:</strong> 텍스트로 꿈 입력
+                    <strong>Short click:</strong> Type your dream
                   </div>
                   <div style={{marginBottom: '15px'}}>
-                    <strong>🎙️ 길게 누르기:</strong> 음성으로 꿈 말하기
+                    <strong>Long press:</strong> Speak your dream
                   </div>
                   <div style={{fontSize: '14px', color: '#666', marginTop: '15px'}}>
-                    음성인식은 Chrome, Safari 등에서 지원됩니다
+                    Voice recognition is supported in Chrome, Safari and other modern browsers
                   </div>
                 </div>
                 <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
@@ -2568,9 +2570,9 @@ export default function SimpleDreamInterface() {
                       handleAnalyze();
                     }}
                     className="btn-secondary"
-                    style={{padding: '10px 20px'}}
+                    style={{padding: '10px 20px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}
                   >
-                    텍스트 입력
+                    Text Input
                   </button>
                   <button 
                     onClick={() => {
@@ -2580,9 +2582,9 @@ export default function SimpleDreamInterface() {
                       startVoiceRecording();
                     }}
                     className="btn-primary"
-                    style={{padding: '10px 20px'}}
+                    style={{padding: '10px 20px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}
                   >
-                    음성 입력
+                    Voice Input
                   </button>
                 </div>
               </div>

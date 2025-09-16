@@ -54,7 +54,7 @@ export default function PWAInstall() {
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       // Fallback: show manual install instructions
-      alert('홈 화면에 추가하려면:\n\n📱 모바일: 브라우저 메뉴 → "홈 화면에 추가"\n💻 데스크톱: 주소창 오른쪽 "설치" 아이콘 클릭');
+      alert('To add to home screen:\n\nMobile: Browser menu → "Add to Home Screen"\nDesktop: Click "Install" icon in address bar');
       return;
     }
 
@@ -86,7 +86,7 @@ export default function PWAInstall() {
         className="install-btn glass glass-hover"
         title="Install Nova Dream as an app"
       >
-        <span>📱</span>
+        <span>+</span>
         Install App
       </button>
     </div>
