@@ -941,8 +941,33 @@ export default function SimpleDreamInterface() {
           height: 200px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           position: relative;
-          overflow: visible;
+          overflow: hidden;
           border-radius: 16px 16px 0 0;
+        }
+        
+        .camera-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          cursor: pointer;
+        }
+        
+        .dream-image:hover .camera-overlay {
+          opacity: 1;
+        }
+        
+        .camera-icon {
+          color: white;
+          font-size: 48px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         .dream-actions {
@@ -1947,6 +1972,37 @@ export default function SimpleDreamInterface() {
                         backgroundSize: 'cover',
                         backgroundPosition: 'center'
                       }}>
+                        {/* Camera overlay for adding photos */}
+                        <div 
+                          className="camera-overlay"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Create hidden file input for this specific dream
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = (event) => {
+                              const file = (event.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                  const imageUrl = e.target?.result as string;
+                                  // Update the dream with new image
+                                  const updatedDreams = savedDreams.map(d => 
+                                    d.id === dream.id ? { ...d, image: imageUrl } : d
+                                  );
+                                  setSavedDreams(updatedDreams);
+                                  localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            };
+                            input.click();
+                          }}
+                        >
+                          <div className="camera-icon">📷</div>
+                        </div>
+                        
                         <div className="dream-actions">
                           <button 
                             className="dots-menu-btn" 
@@ -2102,25 +2158,6 @@ export default function SimpleDreamInterface() {
                     onChange={(e) => setEditTitle(e.target.value)}
                     placeholder="Dream title..."
                   />
-                  <div 
-                    className={`image-upload-container ${editImage ? 'has-image' : ''}`}
-                    onClick={() => document.getElementById('edit-image-input')?.click()}
-                  >
-                    {editImage ? (
-                      <img src={editImage} alt="Dream" className="uploaded-image" />
-                    ) : (
-                      <div className="upload-placeholder">
-                        📸 Add or change dream image (optional)
-                      </div>
-                    )}
-                  </div>
-                  <input
-                    id="edit-image-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleEditImageUpload}
-                    className="upload-input"
-                  />
                   <textarea
                     className="edit-input edit-textarea"
                     value={editText}
@@ -2128,65 +2165,47 @@ export default function SimpleDreamInterface() {
                     placeholder="Describe your dream..."
                   />
                   
-                  {/* Tags Section */}
+                  {/* Simplified Tags Section */}
                   <div className="tags-section">
                     <h4 className="tags-section-title">Tags</h4>
                     
-                    {/* AI Auto Tags */}
-                    {editAutoTags.length > 0 && (
-                      <div className="tags-group">
-                        <div className="tags-group-title">🤖 AI Tags</div>
-                        <div className="tags-container">
-                          {editAutoTags.map(tag => (
-                            <span key={tag} className="tag auto-tag">
-                              #{tag}
-                              <button 
-                                onClick={() => removeTag(tag, true)}
-                                className="tag-remove"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Manual Tags */}
-                    <div className="tags-group">
-                      <div className="tags-group-title">✏️ Your Tags</div>
-                      <div className="tags-container">
-                        {editTags.map(tag => (
-                          <span key={tag} className="tag manual-tag">
-                            #{tag}
-                            <button 
-                              onClick={() => removeTag(tag, false)}
-                              className="tag-remove"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                      
-                      {/* Add New Tag */}
-                      <div className="add-tag-container">
-                        <input
-                          type="text"
-                          value={newTag}
-                          onChange={(e) => setNewTag(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && addNewTag()}
-                          placeholder="Add new tag..."
-                          className="add-tag-input"
-                        />
+                    {/* All Tags Display */}
+                    <div className="tags-container" style={{marginBottom: '16px'}}>
+                      {[...editAutoTags, ...editTags].map((tag, index) => (
                         <button 
-                          onClick={addNewTag}
-                          className="add-tag-btn"
+                          key={`${tag}-${index}`} 
+                          className="btn-secondary"
+                          style={{
+                            marginRight: '8px',
+                            marginBottom: '8px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                          onClick={() => {
+                            if (editAutoTags.includes(tag)) {
+                              removeTag(tag, true);
+                            } else {
+                              removeTag(tag, false);
+                            }
+                          }}
                         >
-                          Add
+                          #{tag}
+                          <span style={{marginLeft: '4px', opacity: '0.7'}}>×</span>
                         </button>
-                      </div>
+                      ))}
                     </div>
+                    
+                    {/* Tag Input */}
+                    <input
+                      type="text"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addNewTag()}
+                      placeholder="Type to add new tags..."
+                      className="edit-input"
+                      style={{marginBottom: '0'}}
+                    />
                   </div>
                 </div>
                 <div className="edit-actions">
