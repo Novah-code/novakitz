@@ -1908,7 +1908,7 @@ export default function SimpleDreamInterface() {
                     ) : null}
                   </div>
                   
-                  {/* Search and Filter Controls - Right side only */}
+                  {/* Search and Filter Controls - Right side of header */}
                   <div className="flex gap-3 items-center">
                     <div className="search-container">
                       <input
