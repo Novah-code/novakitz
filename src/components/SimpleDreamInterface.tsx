@@ -55,7 +55,15 @@ export default function SimpleDreamInterface() {
         title: 'My First Dream',
         text: 'I found myself in a peaceful garden where butterflies danced among the flowers. The sun was warm on my face and everything felt serene and magical.',
         response: 'SYMBOLIC MEANING:\nGardens in dreams often represent personal growth and inner peace. The butterflies symbolize transformation and the beauty of change in your life.\n\nEMOTIONAL SIGNIFICANCE:\nThis dream reflects a desire for tranquility and harmony. It suggests you are in a phase of personal development and positive change.\n\nGUIDANCE:\nEmbrace the peaceful moments in your life. Trust in your personal growth journey and allow yourself to transform naturally, like a butterfly.',
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        time: new Date().toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
         tags: ['nature', 'peace'],
         autoTags: ['garden', 'butterfly', 'transformation'],
         image: '/default-dream.png'
@@ -144,6 +152,10 @@ export default function SimpleDreamInterface() {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
+      }),
+      time: new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       }),
       timestamp: Date.now()
     };
@@ -2217,11 +2229,11 @@ export default function SimpleDreamInterface() {
                       </div>
                       <div className="dream-content">
                         <div className="dream-title">
-                          <span className="dream-icon">📝</span>
+                          <span className="dream-icon"></span>
                           <span className="dream-title-text">{dream.title || 'Dream Entry'}</span>
                         </div>
                         <div className="dream-meta">
-                          {dream.date}
+                          {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
                         <div className="dream-text">
                           {dream.text}
@@ -2352,7 +2364,7 @@ export default function SimpleDreamInterface() {
                     ×
                   </button>
                   <div className="dream-detail-title">{selectedDream.title || 'Dream Entry'}</div>
-                  <div className="dream-detail-date">{selectedDream.date}</div>
+                  <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
                 </div>
                 <div className="dream-detail-body">
                   {selectedDream.image && (
