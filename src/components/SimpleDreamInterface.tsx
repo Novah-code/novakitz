@@ -1545,22 +1545,22 @@ export default function SimpleDreamInterface() {
         }
         
         .frame-1 {
-          animation: frameToggle1 1.2s ease-in-out infinite !important;
+          animation: fadeInOut1 2s ease-in-out infinite !important;
         }
         
         .frame-2 {
-          animation: frameToggle2 1.2s ease-in-out infinite !important;
+          animation: fadeInOut2 2s ease-in-out infinite !important;
         }
         
-        @keyframes frameToggle1 {
-          0%, 40% { opacity: 1; }
-          50%, 90% { opacity: 0; }
+        @keyframes fadeInOut1 {
+          0% { opacity: 1; }
+          50% { opacity: 0; }
           100% { opacity: 1; }
         }
         
-        @keyframes frameToggle2 {
-          0%, 40% { opacity: 0; }
-          50%, 90% { opacity: 1; }
+        @keyframes fadeInOut2 {
+          0% { opacity: 0; }
+          50% { opacity: 1; }
           100% { opacity: 0; }
         }
 
