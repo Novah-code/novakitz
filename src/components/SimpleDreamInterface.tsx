@@ -1018,6 +1018,8 @@ export default function SimpleDreamInterface() {
           position: relative;
           overflow: hidden;
           border-radius: 16px 16px 0 0;
+          background-size: cover;
+          background-position: center;
         }
         
         .camera-overlay {
@@ -2339,6 +2341,25 @@ export default function SimpleDreamInterface() {
                   <div className="dream-detail-date">{selectedDream.date}</div>
                 </div>
                 <div className="dream-detail-body">
+                  {selectedDream.image && (
+                    <div className="dream-detail-image-container" style={{marginBottom: '20px'}}>
+                      <img 
+                        src={selectedDream.image} 
+                        alt="Dream visual" 
+                        style={{
+                          width: '100%',
+                          maxHeight: '200px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(selectedDream.image, '_blank');
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="dream-detail-content">
                     {selectedDream.text}
                   </div>
