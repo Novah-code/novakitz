@@ -36,6 +36,7 @@ export default function SimpleDreamInterface() {
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const [currentMatchaFrame, setCurrentMatchaFrame] = useState<1 | 2>(1);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -53,6 +54,23 @@ export default function SimpleDreamInterface() {
     img1.src = '/matcha-frame1.png';
     img2.src = '/matcha-frame2.png';
   }, []);
+
+  // Matcha frame animation with JavaScript
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isLoading) {
+      interval = setInterval(() => {
+        setCurrentMatchaFrame(prev => prev === 1 ? 2 : 1);
+      }, 300); // 0.3초마다 이미지 교체
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isLoading]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -2318,55 +2336,21 @@ export default function SimpleDreamInterface() {
                       width: '100%',
                       height: '200px'
                     }}>
-                      <div style={{
-                        position: 'relative', 
-                        width: '200px', 
-                        height: '200px',
-                        margin: '0 auto'
-                      }}>
-                        <img 
-                          src="/matcha-frame1.png" 
-                          alt="Matcha preparation" 
-                          style={{
-                            position: 'absolute',
-                            top: '0',
-                            left: '0', 
-                            right: '0',
-                            bottom: '0',
-                            width: '200px',
-                            height: '200px',
-                            objectFit: 'contain',
-                            animation: 'matchaFrame1 0.6s ease-in-out infinite',
-                            margin: '0 auto'
-                          }}
-                          onError={(e) => {
-                            console.log('Image 1 failed to load');
-                            e.currentTarget.style.display = 'none';
-                          }}
-                          onLoad={() => console.log('Image 1 loaded successfully')}
-                        />
-                        <img 
-                          src="/matcha-frame2.png" 
-                          alt="Matcha preparation" 
-                          style={{
-                            position: 'absolute',
-                            top: '0',
-                            left: '0',
-                            right: '0', 
-                            bottom: '0',
-                            width: '200px',
-                            height: '200px',
-                            objectFit: 'contain',
-                            animation: 'matchaFrame2 0.6s ease-in-out infinite',
-                            margin: '0 auto'
-                          }}
-                          onError={(e) => {
-                            console.log('Image 2 failed to load');
-                            e.currentTarget.style.display = 'none';
-                          }}
-                          onLoad={() => console.log('Image 2 loaded successfully')}
-                        />
-                      </div>
+                      <img 
+                        src={`/matcha-frame${currentMatchaFrame}.png`}
+                        alt="Matcha preparation" 
+                        style={{
+                          width: '200px',
+                          height: '200px',
+                          objectFit: 'contain',
+                          transition: 'opacity 0.1s ease-in-out'
+                        }}
+                        onError={(e) => {
+                          console.log(`Image ${currentMatchaFrame} failed to load`);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        onLoad={() => console.log(`Image ${currentMatchaFrame} loaded successfully`)}
+                      />
                     </div>
                     <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>Whisking up wisdom from your dream...</p>
                   </div>
