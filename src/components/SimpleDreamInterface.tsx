@@ -2171,8 +2171,6 @@ export default function SimpleDreamInterface() {
                   
                   {/* Simplified Tags Section */}
                   <div className="tags-section">
-                    <h4 className="tags-section-title">Tags</h4>
-                    
                     {/* All Tags Display */}
                     <div className="tags-container" style={{marginBottom: '16px'}}>
                       {[...editAutoTags, ...editTags].map((tag, index) => (
@@ -2338,7 +2336,7 @@ export default function SimpleDreamInterface() {
                             width: '200px',
                             height: '200px',
                             objectFit: 'contain',
-                            animation: 'matchaFrame1 2s ease-in-out infinite',
+                            animation: 'matchaFrame1 0.6s ease-in-out infinite',
                             margin: '0 auto'
                           }}
                           onError={(e) => {
@@ -2359,7 +2357,7 @@ export default function SimpleDreamInterface() {
                             width: '200px',
                             height: '200px',
                             objectFit: 'contain',
-                            animation: 'matchaFrame2 2s ease-in-out infinite',
+                            animation: 'matchaFrame2 0.6s ease-in-out infinite',
                             margin: '0 auto'
                           }}
                           onError={(e) => {
