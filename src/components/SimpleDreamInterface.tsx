@@ -467,7 +467,7 @@ export default function SimpleDreamInterface() {
       <style jsx global>{`
         body {
           font-family: Georgia, "Times New Roman", Times, serif;
-          background: linear-gradient(135deg, #0a0f0a 0%, #1a2e1a 50%, #2d5a2d 100%);
+          background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 50%, #c3e6cb 100%);
           color: #1f2937;
           overflow-x: hidden;
         }
