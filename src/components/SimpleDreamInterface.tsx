@@ -1979,13 +1979,15 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
                 <div className="modal-body">
-                  <input
-                    type="text"
-                    className="dream-title-input"
-                    value={dreamTitle}
-                    onChange={(e) => setDreamTitle(e.target.value)}
-                    placeholder="Give your dream a title..."
-                  />
+                  {!isRecording && (
+                    <input
+                      type="text"
+                      className="dream-title-input"
+                      value={dreamTitle}
+                      onChange={(e) => setDreamTitle(e.target.value)}
+                      placeholder="Give your dream a title..."
+                    />
+                  )}
                   {isRecording && (
                     <div className="recording-indicator" style={{
                       display: 'flex',
