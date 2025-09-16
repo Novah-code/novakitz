@@ -1533,28 +1533,16 @@ export default function SimpleDreamInterface() {
         .steam-2 { animation-delay: 0.5s; }
         .steam-3 { animation-delay: 1s; }
         
-        @keyframes frameToggle1 {
-          0%, 40% { 
-            opacity: 1;
-          }
-          50%, 90% { 
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
+        @keyframes matcha-frame1-toggle {
+          0% { opacity: 1; }
+          50% { opacity: 0; }
+          100% { opacity: 1; }
         }
         
-        @keyframes frameToggle2 {
-          0%, 40% { 
-            opacity: 0;
-          }
-          50%, 90% { 
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-          }
+        @keyframes matcha-frame2-toggle {
+          0% { opacity: 0; }
+          50% { opacity: 1; }
+          100% { opacity: 0; }
         }
         
         @keyframes whiskStirring {
@@ -1894,13 +1882,13 @@ export default function SimpleDreamInterface() {
           {showHistory && savedDreams.length > 0 && (
             <div className="dream-history fade-in">
               <div className="dream-history-header">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', width: '100%'}}>
+                  <div style={{flex: '1'}}>
+                    <h1 style={{fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: '0'}}>
                       Dream Journal
                     </h1>
                     {searchTerm || selectedTag ? (
-                      <div className="mt-2 text-sm text-gray-600">
+                      <div style={{marginTop: '8px', fontSize: '14px', color: '#6b7280'}}>
                         Showing {filteredDreams.length} of {savedDreams.length} dreams
                         {searchTerm && ` matching "${searchTerm}"`}
                         {selectedTag && ` tagged with "#${selectedTag}"`}
@@ -1908,8 +1896,8 @@ export default function SimpleDreamInterface() {
                     ) : null}
                   </div>
                   
-                  {/* Search and Filter Controls - Right side of header */}
-                  <div className="flex gap-3 items-center">
+                  {/* Search and Filter Controls - FORCED RIGHT SIDE */}
+                  <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0}}>
                     <div className="search-container">
                       <input
                         type="text"
@@ -2302,48 +2290,48 @@ export default function SimpleDreamInterface() {
               {isLoading ? (
                 <div className="loading-container" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
-                    <div className="matcha-brewing">
-                      <div className="custom-matcha-animation">
-                        <div className="matcha-rotation-animation" style={{position: 'relative', width: '200px', height: '200px'}}>
-                          <img 
-                            src="/matcha-frame1.png" 
-                            alt="Matcha preparation" 
-                            className="matcha-frame frame-1"
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '200px',
-                              height: '200px',
-                              objectFit: 'contain',
-                              animation: 'frameToggle1 1.2s ease-in-out infinite'
-                            }}
-                            onError={(e) => {
-                              console.log('Image 1 failed to load');
-                              e.currentTarget.style.display = 'none';
-                            }}
-                            onLoad={() => console.log('Image 1 loaded successfully')}
-                          />
-                          <img 
-                            src="/matcha-frame2.png" 
-                            alt="Matcha preparation" 
-                            className="matcha-frame frame-2"
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '200px',
-                              height: '200px',
-                              objectFit: 'contain',
-                              animation: 'frameToggle2 1.2s ease-in-out infinite'
-                            }}
-                            onError={(e) => {
-                              console.log('Image 2 failed to load');
-                              e.currentTarget.style.display = 'none';
-                            }}
-                            onLoad={() => console.log('Image 2 loaded successfully')}
-                          />
-                        </div>
+                    <div className="matcha-brewing" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
+                      <div className="custom-matcha-animation" style={{position: 'relative', width: '200px', height: '200px', margin: '0 auto'}}>
+                        <img 
+                          src="/matcha-frame1.png" 
+                          alt="Matcha preparation" 
+                          className="matcha-frame-animated"
+                          style={{
+                            position: 'absolute',
+                            top: '0px',
+                            left: '0px',
+                            width: '200px',
+                            height: '200px',
+                            objectFit: 'contain',
+                            animation: 'matcha-frame1-toggle 1.5s ease-in-out infinite',
+                            zIndex: 2
+                          }}
+                          onError={(e) => {
+                            console.log('Image 1 failed to load');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                          onLoad={() => console.log('Image 1 loaded successfully')}
+                        />
+                        <img 
+                          src="/matcha-frame2.png" 
+                          alt="Matcha preparation" 
+                          className="matcha-frame-animated"
+                          style={{
+                            position: 'absolute',
+                            top: '0px',
+                            left: '0px',
+                            width: '200px',
+                            height: '200px',
+                            objectFit: 'contain',
+                            animation: 'matcha-frame2-toggle 1.5s ease-in-out infinite',
+                            zIndex: 1
+                          }}
+                          onError={(e) => {
+                            console.log('Image 2 failed to load');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                          onLoad={() => console.log('Image 2 loaded successfully')}
+                        />
                       </div>
                     </div>
                     <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>Whisking up wisdom from your dream...</p>
