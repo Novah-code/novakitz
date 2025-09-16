@@ -13,7 +13,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function PWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(true); // Always show for testing
 
   useEffect(() => {
     // Register service worker
@@ -53,6 +53,8 @@ export default function PWAInstall() {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
+      // Fallback: show manual install instructions
+      alert('홈 화면에 추가하려면:\n\n📱 모바일: 브라우저 메뉴 → "홈 화면에 추가"\n💻 데스크톱: 주소창 오른쪽 "설치" 아이콘 클릭');
       return;
     }
 
