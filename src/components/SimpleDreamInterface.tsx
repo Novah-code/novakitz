@@ -48,6 +48,20 @@ export default function SimpleDreamInterface() {
     const saved = localStorage.getItem('novaDreams');
     if (saved) {
       setSavedDreams(JSON.parse(saved));
+    } else {
+      // Create default first dream entry with sample image
+      const defaultDream = {
+        id: 'sample-dream-1',
+        title: 'My First Dream',
+        text: 'I found myself in a peaceful garden where butterflies danced among the flowers. The sun was warm on my face and everything felt serene and magical.',
+        response: 'SYMBOLIC MEANING:\nGardens in dreams often represent personal growth and inner peace. The butterflies symbolize transformation and the beauty of change in your life.\n\nEMOTIONAL SIGNIFICANCE:\nThis dream reflects a desire for tranquility and harmony. It suggests you are in a phase of personal development and positive change.\n\nGUIDANCE:\nEmbrace the peaceful moments in your life. Trust in your personal growth journey and allow yourself to transform naturally, like a butterfly.',
+        date: new Date().toLocaleDateString(),
+        tags: ['nature', 'peace'],
+        autoTags: ['garden', 'butterfly', 'transformation'],
+        image: '/default-dream.png'
+      };
+      setSavedDreams([defaultDream]);
+      localStorage.setItem('novaDreams', JSON.stringify([defaultDream]));
     }
 
     // Check if user has seen voice guide
