@@ -1558,15 +1558,19 @@ export default function SimpleDreamInterface() {
         .steam-2 { animation-delay: 0.5s; }
         .steam-3 { animation-delay: 1s; }
         
-        @keyframes matcha-frame1-toggle {
+        @keyframes matchaFrame1 {
           0% { opacity: 1; }
+          25% { opacity: 1; }
           50% { opacity: 0; }
+          75% { opacity: 0; }
           100% { opacity: 1; }
         }
         
-        @keyframes matcha-frame2-toggle {
+        @keyframes matchaFrame2 {
           0% { opacity: 0; }
+          25% { opacity: 0; }
           50% { opacity: 1; }
+          75% { opacity: 1; }
           100% { opacity: 0; }
         }
         
@@ -2309,21 +2313,33 @@ export default function SimpleDreamInterface() {
               {isLoading ? (
                 <div className="loading-container" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
-                    <div className="matcha-brewing" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-                      <div className="custom-matcha-animation" style={{position: 'relative', width: '200px', height: '200px', margin: '0 auto'}}>
+                    <div className="matcha-brewing" style={{
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      width: '100%',
+                      height: '200px'
+                    }}>
+                      <div style={{
+                        position: 'relative', 
+                        width: '200px', 
+                        height: '200px',
+                        margin: '0 auto'
+                      }}>
                         <img 
                           src="/matcha-frame1.png" 
                           alt="Matcha preparation" 
-                          className="matcha-frame-animated"
                           style={{
                             position: 'absolute',
-                            top: '0px',
-                            left: '0px',
+                            top: '0',
+                            left: '0', 
+                            right: '0',
+                            bottom: '0',
                             width: '200px',
                             height: '200px',
                             objectFit: 'contain',
-                            animation: 'matcha-frame1-toggle 1.5s ease-in-out infinite',
-                            zIndex: 2
+                            animation: 'matchaFrame1 2s ease-in-out infinite',
+                            margin: '0 auto'
                           }}
                           onError={(e) => {
                             console.log('Image 1 failed to load');
@@ -2334,16 +2350,17 @@ export default function SimpleDreamInterface() {
                         <img 
                           src="/matcha-frame2.png" 
                           alt="Matcha preparation" 
-                          className="matcha-frame-animated"
                           style={{
                             position: 'absolute',
-                            top: '0px',
-                            left: '0px',
+                            top: '0',
+                            left: '0',
+                            right: '0', 
+                            bottom: '0',
                             width: '200px',
                             height: '200px',
                             objectFit: 'contain',
-                            animation: 'matcha-frame2-toggle 1.5s ease-in-out infinite',
-                            zIndex: 1
+                            animation: 'matchaFrame2 2s ease-in-out infinite',
+                            margin: '0 auto'
                           }}
                           onError={(e) => {
                             console.log('Image 2 failed to load');
