@@ -90,7 +90,7 @@ export default function PWAInstall() {
   }
 
   return (
-    <div className="pwa-install-prompt">
+    <div className="pwa-install-prompt" style={{display: 'none'}}>
       <button 
         onClick={handleInstallClick}
         className="install-btn glass glass-hover"

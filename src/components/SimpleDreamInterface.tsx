@@ -467,7 +467,7 @@ export default function SimpleDreamInterface() {
       <style jsx global>{`
         body {
           font-family: Georgia, "Times New Roman", Times, serif;
-          background-color: #f9fafb;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: #1f2937;
           overflow-x: hidden;
         }
@@ -490,6 +490,10 @@ export default function SimpleDreamInterface() {
           animation: pulse 8s infinite ease-in-out;
           overflow: hidden;
           margin: 0 auto;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: transparent;
         }
         
         .orb-motion {
@@ -1907,6 +1911,86 @@ export default function SimpleDreamInterface() {
         
         .add-tag-btn:hover {
           background: #5A8449;
+        }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+          .dream-orb {
+            width: 280px;
+            height: 280px;
+          }
+          
+          .dream-history {
+            margin: 0;
+            padding: 10px;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+          }
+          
+          .dream-history-header {
+            padding: 15px;
+            position: relative;
+          }
+          
+          .dream-history-header > div:first-child {
+            flex-direction: column !important;
+            gap: 15px !important;
+          }
+          
+          .dream-history-header > div:first-child > div:last-child {
+            width: 100% !important;
+            max-width: none !important;
+          }
+          
+          .search-container {
+            width: 100%;
+          }
+          
+          .search-input {
+            width: 100%;
+            min-width: unset;
+          }
+          
+          .filter-container {
+            width: 100%;
+          }
+          
+          .filter-select {
+            width: 100%;
+          }
+          
+          .dream-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 0 5px;
+          }
+          
+          .dream-entry {
+            max-width: none;
+          }
+          
+          .journal-close-btn {
+            position: fixed !important;
+            top: 15px !important;
+            right: 15px !important;
+            z-index: 1000 !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+          }
+          
+          .modal-content {
+            margin: 10px;
+            max-height: calc(100vh - 40px);
+            width: calc(100vw - 20px);
+            max-width: calc(100vw - 20px);
+          }
         }
       `}</style>
 
