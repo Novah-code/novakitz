@@ -7,6 +7,7 @@ interface DreamEntry {
   text: string;
   response: string;
   date: string;
+  time?: string;
   timestamp: number;
   title?: string;
   image?: string;
