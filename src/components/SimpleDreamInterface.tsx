@@ -467,7 +467,7 @@ export default function SimpleDreamInterface() {
       <style jsx global>{`
         body {
           font-family: Georgia, "Times New Roman", Times, serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #0a0f0a 0%, #1a2e1a 50%, #2d5a2d 100%);
           color: #1f2937;
           overflow-x: hidden;
         }
@@ -1542,8 +1542,8 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 100px !important;
-          height: 90px !important;
+          width: 80px !important;
+          height: 75px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
           margin: 0 auto !important;
@@ -1554,8 +1554,8 @@ export default function SimpleDreamInterface() {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 100px !important;
-          height: 90px !important;
+          width: 80px !important;
+          height: 75px !important;
           object-fit: contain !important;
           display: block !important;
         }
@@ -2537,7 +2537,7 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      height: '110px'
+                      height: '85px'
                     }}>
                       <div className="matcha-rotation-animation">
                         <img 
