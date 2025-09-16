@@ -2304,11 +2304,20 @@ export default function SimpleDreamInterface() {
                   <div className="loading-analysis">
                     <div className="matcha-brewing">
                       <div className="custom-matcha-animation">
-                        <div className="matcha-rotation-animation">
+                        <div className="matcha-rotation-animation" style={{position: 'relative', width: '200px', height: '200px'}}>
                           <img 
                             src="/matcha-frame1.png" 
                             alt="Matcha preparation" 
                             className="matcha-frame frame-1"
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '200px',
+                              height: '200px',
+                              objectFit: 'contain',
+                              animation: 'frameToggle1 1.2s ease-in-out infinite'
+                            }}
                             onError={(e) => {
                               console.log('Image 1 failed to load');
                               e.currentTarget.style.display = 'none';
@@ -2319,6 +2328,15 @@ export default function SimpleDreamInterface() {
                             src="/matcha-frame2.png" 
                             alt="Matcha preparation" 
                             className="matcha-frame frame-2"
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '200px',
+                              height: '200px',
+                              objectFit: 'contain',
+                              animation: 'frameToggle2 1.2s ease-in-out infinite'
+                            }}
                             onError={(e) => {
                               console.log('Image 2 failed to load');
                               e.currentTarget.style.display = 'none';
