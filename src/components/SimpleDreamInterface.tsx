@@ -351,17 +351,6 @@ export default function SimpleDreamInterface() {
     setActiveMenu(null);
   };
 
-  const togglePrivacy = (dreamId: string) => {
-    const updatedDreams = savedDreams.map(dream => 
-      dream.id === dreamId 
-        ? { ...dream, isPrivate: !dream.isPrivate }
-        : dream
-    );
-    
-    setSavedDreams(updatedDreams);
-    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-    setActiveMenu(null);
-  };
 
   const addNewTag = () => {
     if (newTag.trim() && !editTags.includes(newTag.trim().toLowerCase())) {
@@ -947,6 +936,7 @@ export default function SimpleDreamInterface() {
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
           cursor: pointer;
+          position: relative;
         }
         
         .dream-entry:hover {
@@ -2036,28 +2026,6 @@ export default function SimpleDreamInterface() {
                             ⋮
                             {activeMenu === dream.id && (
                               <div className="dots-menu">
-                                <button 
-                                  className="menu-item"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    togglePrivacy(dream.id);
-                                  }}
-                                >
-                                  <span className="menu-icon">
-                                    {dream.isPrivate ? (
-                                      <svg viewBox="0 0 24 24">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                        <circle cx="12" cy="7" r="4"/>
-                                      </svg>
-                                    ) : (
-                                      <svg viewBox="0 0 24 24">
-                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                                        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
-                                      </svg>
-                                    )}
-                                  </span>
-                                  {dream.isPrivate ? 'Make Public' : 'Make Private'}
-                                </button>
                                 <button 
                                   className="menu-item"
                                   onClick={(e) => {
