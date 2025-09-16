@@ -1524,8 +1524,8 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 180px !important;
-          height: 160px !important;
+          width: 150px !important;
+          height: 140px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
           margin: 0 auto !important;
@@ -1536,8 +1536,8 @@ export default function SimpleDreamInterface() {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 180px !important;
-          height: 160px !important;
+          width: 150px !important;
+          height: 140px !important;
           object-fit: contain !important;
           display: block !important;
         }
@@ -2421,11 +2421,11 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      height: '200px'
+                      height: '170px'
                     }}>
                       <div className="matcha-rotation-animation">
                         <img 
-                          src="/matcha-frame1.png"
+                          src="/matcha-frame1.png?v=2"
                           alt="Matcha preparation frame 1" 
                           className="matcha-frame frame-1"
                           onError={(e) => {
@@ -2434,7 +2434,7 @@ export default function SimpleDreamInterface() {
                           }}
                         />
                         <img 
-                          src="/matcha-frame2.png"
+                          src="/matcha-frame2.png?v=2"
                           alt="Matcha preparation frame 2" 
                           className="matcha-frame frame-2"
                           onError={(e) => {
