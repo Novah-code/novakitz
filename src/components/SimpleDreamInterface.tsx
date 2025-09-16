@@ -36,7 +36,6 @@ export default function SimpleDreamInterface() {
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
-  const [currentMatchaFrame, setCurrentMatchaFrame] = useState<1 | 2>(1);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
 
   // Load saved dreams from localStorage
@@ -55,22 +54,6 @@ export default function SimpleDreamInterface() {
     img2.src = '/matcha-frame2.png';
   }, []);
 
-  // Matcha frame animation with JavaScript
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isLoading) {
-      interval = setInterval(() => {
-        setCurrentMatchaFrame(prev => prev === 1 ? 2 : 1);
-      }, 300); // 0.3초마다 이미지 교체
-    }
-    
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isLoading]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -1484,6 +1467,18 @@ export default function SimpleDreamInterface() {
           animation: frameToggle2 1.2s ease-in-out infinite !important;
         }
         
+        @keyframes frameToggle1 {
+          0%, 40% { opacity: 1; }
+          50%, 90% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        
+        @keyframes frameToggle2 {
+          0%, 40% { opacity: 0; }
+          50%, 90% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        
         .loading-georgia-text {
           font-family: Georgia, "Times New Roman", Times, serif !important;
           font-size: 18px !important;
@@ -2304,21 +2299,26 @@ export default function SimpleDreamInterface() {
                       width: '100%',
                       height: '200px'
                     }}>
-                      <img 
-                        src={`/matcha-frame${currentMatchaFrame}.png`}
-                        alt="Matcha preparation" 
-                        style={{
-                          width: '200px',
-                          height: '200px',
-                          objectFit: 'contain',
-                          transition: 'opacity 0.1s ease-in-out'
-                        }}
-                        onError={(e) => {
-                          console.log(`Image ${currentMatchaFrame} failed to load`);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                        onLoad={() => console.log(`Image ${currentMatchaFrame} loaded successfully`)}
-                      />
+                      <div className="matcha-rotation-animation">
+                        <img 
+                          src="/matcha-frame1.png"
+                          alt="Matcha preparation frame 1" 
+                          className="matcha-frame frame-1"
+                          onError={(e) => {
+                            console.log('Image frame1 failed to load');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                        <img 
+                          src="/matcha-frame2.png"
+                          alt="Matcha preparation frame 2" 
+                          className="matcha-frame frame-2"
+                          onError={(e) => {
+                            console.log('Image frame2 failed to load');
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
                     </div>
                     <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>Whisking up wisdom from your dream...</p>
                   </div>
