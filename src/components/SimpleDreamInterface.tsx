@@ -66,7 +66,8 @@ export default function SimpleDreamInterface() {
         }),
         tags: ['nature', 'peace'],
         autoTags: ['garden', 'butterfly', 'transformation'],
-        image: '/default-dream.png'
+        image: '/default-dream.png',
+        timestamp: Date.now()
       };
       setSavedDreams([defaultDream]);
       localStorage.setItem('novaDreams', JSON.stringify([defaultDream]));
