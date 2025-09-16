@@ -36,13 +36,54 @@ export default function SimpleDreamInterface() {
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [showVoiceGuide, setShowVoiceGuide] = useState(false);
+  const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load saved dreams from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('novaDreams');
     if (saved) {
       setSavedDreams(JSON.parse(saved));
+    }
+
+    // Check if user has seen voice guide
+    const seenGuide = localStorage.getItem('hasSeenVoiceGuide');
+    if (seenGuide) {
+      setHasSeenVoiceGuide(true);
+    }
+  }, []);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'ko-KR';
+        
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setDreamText(transcript);
+          setIsRecording(false);
+        };
+        
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsRecording(false);
+        };
+        
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+        
+        recognitionRef.current = recognition;
+      }
     }
   }, []);
 
@@ -148,6 +189,47 @@ export default function SimpleDreamInterface() {
 
   const handleAnalyze = async () => {
     setShowInput(true);
+  };
+
+  const startVoiceRecording = () => {
+    if (recognitionRef.current) {
+      setIsRecording(true);
+      setShowInput(true);
+      recognitionRef.current.start();
+    } else {
+      alert('음성인식이 지원되지 않는 브라우저입니다.');
+    }
+  };
+
+  const handleOrbMouseDown = () => {
+    longPressTimerRef.current = setTimeout(() => {
+      if (!hasSeenVoiceGuide) {
+        setShowVoiceGuide(true);
+        return;
+      }
+      startVoiceRecording();
+    }, 800); // 0.8초 롱프레스
+  };
+
+  const handleOrbMouseUp = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+      
+      // Short click
+      if (!hasSeenVoiceGuide) {
+        setShowVoiceGuide(true);
+        return;
+      }
+      handleAnalyze();
+    }
+  };
+
+  const handleOrbMouseLeave = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   };
 
   const analyzeDreamWithGemini = async (dreamText: string) => {
@@ -1479,6 +1561,12 @@ export default function SimpleDreamInterface() {
           50%, 90% { opacity: 1; }
           100% { opacity: 0; }
         }
+
+        @keyframes pulse {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.2); }
+          100% { opacity: 1; transform: scale(1); }
+        }
         
         .loading-georgia-text {
           font-family: Georgia, "Times New Roman", Times, serif !important;
@@ -1851,7 +1939,15 @@ export default function SimpleDreamInterface() {
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           
           {!showInput && !showResponse && !showHistory && (
-            <div className="dream-orb flex items-center justify-center mb-8 fade-in" onClick={handleAnalyze} style={{cursor: 'pointer'}}>
+            <div 
+              className="dream-orb flex items-center justify-center mb-8 fade-in" 
+              onMouseDown={handleOrbMouseDown}
+              onMouseUp={handleOrbMouseUp}
+              onMouseLeave={handleOrbMouseLeave}
+              onTouchStart={handleOrbMouseDown}
+              onTouchEnd={handleOrbMouseUp}
+              style={{cursor: 'pointer'}}
+            >
               <div className="orb-motion">
                 <div className="smoke-base"></div>
                 <div className="smoke-layer-1"></div>
@@ -1888,13 +1984,38 @@ export default function SimpleDreamInterface() {
                     onChange={(e) => setDreamTitle(e.target.value)}
                     placeholder="Give your dream a title..."
                   />
+                  {isRecording && (
+                    <div className="recording-indicator" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      padding: '15px',
+                      background: 'rgba(127, 176, 105, 0.1)',
+                      borderRadius: '10px',
+                      marginBottom: '15px',
+                      border: '2px solid #7FB069'
+                    }}>
+                      <div className="recording-dot" style={{
+                        width: '12px',
+                        height: '12px',
+                        backgroundColor: '#ff4444',
+                        borderRadius: '50%',
+                        animation: 'pulse 1s infinite'
+                      }}></div>
+                      <span style={{color: '#7FB069', fontWeight: '600'}}>
+                        🎙️ 음성을 듣고 있습니다...
+                      </span>
+                    </div>
+                  )}
                   <textarea
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder=" What's brewing in your dreams? (Please write at least 10 characters)"
+                    placeholder={isRecording ? "음성 인식 중..." : " What's brewing in your dreams? (Please write at least 10 characters)"}
                     rows={4}
-                    autoFocus
+                    autoFocus={!isRecording}
+                    disabled={isRecording}
                   />
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
                     {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? '✓' : ''}
@@ -2416,6 +2537,59 @@ export default function SimpleDreamInterface() {
           )}
 
         </main>
+
+        {/* Voice Guide Popup */}
+        {showVoiceGuide && (
+          <div className="modal-overlay" onClick={() => setShowVoiceGuide(false)}>
+            <div className="modal-content voice-guide-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
+                  🎤 음성 입력 안내
+                </h2>
+              </div>
+              <div className="modal-body" style={{padding: '20px', textAlign: 'center'}}>
+                <div style={{marginBottom: '20px', fontSize: '16px', lineHeight: '1.6'}}>
+                  <div style={{marginBottom: '15px'}}>
+                    <strong>💫 짧게 클릭:</strong> 텍스트로 꿈 입력
+                  </div>
+                  <div style={{marginBottom: '15px'}}>
+                    <strong>🎙️ 길게 누르기:</strong> 음성으로 꿈 말하기
+                  </div>
+                  <div style={{fontSize: '14px', color: '#666', marginTop: '15px'}}>
+                    음성인식은 Chrome, Safari 등에서 지원됩니다
+                  </div>
+                </div>
+                <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
+                  <button 
+                    onClick={() => {
+                      setShowVoiceGuide(false);
+                      localStorage.setItem('hasSeenVoiceGuide', 'true');
+                      setHasSeenVoiceGuide(true);
+                      handleAnalyze();
+                    }}
+                    className="btn-secondary"
+                    style={{padding: '10px 20px'}}
+                  >
+                    텍스트 입력
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowVoiceGuide(false);
+                      localStorage.setItem('hasSeenVoiceGuide', 'true');
+                      setHasSeenVoiceGuide(true);
+                      startVoiceRecording();
+                    }}
+                    className="btn-primary"
+                    style={{padding: '10px 20px'}}
+                  >
+                    음성 입력
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
