@@ -1992,20 +1992,17 @@ export default function SimpleDreamInterface() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '10px',
-                      padding: '15px',
-                      background: 'rgba(127, 176, 105, 0.1)',
-                      borderRadius: '10px',
-                      marginBottom: '15px',
-                      border: '2px solid #7FB069'
+                      padding: '10px 0',
+                      marginBottom: '10px'
                     }}>
                       <div className="recording-dot" style={{
-                        width: '12px',
-                        height: '12px',
+                        width: '8px',
+                        height: '8px',
                         backgroundColor: '#ff4444',
                         borderRadius: '50%',
                         animation: 'pulse 1s infinite'
                       }}></div>
-                      <span style={{color: '#7FB069', fontWeight: '600', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
+                      <span style={{color: '#7FB069', fontWeight: '500', fontFamily: 'Georgia, "Times New Roman", Times, serif', fontSize: '14px'}}>
                         Listening for your voice...
                       </span>
                     </div>
