@@ -90,15 +90,64 @@ export default function PWAInstall() {
   }
 
   return (
-    <div className="pwa-install-prompt" style={{display: 'none'}}>
+    <div className="pwa-install-prompt">
       <button 
         onClick={handleInstallClick}
         className="install-btn glass glass-hover"
         title="Install Nova Dream as an app"
+        style={{
+          display: 'block'
+        }}
       >
         <span>+</span>
         Install App
       </button>
+      
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .pwa-install-prompt {
+            display: none !important;
+          }
+        }
+        
+        .pwa-install-prompt {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 1000;
+        }
+        
+        .install-btn {
+          padding: 12px 20px;
+          border: none;
+          border-radius: 25px;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: white;
+          font-family: Georgia, "Times New Roman", Times, serif;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .install-btn:hover {
+          background: rgba(127, 176, 105, 0.2);
+          border-color: rgba(127, 176, 105, 0.4);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(127, 176, 105, 0.3);
+        }
+        
+        .install-btn span {
+          font-size: 16px;
+          font-weight: bold;
+        }
+      `}</style>
     </div>
   );
 }
