@@ -2725,13 +2725,13 @@ export default function SimpleDreamInterface() {
                         {[0, 1, 2, 3, 4].map((index) => (
                           <div
                             key={index}
-                            className={`pulse-dot pulse-dot-${index + 1}`}
                             style={{
                               width: '8px',
                               height: '8px',
                               borderRadius: '50%',
                               backgroundColor: 'white',
-                              opacity: '0.3'
+                              opacity: '0.3',
+                              animation: `dotPulse 1.5s ease-in-out infinite ${index * 0.2}s`
                             }}
                           />
                         ))}
