@@ -472,6 +472,77 @@ export default function SimpleDreamInterface() {
           overflow-x: hidden;
         }
         
+        .nova-logo {
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          width: 50px;
+          height: 50px;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 16px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.12),
+            0 2px 8px rgba(127, 176, 105, 0.2);
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+        
+        .nova-logo:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(127, 176, 105, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 
+            0 12px 40px rgba(0, 0, 0, 0.15),
+            0 4px 12px rgba(127, 176, 105, 0.3);
+        }
+        
+        .logo-dots {
+          position: relative;
+          width: 28px;
+          height: 28px;
+        }
+        
+        .logo-dot {
+          position: absolute;
+          width: 5px;
+          height: 5px;
+          background: linear-gradient(135deg, #7fb069, #a8d5a8);
+          border-radius: 50%;
+          box-shadow: 
+            0 2px 6px rgba(127, 176, 105, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          animation: logoGlow 3s ease-in-out infinite;
+        }
+        
+        .dot-1 { top: 0; left: 50%; transform: translateX(-50%); animation-delay: 0s; }
+        .dot-2 { top: 25%; right: 15%; animation-delay: 0.5s; }
+        .dot-3 { bottom: 25%; right: 15%; animation-delay: 1s; }
+        .dot-4 { bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: 1.5s; }
+        .dot-5 { bottom: 25%; left: 15%; animation-delay: 2s; }
+        .dot-6 { top: 25%; left: 15%; animation-delay: 2.5s; }
+        
+        @keyframes logoGlow {
+          0%, 100% { 
+            opacity: 0.8; 
+            box-shadow: 
+              0 2px 6px rgba(127, 176, 105, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+          }
+          50% { 
+            opacity: 1; 
+            box-shadow: 
+              0 4px 12px rgba(127, 176, 105, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.4);
+          }
+        }
+
         .dream-orb {
           width: 350px;
           height: 350px;
@@ -1921,6 +1992,24 @@ export default function SimpleDreamInterface() {
 
         /* Mobile responsive styles */
         @media (max-width: 768px) {
+          .nova-logo {
+            top: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+          }
+          
+          .logo-dots {
+            width: 24px;
+            height: 24px;
+          }
+          
+          .logo-dot {
+            width: 4px;
+            height: 4px;
+          }
+          
           .dream-orb {
             width: 280px;
             height: 280px;
@@ -2039,6 +2128,18 @@ export default function SimpleDreamInterface() {
           </filter>
         </svg>
 
+        
+        {/* Nova Kitz Logo */}
+        <div className="nova-logo">
+          <div className="logo-dots">
+            <div className="logo-dot dot-1"></div>
+            <div className="logo-dot dot-2"></div>
+            <div className="logo-dot dot-3"></div>
+            <div className="logo-dot dot-4"></div>
+            <div className="logo-dot dot-5"></div>
+            <div className="logo-dot dot-6"></div>
+          </div>
+        </div>
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
           

@@ -23,13 +23,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.png?v=2", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png?v=2", sizes: "512x512", type: "image/png" }
+      { url: "/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png?v=3", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=3", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=3", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/icons/icon-192x192.png?v=2", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=2", sizes: "192x192", type: "image/png" }
-    ]
+      { url: "/icons/icon-192x192.png?v=3", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=3", sizes: "192x192", type: "image/png" }
+    ],
+    shortcut: "/icons/icon-192x192.png?v=3"
   },
   other: {
     "mobile-web-app-capable": "yes",
