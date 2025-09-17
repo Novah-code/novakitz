@@ -1533,7 +1533,7 @@ export default function SimpleDreamInterface() {
           display: flex;
           justify-content: center;
           overflow: visible !important;
-          min-height: 120px;
+          min-height: 160px;
           align-items: center;
         }
         
@@ -1546,8 +1546,8 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 120px !important;
-          height: 110px !important;
+          width: 100px !important;
+          height: 140px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
           margin: 0 auto !important;
@@ -1558,8 +1558,8 @@ export default function SimpleDreamInterface() {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 120px !important;
-          height: 110px !important;
+          width: 100px !important;
+          height: 140px !important;
           object-fit: contain !important;
           object-position: center !important;
           display: block !important;
@@ -2543,7 +2543,7 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      minHeight: '120px',
+                      minHeight: '160px',
                       overflow: 'visible'
                     }}>
                       <div className="matcha-rotation-animation">
