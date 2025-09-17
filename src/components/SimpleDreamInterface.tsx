@@ -2273,8 +2273,13 @@ export default function SimpleDreamInterface() {
 
 
           {showHistory && (
-            <div className="dream-history fade-in">
-              <div className="dream-history-header">
+            <div className="dream-history fade-in" style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '90vh',
+              maxHeight: '90vh'
+            }}>
+              <div className="dream-history-header" style={{flexShrink: 0}}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', width: '100%'}}>
                   <div style={{flex: '1'}}>
                     <h1 style={{fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: '0'}}>
@@ -2319,7 +2324,11 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                 </div>
-              <div className="dream-grid">
+              <div className="dream-grid" style={{
+                flex: 1,
+                overflowY: 'auto',
+                paddingBottom: '20px'
+              }}>
                 {filteredDreams.slice(0, 9).map((dream, index) => {
                   const gradients = [
                     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -2493,12 +2502,20 @@ export default function SimpleDreamInterface() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => {setShowHistory(false);}}
-                className="journal-close-btn"
-              >
-                Close
-              </button>
+              <div style={{
+                flexShrink: 0,
+                padding: '20px 0',
+                borderTop: '1px solid #e5e7eb',
+                marginTop: '20px',
+                textAlign: 'center'
+              }}>
+                <button
+                  onClick={() => {setShowHistory(false);}}
+                  className="journal-close-btn"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
 
