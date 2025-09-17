@@ -2,6 +2,66 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+// Client-side only PulseDots component to avoid SSR issues
+const PulseDots = () => {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  if (!mounted) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '8px',
+        margin: '20px 0',
+        height: '8px'
+      }}>
+        {[0, 1, 2, 3, 4].map((index) => (
+          <div
+            key={index}
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: 'white',
+              opacity: '0.3'
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+  
+  return (
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: '8px',
+      margin: '20px 0'
+    }}>
+      {[0, 1, 2, 3, 4].map((index) => (
+        <div
+          key={index}
+          style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            backgroundColor: 'white',
+            opacity: '0.3',
+            animation: `dotPulse 1.5s ease-in-out infinite`,
+            animationDelay: `${index * 0.2}s`
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 interface DreamEntry {
   id: string;
   text: string;
@@ -2732,27 +2792,7 @@ export default function SimpleDreamInterface() {
                       </div>
                       
                       {/* Pulsing Dots Loading Bar */}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: '8px',
-                        margin: '20px 0'
-                      }}>
-                        {[0, 1, 2, 3, 4].map((index) => (
-                          <div
-                            key={index}
-                            style={{
-                              width: '8px',
-                              height: '8px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white',
-                              opacity: '0.3',
-                              animation: `dotPulse 1.5s ease-in-out infinite ${index * 0.2}s`
-                            }}
-                          />
-                        ))}
-                      </div>
+                      <PulseDots />
                       
                       {/* Simple Text */}
                       <p style={{
