@@ -1611,7 +1611,7 @@ export default function SimpleDreamInterface() {
           display: flex;
           justify-content: center;
           overflow: visible !important;
-          min-height: 550px;
+          min-height: 450px;
           align-items: center;
           width: 100%;
         }
@@ -1623,47 +1623,22 @@ export default function SimpleDreamInterface() {
           align-items: center;
         }
         
-        .matcha-rotation-animation {
-          position: relative;
-          width: 400px !important;
-          height: 500px !important;
-          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
+        .matcha-background-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           overflow: visible !important;
-          margin: 0 auto !important;
-          display: block !important;
         }
         
-        .matcha-frame {
-          position: absolute !important;
-          top: 0 !important;
-          left: 0 !important;
-          width: 400px !important;
-          height: 500px !important;
-          object-fit: contain !important;
-          object-position: center !important;
-          display: block !important;
+        .matcha-bg-image {
+          filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
         }
         
         .frame-1 {
-          animation: fadeInOut1 2s ease-in-out infinite !important;
+          opacity: 1 !important;
         }
         
-        .frame-2 {
-          animation: fadeInOut2 2s ease-in-out infinite !important;
-        }
-        
-        @keyframes fadeInOut1 {
-          0% { opacity: 1; }
-          50% { opacity: 0; }
-          100% { opacity: 1; }
-        }
-        
-        @keyframes fadeInOut2 {
-          0% { opacity: 0; }
-          50% { opacity: 1; }
-          100% { opacity: 0; }
-        }
 
         @keyframes pulse {
           0% { opacity: 1; transform: scale(1); }
@@ -2105,14 +2080,9 @@ export default function SimpleDreamInterface() {
             min-height: 400px !important;
           }
           
-          .matcha-rotation-animation {
-            width: 300px !important;
-            height: 380px !important;
-          }
-          
-          .matcha-frame {
-            width: 300px !important;
-            height: 380px !important;
+          .matcha-bg-image {
+            width: 350px !important;
+            height: 450px !important;
           }
         }
       `}</style>
@@ -2683,26 +2653,20 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      minHeight: '550px',
+                      minHeight: '450px',
                       overflow: 'visible'
                     }}>
-                      <div className="matcha-rotation-animation">
-                        <img 
-                          src="/matcha-frame1.png?v=4"
-                          alt="Matcha preparation frame 1" 
-                          className="matcha-frame frame-1"
-                          onError={(e) => {
-                            console.log('Image frame1 failed to load');
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                        <img 
-                          src="/matcha-frame2.png?v=4"
-                          alt="Matcha preparation frame 2" 
-                          className="matcha-frame frame-2"
-                          onError={(e) => {
-                            console.log('Image frame2 failed to load');
-                            e.currentTarget.style.display = 'none';
+                      <div className="matcha-background-container">
+                        <div 
+                          className="matcha-bg-image"
+                          style={{
+                            backgroundImage: 'url(/matcha-frame1.png?v=7)',
+                            backgroundSize: 'contain',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            width: '400px',
+                            height: '500px',
+                            margin: '0 auto'
                           }}
                         />
                       </div>
