@@ -1838,6 +1838,11 @@ export default function SimpleDreamInterface() {
         }
         
         .pulse-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: white;
+          opacity: 0.3;
           animation: dotPulse 1.5s ease-in-out infinite;
         }
         
@@ -2720,15 +2725,7 @@ export default function SimpleDreamInterface() {
                         {[0, 1, 2, 3, 4].map((index) => (
                           <div
                             key={index}
-                            style={{
-                              width: '8px',
-                              height: '8px',
-                              borderRadius: '50%',
-                              backgroundColor: 'white',
-                              opacity: '0.3',
-                              animation: `dotPulse 1.5s ease-in-out infinite`,
-                              animationDelay: `${index * 0.2}s`
-                            }}
+                            className={`pulse-dot pulse-dot-${index + 1}`}
                           />
                         ))}
                       </div>
