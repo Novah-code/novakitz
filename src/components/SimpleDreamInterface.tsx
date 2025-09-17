@@ -963,32 +963,6 @@ export default function SimpleDreamInterface() {
           background: #f1f5f9;
         }
         
-        .journal-view-btn {
-          background: #f8fafc;
-          color: #64748b;
-          border: 1px solid #e2e8f0;
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          font-weight: 500;
-          font-size: 12px;
-          font-family: Georgia, "Times New Roman", Times, serif;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          line-height: 1.2;
-          margin: 0 auto;
-        }
-        
-        .journal-view-btn:hover {
-          background: #f1f5f9;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
         .user-avatar {
           width: 40px;
           height: 40px;
@@ -2159,7 +2133,7 @@ export default function SimpleDreamInterface() {
 
         
         {/* novakitz Logo */}
-        <div className="nova-logo">
+        <div className="nova-logo" onClick={() => setShowHistory(true)}>
           <div className="logo-dots">
             <div className="logo-dot dot-1"></div>
             <div className="logo-dot dot-2"></div>
@@ -2778,16 +2752,6 @@ export default function SimpleDreamInterface() {
             </div>
           )}
 
-          {!showInput && !showResponse && !showHistory && savedDreams.length > 0 && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => setShowHistory(true)}
-                className="journal-view-btn"
-              >
-                View Dream Journal ({savedDreams.length})
-              </button>
-            </div>
-          )}
 
         </main>
 
