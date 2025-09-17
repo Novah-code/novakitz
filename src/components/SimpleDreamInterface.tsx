@@ -2080,9 +2080,17 @@ export default function SimpleDreamInterface() {
             min-height: 400px !important;
           }
           
+          .matcha-background-container {
+            width: 80vw !important;
+            max-width: 280px !important;
+            aspectRatio: 1197/1669 !important;
+            margin: 0 auto !important;
+          }
+          
           .matcha-bg-image {
-            width: 350px !important;
-            height: 450px !important;
+            width: 100% !important;
+            height: 100% !important;
+            aspectRatio: 1197/1669 !important;
           }
         }
       `}</style>
@@ -2650,28 +2658,36 @@ export default function SimpleDreamInterface() {
                   <div className="loading-analysis">
                     <div className="matcha-brewing" style={{
                       display: 'flex', 
+                      flexDirection: 'column',
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      minHeight: '450px',
-                      overflow: 'visible'
+                      minHeight: '400px',
+                      overflow: 'visible',
+                      textAlign: 'center'
                     }}>
-                      <div className="matcha-background-container">
+                      <div className="matcha-background-container" style={{
+                        width: '100%',
+                        maxWidth: '320px',
+                        aspectRatio: '1197/1669',
+                        overflow: 'visible',
+                        margin: '0 auto'
+                      }}>
                         <div 
                           className="matcha-bg-image"
                           style={{
-                            backgroundImage: 'url(/matcha-frame1.png?v=7)',
+                            backgroundImage: 'url(/matcha-frame1.png?v=8)',
                             backgroundSize: 'contain',
                             backgroundRepeat: 'no-repeat',
                             backgroundPosition: 'center',
-                            width: '400px',
-                            height: '500px',
-                            margin: '0 auto'
+                            width: '100%',
+                            height: '100%',
+                            aspectRatio: '1197/1669'
                           }}
                         />
                       </div>
                     </div>
-                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '20px 0 0 0'}}>Whisking up wisdom from your dream...</p>
+                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '30px 0 0 0', fontSize: '18px'}}>Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
