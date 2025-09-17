@@ -1825,6 +1825,28 @@ export default function SimpleDreamInterface() {
           }
         }
         
+        /* Pulsing Dots Animation */
+        @keyframes dotPulse {
+          0%, 80%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          40% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+        }
+        
+        .pulse-dot {
+          animation: dotPulse 1.5s ease-in-out infinite;
+        }
+        
+        .pulse-dot-1 { animation-delay: 0s; }
+        .pulse-dot-2 { animation-delay: 0.2s; }
+        .pulse-dot-3 { animation-delay: 0.4s; }
+        .pulse-dot-4 { animation-delay: 0.6s; }
+        .pulse-dot-5 { animation-delay: 0.8s; }
+
         @keyframes steamRise {
           0% { 
             opacity: 0;
@@ -2688,8 +2710,31 @@ export default function SimpleDreamInterface() {
                           }}
                         />
                       </div>
+                      
+                      {/* Pulsing Dots Loading Bar */}
+                      <div className="dots-container" style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: '8px',
+                        margin: '20px 0'
+                      }}>
+                        {[0, 1, 2, 3, 4].map((index) => (
+                          <div
+                            key={index}
+                            className={`pulse-dot pulse-dot-${index + 1}`}
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              opacity: '0.3'
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '30px 0 0 0', fontSize: '18px'}}>Whisking up wisdom from your dream...</p>
+                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '10px 0 0 0', fontSize: '18px'}}>Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
