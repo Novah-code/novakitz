@@ -2437,6 +2437,7 @@ export default function SimpleDreamInterface() {
                                   marginRight: '6px',
                                   marginBottom: '4px'
                                 }}
+                                title=""
                               >
                                 #{tag}
                               </span>
@@ -2510,6 +2511,7 @@ export default function SimpleDreamInterface() {
                             alignItems: 'center',
                             gap: '4px'
                           }}
+                          title=""
                           onClick={() => {
                             if (editAutoTags.includes(tag)) {
                               removeTag(tag, true);
