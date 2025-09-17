@@ -2726,6 +2726,13 @@ export default function SimpleDreamInterface() {
                           <div
                             key={index}
                             className={`pulse-dot pulse-dot-${index + 1}`}
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              backgroundColor: 'white',
+                              opacity: '0.3'
+                            }}
                           />
                         ))}
                       </div>
