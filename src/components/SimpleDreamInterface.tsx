@@ -122,7 +122,7 @@ export default function SimpleDreamInterface() {
     
     // If this is the first dream and no image is selected, use default image
     const isFirstDream = savedDreams.length === 0;
-    const defaultImage = isFirstDream && !dreamImage ? '/default-dream.png' : dreamImage;
+    const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
     
     const newDream: DreamEntry = {
       id: Date.now().toString(),
@@ -1148,7 +1148,7 @@ export default function SimpleDreamInterface() {
         .dream-detail-header {
           padding: 24px;
           border-bottom: 1px solid #f1f5f9;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%);
           color: white;
         }
         
@@ -2433,7 +2433,7 @@ export default function SimpleDreamInterface() {
           {selectedDream && (
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
+                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)'}}>
                   <button className="dream-detail-close" onClick={() => setSelectedDream(null)}>
                     ×
                   </button>
