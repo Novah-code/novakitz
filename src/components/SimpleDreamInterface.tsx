@@ -2680,25 +2680,23 @@ export default function SimpleDreamInterface() {
               {isLoading ? (
                 <div className="loading-container" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
-                    <div className="matcha-brewing" style={{
+                    <div style={{
                       display: 'flex', 
                       flexDirection: 'column',
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
                       minHeight: '400px',
-                      overflow: 'visible',
                       textAlign: 'center'
                     }}>
-                      <div className="matcha-background-container" style={{
+                      {/* Simple Matcha Image */}
+                      <div style={{
                         width: '100%',
                         maxWidth: '320px',
                         aspectRatio: '1197/1669',
-                        overflow: 'visible',
                         margin: '0 auto'
                       }}>
                         <div 
-                          className="matcha-bg-image"
                           style={{
                             backgroundImage: 'url(/matcha-frame1.png?v=8)',
                             backgroundSize: 'contain',
@@ -2712,7 +2710,7 @@ export default function SimpleDreamInterface() {
                       </div>
                       
                       {/* Pulsing Dots Loading Bar */}
-                      <div className="dots-container" style={{
+                      <div style={{
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -2733,8 +2731,19 @@ export default function SimpleDreamInterface() {
                           />
                         ))}
                       </div>
+                      
+                      {/* Simple Text */}
+                      <p style={{
+                        fontFamily: 'Georgia, "Times New Roman", Times, serif', 
+                        color: 'white', 
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)', 
+                        textAlign: 'center', 
+                        margin: '0', 
+                        fontSize: '18px'
+                      }}>
+                        Whisking up wisdom from your dream...
+                      </p>
                     </div>
-                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '10px 0 0 0', fontSize: '18px'}}>Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
