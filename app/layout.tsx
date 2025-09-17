@@ -23,16 +23,17 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.png?v=4", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png?v=4", sizes: "512x512", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=4", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=4", sizes: "16x16", type: "image/png" }
+      { url: "/favicon.ico?v=5", sizes: "any" },
+      { url: "/icons/icon-192x192.png?v=5", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png?v=5", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=5", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=5", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/icons/icon-192x192.png?v=4", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=4", sizes: "192x192", type: "image/png" }
+      { url: "/icons/icon-192x192.png?v=5", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=5", sizes: "192x192", type: "image/png" }
     ],
-    shortcut: "/icons/icon-192x192.png?v=4"
+    shortcut: "/icons/icon-192x192.png?v=5"
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -60,6 +61,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link rel="icon" href="/favicon.ico?v=5" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico?v=5" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=5" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <div className="particles">
           <div className="particle particle-1"></div>
