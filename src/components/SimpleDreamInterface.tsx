@@ -2103,8 +2103,8 @@ export default function SimpleDreamInterface() {
           }
           
           .matcha-background-container {
-            width: 80vw !important;
-            max-width: 280px !important;
+            width: 70vw !important;
+            max-width: 180px !important;
             aspectRatio: 1197/1669 !important;
             margin: 0 auto !important;
           }
@@ -2692,7 +2692,7 @@ export default function SimpleDreamInterface() {
                       {/* Simple Matcha Image */}
                       <div style={{
                         width: '100%',
-                        maxWidth: '320px',
+                        maxWidth: '200px',
                         aspectRatio: '1197/1669',
                         margin: '0 auto'
                       }}>
@@ -2720,13 +2720,14 @@ export default function SimpleDreamInterface() {
                         {[0, 1, 2, 3, 4].map((index) => (
                           <div
                             key={index}
-                            className={`pulse-dot pulse-dot-${index + 1}`}
                             style={{
                               width: '8px',
                               height: '8px',
                               borderRadius: '50%',
                               backgroundColor: 'white',
-                              opacity: '0.3'
+                              opacity: '0.3',
+                              animation: `dotPulse 1.5s ease-in-out infinite`,
+                              animationDelay: `${index * 0.2}s`
                             }}
                           />
                         ))}
