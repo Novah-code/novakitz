@@ -2246,7 +2246,7 @@ export default function SimpleDreamInterface() {
           )}
 
 
-          {showHistory && savedDreams.length > 0 && (
+          {showHistory && (
             <div className="dream-history fade-in">
               <div className="dream-history-header">
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', width: '100%'}}>
@@ -2450,8 +2450,10 @@ export default function SimpleDreamInterface() {
                 })}
                 </div>
                 {savedDreams.length === 0 && (
-                  <div className="text-center text-gray-500 py-8">
-                    🌙 No dreams recorded yet
+                  <div className="text-center py-12" style={{color: '#64748b', fontSize: '18px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
+                    <div style={{fontSize: '48px', marginBottom: '16px'}}>🌙</div>
+                    <div style={{fontWeight: '500', marginBottom: '8px'}}>Welcome to your Dream Journal</div>
+                    <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
                 )}
               </div>
