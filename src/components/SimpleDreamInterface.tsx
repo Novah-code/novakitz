@@ -1035,6 +1035,7 @@ export default function SimpleDreamInterface() {
           max-width: 1200px;
           margin: 0 auto;
           position: relative;
+          min-height: calc(100vh - 200px);
         }
         
         .dream-grid {
@@ -2450,7 +2451,16 @@ export default function SimpleDreamInterface() {
                 })}
                 </div>
                 {savedDreams.length === 0 && (
-                  <div className="text-center py-12" style={{color: '#64748b', fontSize: '18px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    textAlign: 'center',
+                    color: '#64748b',
+                    fontSize: '18px',
+                    fontFamily: 'Georgia, "Times New Roman", Times, serif'
+                  }}>
                     <div style={{fontSize: '48px', marginBottom: '16px'}}>🌙</div>
                     <div style={{fontWeight: '500', marginBottom: '8px'}}>Welcome to your Dream Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
