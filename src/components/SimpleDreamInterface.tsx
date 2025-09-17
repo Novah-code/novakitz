@@ -2094,6 +2094,26 @@ export default function SimpleDreamInterface() {
             width: calc(100vw - 20px);
             max-width: calc(100vw - 20px);
           }
+          
+          .loading-analysis {
+            min-width: 90vw !important;
+            max-width: 95vw !important;
+            padding: 20px !important;
+          }
+          
+          .matcha-brewing {
+            min-height: 400px !important;
+          }
+          
+          .matcha-rotation-animation {
+            width: 300px !important;
+            height: 380px !important;
+          }
+          
+          .matcha-frame {
+            width: 300px !important;
+            height: 380px !important;
+          }
         }
       `}</style>
 
@@ -2687,7 +2707,7 @@ export default function SimpleDreamInterface() {
                         />
                       </div>
                     </div>
-                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>Whisking up wisdom from your dream...</p>
+                    <p className="loading-georgia-text" style={{fontFamily: 'Georgia, "Times New Roman", Times, serif', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.3)', textAlign: 'center', margin: '20px 0 0 0'}}>Whisking up wisdom from your dream...</p>
                   </div>
                 </div>
               ) : (
