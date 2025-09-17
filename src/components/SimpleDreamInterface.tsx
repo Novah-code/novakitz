@@ -66,7 +66,7 @@ export default function SimpleDreamInterface() {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'ko-KR';
+        recognition.lang = 'en-US';
         
         recognition.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
