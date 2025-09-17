@@ -18,7 +18,7 @@ interface DreamEntry {
 
 export default function SimpleDreamInterface() {
   const [isLoading, setIsLoading] = useState(false);
-  const [novaResponse, setNovaResponse] = useState('');
+  const [dreamResponse, setDreamResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
@@ -309,12 +309,12 @@ export default function SimpleDreamInterface() {
     setIsLoading(true);
     setShowInput(false); // Close input modal immediately
     setShowResponse(true); // Show analysis modal immediately with loading state
-    setNovaResponse(''); // Clear previous response
+    setDreamResponse(''); // Clear previous response
 
     try {
       const result = await analyzeDreamWithGemini(dreamText);
       console.log('Analysis received in handleSubmitDream:', result);
-      setNovaResponse(result.analysis);
+      setDreamResponse(result.analysis);
       console.log('About to save dream with analysis:', { dreamText, result });
       saveDreamWithTags(dreamText, result.analysis, result.autoTags || []); // Save the dream with tags
       
@@ -323,7 +323,7 @@ export default function SimpleDreamInterface() {
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setNovaResponse("Dream analysis temporarily unavailable. Please try again later.");
+      setDreamResponse("Dream analysis temporarily unavailable. Please try again later.");
       saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later."); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
@@ -1604,7 +1604,7 @@ export default function SimpleDreamInterface() {
           display: flex;
           justify-content: center;
           overflow: visible !important;
-          min-height: 160px;
+          min-height: 200px;
           align-items: center;
         }
         
@@ -1617,8 +1617,8 @@ export default function SimpleDreamInterface() {
         
         .matcha-rotation-animation {
           position: relative;
-          width: 100px !important;
-          height: 140px !important;
+          width: 120px !important;
+          height: 180px !important;
           filter: drop-shadow(0 10px 20px rgba(127, 176, 105, 0.3));
           overflow: visible !important;
           margin: 0 auto !important;
@@ -1629,8 +1629,8 @@ export default function SimpleDreamInterface() {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
-          width: 100px !important;
-          height: 140px !important;
+          width: 120px !important;
+          height: 180px !important;
           object-fit: contain !important;
           object-position: center !important;
           display: block !important;
@@ -2129,7 +2129,7 @@ export default function SimpleDreamInterface() {
         </svg>
 
         
-        {/* Nova Kitz Logo */}
+        {/* novakitz Logo */}
         <div className="nova-logo">
           <div className="logo-dots">
             <div className="logo-dot dot-1"></div>
@@ -2644,7 +2644,7 @@ export default function SimpleDreamInterface() {
                       justifyContent: 'center', 
                       alignItems: 'center', 
                       width: '100%',
-                      minHeight: '160px',
+                      minHeight: '200px',
                       overflow: 'visible'
                     }}>
                       <div className="matcha-rotation-animation">
@@ -2682,7 +2682,7 @@ export default function SimpleDreamInterface() {
                   </div>
                   <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
                     <div className="analysis-content">
-                      {novaResponse.split('\n\n').map((section, index) => {
+                      {dreamResponse.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
                         if (!trimmedSection) return null; // Skip empty sections
                         

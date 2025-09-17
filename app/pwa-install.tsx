@@ -59,11 +59,11 @@ export default function PWAInstall() {
       const isAndroid = /Android/.test(navigator.userAgent);
       
       if (isIOS) {
-        alert('To install Nova Kitz on iPhone:\n\n1. Tap the Share button (⬆️) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app');
+        alert('To install novakitz on iPhone:\n\n1. Tap the Share button (⬆️) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app');
       } else if (isAndroid) {
-        alert('To install Nova Kitz on Android:\n\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home screen" or "Install app"\n3. Tap "Install" to add the app');
+        alert('To install novakitz on Android:\n\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home screen" or "Install app"\n3. Tap "Install" to add the app');
       } else {
-        alert('To install Nova Kitz:\n\nDesktop: Look for the "Install" icon in your browser address bar\nMobile: Use your browser menu to "Add to Home Screen"');
+        alert('To install novakitz:\n\nDesktop: Look for the "Install" icon in your browser address bar\nMobile: Use your browser menu to "Add to Home Screen"');
       }
       return;
     }
@@ -94,7 +94,7 @@ export default function PWAInstall() {
       <button 
         onClick={handleInstallClick}
         className="install-btn glass glass-hover"
-        title="Install Nova Dream as an app"
+        title="Install novakitz as an app"
         style={{
           display: 'block'
         }}
