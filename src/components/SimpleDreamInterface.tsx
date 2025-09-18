@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import APIMonitoringDashboard from './APIMonitoringDashboard';
 
 // Client-side only PulseDots component to avoid SSR issues
 const PulseDots = () => {
@@ -302,28 +303,120 @@ export default function SimpleDreamInterface() {
     }
   };
 
+  // Client-side retry utility
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const retryApiCall = async (fn: () => Promise<Response>, maxRetries = 3, baseDelay = 1000): Promise<Response> => {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fn();
+        
+        // If it's a server error (503, 502, 500) or rate limit (429), we should retry
+        if (response.status >= 500 || response.status === 429) {
+          if (attempt === maxRetries) {
+            return response; // Return the last response so we can handle the error properly
+          }
+          
+          // Calculate delay with exponential backoff
+          const delay = baseDelay * Math.pow(2, attempt);
+          const jitter = Math.random() * 0.1 * delay;
+          const totalDelay = Math.min(delay + jitter, 10000); // Max 10 seconds
+          
+          console.log(`Attempt ${attempt + 1} failed with status ${response.status}, retrying in ${Math.round(totalDelay)}ms...`);
+          await sleep(totalDelay);
+          continue;
+        }
+        
+        return response;
+      } catch (error) {
+        lastError = error as Error;
+        
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        const delay = baseDelay * Math.pow(2, attempt);
+        const jitter = Math.random() * 0.1 * delay;
+        const totalDelay = Math.min(delay + jitter, 10000);
+        
+        console.log(`Network error on attempt ${attempt + 1}, retrying in ${Math.round(totalDelay)}ms...`);
+        await sleep(totalDelay);
+      }
+    }
+    
+    // This shouldn't happen, but TypeScript needs this
+    throw lastError || new Error('Maximum retries exceeded');
+  };
+
   const analyzeDreamWithGemini = async (dreamText: string) => {
     console.log('Starting dream analysis for:', dreamText);
+    const startTime = Date.now();
     
     try {
-      const response = await fetch('/api/analyze-dream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          dreamText: dreamText
-        })
-      });
+      const response = await retryApiCall(() => 
+        fetch('/api/analyze-dream', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            dreamText: dreamText
+          })
+        }),
+        3, // 3 retries
+        1000 // 1 second base delay
+      );
 
       console.log('Response status:', response.status);
       console.log('Response ok:', response.ok);
 
+      // API 호출 결과를 로컬스토리지에 기록 (에러만)
       if (!response.ok) {
-        const errorData = await response.json();
+        const responseTime = Date.now() - startTime;
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        
+        try {
+          const errorLog = {
+            timestamp: new Date().toISOString(),
+            endpoint: '/api/analyze-dream',
+            status: response.status,
+            error: errorData.error || 'Unknown error',
+            responseTime
+          };
+
+          const existing = localStorage.getItem('api-errors') || '[]';
+          const errors = JSON.parse(existing);
+          errors.push(errorLog);
+          
+          // 최근 100개 에러만 저장
+          const recentErrors = errors.slice(-100);
+          localStorage.setItem('api-errors', JSON.stringify(recentErrors));
+        } catch (storageError) {
+          console.error('Failed to log error to storage:', storageError);
+        }
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.log('ERROR RESPONSE DETAILS:', JSON.stringify(errorData, null, 2));
         console.log('Full error object:', errorData);
-        throw new Error(`API request failed with status ${response.status}: ${errorData.error || 'Unknown error'}`);
+        
+        // Provide user-friendly error messages
+        let userMessage = errorData.error || 'Unknown error occurred';
+        
+        if (response.status === 503) {
+          userMessage = 'The AI service is experiencing high demand. Please try again in a few moments. ⏳';
+        } else if (response.status === 429) {
+          userMessage = 'Too many requests. Please wait a moment before trying again. ⏰';
+        } else if (response.status === 502) {
+          userMessage = 'The AI service is temporarily unavailable. Please try again shortly. 🔄';
+        } else if (response.status >= 500) {
+          userMessage = 'The AI service is experiencing technical difficulties. Please try again later. 🛠️';
+        }
+        
+        throw new Error(userMessage);
       }
 
       const data = await response.json();
@@ -335,7 +428,7 @@ export default function SimpleDreamInterface() {
         return data;
       } else {
         console.log('Invalid response structure:', data);
-        throw new Error(`Invalid API response structure: ${JSON.stringify(data)}`);
+        throw new Error('The AI service returned an unexpected response. Please try again.');
       }
     } catch (error) {
       console.error('Dream Analysis Error:', error);
@@ -383,8 +476,12 @@ export default function SimpleDreamInterface() {
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      setDreamResponse("Dream analysis temporarily unavailable. Please try again later.");
-      saveDream(dreamText, "Dream analysis temporarily unavailable. Please try again later."); // Save the dream even on error
+      
+      // Use the user-friendly error message from the API or a default fallback
+      const errorMessage = error instanceof Error ? error.message : "Dream analysis temporarily unavailable. Please try again later.";
+      
+      setDreamResponse(errorMessage);
+      saveDream(dreamText, `Analysis unavailable: ${errorMessage}`); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
@@ -2942,6 +3039,9 @@ export default function SimpleDreamInterface() {
         )}
 
       </div>
+      
+      {/* API Monitoring Dashboard - 개발 환경에서만 표시 */}
+      {process.env.NODE_ENV === 'development' && <APIMonitoringDashboard />}
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */
