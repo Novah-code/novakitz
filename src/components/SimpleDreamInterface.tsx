@@ -2184,19 +2184,28 @@ export default function SimpleDreamInterface() {
           
           .dream-history {
             margin: 0;
-            padding: 10px;
-            max-height: calc(100vh - 20px);
+            padding: 5px;
+            max-height: calc(100vh - 10px);
             overflow-y: auto;
+            top: 5px !important;
+            left: 5px !important;
+            right: 5px !important;
+            bottom: 5px !important;
           }
           
           .dream-history-header {
-            padding: 15px;
+            padding: 10px;
             position: relative;
           }
           
           .dream-history-header > div:first-child {
             flex-direction: column !important;
-            gap: 15px !important;
+            gap: 10px !important;
+          }
+          
+          .dream-history-header h1 {
+            font-size: 24px !important;
+            margin: 0 !important;
           }
           
           .dream-history-header > div:first-child > div:last-child {
@@ -2223,12 +2232,17 @@ export default function SimpleDreamInterface() {
           
           .dream-grid {
             grid-template-columns: 1fr;
-            gap: 16px;
-            padding: 0 5px;
+            gap: 12px;
+            padding: 0 8px;
           }
           
           .dream-entry {
             max-width: none;
+            margin: 0 !important;
+          }
+          
+          .dream-content {
+            padding: 16px !important;
           }
           
           .journal-close-btn {
