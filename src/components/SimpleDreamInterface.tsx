@@ -119,6 +119,19 @@ export default function SimpleDreamInterface() {
     }
   }, []);
 
+  // Check microphone permission status
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.permissions) {
+      navigator.permissions.query({ name: 'microphone' as PermissionName })
+        .then((result) => {
+          console.log('Microphone permission status:', result.state);
+        })
+        .catch(() => {
+          console.log('Permission query not supported');
+        });
+    }
+  }, []);
+
   // Initialize speech recognition
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -3011,6 +3024,9 @@ export default function SimpleDreamInterface() {
               </div>
               <div className="modal-body" style={{padding: '20px', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
                 <div style={{marginBottom: '20px', fontSize: '16px', lineHeight: '1.6'}}>
+                  <div style={{marginBottom: '15px', padding: '12px', background: '#f0f9f0', borderRadius: '8px', fontSize: '14px', color: '#5a8449'}}>
+                    💡 <strong>First time?</strong> Your browser will ask for microphone permission once. Choose "Allow" to enable voice input.
+                  </div>
                   <div style={{marginBottom: '15px'}}>
                     <strong>Short click:</strong> Type your dream
                   </div>
