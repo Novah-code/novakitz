@@ -2279,7 +2279,7 @@ export default function SimpleDreamInterface() {
         }
       `}</style>
 
-      <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8" style={{minHeight: '100dvh'}}>
         <svg className="absolute w-0 h-0">
           <filter id="liquid-motion">
             <feTurbulence 
@@ -2335,7 +2335,7 @@ export default function SimpleDreamInterface() {
           
           {!showInput && !showResponse && !showHistory && (
             <div 
-              className="dream-orb flex items-center justify-center mb-8 fade-in" 
+              className="dream-orb flex items-center justify-center fade-in" 
               onMouseDown={handleOrbMouseDown}
               onMouseUp={handleOrbMouseUp}
               onMouseLeave={handleOrbMouseLeave}
