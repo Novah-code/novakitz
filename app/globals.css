@@ -32,8 +32,11 @@ body {
             #C1E7C8 75%, 
             #A8D5A8 100%);
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
     position: relative;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Glass effect styles */
