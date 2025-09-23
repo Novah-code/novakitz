@@ -35,8 +35,16 @@ body {
     min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
     position: relative;
-    padding-top: env(safe-area-inset-top);
+    padding-top: max(env(safe-area-inset-top), 20px) !important;
     padding-bottom: env(safe-area-inset-bottom);
+    background-attachment: fixed !important;
+}
+
+/* iOS Safari 전용 상태바 수정 */
+@supports (-webkit-touch-callout: none) {
+  body {
+    padding-top: max(env(safe-area-inset-top), 44px) !important;
+  }
 }
 
 /* Glass effect styles */

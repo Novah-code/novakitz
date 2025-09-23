@@ -2217,8 +2217,11 @@ export default function SimpleDreamInterface() {
           }
           
           .dream-history-header h1 {
-            font-size: 24px !important;
+            font-size: 20px !important;
             margin: 0 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
           
           .dream-history-header > div:first-child > div:last-child {
@@ -2306,7 +2309,7 @@ export default function SimpleDreamInterface() {
         }
       `}</style>
 
-      <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8" style={{minHeight: '100dvh'}}>
+      <div className="min-h-screen w-full flex flex-col items-center justify-center p-2 sm:p-4 lg:p-6" style={{minHeight: '100dvh', paddingTop: 'max(env(safe-area-inset-top), 20px)'}}>
         <svg className="absolute w-0 h-0">
           <filter id="liquid-motion">
             <feTurbulence 
