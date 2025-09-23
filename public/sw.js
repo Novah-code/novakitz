@@ -1,4 +1,4 @@
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const CACHE_NAME = `nova-dream-v${VERSION}`;
 const STATIC_CACHE = `nova-dream-static-v${VERSION}`;
 const RUNTIME_CACHE = `nova-dream-runtime-v${VERSION}`;
