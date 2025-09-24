@@ -13,9 +13,30 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function PWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showInstallButton, setShowInstallButton] = useState(true); // Always show for testing
+  const [showInstallButton, setShowInstallButton] = useState(true);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Check if app is already installed (running in standalone mode)
+    const checkStandalone = () => {
+      return window.matchMedia('(display-mode: standalone)').matches || 
+             (window.navigator as any).standalone || 
+             document.referrer.includes('android-app://');
+    };
+    
+    setIsStandalone(checkStandalone());
+    
+    if (checkStandalone()) {
+      setShowInstallButton(false);
+      return;
+    }
+    
+    // Also hide if user has dismissed before
+    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    if (dismissed) {
+      setShowInstallButton(false);
+      return;
+    }
     // Register service worker
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -44,6 +65,7 @@ export default function PWAInstall() {
     window.addEventListener('appinstalled', () => {
       console.log('PWA was installed');
       setShowInstallButton(false);
+      localStorage.setItem('pwa-install-dismissed', 'true');
     });
 
     return () => {
@@ -59,11 +81,21 @@ export default function PWAInstall() {
       const isAndroid = /Android/.test(navigator.userAgent);
       
       if (isIOS) {
-        alert('To install novakitz on iPhone:\n\n1. Tap the Share button (⬆️) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app');
+        if (confirm('Install novakitz on your device?\n\n1. Tap the Share button (⬆️) at the bottom of Safari\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add" to install the app\n\nWould you like to proceed?')) {
+          // User confirmed, hide the button
+          setShowInstallButton(false);
+          localStorage.setItem('pwa-install-dismissed', 'true');
+        }
       } else if (isAndroid) {
-        alert('To install novakitz on Android:\n\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home screen" or "Install app"\n3. Tap "Install" to add the app');
+        if (confirm('Install novakitz on your device?\n\n1. Tap the menu (⋮) in Chrome\n2. Tap "Add to Home screen" or "Install app"\n3. Tap "Install" to add the app\n\nWould you like to proceed?')) {
+          setShowInstallButton(false);
+          localStorage.setItem('pwa-install-dismissed', 'true');
+        }
       } else {
-        alert('To install novakitz:\n\nDesktop: Look for the "Install" icon in your browser address bar\nMobile: Use your browser menu to "Add to Home Screen"');
+        if (confirm('Install novakitz on your device?\n\nDesktop: Look for the "Install" icon in your browser address bar\nMobile: Use your browser menu to "Add to Home Screen"\n\nWould you like to proceed?')) {
+          setShowInstallButton(false);
+          localStorage.setItem('pwa-install-dismissed', 'true');
+        }
       }
       return;
     }
@@ -76,8 +108,10 @@ export default function PWAInstall() {
     
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
+      localStorage.setItem('pwa-install-dismissed', 'true');
     } else {
       console.log('User dismissed the install prompt');
+      localStorage.setItem('pwa-install-dismissed', 'true');
     }
 
     // Clear the deferredPrompt variable, since it can only be used once
@@ -85,28 +119,46 @@ export default function PWAInstall() {
     setShowInstallButton(false);
   };
 
-  if (!showInstallButton) {
+  const handleDismiss = () => {
+    setShowInstallButton(false);
+    localStorage.setItem('pwa-install-dismissed', 'true');
+  };
+
+  if (!showInstallButton || isStandalone) {
     return null;
   }
 
   return (
     <div className="pwa-install-prompt">
-      <button 
-        onClick={handleInstallClick}
-        className="install-btn glass glass-hover"
-        title="Install novakitz as an app"
-        style={{
-          display: 'block'
-        }}
-      >
-        <span>+</span>
-        Install App
-      </button>
+      <div className="install-content">
+        <button 
+          onClick={handleInstallClick}
+          className="install-btn glass glass-hover"
+          title="Install novakitz as an app"
+        >
+          <span>+</span>
+          Install App
+        </button>
+        <button 
+          onClick={handleDismiss}
+          className="dismiss-btn"
+          title="Dismiss"
+        >
+          ×
+        </button>
+      </div>
       
       <style jsx>{`
         @media (max-width: 768px) {
           .pwa-install-prompt {
-            display: none !important;
+            top: 10px;
+            right: 10px;
+            display: block;
+          }
+          
+          .install-btn {
+            padding: 8px 12px;
+            font-size: 12px;
           }
         }
         
@@ -115,6 +167,12 @@ export default function PWAInstall() {
           top: 20px;
           right: 20px;
           z-index: 1000;
+        }
+        
+        .install-content {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
         
         .install-btn {
@@ -146,6 +204,23 @@ export default function PWAInstall() {
         .install-btn span {
           font-size: 16px;
           font-weight: bold;
+        }
+        
+        .dismiss-btn {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 4px 8px;
+          border-radius: 50%;
+          opacity: 0.7;
+          transition: all 0.2s ease;
+        }
+        
+        .dismiss-btn:hover {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.1);
         }
       `}</style>
     </div>
