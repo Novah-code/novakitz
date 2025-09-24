@@ -2217,11 +2217,20 @@ export default function SimpleDreamInterface() {
           }
           
           .dream-history-header h1 {
-            font-size: 20px !important;
+            font-size: 18px !important;
             margin: 0 !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            max-width: 200px !important;
+          }
+          
+          .dream-history-header div h1[style*="fontSize"] {
+            font-size: 18px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 200px !important;
           }
           
           .dream-history-header > div:first-child > div:last-child {
