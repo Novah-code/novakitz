@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "novakitz"
   },
   icons: {
@@ -38,10 +38,10 @@ export const metadata: Metadata = {
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-status-bar-style": "default",
     "apple-mobile-web-app-title": "novakitz",
     "application-name": "novakitz",
-    "msapplication-TileColor": "#7fb069",
+    "msapplication-TileColor": "#F7F3E9",
     "msapplication-config": "none"
   }
 };

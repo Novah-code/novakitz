@@ -47,6 +47,27 @@ body {
   }
 }
 
+/* 상태바 영역 배경색 강제 적용 */
+html {
+  background: #F7F3E9 !important;
+}
+
+/* PWA에서 상태바 배경 완전 매칭 */
+@media (display-mode: standalone) {
+  html, body {
+    background: 
+        radial-gradient(ellipse at 20% 80%, rgba(127, 176, 105, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(168, 213, 168, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 40% 40%, rgba(135, 169, 107, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg, 
+            #F7F3E9 0%, 
+            #E8F5E8 25%, 
+            #D4F4DD 50%, 
+            #C1E7C8 75%, 
+            #A8D5A8 100%) !important;
+  }
+}
+
 /* Glass effect styles */
 .glass {
     backdrop-filter: blur(20px) saturate(180%);
