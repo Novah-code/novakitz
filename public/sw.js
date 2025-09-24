@@ -58,11 +58,17 @@ self.addEventListener('fetch', (event) => {
         }
         
         return fetch(request).then((response) => {
-          // Cache successful responses
-          if (response.status === 200) {
+          // Cache successful responses, but skip unsupported schemes
+          if (response.status === 200 && 
+              request.url.startsWith('http') && 
+              !request.url.startsWith('chrome-extension://') &&
+              !request.url.startsWith('moz-extension://') &&
+              !request.url.startsWith('safari-extension://')) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseClone);
+              cache.put(request, responseClone).catch((err) => {
+                console.log('Cache put failed:', err);
+              });
             });
           }
           return response;
