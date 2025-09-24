@@ -1,1 +1,3 @@
 Deploy trigger: force cache update
+Force deployment: September 24, 2025 - 19:14 KST
+Vercel deployment trigger to ensure latest changes are live
