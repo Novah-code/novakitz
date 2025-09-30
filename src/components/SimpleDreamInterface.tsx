@@ -2930,11 +2930,12 @@ export default function SimpleDreamInterface() {
                       {/* Simple Text */}
                       <p style={{
                         fontFamily: 'Georgia, "Times New Roman", Times, serif',
-                        color: '#2d3748',
+                        color: 'white',
                         textAlign: 'center',
                         margin: '0',
                         fontSize: '18px',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                       }}>
                         Whisking up wisdom from your dream...
                       </p>
