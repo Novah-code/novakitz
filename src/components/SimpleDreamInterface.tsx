@@ -1193,12 +1193,11 @@ export default function SimpleDreamInterface() {
           left: 20px;
           right: 20px;
           bottom: 20px;
-          background: #f8fafc;
+          background: transparent;
           z-index: 2000;
           overflow-y: auto;
           padding: 40px;
           border-radius: 24px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
         .dream-history-container {
