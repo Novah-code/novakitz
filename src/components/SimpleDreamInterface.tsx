@@ -92,6 +92,7 @@ export default function SimpleDreamInterface() {
   const [editText, setEditText] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [editImage, setEditImage] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
@@ -2689,8 +2690,8 @@ export default function SimpleDreamInterface() {
                     fontSize: '18px',
                     fontFamily: 'Georgia, "Times New Roman", Times, serif'
                   }}>
-                    <div style={{fontSize: '32px', marginBottom: '12px'}}>🌙</div>
-                    <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '24px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
+                    <div style={{fontSize: '28px', marginBottom: '12px'}}>🌙</div>
+                    <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '20px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
                 )}
