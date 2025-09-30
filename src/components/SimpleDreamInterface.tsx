@@ -2268,16 +2268,17 @@ export default function SimpleDreamInterface() {
           
           .journal-close-btn {
             position: fixed !important;
-            top: 15px !important;
-            right: 15px !important;
+            bottom: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
             z-index: 1000 !important;
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(10px) !important;
             border: 1px solid rgba(0, 0, 0, 0.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-            padding: 8px 16px !important;
-            border-radius: 20px !important;
-            font-size: 14px !important;
+            padding: 12px 32px !important;
+            border-radius: 24px !important;
+            font-size: 16px !important;
             font-weight: 600 !important;
             color: #374151 !important;
           }
