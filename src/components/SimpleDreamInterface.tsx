@@ -1193,11 +1193,12 @@ export default function SimpleDreamInterface() {
           left: 20px;
           right: 20px;
           bottom: 20px;
-          background: transparent;
+          background: #f8fafc;
           z-index: 2000;
           overflow-y: auto;
           padding: 40px;
           border-radius: 24px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
         .dream-history-container {
@@ -2688,7 +2689,7 @@ export default function SimpleDreamInterface() {
                     fontSize: '18px',
                     fontFamily: 'Georgia, "Times New Roman", Times, serif'
                   }}>
-                    <div style={{fontSize: '48px', marginBottom: '16px'}}>🌙</div>
+                    <div style={{fontSize: '32px', marginBottom: '12px'}}>🌙</div>
                     <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '24px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
