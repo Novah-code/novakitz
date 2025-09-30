@@ -1828,8 +1828,8 @@ export default function SimpleDreamInterface() {
         .dream-history-header {
           position: sticky;
           top: 0;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
+          background: transparent;
+          backdrop-filter: none;
           z-index: 10;
           padding: 20px;
           border-radius: 24px 24px 0 0;
