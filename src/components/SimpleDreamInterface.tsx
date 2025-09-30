@@ -2689,7 +2689,7 @@ export default function SimpleDreamInterface() {
                     fontFamily: 'Georgia, "Times New Roman", Times, serif'
                   }}>
                     <div style={{fontSize: '48px', marginBottom: '16px'}}>🌙</div>
-                    <div style={{fontWeight: '500', marginBottom: '8px'}}>Welcome to your Dream Journal</div>
+                    <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '24px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
                 )}
