@@ -1215,6 +1215,44 @@ export default function SimpleDreamInterface() {
           gap: 24px;
         }
         
+        .dream-grid-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        
+        
+        .dream-grid-list .dream-entry {
+          display: flex;
+          flex-direction: row;
+          padding: 16px;
+          max-height: 120px;
+        }
+        
+        .dream-grid-list .dream-entry .dream-image {
+          width: 100px;
+          height: 100px;
+          flex-shrink: 0;
+          margin-right: 16px;
+        }
+        
+        .dream-grid-list .dream-entry .dream-content {
+          flex: 1;
+          overflow: hidden;
+        }
+        
+        .dream-grid-list .dream-entry .dream-title {
+          font-size: 16px;
+          margin-bottom: 4px;
+        }
+        
+        .dream-grid-list .dream-entry .dream-text {
+          font-size: 13px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
         @media (max-width: 768px) {
           .dream-grid {
             grid-template-columns: 1fr;
@@ -2511,6 +2549,10 @@ export default function SimpleDreamInterface() {
                         ))}
                       </select>
                     </div>
+                    <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px'}}>
+                      <button onClick={() => setViewMode('card')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Card</button>
+                      <button onClick={() => setViewMode('list')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#ffffff' : 'transparent', color: viewMode === 'list' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'list' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>List</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2518,7 +2560,7 @@ export default function SimpleDreamInterface() {
               <div className="dream-history-container">
                 <div className="mb-12">
                 </div>
-              <div className="dream-grid" style={{
+              <div className={viewMode === 'list' ? 'dream-grid-list' : 'dream-grid'} style={{
                 flex: 1,
                 overflowY: 'auto',
                 paddingBottom: '20px'
