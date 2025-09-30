@@ -1882,6 +1882,19 @@ body {
     padding: 40px 20px;
 }
 
+.loading-container-transparent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+    padding: 40px 20px;
+}
+
+.loading-container-transparent .loading-analysis {
+    background: transparent;
+    box-shadow: none;
+}
+
 .loading-spinner {
     text-align: center;
 }

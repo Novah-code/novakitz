@@ -1765,12 +1765,8 @@ export default function SimpleDreamInterface() {
         .loading-analysis {
           text-align: center;
           padding: 40px;
-          background: rgba(248, 250, 252, 0.95);
+          background: transparent;
           border-radius: 24px;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
           overflow: visible !important;
           width: auto;
           min-width: 600px;
@@ -2896,7 +2892,7 @@ export default function SimpleDreamInterface() {
           {showResponse && (
             <div className="modal-overlay" onClick={() => {setShowResponse(false); setIsLoading(false);}}>
               {isLoading ? (
-                <div className="loading-container" onClick={(e) => e.stopPropagation()}>
+                <div className="loading-container-transparent" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
                     <div style={{
                       display: 'flex', 
@@ -2932,12 +2928,12 @@ export default function SimpleDreamInterface() {
                       
                       {/* Simple Text */}
                       <p style={{
-                        fontFamily: 'Georgia, "Times New Roman", Times, serif', 
-                        color: 'white', 
-                        textShadow: '0 2px 4px rgba(0,0,0,0.3)', 
-                        textAlign: 'center', 
-                        margin: '0', 
-                        fontSize: '18px'
+                        fontFamily: 'Georgia, "Times New Roman", Times, serif',
+                        color: '#2d3748',
+                        textAlign: 'center',
+                        margin: '0',
+                        fontSize: '18px',
+                        fontWeight: '500'
                       }}>
                         Whisking up wisdom from your dream...
                       </p>
