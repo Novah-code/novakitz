@@ -157,6 +157,41 @@ export default function DreamInterpreter() {
               </p>
             </div>
 
+            <div className="dream-input-card glass-strong">
+              <textarea
+                value={dreamText}
+                onChange={(e) => setDreamText(e.target.value)}
+                placeholder="Describe your dream in detail... The more you share, the better the interpretation will be. Include people, places, emotions, colors, and any symbols you remember."
+                className="dream-textarea"
+                rows={8}
+                disabled={isAnalyzing}
+              />
+              
+              <div className="dream-input-footer">
+                <div className="input-info">
+                  <span className="char-count">{dreamText.length}/1000 characters</span>
+                  <span className="privacy-note">🔒 Your dreams are private and secure</span>
+                </div>
+                
+                <button
+                  onClick={analyzeDream}
+                  disabled={!dreamText.trim() || isAnalyzing}
+                  className={`btn btn-primary btn-large ${isAnalyzing ? 'loading' : ''}`}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <span className="spinner"></span>
+                      Interpreting your dream...
+                    </>
+                  ) : (
+                    <>
+                      Interpret My Dream
+                      <span className="btn-icon">🔮</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
 
             <div className="sample-dreams">
               <p className="sample-title">Need inspiration? Try these:</p>
@@ -229,6 +264,19 @@ export default function DreamInterpreter() {
                 <h3>Want deeper dream insights?</h3>
                 <p>Get personalized dream analysis tips and unlock advanced interpretations</p>
                 
+                <form onSubmit={handleEmailSubmit} className="interpretation-email-form">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email for advanced insights"
+                    className="email-input"
+                    required
+                  />
+                  <button type="submit" className="btn btn-primary">
+                    Get Advanced Insights
+                  </button>
+                </form>
               </div>
             )}
 
