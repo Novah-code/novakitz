@@ -2316,6 +2316,8 @@ export default function SimpleDreamInterface() {
           .search-input {
             width: 100%;
             min-width: unset;
+            padding: 8px 12px !important;
+            font-size: 14px !important;
           }
 
           .filter-container {
@@ -2324,6 +2326,8 @@ export default function SimpleDreamInterface() {
 
           .filter-select {
             width: 100%;
+            padding: 8px 12px !important;
+            font-size: 14px !important;
           }
 
           .dream-history-header > div:first-child > div:last-child > div:last-child {
@@ -2354,21 +2358,14 @@ export default function SimpleDreamInterface() {
           }
           
           .journal-close-btn {
-            position: fixed !important;
-            bottom: 20px !important;
-            right: 20px !important;
-            left: auto !important;
-            transform: none !important;
-            z-index: 1000 !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px) !important;
-            border: 1px solid rgba(0, 0, 0, 0.1) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             padding: 8px 20px !important;
             border-radius: 20px !important;
             font-size: 14px !important;
             font-weight: 600 !important;
-            color: #374151 !important;
+          }
+
+          .journal-close-btn:hover {
+            transform: none !important;
           }
           
           .modal-content {
@@ -2799,9 +2796,9 @@ export default function SimpleDreamInterface() {
                 position: 'sticky',
                 bottom: 0,
                 background: 'white',
-                padding: '20px 0',
+                padding: '20px',
                 borderTop: '1px solid #e5e7eb',
-                textAlign: 'center',
+                textAlign: 'right',
                 zIndex: 10
               }}>
                 <button

@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "novakitz"
+    statusBarStyle: "black-translucent",
+    title: "Novakitz"
   },
   icons: {
     icon: [
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "default",
-    "apple-mobile-web-app-title": "novakitz",
-    "application-name": "novakitz",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+    "apple-mobile-web-app-title": "Novakitz",
+    "application-name": "Novakitz",
     "msapplication-TileColor": "#F7F3E9",
     "msapplication-config": "none"
   }
@@ -50,8 +50,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   userScalable: false,
-  themeColor: "#7fb069",
-  colorScheme: "dark light"
+  themeColor: "#ffffff",
+  colorScheme: "light"
 };
 
 export default function RootLayout({
