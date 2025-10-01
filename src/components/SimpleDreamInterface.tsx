@@ -1219,6 +1219,10 @@ export default function SimpleDreamInterface() {
           display: flex;
           flex-direction: column;
           gap: 12px;
+          width: 100%;
+          max-width: 100%;
+          margin: 0;
+          padding: 0 20px;
         }
 
 
