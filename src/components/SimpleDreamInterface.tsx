@@ -2550,7 +2550,8 @@ export default function SimpleDreamInterface() {
               display: 'flex',
               flexDirection: 'column',
               height: '90vh',
-              maxHeight: '90vh'
+              maxHeight: '90vh',
+              overflowY: 'auto'
             }}>
               <div className="dream-history-header" style={{
                 position: 'sticky',
@@ -2558,8 +2559,7 @@ export default function SimpleDreamInterface() {
                 background: 'white',
                 zIndex: 10,
                 paddingBottom: '16px',
-                borderBottom: '1px solid #e5e7eb',
-                flexShrink: 0
+                borderBottom: '1px solid #e5e7eb'
               }}>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', width: '100%'}}>
                   <div style={{flex: '1'}}>
@@ -2605,13 +2605,9 @@ export default function SimpleDreamInterface() {
                   </div>
                 </div>
               </div>
-              
-              <div className="dream-history-container">
-                <div className="mb-12">
-                </div>
+
+              <div className="dream-history-container" style={{paddingTop: '20px'}}>
               <div className={viewMode === 'list' ? 'dream-grid-list' : 'dream-grid'} style={{
-                flex: 1,
-                overflowY: 'auto',
                 paddingBottom: '20px'
               }}>
                 {filteredDreams.slice(0, 9).map((dream, index) => {
@@ -2790,15 +2786,14 @@ export default function SimpleDreamInterface() {
                   </div>
                 )}
               </div>
+
               <div style={{
                 position: 'sticky',
                 bottom: 0,
                 background: 'white',
                 padding: '20px 0',
                 borderTop: '1px solid #e5e7eb',
-                marginTop: 'auto',
                 textAlign: 'center',
-                flexShrink: 0,
                 zIndex: 10
               }}>
                 <button
