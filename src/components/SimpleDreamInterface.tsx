@@ -1220,38 +1220,68 @@ export default function SimpleDreamInterface() {
           flex-direction: column;
           gap: 12px;
         }
-        
-        
+
+
         .dream-grid-list .dream-entry {
           display: flex;
           flex-direction: row;
-          padding: 16px;
-          max-height: 120px;
+          align-items: center;
+          padding: 12px 16px;
+          height: 88px;
+          position: relative;
         }
-        
+
         .dream-grid-list .dream-entry .dream-image {
-          width: 100px;
-          height: 100px;
+          width: 64px;
+          height: 64px;
           flex-shrink: 0;
           margin-right: 16px;
+          border-radius: 8px;
         }
-        
+
         .dream-grid-list .dream-entry .dream-content {
           flex: 1;
           overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 4px;
         }
-        
+
         .dream-grid-list .dream-entry .dream-title {
-          font-size: 16px;
-          margin-bottom: 4px;
-        }
-        
-        .dream-grid-list .dream-entry .dream-text {
-          font-size: 13px;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 0;
+          white-space: nowrap;
           overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .dream-grid-list .dream-entry .dream-date {
+          font-size: 14px;
+          color: #6b7280;
+          display: block;
+        }
+
+        .dream-grid-list .dream-entry .dream-meta {
+          display: none;
+        }
+
+        .dream-grid-list .dream-entry .dream-text {
+          display: none;
+        }
+
+        .dream-grid-list .dream-entry .dream-tags {
+          display: none;
+        }
+
+        .dream-grid-list .dream-entry .dream-actions {
+          position: static;
+          margin-left: auto;
+        }
+
+        .dream-grid .dream-entry .dream-date {
+          display: none;
         }
         @media (max-width: 768px) {
           .dream-grid {
@@ -2271,23 +2301,30 @@ export default function SimpleDreamInterface() {
           .dream-history-header > div:first-child > div:last-child {
             width: 100% !important;
             max-width: none !important;
+            flex-direction: column !important;
+            gap: 8px !important;
           }
-          
+
           .search-container {
             width: 100%;
           }
-          
+
           .search-input {
             width: 100%;
             min-width: unset;
           }
-          
+
           .filter-container {
             width: 100%;
           }
-          
+
           .filter-select {
             width: 100%;
+          }
+
+          .dream-history-header > div:first-child > div:last-child > div:last-child {
+            width: 100% !important;
+            justify-content: center !important;
           }
           
           .dream-grid {
@@ -2685,6 +2722,9 @@ export default function SimpleDreamInterface() {
                           <span className="dream-icon"></span>
                           <span className="dream-title-text">{dream.title || 'Dream Entry'}</span>
                         </div>
+                        <div className="dream-date">
+                          {dream.date} {dream.time && `at ${dream.time}`}
+                        </div>
                         <div className="dream-meta">
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
@@ -2833,9 +2873,35 @@ export default function SimpleDreamInterface() {
           {selectedDream && (
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)'}}>
+                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
                   <button className="dream-detail-close" onClick={() => setSelectedDream(null)}>
                     ×
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedDream(null);
+                      startEditDream(selectedDream);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '15px',
+                      right: '15px',
+                      background: 'rgba(255, 255, 255, 0.3)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'white',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      fontFamily: 'Georgia, serif'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                  >
+                    ✏️ Edit
                   </button>
                   <div className="dream-detail-title">{selectedDream.title || 'Dream Entry'}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
@@ -2916,17 +2982,6 @@ export default function SimpleDreamInterface() {
                         return null;
                       }).filter(Boolean)}
                     </div>
-                  </div>
-                  <div style={{textAlign: 'center', marginTop: '20px'}}>
-                    <button 
-                      onClick={() => {
-                        setSelectedDream(null);
-                        startEditDream(selectedDream);
-                      }}
-                      className="btn-primary"
-                    >
-                      Edit Dream
-                    </button>
                   </div>
                 </div>
               </div>
