@@ -2327,8 +2327,15 @@ export default function SimpleDreamInterface() {
           }
 
           .dream-history-header > div:first-child > div:last-child > div:last-child {
-            width: 100% !important;
-            justify-content: center !important;
+            width: auto !important;
+            align-self: flex-end !important;
+            justify-content: flex-end !important;
+            padding: 2px !important;
+          }
+
+          .dream-history-header > div:first-child > div:last-child > div:last-child button {
+            padding: 4px 10px !important;
+            font-size: 12px !important;
           }
           
           .dream-grid {
@@ -2349,16 +2356,17 @@ export default function SimpleDreamInterface() {
           .journal-close-btn {
             position: fixed !important;
             bottom: 20px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
+            right: 20px !important;
+            left: auto !important;
+            transform: none !important;
             z-index: 1000 !important;
             background: rgba(255, 255, 255, 0.95) !important;
             backdrop-filter: blur(10px) !important;
             border: 1px solid rgba(0, 0, 0, 0.1) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-            padding: 12px 32px !important;
-            border-radius: 24px !important;
-            font-size: 16px !important;
+            padding: 8px 20px !important;
+            border-radius: 20px !important;
+            font-size: 14px !important;
             font-weight: 600 !important;
             color: #374151 !important;
           }
