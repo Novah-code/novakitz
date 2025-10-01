@@ -2552,8 +2552,16 @@ export default function SimpleDreamInterface() {
               height: '90vh',
               maxHeight: '90vh'
             }}>
-              <div className="dream-history-header" style={{flexShrink: 0}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', width: '100%'}}>
+              <div className="dream-history-header" style={{
+                position: 'sticky',
+                top: 0,
+                background: 'white',
+                zIndex: 10,
+                paddingBottom: '16px',
+                borderBottom: '1px solid #e5e7eb',
+                flexShrink: 0
+              }}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', width: '100%'}}>
                   <div style={{flex: '1'}}>
                     <h1 style={{fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: '0'}}>
                       Dream Journal
@@ -2566,7 +2574,7 @@ export default function SimpleDreamInterface() {
                       </div>
                     ) : null}
                   </div>
-                  
+
                   {/* Search and Filter Controls - FORCED RIGHT SIDE */}
                   <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0}}>
                     <div className="search-container">
@@ -2783,11 +2791,15 @@ export default function SimpleDreamInterface() {
                 )}
               </div>
               <div style={{
-                flexShrink: 0,
+                position: 'sticky',
+                bottom: 0,
+                background: 'white',
                 padding: '20px 0',
                 borderTop: '1px solid #e5e7eb',
-                marginTop: '20px',
-                textAlign: 'center'
+                marginTop: 'auto',
+                textAlign: 'center',
+                flexShrink: 0,
+                zIndex: 10
               }}>
                 <button
                   onClick={() => {setShowHistory(false);}}
