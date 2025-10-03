@@ -1262,7 +1262,7 @@ export default function SimpleDreamInterface() {
         }
 
         .dream-grid-list .dream-entry .dream-date {
-          font-size: 14px;
+          font-size: 12px;
           color: #6b7280;
           display: block;
         }
@@ -1280,8 +1280,19 @@ export default function SimpleDreamInterface() {
         }
 
         .dream-grid-list .dream-entry .dream-actions {
-          position: static;
-          margin-left: auto;
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          margin-left: 0;
+        }
+
+        .dream-grid-list .dream-entry .dream-image {
+          pointer-events: none;
+        }
+
+        .dream-grid-list .dream-entry .camera-overlay {
+          display: none;
         }
 
         .dream-grid .dream-entry .dream-date {
@@ -2906,7 +2917,7 @@ export default function SimpleDreamInterface() {
                     style={{
                       position: 'absolute',
                       top: '15px',
-                      right: '15px',
+                      right: '60px',
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
@@ -2921,7 +2932,7 @@ export default function SimpleDreamInterface() {
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                   >
-                    ✏️ Edit
+                    Edit
                   </button>
                   <div className="dream-detail-title">{selectedDream.title || 'Dream Entry'}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
