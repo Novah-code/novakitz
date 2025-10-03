@@ -1220,7 +1220,7 @@ export default function SimpleDreamInterface() {
           flex-direction: column;
           gap: 12px;
           width: 100%;
-          max-width: 100%;
+          max-width: 900px;
           margin: 0;
           padding: 0 20px;
         }
@@ -1279,20 +1279,30 @@ export default function SimpleDreamInterface() {
           display: none;
         }
 
-        .dream-grid-list .dream-entry .dream-actions {
-          position: absolute;
-          right: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          margin-left: 0;
+        .dream-grid-list .dream-entry {
+          position: relative;
         }
 
         .dream-grid-list .dream-entry .dream-image {
+          position: relative;
           pointer-events: none;
         }
 
+        .dream-grid-list .dream-entry .dream-actions {
+          position: absolute !important;
+          right: 16px !important;
+          top: 50% !important;
+          left: auto !important;
+          transform: translateY(-50%) !important;
+          margin: 0 !important;
+        }
+
+        .dream-grid-list .dream-entry .dots-menu-btn {
+          pointer-events: auto !important;
+        }
+
         .dream-grid-list .dream-entry .camera-overlay {
-          display: none;
+          display: none !important;
         }
 
         .dream-grid .dream-entry .dream-date {
