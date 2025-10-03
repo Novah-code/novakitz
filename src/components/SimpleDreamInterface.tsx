@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
+import LiquidEther from './LiquidEther';
 
 // Client-side only PulseDots component to avoid SSR issues
 const PulseDots = () => {
@@ -635,10 +636,13 @@ export default function SimpleDreamInterface() {
 
   return (
     <div>
+      <LiquidEther
+        colors={['#F7F3E9', '#E8F5E8', '#D4F4DD', '#C1E7C8', '#A8D5A8']}
+      />
       <style jsx global>{`
         body {
           font-family: Georgia, "Times New Roman", Times, serif;
-          background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 50%, #c3e6cb 100%);
+          background: #e8f5e8;
           color: #1f2937;
           overflow-x: hidden;
         }
