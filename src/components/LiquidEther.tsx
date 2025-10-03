@@ -1167,7 +1167,7 @@ export default function LiquidEther({
         width: '100%',
         height: '100%',
         zIndex: 0,
-        background: 'rgba(245, 245, 245, 0.3)',
+        background: 'linear-gradient(135deg, #FFFFFF 0%, #F0F9F0 50%, #E8F5E8 100%)',
         pointerEvents: 'none',
         ...style
       }}
