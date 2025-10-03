@@ -2316,8 +2316,10 @@ export default function SimpleDreamInterface() {
           .search-input {
             width: 100%;
             min-width: unset;
-            padding: 8px 12px !important;
-            font-size: 14px !important;
+            padding: 6px 10px !important;
+            font-size: 13px !important;
+            height: 36px !important;
+            line-height: 1.2 !important;
           }
 
           .filter-container {
@@ -2326,8 +2328,10 @@ export default function SimpleDreamInterface() {
 
           .filter-select {
             width: 100%;
-            padding: 8px 12px !important;
-            font-size: 14px !important;
+            padding: 6px 10px !important;
+            font-size: 13px !important;
+            height: 36px !important;
+            line-height: 1.2 !important;
           }
 
           .dream-history-header > div:first-child > div:last-child > div:last-child {
