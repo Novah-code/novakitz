@@ -637,7 +637,7 @@ export default function SimpleDreamInterface() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
       <LiquidEther
-        colors={['#F7F3E9', '#E8F5E8', '#D4F4DD', '#C1E7C8', '#A8D5A8']}
+        colors={['#FFFFFF', '#F0F9F0', '#E8F5E8', '#D4F4DD']}
         resolution={0.25}
         autoDemo={false}
       />
