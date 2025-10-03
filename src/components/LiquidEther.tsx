@@ -1156,5 +1156,21 @@ export default function LiquidEther({
     autoRampDuration
   ]);
 
-  return <div ref={mountRef} className={`liquid-ether-container ${className || ''}`} style={style} />;
+  return (
+    <div
+      ref={mountRef}
+      className={`liquid-ether-container ${className || ''}`}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 0,
+        background: 'rgba(255, 0, 0, 0.3)',
+        pointerEvents: 'none',
+        ...style
+      }}
+    />
+  );
 }
