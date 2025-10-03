@@ -638,6 +638,8 @@ export default function SimpleDreamInterface() {
     <div style={{ position: 'relative', minHeight: '100vh' }}>
       <LiquidEther
         colors={['#F7F3E9', '#E8F5E8', '#D4F4DD', '#C1E7C8', '#A8D5A8']}
+        resolution={0.25}
+        autoDemo={false}
       />
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
