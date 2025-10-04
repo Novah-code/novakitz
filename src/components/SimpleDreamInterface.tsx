@@ -634,7 +634,7 @@ export default function SimpleDreamInterface() {
   ])].sort();
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: 'linear-gradient(135deg, #FFFFFF 0%, #F0F9F0 50%, #E8F5E8 100%)' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
         body {
