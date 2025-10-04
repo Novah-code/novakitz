@@ -3205,9 +3205,9 @@ body {
 }
 
 .install-btn {
-    background: linear-gradient(135deg, #7fb069 0%, #5a8c47 100%);
-    color: white;
-    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: #6b7280;
+    border: 2px solid rgba(107, 114, 128, 0.2);
     padding: 12px 20px;
     border-radius: 25px;
     font-weight: 600;
@@ -3217,14 +3217,14 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(90, 140, 71, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
 }
 
 .install-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25), 0 3px 10px rgba(90, 140, 71, 0.4);
-    background: linear-gradient(135deg, #8fc479 0%, #6a9c57 100%);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2), 0 3px 10px rgba(0, 0, 0, 0.15);
+    border-color: rgba(107, 114, 128, 0.3);
 }
 
 .install-btn span {
