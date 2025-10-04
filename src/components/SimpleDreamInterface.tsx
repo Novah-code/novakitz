@@ -1205,15 +1205,17 @@ export default function SimpleDreamInterface() {
         
         .dream-history-container {
           max-width: 1200px;
-          margin: 0 auto;
+          margin: 0;
+          margin-left: 0;
           position: relative;
           min-height: calc(100vh - 200px);
         }
-        
+
         .dream-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 24px;
+          justify-items: start;
         }
         
         .dream-grid-list {
