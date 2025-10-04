@@ -2976,19 +2976,15 @@ export default function SimpleDreamInterface() {
                 <div className="dream-detail-body">
                   {selectedDream.image && (
                     <div className="dream-detail-image-container" style={{marginBottom: '20px'}}>
-                      <img 
-                        src={selectedDream.image} 
-                        alt="Dream visual" 
+                      <img
+                        src={selectedDream.image}
+                        alt="Dream visual"
                         style={{
                           width: '100%',
                           maxHeight: '200px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          cursor: 'pointer'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(selectedDream.image, '_blank');
+                          cursor: 'default'
                         }}
                       />
                     </div>
