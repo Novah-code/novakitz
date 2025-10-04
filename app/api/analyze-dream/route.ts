@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
     console.log('Using environment variable API key');
-    
+
     if (!apiKey) {
       console.error('API key is not available');
       return NextResponse.json(
@@ -179,7 +179,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await retryWithExponentialBackoff(async () => {
+    // Start both API calls in parallel for faster response
+    const [response, autoTags] = await Promise.all([
+      retryWithExponentialBackoff(async () => {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
         {
@@ -191,30 +193,27 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Analyze this dream using Jungian psychology principles. Provide a warm, accessible interpretation focused on personal growth and self-understanding. Do not include any greeting or introduction text. Start directly with the analysis sections:
+                text: `Analyze this dream using Jungian psychology. No greeting. Start directly:
 
 "${dreamText}"
 
-Please provide your analysis in a natural, conversational format without any markdown formatting (**bold** text). Structure your response with clear sections but use simple headings and natural paragraph breaks:
+Use natural language without markdown. Structure:
 
 DREAM SYMBOLS:
-Interpret 2-3 key symbols warmly and accessibly, connecting personal and universal meanings within a personal growth context.
+2-3 key symbols with personal growth meanings.
 
 INNER MESSAGE:
-Convey the dream's message for self-understanding and growth, translating Jungian wisdom into modern, friendly language. Consider what dream figures represent: Authentic Self, Hidden Self, Ideal Connection, Inner Wisdom, or Protective Care.
+Dream's message for self-understanding. Consider what figures represent (Authentic Self, Hidden Self, etc).
 
 TODAY'S PRACTICE:
-Choose ONE specific suggestion from these areas:
-- Personal Growth Experiment: Translate the dream into small daily actions
-- Relationship Application: Connect dream to real-life relationships  
-- Self-Care: Address emotions or needs shown in the dream
+ONE specific suggestion: daily action, relationship application, or self-care.
 
-SOMETHING TO REFLECT ON:
-One warm question that connects to daily life, guiding toward self-discovery rather than providing answers.
+REFLECTION:
+One question connecting dream to daily life.
 
-End with: "How does this interpretation feel to you? Add your own feelings and intuition to complete the meaning in your unique way."
+End: "How does this feel to you? Add your own intuition."
 
-Write as a warm, empathetic companion on the journey - like a friend who understands. Use simple, friendly language without jargon or any formatting symbols. Be hopeful yet realistic, encouraging without being overly certain. Keep it around 250-300 words total.`
+Warm, friendly tone. 200-250 words.`
               }]
             }]
           })
@@ -235,16 +234,15 @@ Write as a warm, empathetic companion on the journey - like a friend who underst
       }
 
       return res;
-    }, { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 }); // More aggressive retry for main analysis
+    }, { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 }), // More aggressive retry for main analysis
+      generateAutoTags(dreamText) // Run tag generation in parallel
+    ]);
 
     const data = await response.json();
     console.log('Gemini API success');
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
       const analysisText = data.candidates[0].content.parts[0].text;
-      
-      // Generate auto tags from dream text
-      const autoTags = await generateAutoTags(dreamText);
       
       // 성공 로깅
       logAPIMetrics({
