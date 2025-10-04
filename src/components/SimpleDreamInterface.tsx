@@ -1410,13 +1410,15 @@ export default function SimpleDreamInterface() {
         
         .dream-content {
           padding: 20px;
+          text-align: left;
         }
-        
+
         .dream-title {
           display: flex;
           align-items: center;
           gap: 8px;
           margin-bottom: 12px;
+          text-align: left;
         }
         
         .dream-icon {
@@ -1440,6 +1442,7 @@ export default function SimpleDreamInterface() {
           line-height: 1.6;
           color: #374151;
           font-family: Georgia, serif;
+          text-align: left;
         }
         
         .dream-date {
