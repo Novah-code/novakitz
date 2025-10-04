@@ -1235,10 +1235,11 @@ export default function SimpleDreamInterface() {
           flex-direction: row;
           align-items: center;
           padding: 12px 16px;
+          padding-right: 60px;
           height: 88px;
           position: relative;
-          width: 100%;
-          max-width: 900px;
+          width: auto;
+          max-width: 600px;
         }
 
         .dream-grid-list .dream-entry .dream-image {
@@ -1301,6 +1302,7 @@ export default function SimpleDreamInterface() {
           left: auto !important;
           transform: translateY(-50%) !important;
           margin: 0 !important;
+          z-index: 10 !important;
         }
 
         .dream-grid-list .dream-entry .dots-menu-btn {
