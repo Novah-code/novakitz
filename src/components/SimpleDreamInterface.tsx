@@ -1297,16 +1297,25 @@ export default function SimpleDreamInterface() {
 
         .dream-grid-list .dream-entry .dream-actions {
           position: absolute !important;
-          right: 16px !important;
+          right: 12px !important;
           top: 50% !important;
           left: auto !important;
           transform: translateY(-50%) !important;
           margin: 0 !important;
           z-index: 10 !important;
+          background: transparent !important;
         }
 
         .dream-grid-list .dream-entry .dots-menu-btn {
           pointer-events: auto !important;
+          background: rgba(255, 255, 255, 0.9) !important;
+          border-radius: 50% !important;
+          width: 32px !important;
+          height: 32px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
 
         .dream-grid-list .dream-entry .camera-overlay {
