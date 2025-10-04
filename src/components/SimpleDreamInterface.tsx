@@ -1223,9 +1223,10 @@ export default function SimpleDreamInterface() {
           flex-direction: column;
           gap: 12px;
           width: 100%;
-          max-width: 900px;
+          max-width: none;
           margin: 0;
           padding: 0 20px;
+          align-items: flex-start;
         }
 
 
@@ -1236,6 +1237,8 @@ export default function SimpleDreamInterface() {
           padding: 12px 16px;
           height: 88px;
           position: relative;
+          width: 100%;
+          max-width: 900px;
         }
 
         .dream-grid-list .dream-entry .dream-image {
