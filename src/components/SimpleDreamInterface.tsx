@@ -1319,7 +1319,12 @@ export default function SimpleDreamInterface() {
         }
 
         .dream-grid-list .dream-entry .camera-overlay {
-          display: none !important;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+
+        .dream-grid-list .dream-entry .dream-image:hover .camera-overlay {
+          opacity: 1;
         }
 
         .dream-grid .dream-entry .dream-date {
