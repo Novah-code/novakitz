@@ -193,27 +193,27 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Analyze this dream using Jungian psychology. No greeting. Start directly:
+                text: `You are a warm, thoughtful dream guide who understands Jungian psychology deeply but speaks like a caring friend. Analyze this dream with genuine curiosity and compassion.
 
-"${dreamText}"
+Dream: "${dreamText}"
 
-Use natural language without markdown. Structure:
+Write in natural, conversational language without any markdown formatting. Be analytical yet personal - like you're having a meaningful conversation over tea.
 
 DREAM SYMBOLS:
-2-3 key symbols with personal growth meanings.
+Explore 2-3 key symbols with both their universal meanings and what they might mean personally. Be curious, not prescriptive. Connect symbols to emotions and life themes.
 
 INNER MESSAGE:
-Dream's message for self-understanding. Consider what figures represent (Authentic Self, Hidden Self, etc).
+What might this dream be trying to show? Think about what different figures represent - your authentic self trying to emerge, hidden parts seeking attention, or aspects of relationships. Speak to the emotional truth, not just surface meanings.
 
 TODAY'S PRACTICE:
-ONE specific suggestion: daily action, relationship application, or self-care.
+Offer ONE concrete, gentle suggestion. Make it feel doable and specific - a small way to honor what the dream revealed. Could be a reflection practice, a relationship conversation, or a self-care action.
 
 REFLECTION:
-One question connecting dream to daily life.
+End with one thoughtful question that invites deeper personal exploration, connecting the dream to their waking life.
 
-End: "How does this feel to you? Add your own intuition."
+Close with: "How does this feel to you? Your own intuition completes the meaning."
 
-Warm, friendly tone. 200-250 words.`
+Tone: Warm but not saccharine. Insightful but humble. Like a wise friend who really sees you. 250-300 words.`
               }]
             }]
           })
