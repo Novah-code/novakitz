@@ -227,21 +227,27 @@ export default function SimpleDreamInterface() {
     console.log('Saved to localStorage and updated state');
   };
 
-  // Smoke-like turbulence animation
+  // Smoke-like turbulence animation (pauses when modal is open)
   useEffect(() => {
     let frame = 0;
     let animationId: number;
-    
+
     const animateSmoke = () => {
       try {
+        // Pause animation when Dream Journal modal or response modal is open
+        if (showHistory || showResponse || selectedDream || editingDream) {
+          animationId = requestAnimationFrame(animateSmoke);
+          return;
+        }
+
         if (turbulenceRef.current) {
           const time = frame * 0.002;
           // Create upward flowing smoke motion
           const smokeX = 0.012 + Math.sin(time * 0.8) * 0.005;
           const smokeY = 0.018 + Math.cos(time * 0.6) * 0.008 + Math.sin(time * 1.2) * 0.003;
-          
+
           turbulenceRef.current.setAttribute("baseFrequency", `${smokeX} ${smokeY}`);
-          
+
           // Animate smoke distort filter
           const smokeFilter = document.querySelector('#smoke-distort feTurbulence');
           if (smokeFilter) {
@@ -256,19 +262,19 @@ export default function SimpleDreamInterface() {
         console.error('Animation error:', error);
       }
     };
-    
+
     // Start animation after a short delay to ensure DOM is ready
     const timeoutId = setTimeout(() => {
       animateSmoke();
     }, 100);
-    
+
     return () => {
       clearTimeout(timeoutId);
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
     };
-  }, []);
+  }, [showHistory, showResponse, selectedDream, editingDream]);
 
 
 
