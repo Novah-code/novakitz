@@ -1,7 +1,7 @@
-import SimpleDreamInterface from '../src/components/SimpleDreamInterface';
+import SimpleDreamInterfaceWithAuth from '../src/components/SimpleDreamInterfaceWithAuth';
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
-  return <SimpleDreamInterface />;
+  return <SimpleDreamInterfaceWithAuth />;
 }

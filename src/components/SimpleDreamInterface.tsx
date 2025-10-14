@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
+
+interface SimpleDreamInterfaceProps {
+  user?: User | null;
+}
 
 // Client-side only PulseDots component to avoid SSR issues
 const PulseDots = () => {
@@ -77,7 +83,7 @@ interface DreamEntry {
   autoTags?: string[];
 }
 
-export default function SimpleDreamInterface() {
+export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
@@ -106,19 +112,66 @@ export default function SimpleDreamInterface() {
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load saved dreams from localStorage
+  // Load saved dreams from Supabase or localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('novaDreams');
-    if (saved) {
-      setSavedDreams(JSON.parse(saved));
-    }
+    const loadDreams = async () => {
+      if (user) {
+        // Load from Supabase if logged in
+        try {
+          const { data, error } = await supabase
+            .from('dreams')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error('Error loading from Supabase:', error);
+            // Fall back to localStorage on error
+            const saved = localStorage.getItem('novaDreams');
+            if (saved) {
+              setSavedDreams(JSON.parse(saved));
+            }
+          } else if (data) {
+            // Convert Supabase dreams to DreamEntry format
+            const dreams: DreamEntry[] = data.map(dream => ({
+              id: dream.id,
+              text: dream.content.split('\n\n---\n\n')[0] || dream.content,
+              response: dream.content.split('Analysis:\n')[1] || '',
+              title: dream.title,
+              date: dream.date,
+              time: dream.time,
+              timestamp: new Date(dream.created_at).getTime(),
+              tags: dream.tags || [],
+              autoTags: dream.tags || []
+            }));
+            setSavedDreams(dreams);
+            console.log('Loaded dreams from Supabase:', dreams.length);
+          }
+        } catch (error) {
+          console.error('Exception loading from Supabase:', error);
+          // Fall back to localStorage
+          const saved = localStorage.getItem('novaDreams');
+          if (saved) {
+            setSavedDreams(JSON.parse(saved));
+          }
+        }
+      } else {
+        // Load from localStorage if not logged in
+        const saved = localStorage.getItem('novaDreams');
+        if (saved) {
+          setSavedDreams(JSON.parse(saved));
+        }
+      }
+    };
+
+    loadDreams();
 
     // Check if user has seen voice guide
     const seenGuide = localStorage.getItem('hasSeenVoiceGuide');
     if (seenGuide) {
       setHasSeenVoiceGuide(true);
     }
-  }, []);
+  }, [user]);
 
   // Check microphone permission status
   useEffect(() => {
@@ -192,13 +245,14 @@ export default function SimpleDreamInterface() {
     saveDreamWithTags(dreamText, response, []);
   };
 
-  const saveDreamWithTags = (dreamText: string, response: string, autoTags: string[]) => {
+  const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[]) => {
     console.log('saveDreamWithTags called with:', { dreamText, response, autoTags });
-    
+
     // If this is the first dream and no image is selected, use default image
     const isFirstDream = savedDreams.length === 0;
     const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
-    
+
+    const now = new Date();
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
@@ -207,24 +261,65 @@ export default function SimpleDreamInterface() {
       image: defaultImage || undefined,
       autoTags: autoTags,
       tags: [], // Empty manual tags initially
-      date: new Date().toLocaleDateString('en-US', {
+      date: now.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       }),
-      time: new Date().toLocaleTimeString('en-US', {
+      time: now.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       }),
       timestamp: Date.now()
     };
-    
+
     console.log('Created newDream object with tags:', newDream);
-    const updatedDreams = [newDream, ...savedDreams];
-    console.log('Updated dreams array:', updatedDreams);
-    setSavedDreams(updatedDreams);
-    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-    console.log('Saved to localStorage and updated state');
+
+    // Save to Supabase if user is logged in
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from('dreams')
+          .insert([{
+            user_id: user.id,
+            title: newDream.title,
+            content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
+            mood: 'peaceful', // Default mood
+            tags: [...autoTags, ...newDream.tags],
+            date: newDream.date,
+            time: newDream.time
+          }])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error saving to Supabase:', error);
+          // Fall back to localStorage on error
+          const updatedDreams = [newDream, ...savedDreams];
+          setSavedDreams(updatedDreams);
+          localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+        } else {
+          console.log('Saved to Supabase:', data);
+          // Update local state with Supabase ID
+          const dreamWithSupabaseId = { ...newDream, id: data.id };
+          const updatedDreams = [dreamWithSupabaseId, ...savedDreams];
+          setSavedDreams(updatedDreams);
+        }
+      } catch (error) {
+        console.error('Exception saving to Supabase:', error);
+        // Fall back to localStorage
+        const updatedDreams = [newDream, ...savedDreams];
+        setSavedDreams(updatedDreams);
+        localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+      }
+    } else {
+      // Save to localStorage if not logged in
+      const updatedDreams = [newDream, ...savedDreams];
+      console.log('Updated dreams array:', updatedDreams);
+      setSavedDreams(updatedDreams);
+      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+      console.log('Saved to localStorage and updated state');
+    }
   };
 
   // Smoke-like turbulence animation (pauses when modal is open)
@@ -582,10 +677,34 @@ export default function SimpleDreamInterface() {
     setNewTag('');
   };
 
-  const deleteDream = (dreamId: string) => {
+  const deleteDream = async (dreamId: string) => {
+    // Delete from Supabase if user is logged in
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('dreams')
+          .delete()
+          .eq('id', dreamId)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error deleting from Supabase:', error);
+          // Still remove from local state
+        } else {
+          console.log('Deleted from Supabase:', dreamId);
+        }
+      } catch (error) {
+        console.error('Exception deleting from Supabase:', error);
+      }
+    } else {
+      // Delete from localStorage if not logged in
+      const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
+      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+    }
+
+    // Update local state
     const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
     setSavedDreams(updatedDreams);
-    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
     setActiveMenu(null);
   };
 
