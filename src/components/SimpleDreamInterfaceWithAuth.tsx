@@ -45,7 +45,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{
-            fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "Georgia, 'Times New Roman', serif",
             color: 'var(--matcha-dark)',
             fontSize: '1.1rem'
           }}>Loading...</p>
@@ -92,7 +92,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 2rem',
-        fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"
+        fontFamily: "Georgia, 'Times New Roman', serif"
       }}>
         <div style={{
           display: 'flex',
