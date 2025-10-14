@@ -41,12 +41,14 @@ export default function SimpleDreamInterfaceWithAuth() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f0f4f0 0%, #d4e7d4 100%)'
+        minHeight: '100vh'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍵</div>
-          <p style={{ color: '#5a7a5a' }}>Loading...</p>
+          <p style={{
+            fontFamily: 'var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif',
+            color: 'var(--matcha-dark)',
+            fontSize: '1.1rem'
+          }}>Loading...</p>
         </div>
       </div>
     );
@@ -60,16 +62,11 @@ export default function SimpleDreamInterfaceWithAuth() {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f0f4f0 0%, #d4e7d4 100%)',
         padding: '2rem'
       }}>
         <div style={{
           maxWidth: '450px',
-          width: '100%',
-          background: 'white',
-          borderRadius: '16px',
-          padding: '2rem',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+          width: '100%'
         }}>
           <Auth onAuthSuccess={() => {}} />
         </div>
@@ -94,7 +91,8 @@ export default function SimpleDreamInterfaceWithAuth() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 2rem'
+        padding: '0 2rem',
+        fontFamily: 'var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif'
       }}>
         <div style={{
           display: 'flex',
@@ -102,16 +100,15 @@ export default function SimpleDreamInterfaceWithAuth() {
           gap: '0.5rem',
           cursor: 'pointer'
         }}>
-          <span style={{ fontSize: '1.5rem' }}>🍵</span>
           <span style={{
             fontSize: '1.2rem',
             fontWeight: '600',
-            color: '#5a7a5a'
+            color: 'var(--matcha-dark)'
           }}>Novakitz</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ color: '#5a7a5a' }}>
+          <span style={{ color: 'var(--matcha-dark)' }}>
             {user.user_metadata?.full_name || user.user_metadata?.name || user.email}
           </span>
           <button
@@ -119,20 +116,21 @@ export default function SimpleDreamInterfaceWithAuth() {
             style={{
               padding: '0.5rem 1rem',
               background: 'transparent',
-              border: '1px solid #5a7a5a',
+              border: '1px solid var(--matcha-dark)',
               borderRadius: '8px',
-              color: '#5a7a5a',
+              color: 'var(--matcha-dark)',
               cursor: 'pointer',
               fontSize: '0.9rem',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              fontFamily: 'inherit'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#5a7a5a';
+              e.currentTarget.style.background = 'var(--matcha-dark)';
               e.currentTarget.style.color = 'white';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#5a7a5a';
+              e.currentTarget.style.color = 'var(--matcha-dark)';
             }}
           >
             Sign Out

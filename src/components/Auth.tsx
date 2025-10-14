@@ -39,7 +39,6 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
     <div className="auth-container">
       <div className="auth-form-container glass-strong">
         <div className="auth-header">
-          <div className="hero-teacup">🍵</div>
           <h2 className="auth-title">Welcome to Novakitz</h2>
           <p className="auth-subtitle">
             Start your dream journaling journey with Google
@@ -61,7 +60,6 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
               </>
             ) : (
               <>
-                <span className="google-icon">🔍</span>
                 Continue with Google
               </>
             )}
@@ -75,7 +73,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
         </div>
 
         <div className="auth-footer">
-          <p>🔒 Your dreams are private and secure</p>
+          <p>Your dreams are private and secure</p>
           <p className="auth-note">Sign in with Google to save and sync your dreams across devices</p>
         </div>
       </div>

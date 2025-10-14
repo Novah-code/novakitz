@@ -3245,32 +3245,36 @@ html {
     align-items: center;
     justify-content: center;
     gap: 16px;
-    padding: 24px 32px;
-    background: linear-gradient(135deg, var(--matcha-green), var(--matcha-dark));
-    color: white;
-    border: none;
+    padding: 20px 32px;
+    background: rgba(127, 176, 105, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--matcha-dark);
+    border: 2px solid rgba(127, 176, 105, 0.3);
     border-radius: 16px;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 32px rgba(127, 176, 105, 0.3);
+    box-shadow: 0 4px 24px rgba(127, 176, 105, 0.15);
     margin-bottom: 20px;
 }
 
 .google-signin-btn-large:hover:not(:disabled) {
+    background: rgba(127, 176, 105, 0.25);
+    border-color: rgba(127, 176, 105, 0.5);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(127, 176, 105, 0.4);
+    box-shadow: 0 8px 32px rgba(127, 176, 105, 0.25);
 }
 
 .google-signin-btn-large:disabled {
-    opacity: 0.8;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
 .google-signin-btn-large .google-icon {
-    font-size: 24px;
+    font-size: 22px;
 }
 
 .auth-message.info {
