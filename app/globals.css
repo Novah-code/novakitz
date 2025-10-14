@@ -1787,12 +1787,14 @@ html {
     font-weight: 700;
     color: var(--matcha-dark);
     margin-bottom: 8px;
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
 .auth-subtitle {
     font-size: 16px;
     color: var(--sage);
     line-height: 1.5;
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
 .auth-form {
@@ -1910,6 +1912,7 @@ html {
 .auth-footer p {
     font-size: 14px;
     color: var(--sage);
+    font-family: Georgia, 'Times New Roman', serif;
 }
 
 /* User Header */
@@ -3254,6 +3257,7 @@ html {
     border-radius: 16px;
     font-size: 17px;
     font-weight: 600;
+    font-family: Georgia, 'Times New Roman', serif;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 24px rgba(127, 176, 105, 0.15);
