@@ -1773,28 +1773,38 @@ html {
 
 .auth-form-container {
     width: 100%;
-    max-width: 400px;
-    padding: 48px;
+    max-width: 420px;
+    padding: 48px 40px;
+    border-radius: 24px;
+    backdrop-filter: blur(30px) saturate(180%);
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid rgba(127, 176, 105, 0.3);
+    box-shadow:
+        0 8px 32px rgba(127, 176, 105, 0.2),
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .auth-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
 }
 
 .auth-title {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 600;
     color: var(--matcha-dark);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     font-family: Georgia, 'Times New Roman', serif;
+    letter-spacing: -0.02em;
 }
 
 .auth-subtitle {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--sage);
-    line-height: 1.5;
+    line-height: 1.6;
     font-family: Georgia, 'Times New Roman', serif;
+    opacity: 0.85;
 }
 
 .auth-form {
@@ -1904,15 +1914,17 @@ html {
 
 .auth-footer {
     text-align: center;
-    margin-top: 32px;
+    margin-top: 36px;
     padding-top: 24px;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid rgba(127, 176, 105, 0.15);
 }
 
 .auth-footer p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--sage);
     font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.6;
+    opacity: 0.8;
 }
 
 /* User Header */
@@ -3247,28 +3259,34 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    padding: 20px 32px;
-    background: rgba(127, 176, 105, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    gap: 12px;
+    padding: 18px 32px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     color: var(--matcha-dark);
-    border: 2px solid rgba(127, 176, 105, 0.3);
+    border: 2px solid rgba(127, 176, 105, 0.25);
     border-radius: 16px;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
     font-family: Georgia, 'Times New Roman', serif;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 24px rgba(127, 176, 105, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 4px 16px rgba(127, 176, 105, 0.12),
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
     margin-bottom: 20px;
 }
 
 .google-signin-btn-large:hover:not(:disabled) {
-    background: rgba(127, 176, 105, 0.25);
-    border-color: rgba(127, 176, 105, 0.5);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(127, 176, 105, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(127, 176, 105, 0.25);
+    box-shadow:
+        0 8px 24px rgba(127, 176, 105, 0.18),
+        0 2px 6px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 .google-signin-btn-large:disabled {
