@@ -285,7 +285,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
             title: newDream.title,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
             mood: 'peaceful', // Default mood
-            tags: [...autoTags, ...newDream.tags],
+            tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time
           }])
