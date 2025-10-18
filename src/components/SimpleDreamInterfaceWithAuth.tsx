@@ -270,58 +270,57 @@ export default function SimpleDreamInterfaceWithAuth() {
               <div style={{
                 padding: '1rem 2rem',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem'
+                alignItems: 'center',
+                justifyContent: 'space-between'
               }}>
                 <div style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--sage)',
-                  fontWeight: '500',
-                  marginBottom: '0.25rem'
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  fontWeight: '500'
                 }}>
                   Language
                 </div>
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem'
-                }}>
-                  <button
-                    onClick={() => setLanguage('en')}
-                    style={{
-                      flex: 1,
-                      padding: '0.5rem 1rem',
-                      background: language === 'en' ? 'rgba(127, 176, 105, 0.2)' : 'rgba(127, 176, 105, 0.05)',
-                      border: language === 'en' ? '2px solid var(--matcha-green)' : '2px solid rgba(127, 176, 105, 0.2)',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: 'var(--matcha-dark)',
-                      fontWeight: language === 'en' ? '600' : '400',
-                      transition: 'all 0.2s',
-                      fontFamily: 'inherit'
-                    }}
-                  >
-                    🇺🇸 English
-                  </button>
-                  <button
-                    onClick={() => setLanguage('ko')}
-                    style={{
-                      flex: 1,
-                      padding: '0.5rem 1rem',
-                      background: language === 'ko' ? 'rgba(127, 176, 105, 0.2)' : 'rgba(127, 176, 105, 0.05)',
-                      border: language === 'ko' ? '2px solid var(--matcha-green)' : '2px solid rgba(127, 176, 105, 0.2)',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: 'var(--matcha-dark)',
-                      fontWeight: language === 'ko' ? '600' : '400',
-                      transition: 'all 0.2s',
-                      fontFamily: 'inherit'
-                    }}
-                  >
-                    🇰🇷 한국어
-                  </button>
-                </div>
+                <button
+                  onClick={() => setLanguage(language === 'en' ? 'ko' : 'en')}
+                  style={{
+                    position: 'relative',
+                    width: '80px',
+                    height: '36px',
+                    background: language === 'en' ? 'var(--matcha-green)' : '#9ca3af',
+                    borderRadius: '18px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  {/* Toggle circle */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: language === 'en' ? '44px' : '4px',
+                    width: '28px',
+                    height: '28px',
+                    background: 'white',
+                    borderRadius: '50%',
+                    transition: 'left 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                  }}></div>
+                  {/* Text */}
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: language === 'en' ? '10px' : '48px',
+                    transform: 'translateY(-50%)',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'white',
+                    transition: 'all 0.3s ease',
+                    opacity: 0.9
+                  }}>
+                    {language === 'en' ? 'EN' : 'KO'}
+                  </span>
+                </button>
               </div>
 
               <div style={{
