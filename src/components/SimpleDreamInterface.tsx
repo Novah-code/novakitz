@@ -759,11 +759,11 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
   ])].sort();
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8', paddingTop: '60px' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
         body {
-          font-family: Georgia, "Times New Roman", Times, serif;
+          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
           background: #e8f5e8;
           color: #1f2937;
           overflow-x: hidden;

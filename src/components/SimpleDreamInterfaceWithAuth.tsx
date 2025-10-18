@@ -79,83 +79,53 @@ export default function SimpleDreamInterfaceWithAuth() {
   // Show main app when logged in
   return (
     <>
-      {/* Top Navigation Bar */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '60px',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 2rem',
-        fontFamily: "Georgia, 'Times New Roman', serif"
-      }}>
-        {/* Left: Hamburger Menu */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              transition: 'all 0.3s'
-            }}
-            aria-label="Menu"
-          >
-            <div style={{
-              width: '24px',
-              height: '2px',
-              background: 'var(--matcha-dark)',
-              borderRadius: '2px',
-              transition: 'all 0.3s',
-              transform: menuOpen ? 'rotate(45deg) translateY(6px)' : 'none'
-            }}></div>
-            <div style={{
-              width: '24px',
-              height: '2px',
-              background: 'var(--matcha-dark)',
-              borderRadius: '2px',
-              transition: 'all 0.3s',
-              opacity: menuOpen ? 0 : 1
-            }}></div>
-            <div style={{
-              width: '24px',
-              height: '2px',
-              background: 'var(--matcha-dark)',
-              borderRadius: '2px',
-              transition: 'all 0.3s',
-              transform: menuOpen ? 'rotate(-45deg) translateY(-6px)' : 'none'
-            }}></div>
-          </button>
-
-          <span style={{
-            fontSize: '1.2rem',
-            fontWeight: '600',
-            color: 'var(--matcha-dark)'
-          }}>Novakitz</span>
-        </div>
-
-        {/* Right: User info */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{
-            color: 'var(--matcha-dark)',
-            fontSize: '0.9rem',
-            display: window.innerWidth > 640 ? 'block' : 'none'
-          }}>
-            {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
-          </span>
-        </div>
-      </div>
+      {/* Hamburger Menu Button (Top Right) */}
+      <button
+        onClick={() => setMenuOpen(!menuOpen)}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          border: 'none',
+          borderRadius: '12px',
+          cursor: 'pointer',
+          padding: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          transition: 'all 0.3s',
+          zIndex: 10000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}
+        aria-label="Menu"
+      >
+        <div style={{
+          width: '24px',
+          height: '2.5px',
+          background: 'var(--matcha-dark)',
+          borderRadius: '2px',
+          transition: 'all 0.3s',
+          transform: menuOpen ? 'rotate(45deg) translateY(8px)' : 'none'
+        }}></div>
+        <div style={{
+          width: '24px',
+          height: '2.5px',
+          background: 'var(--matcha-dark)',
+          borderRadius: '2px',
+          transition: 'all 0.3s',
+          opacity: menuOpen ? 0 : 1
+        }}></div>
+        <div style={{
+          width: '24px',
+          height: '2.5px',
+          background: 'var(--matcha-dark)',
+          borderRadius: '2px',
+          transition: 'all 0.3s',
+          transform: menuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none'
+        }}></div>
+      </button>
 
       {/* Hamburger Menu Sidebar */}
       {menuOpen && (
@@ -179,21 +149,21 @@ export default function SimpleDreamInterfaceWithAuth() {
           <div style={{
             position: 'fixed',
             top: 0,
-            left: 0,
+            right: 0,
             width: '280px',
             height: '100vh',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '2px 0 20px rgba(0,0,0,0.1)',
+            boxShadow: '-2px 0 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
             padding: '80px 0 20px 0',
-            fontFamily: "Georgia, 'Times New Roman', serif",
-            animation: 'slideIn 0.3s ease-out'
+            fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
+            animation: 'slideInRight 0.3s ease-out'
           }}>
             <style>{`
-              @keyframes slideIn {
+              @keyframes slideInRight {
                 from {
-                  transform: translateX(-100%);
+                  transform: translateX(100%);
                 }
                 to {
                   transform: translateX(0);
@@ -226,7 +196,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                   e.currentTarget.style.background = 'none';
                 }}
               >
-                <span style={{ fontSize: '1.2rem' }}>🏠</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
                 <span>Dream Journal</span>
               </button>
 
@@ -256,7 +229,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                   e.currentTarget.style.background = 'none';
                 }}
               >
-                <span style={{ fontSize: '1.2rem' }}>📖</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
                 <span>History</span>
               </button>
 
@@ -338,7 +314,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                 alignItems: 'center',
                 gap: '0.75rem'
               }}>
-                <span style={{ fontSize: '1.2rem' }}>👤</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
                 <div>
                   <div style={{ fontWeight: '500', color: 'var(--matcha-dark)' }}>
                     {user.user_metadata?.full_name || user.user_metadata?.name || 'User'}
@@ -372,7 +351,11 @@ export default function SimpleDreamInterfaceWithAuth() {
                   e.currentTarget.style.background = 'none';
                 }}
               >
-                <span style={{ fontSize: '1.2rem' }}>🚪</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
                 <span>Sign Out</span>
               </button>
             </div>
@@ -380,10 +363,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         </>
       )}
 
-      {/* Add padding to account for fixed nav */}
-      <div style={{ paddingTop: '60px' }}>
-        <SimpleDreamInterface user={user} />
-      </div>
+      <SimpleDreamInterface user={user} />
     </>
   );
 }
