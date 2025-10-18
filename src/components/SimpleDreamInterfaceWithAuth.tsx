@@ -87,7 +87,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        zIndex: 1000,
+        zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

@@ -556,14 +556,14 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
     
     // Basic length check
     if (!trimmedText || trimmedText.length < 10) {
-      alert('Please describe your dream in more detail. Minimum 10 characters required. 💭');
+      alert('Please describe your dream in more detail. Minimum 10 characters required.');
       return;
     }
-    
+
     // Check for meaningful content (not just repeated characters)
     const uniqueChars = new Set(trimmedText.replace(/\s/g, '').toLowerCase()).size;
     if (uniqueChars < 3) {
-      alert('Please write a meaningful dream description with different words. 🌙');
+      alert('Please write a meaningful dream description with different words.');
       return;
     }
     
@@ -2961,7 +2961,6 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                     fontSize: '18px',
                     fontFamily: 'Georgia, "Times New Roman", Times, serif'
                   }}>
-                    <div style={{fontSize: '28px', marginBottom: '12px'}}>🌙</div>
                     <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '20px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
@@ -3129,7 +3128,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">🔮 Dream Symbols</h4>
+                              <h4 className="section-title">Dream Symbols</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3138,7 +3137,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">💝 Inner Message</h4>
+                              <h4 className="section-title">Inner Message</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3147,7 +3146,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">🌱 Today's Practice</h4>
+                              <h4 className="section-title">Today's Practice</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3156,7 +3155,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">💭 Something to Reflect On</h4>
+                              <h4 className="section-title">Something to Reflect On</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3248,7 +3247,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">🔮 Dream Symbols</h3>
+                              <h3 className="section-title">Dream Symbols</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3257,7 +3256,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">💝 Inner Message</h3>
+                              <h3 className="section-title">Inner Message</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3266,7 +3265,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">🌱 Today's Practice</h3>
+                              <h3 className="section-title">Today's Practice</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3275,7 +3274,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">💭 Something to Reflect On</h3>
+                              <h3 className="section-title">Something to Reflect On</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
