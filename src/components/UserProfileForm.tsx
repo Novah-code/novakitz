@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { supabase, UserProfile, UserProfileUpdate } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 
+interface LocationData {
+  ip: string;
+  country_code: string;
+  country_name: string;
+  city: string;
+  timezone: string;
+  isMock?: boolean;
+}
+
 interface UserProfileFormProps {
   user: User;
   profile?: UserProfile;
@@ -40,6 +49,30 @@ const DREAM_GOAL_OPTIONS = [
   'Personal healing'
 ];
 
+// Common countries list
+const COUNTRIES = [
+  { code: 'US', name: 'United States' },
+  { code: 'KR', name: 'South Korea (대한민국)' },
+  { code: 'JP', name: 'Japan (日本)' },
+  { code: 'CN', name: 'China (中国)' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'IN', name: 'India' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'VN', name: 'Vietnam' },
+  { code: 'PH', name: 'Philippines' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'MY', name: 'Malaysia' }
+];
+
 export default function UserProfileForm({ user, profile, onComplete, onCancel }: UserProfileFormProps) {
   const [formData, setFormData] = useState<UserProfileUpdate>({
     user_id: user.id,
@@ -57,6 +90,15 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
     }
   });
 
+  // Location and language states
+  const [countryCode, setCountryCode] = useState(profile?.country_code || 'US');
+  const [countryName, setCountryName] = useState(profile?.country_name || 'United States');
+  const [city, setCity] = useState(profile?.city || '');
+  const [timezone, setTimezone] = useState(profile?.timezone || '');
+  const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || 'en');
+  const [signupIp, setSignupIp] = useState(profile?.signup_ip || '');
+  const [detectingLocation, setDetectingLocation] = useState(!profile);
+
   const [selectedDreamGoals, setSelectedDreamGoals] = useState<string[]>(
     profile?.dream_goals ? profile.dream_goals.split(', ') : []
   );
@@ -68,10 +110,39 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
   const [waketimeHour, setWaketimeHour] = useState('');
   const [waketimeMinute, setWaketimeMinute] = useState('');
   const [waketimeAmPm, setWaketimeAmPm] = useState('AM');
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Fetch location on mount (only for new profiles)
+  useEffect(() => {
+    if (!profile && detectingLocation) {
+      const fetchLocation = async () => {
+        try {
+          const response = await fetch('/api/get-location');
+          const data: LocationData = await response.json();
+
+          setCountryCode(data.country_code);
+          setCountryName(data.country_name);
+          setCity(data.city);
+          setTimezone(data.timezone);
+          setSignupIp(data.ip);
+
+          // Auto-detect language based on country
+          if (data.country_code === 'KR') {
+            setPreferredLanguage('ko');
+          }
+        } catch (error) {
+          console.error('Error fetching location:', error);
+        } finally {
+          setDetectingLocation(false);
+        }
+      };
+
+      fetchLocation();
+    }
+  }, [profile, detectingLocation]);
 
   const handleInterestToggle = (interest: string) => {
     const currentInterests = formData.interests || [];
@@ -287,6 +358,15 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
         bio: formData.bio,
         dream_goals: formData.dream_goals,
         sleep_schedule: formData.sleep_schedule,
+        // Add location and language data
+        country_code: countryCode,
+        country_name: countryName,
+        city: city || null,
+        timezone: timezone,
+        preferred_language: preferredLanguage,
+        signup_ip: signupIp || null,
+        last_login_ip: signupIp || null,
+        last_login_at: new Date().toISOString(),
         profile_completed: true
       };
 
@@ -410,6 +490,58 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
                   ))}
                 </select>
               </div>
+
+              {/* Location & Language */}
+              {detectingLocation && (
+                <div style={{ textAlign: 'center', padding: '10px', color: 'var(--matcha-green)', fontSize: '14px' }}>
+                  Detecting your location...
+                </div>
+              )}
+
+              {!detectingLocation && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="country">Country</label>
+                    <select
+                      id="country"
+                      value={countryCode}
+                      onChange={(e) => {
+                        const selected = COUNTRIES.find(c => c.code === e.target.value);
+                        setCountryCode(e.target.value);
+                        setCountryName(selected?.name || e.target.value);
+                      }}
+                    >
+                      {COUNTRIES.map(country => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Preferred Language</label>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('en')}
+                        className={`interest-tag ${preferredLanguage === 'en' ? 'selected' : ''}`}
+                        style={{ flex: 1 }}
+                      >
+                        English
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('ko')}
+                        className={`interest-tag ${preferredLanguage === 'ko' ? 'selected' : ''}`}
+                        style={{ flex: 1 }}
+                      >
+                        한국어
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {error && currentStep === 1 && (
@@ -572,13 +704,13 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
             </div>
 
             <div className="form-group">
-              <label htmlFor="bio">About Yourself (Optional)</label>
+              <label htmlFor="bio">Anything else you'd like to share? (Optional)</label>
               <textarea
                 id="bio"
                 rows={2}
                 value={formData.bio || ''}
                 onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                placeholder="Tell us a bit about yourself or anything else you'd like us to know"
+                placeholder="Any additional notes or thoughts..."
               />
             </div>
           </div>

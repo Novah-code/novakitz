@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import SimpleDreamInterface from './SimpleDreamInterface';
-import UserOnboarding from './UserOnboarding';
+import UserProfileForm from './UserProfileForm';
 
 // Translations
 const translations = {
@@ -148,10 +148,10 @@ export default function SimpleDreamInterfaceWithAuth() {
     );
   }
 
-  // Show onboarding if user doesn't have a profile
+  // Show profile setup if user doesn't have a profile
   if (user && hasProfile === false) {
     return (
-      <UserOnboarding
+      <UserProfileForm
         user={user}
         onComplete={() => {
           setHasProfile(true);

@@ -54,15 +54,37 @@ CREATE INDEX dreams_tags_idx ON public.dreams USING GIN(tags);
 CREATE TABLE public.user_profiles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+
+    -- Basic Info
+    full_name TEXT,
     display_name TEXT,
+    birth_date DATE,
+    age INTEGER,
+
+    -- Location & Language
     country_code TEXT, -- ISO 3166-1 alpha-2 (e.g., 'US', 'KR', 'JP')
     country_name TEXT, -- Full country name (e.g., 'United States', 'South Korea')
     city TEXT,
     timezone TEXT, -- IANA timezone (e.g., 'America/New_York', 'Asia/Seoul')
     preferred_language TEXT DEFAULT 'en', -- 'en' or 'ko'
+
+    -- Professional & Personal
+    occupation TEXT,
+    interests TEXT[], -- Array of interests
+    bio TEXT,
+
+    -- Dream Preferences
+    dream_goals TEXT, -- Comma-separated goals
+    sleep_schedule JSONB, -- {bedtime, wake_time, sleep_quality}
+
+    -- Technical Data
     signup_ip TEXT, -- IP address used during signup
     last_login_ip TEXT,
     last_login_at TIMESTAMP WITH TIME ZONE,
+
+    -- Completion Status
+    profile_completed BOOLEAN DEFAULT false,
+
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
