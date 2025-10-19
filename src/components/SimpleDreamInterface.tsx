@@ -7,6 +7,7 @@ import APIMonitoringDashboard from './APIMonitoringDashboard';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
+  language?: 'en' | 'ko';
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -83,7 +84,64 @@ interface DreamEntry {
   autoTags?: string[];
 }
 
-export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps) {
+// Translations
+const translations = {
+  en: {
+    dreamEntry: 'Dream Entry',
+    myDream: 'My Dream',
+    titlePlaceholder: 'Give your dream a title...',
+    listeningVoice: 'Listening for your voice...',
+    voiceInProgress: 'Voice recognition in progress...',
+    dreamPlaceholder: " What's brewing in your dreams? (Please write at least 10 characters)",
+    charactersReady: 'Ready',
+    brewing: 'Brewing...',
+    brew: 'Brew',
+    dreamJournal: 'Dream Journal',
+    showing: 'Showing',
+    of: 'of',
+    dreams: 'dreams',
+    matching: 'matching',
+    taggedWith: 'tagged with',
+    searchPlaceholder: 'Search dreams...',
+    card: 'Card',
+    list: 'List',
+    todaysPractice: "Today's Practice",
+    cancel: 'Cancel',
+    save: 'Save',
+    dreamTitle: 'Dream title...',
+    describeDream: 'Describe your dream...',
+    typeToAddTags: 'Type to add new tags...'
+  },
+  ko: {
+    dreamEntry: '꿈 기록',
+    myDream: '나의 꿈',
+    titlePlaceholder: '꿈에 제목을 붙여보세요...',
+    listeningVoice: '음성을 듣고 있습니다...',
+    voiceInProgress: '음성 인식 진행 중...',
+    dreamPlaceholder: '어떤 꿈을 꾸셨나요? (최소 10자 이상 작성해주세요)',
+    charactersReady: '준비됨',
+    brewing: '분석 중...',
+    brew: '분석하기',
+    dreamJournal: '꿈 일기',
+    showing: '표시 중',
+    of: '/',
+    dreams: '개의 꿈',
+    matching: '검색:',
+    taggedWith: '태그:',
+    searchPlaceholder: '꿈 검색...',
+    card: '카드',
+    list: '목록',
+    todaysPractice: '오늘의 실천',
+    cancel: '취소',
+    save: '저장',
+    dreamTitle: '꿈 제목...',
+    describeDream: '꿈을 설명해주세요...',
+    typeToAddTags: '새 태그 추가...'
+  }
+};
+
+export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDreamInterfaceProps) {
+  const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
   const [showResponse, setShowResponse] = useState(false);
@@ -194,7 +252,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'en-US';
+        recognition.lang = language === 'ko' ? 'ko-KR' : 'en-US';
         
         recognition.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
@@ -214,7 +272,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
         recognitionRef.current = recognition;
       }
     }
-  }, []);
+  }, [language]);
 
   // Preload matcha images
   useEffect(() => {
@@ -257,7 +315,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
       id: Date.now().toString(),
       text: dreamText,
       response: response,
-      title: dreamTitle || 'Dream Entry',
+      title: dreamTitle || t.dreamEntry,
       image: defaultImage || undefined,
       autoTags: autoTags,
       tags: [], // Empty manual tags initially
@@ -470,14 +528,15 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
     const startTime = Date.now();
     
     try {
-      const response = await retryApiCall(() => 
+      const response = await retryApiCall(() =>
         fetch('/api/analyze-dream', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            dreamText: dreamText
+            dreamText: dreamText,
+            language: language
           })
         }),
         3, // 3 retries
@@ -629,7 +688,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
 
   const startEditDream = (dream: DreamEntry) => {
     setEditingDream(dream);
-    setEditTitle(dream.title || '');
+    setEditTitle(dream.title || t.dreamEntry);
     setEditText(dream.text);
     setEditImage(dream.image || '');
     setEditTags(dream.tags || []);
@@ -645,7 +704,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
       dream.id === editingDream.id 
         ? { 
             ...dream, 
-            title: editTitle || 'Dream Entry', 
+            title: editTitle || t.dreamEntry, 
             text: editText, 
             image: editImage || undefined,
             tags: editTags,
@@ -709,10 +768,10 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
   };
 
   const shareDream = (dream: DreamEntry) => {
-    const shareText = `${dream.title || 'My Dream'}\n\n${dream.text}\n\nShared from novakitz`;
+    const shareText = `${dream.title || t.myDream}\n\n${dream.text}\n\nShared from novakitz`;
     if (navigator.share) {
       navigator.share({
-        title: dream.title || 'My Dream',
+        title: dream.title || t.myDream,
         text: shareText
       });
     } else {
@@ -2674,7 +2733,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                       className="dream-title-input"
                       value={dreamTitle}
                       onChange={(e) => setDreamTitle(e.target.value)}
-                      placeholder="Give your dream a title..."
+                      placeholder={t.titlePlaceholder}
                     />
                   )}
                   {isRecording && (
@@ -2694,7 +2753,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                         animation: 'pulse 1s infinite'
                       }}></div>
                       <span style={{color: '#7FB069', fontWeight: '500', fontFamily: 'Georgia, "Times New Roman", Times, serif', fontSize: '14px'}}>
-                        Listening for your voice...
+                        {t.listeningVoice}
                       </span>
                     </div>
                   )}
@@ -2702,13 +2761,13 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                     className="dream-input"
                     value={dreamText}
                     onChange={(e) => setDreamText(e.target.value)}
-                    placeholder={isRecording ? "Voice recognition in progress..." : " What's brewing in your dreams? (Please write at least 10 characters)"}
+                    placeholder={isRecording ? t.voiceInProgress : t.dreamPlaceholder}
                     rows={4}
                     autoFocus={!isRecording}
                     disabled={isRecording}
                   />
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
-                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? 'Ready' : ''}
+                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? t.charactersReady : ''}
                   </div>
                 </div>
                 <div className="modal-actions">
@@ -2717,7 +2776,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                     disabled={!dreamText.trim() || dreamText.trim().length < 10 || isLoading}
                     className="btn-primary"
                   >
-                    {isLoading ? 'Brewing...' : 'Brew'}
+                    {isLoading ? t.brewing : t.brew}
                   </button>
                 </div>
               </div>
@@ -2744,13 +2803,13 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', width: '100%'}}>
                   <div style={{flex: '1'}}>
                     <h1 style={{fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: '0'}}>
-                      Dream Journal
+                      {t.dreamJournal}
                     </h1>
                     {searchTerm || selectedTag ? (
                       <div style={{marginTop: '8px', fontSize: '14px', color: '#6b7280'}}>
-                        Showing {filteredDreams.length} of {savedDreams.length} dreams
-                        {searchTerm && ` matching "${searchTerm}"`}
-                        {selectedTag && ` tagged with "#${selectedTag}"`}
+                        {t.showing} {filteredDreams.length} {t.of} {savedDreams.length} {t.dreams}
+                        {searchTerm && ` ${t.matching} "${searchTerm}"`}
+                        {selectedTag && ` ${t.taggedWith} "#${selectedTag}"`}
                       </div>
                     ) : null}
                   </div>
@@ -2760,7 +2819,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                     <div className="search-container">
                       <input
                         type="text"
-                        placeholder="Search dreams..."
+                        placeholder={t.searchPlaceholder}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
@@ -2779,8 +2838,8 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                       </select>
                     </div>
                     <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px'}}>
-                      <button onClick={() => setViewMode('card')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Card</button>
-                      <button onClick={() => setViewMode('list')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#ffffff' : 'transparent', color: viewMode === 'list' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'list' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>List</button>
+                      <button onClick={() => setViewMode('card')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
+                      <button onClick={() => setViewMode('list')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#ffffff' : 'transparent', color: viewMode === 'list' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'list' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.list}</button>
                     </div>
                   </div>
                 </div>
@@ -2909,7 +2968,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                       <div className="dream-content">
                         <div className="dream-title">
                           <span className="dream-icon"></span>
-                          <span className="dream-title-text">{dream.title || 'Dream Entry'}</span>
+                          <span className="dream-title-text">{dream.title || t.dreamEntry}</span>
                         </div>
                         <div className="dream-date">
                           {dream.date} {dream.time && `at ${dream.time}`}
@@ -2998,13 +3057,13 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                     className="edit-input"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Dream title..."
+                    placeholder={t.dreamTitle}
                   />
                   <textarea
                     className="edit-input edit-textarea"
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    placeholder="Describe your dream..."
+                    placeholder={t.describeDream}
                   />
                   
                   {/* Simplified Tags Section */}
@@ -3043,7 +3102,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && addNewTag()}
-                      placeholder="Type to add new tags..."
+                      placeholder={t.typeToAddTags}
                       className="edit-input"
                       style={{marginBottom: '0'}}
                     />
@@ -3051,10 +3110,10 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                 </div>
                 <div className="edit-actions">
                   <button onClick={cancelEditDream} className="btn-cancel">
-                    Cancel
+                    {t.cancel}
                   </button>
                   <button onClick={saveEditDream} className="btn-save">
-                    Save Changes
+                    {t.save}
                   </button>
                 </div>
               </div>
@@ -3094,7 +3153,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                   >
                     Edit
                   </button>
-                  <div className="dream-detail-title">{selectedDream.title || 'Dream Entry'}</div>
+                  <div className="dream-detail-title">{selectedDream.title || t.dreamEntry}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
                 </div>
                 <div className="dream-detail-body">
@@ -3146,7 +3205,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">Today's Practice</h4>
+                              <h4 className="section-title">{t.todaysPractice}</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -3265,7 +3324,7 @@ export default function SimpleDreamInterface({ user }: SimpleDreamInterfaceProps
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">Today's Practice</h3>
+                              <h3 className="section-title">{t.todaysPractice}</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );

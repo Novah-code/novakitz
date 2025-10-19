@@ -81,10 +81,22 @@ async function retryWithExponentialBackoff<T>(
   throw lastError!;
 }
 
-async function generateAutoTags(dreamText: string): Promise<string[]> {
+async function generateAutoTags(dreamText: string, language: 'en' | 'ko' = 'en'): Promise<string[]> {
   try {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
-    
+
+    const tagPrompt = language === 'ko'
+      ? `이 꿈에서 3-5개의 핵심 태그를 추출하세요. 쉼표로 구분된 태그만 반환하고 다른 텍스트는 포함하지 마세요. 초점: 감정, 상징, 사람, 장소, 행동, 주제.
+
+꿈: "${dreamText}"
+
+예시 태그: 비행, 물, 가족, 불안, 어린시절, 변화, 동물 등`
+      : `Extract 3-5 key tags from this dream for categorization. Return only the tags separated by commas, no other text. Focus on: emotions, symbols, people, places, actions, themes.
+
+Dream: "${dreamText}"
+
+Example tags: flying, water, family, anxiety, childhood, transformation, animals, etc.`;
+
     const response = await retryWithExponentialBackoff(async () => {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
@@ -97,11 +109,7 @@ async function generateAutoTags(dreamText: string): Promise<string[]> {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Extract 3-5 key tags from this dream for categorization. Return only the tags separated by commas, no other text. Focus on: emotions, symbols, people, places, actions, themes.
-
-Dream: "${dreamText}"
-
-Example tags: flying, water, family, anxiety, childhood, transformation, animals, etc.`
+                text: tagPrompt
               }]
             }]
           })
@@ -136,10 +144,11 @@ export async function POST(request: NextRequest) {
   console.log('=== API Route Called ===');
   const startTime = Date.now();
   const endpoint = '/api/analyze-dream';
-  
+
   try {
-    const { dreamText } = await request.json();
+    const { dreamText, language = 'en' } = await request.json();
     console.log('Dream text received:', dreamText);
+    console.log('Language:', language);
 
     const trimmedText = dreamText.trim();
     
@@ -179,21 +188,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Start both API calls in parallel for faster response
-    const [response, autoTags] = await Promise.all([
-      retryWithExponentialBackoff(async () => {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey!,
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Analyze this dream with genuine curiosity and compassion.
+    // Create language-specific prompt
+    const analysisPrompt = language === 'ko'
+      ? `당신은 융(Jung) 심리학에 기반을 둔 따뜻하고 사려 깊은 꿈 안내자입니다. 깊은 개념을 일상적인 언어로 풀어서 전달하세요. 진정한 호기심과 공감으로 이 꿈을 분석하세요.
+
+꿈: "${dreamText}"
+
+마크다운 형식 없이 자연스럽고 대화하는 듯한 언어로 작성하세요. 분석적이면서도 개인적인 느낌으로 - 마치 차를 마시며 의미 있는 대화를 나누는 것처럼.
+
+융의 개념을 접근하기 쉬운 용어로 사용하세요:
+- 그림자 = 우리가 숨기거나 인정하지 않는 자신의 일부
+- 아니마/아니무스 = 내면의 여성성/남성성, 또는 타인과 관계 맺는 방식
+- 자기(Self) = 드러나려는 우리의 전체적이고 진정한 본성
+- 개성화 = 본래 되어야 할 사람이 되어가는 과정
+- 집단 무의식 = 보편적인 인간의 주제와 상징
+
+꿈의 상징:
+2-3개의 핵심 상징을 탐구하되, 보편적 의미(문화를 넘어 나타나는 원형)와 개인적 의미를 모두 살펴보세요. 어떤 감정이나 삶의 상황과 연결될 수 있을까요? 상징이 숨겨진 자신의 일부, 관계, 또는 드러나려는 진정한 자아를 나타내는지 고려하세요.
+
+내면의 메시지:
+무의식이 당신에게 보여주려는 것은 무엇일까요? 통합의 주제를 찾아보세요 - 균형을 찾고 있는 갈등하는 부분들이 있나요? 인정받고 싶어 하는 숨겨진 감정이 있나요? 성장을 향해 당신을 부드럽게 밀어주는 진정한 자아가 있나요? 표면적 의미를 넘어 정서적, 심리적 진실을 말하세요.
+
+오늘의 실천:
+꿈의 통찰을 일상에 통합할 수 있는 구체적이고 부드러운 제안 한 가지를 제시하세요. 실천 가능하고 구체적으로 만드세요 - 무의식에서 드러난 것을 존중하는 작은 방법. 성찰 연습, 관계에서의 대화, 또는 자기 돌봄 행동일 수 있습니다.
+
+성찰:
+무의식의 메시지를 의식적 삶과 연결하는 데 도움이 되는, 더 깊은 개인적 탐구를 초대하는 사려 깊은 질문 하나로 마무리하세요.
+
+마지막으로: "이것이 당신에게 어떻게 느껴지나요? 당신 자신의 직관이 의미를 완성합니다."
+
+어조: 따뜻하되 과하게 달콤하지 않게. 심리학적으로 통찰력 있되 겸손하게. 당신을 진정으로 이해하는 지혜로운 친구처럼. 250-300 단어.`
+      : `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Analyze this dream with genuine curiosity and compassion.
 
 Dream: "${dreamText}"
 
@@ -220,7 +245,23 @@ End with one thoughtful question that invites deeper personal exploration, helpi
 
 Close with: "How does this feel to you? Your own intuition completes the meaning."
 
-Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wise friend who really sees you. 250-300 words.`
+Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wise friend who really sees you. 250-300 words.`;
+
+    // Start both API calls in parallel for faster response
+    const [response, autoTags] = await Promise.all([
+      retryWithExponentialBackoff(async () => {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey!,
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: analysisPrompt
               }]
             }]
           })
@@ -242,7 +283,7 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
 
       return res;
     }, { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 }), // More aggressive retry for main analysis
-      generateAutoTags(dreamText) // Run tag generation in parallel
+      generateAutoTags(dreamText, language) // Run tag generation in parallel with language support
     ]);
 
     const data = await response.json();

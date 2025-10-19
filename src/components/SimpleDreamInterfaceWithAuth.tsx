@@ -5,19 +5,80 @@ import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import SimpleDreamInterface from './SimpleDreamInterface';
+import UserOnboarding from './UserOnboarding';
+
+// Translations
+const translations = {
+  en: {
+    loading: 'Loading...',
+    dreamJournal: 'Dream Journal',
+    history: 'History',
+    language: 'Language',
+    signOut: 'Sign Out'
+  },
+  ko: {
+    loading: '로딩 중...',
+    dreamJournal: '꿈 일기',
+    history: '기록',
+    language: '언어',
+    signOut: '로그아웃'
+  }
+};
 
 export default function SimpleDreamInterfaceWithAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+  const [checkingProfile, setCheckingProfile] = useState(true);
+
+  const t = translations[language];
+
+  // Check if user has a profile
+  const checkUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error checking profile:', error);
+        return false;
+      }
+
+      if (data) {
+        // Load user's preferred language
+        if (data.preferred_language) {
+          setLanguage(data.preferred_language as 'en' | 'ko');
+        }
+      }
+
+      return !!data;
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     // Get initial session
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       setLoading(false);
+
+      if (currentUser) {
+        // Check if user has profile
+        const profileExists = await checkUserProfile(currentUser.id);
+        setHasProfile(profileExists);
+        setCheckingProfile(false);
+      } else {
+        setCheckingProfile(false);
+      }
     };
 
     initAuth();
@@ -27,7 +88,18 @@ export default function SimpleDreamInterfaceWithAuth() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event);
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        setCheckingProfile(true);
+        const profileExists = await checkUserProfile(currentUser.id);
+        setHasProfile(profileExists);
+        setCheckingProfile(false);
+      } else {
+        setHasProfile(null);
+        setCheckingProfile(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -37,7 +109,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     await supabase.auth.signOut();
   };
 
-  if (loading) {
+  if (loading || checkingProfile) {
     return (
       <div style={{
         display: 'flex',
@@ -47,10 +119,10 @@ export default function SimpleDreamInterfaceWithAuth() {
       }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{
-            fontFamily: "Georgia, 'Times New Roman', serif",
+            fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
             color: 'var(--matcha-dark)',
             fontSize: '1.1rem'
-          }}>Loading...</p>
+          }}>{t.loading}</p>
         </div>
       </div>
     );
@@ -73,6 +145,20 @@ export default function SimpleDreamInterfaceWithAuth() {
           <Auth onAuthSuccess={() => {}} />
         </div>
       </div>
+    );
+  }
+
+  // Show onboarding if user doesn't have a profile
+  if (user && hasProfile === false) {
+    return (
+      <UserOnboarding
+        user={user}
+        onComplete={() => {
+          setHasProfile(true);
+          // Reload profile to get language preference
+          checkUserProfile(user.id);
+        }}
+      />
     );
   }
 
@@ -200,7 +286,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span>Dream Journal</span>
+                <span>{t.dreamJournal}</span>
               </button>
 
               <button
@@ -233,7 +319,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
-                <span>History</span>
+                <span>{t.history}</span>
               </button>
 
               <div style={{
@@ -254,7 +340,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   color: 'var(--matcha-dark)',
                   fontWeight: '500'
                 }}>
-                  Language
+                  {t.language}
                 </div>
                 <button
                   onClick={() => setLanguage(language === 'en' ? 'ko' : 'en')}
@@ -356,14 +442,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <polyline points="16 17 21 12 16 7"></polyline>
                   <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-                <span>Sign Out</span>
+                <span>{t.signOut}</span>
               </button>
             </div>
           </div>
         </>
       )}
 
-      <SimpleDreamInterface user={user} />
+      <SimpleDreamInterface user={user} language={language} />
     </>
   );
 }
