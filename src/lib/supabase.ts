@@ -27,17 +27,35 @@ export interface UserProfile {
   id?: string
   user_id: string
   full_name?: string
+  display_name?: string
   birth_date?: string
   age?: number
+
+  // Location & Language
+  country_code?: string
+  country_name?: string
+  city?: string
+  timezone?: string
+  preferred_language?: string
+
+  // Professional & Personal
   occupation?: string
   interests?: string[]
   bio?: string
+
+  // Dream Preferences
   dream_goals?: string
   sleep_schedule?: {
     bedtime?: string
     wake_time?: string
     sleep_quality?: 'poor' | 'fair' | 'good' | 'excellent'
   }
+
+  // Technical Data
+  signup_ip?: string
+  last_login_ip?: string
+  last_login_at?: string
+
   profile_completed?: boolean
   created_at?: string
   updated_at?: string
