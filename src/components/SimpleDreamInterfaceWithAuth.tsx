@@ -35,7 +35,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   const t = translations[language];
 
-  // Check if user has a profile
+  // Check if user has a completed profile
   const checkUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -54,9 +54,13 @@ export default function SimpleDreamInterfaceWithAuth() {
         if (data.preferred_language) {
           setLanguage(data.preferred_language as 'en' | 'ko');
         }
+
+        // Check if profile is actually completed
+        // Return true only if profile_completed is explicitly true
+        return data.profile_completed === true;
       }
 
-      return !!data;
+      return false;
     } catch (error) {
       console.error('Error checking profile:', error);
       return false;
