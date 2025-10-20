@@ -49,6 +49,90 @@ const DREAM_GOAL_OPTIONS = [
   'Personal healing'
 ];
 
+// Translations
+const translations = {
+  en: {
+    profileSetup: 'Profile Setup',
+    subtitle: 'Tell us about yourself for a more personalized dream interpretation experience',
+    basicInfo: 'Basic Information',
+    name: 'Name',
+    namePlaceholder: 'Your name or nickname',
+    dateOfBirth: 'Date of Birth',
+    year: 'Year',
+    month: 'Month',
+    day: 'Day',
+    occupation: 'Occupation',
+    selectOccupation: 'Select your occupation',
+    country: 'Country',
+    preferredLanguage: 'Preferred Language',
+    english: 'English',
+    korean: '한국어',
+    detectingLocation: 'Detecting your location...',
+    next: 'Next',
+    back: 'Back',
+    interests: 'Interests',
+    interestsDescription: 'Select interests that might help us understand your dreams better (multiple selection allowed)',
+    sleepPattern: 'Sleep Pattern',
+    typicalBedtime: 'Typical Bedtime',
+    hour: 'Hour',
+    min: 'Min',
+    period: 'Period',
+    typicalWakeTime: 'Typical Wake Time',
+    sleepQuality: 'Sleep Quality',
+    poor: 'Poor',
+    fair: 'Fair',
+    good: 'Good',
+    excellent: 'Excellent',
+    dreamGoals: 'Dream Goals',
+    dreamGoalsDescription: 'What do you hope to gain from dream interpretation? (select all that apply)',
+    anythingElse: 'Anything else you\'d like to share? (Optional)',
+    additionalNotes: 'Any additional notes or thoughts...',
+    saving: 'Saving...',
+    completeProfile: 'Complete Profile',
+    fillRequired: 'Please fill in all required fields: date of birth and occupation'
+  },
+  ko: {
+    profileSetup: '프로필 설정',
+    subtitle: '더 개인화된 꿈 해석 경험을 위해 자신에 대해 알려주세요',
+    basicInfo: '기본 정보',
+    name: '이름',
+    namePlaceholder: '이름 또는 닉네임',
+    dateOfBirth: '생년월일',
+    year: '년',
+    month: '월',
+    day: '일',
+    occupation: '직업',
+    selectOccupation: '직업을 선택하세요',
+    country: '국가',
+    preferredLanguage: '선호 언어',
+    english: 'English',
+    korean: '한국어',
+    detectingLocation: '위치를 감지하는 중...',
+    next: '다음',
+    back: '이전',
+    interests: '관심사',
+    interestsDescription: '꿈을 더 잘 이해하는 데 도움이 될 수 있는 관심사를 선택하세요 (다중 선택 가능)',
+    sleepPattern: '수면 패턴',
+    typicalBedtime: '평균 취침 시간',
+    hour: '시',
+    min: '분',
+    period: '오전/오후',
+    typicalWakeTime: '평균 기상 시간',
+    sleepQuality: '수면 질',
+    poor: '나쁨',
+    fair: '보통',
+    good: '좋음',
+    excellent: '매우 좋음',
+    dreamGoals: '꿈 목표',
+    dreamGoalsDescription: '꿈 해석을 통해 무엇을 얻고 싶으신가요? (모두 선택 가능)',
+    anythingElse: '추가로 공유하고 싶은 내용이 있나요? (선택)',
+    additionalNotes: '추가 메모나 생각...',
+    saving: '저장 중...',
+    completeProfile: '프로필 완성',
+    fillRequired: '필수 항목을 모두 입력해주세요: 생년월일과 직업'
+  }
+};
+
 // Common countries list
 const COUNTRIES = [
   { code: 'US', name: 'United States' },
@@ -74,6 +158,9 @@ const COUNTRIES = [
 ];
 
 export default function UserProfileForm({ user, profile, onComplete, onCancel }: UserProfileFormProps) {
+  const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || 'en');
+  const t = translations[preferredLanguage as 'en' | 'ko'];
+
   const [formData, setFormData] = useState<UserProfileUpdate>({
     user_id: user.id,
     full_name: profile?.full_name || user.user_metadata?.full_name || '',
@@ -90,12 +177,10 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
     }
   });
 
-  // Location and language states
+  // Location states
   const [countryCode, setCountryCode] = useState(profile?.country_code || 'US');
   const [countryName, setCountryName] = useState(profile?.country_name || 'United States');
-  const [city, setCity] = useState(profile?.city || '');
   const [timezone, setTimezone] = useState(profile?.timezone || '');
-  const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || 'en');
   const [signupIp, setSignupIp] = useState(profile?.signup_ip || '');
   const [detectingLocation, setDetectingLocation] = useState(!profile);
 
@@ -125,7 +210,6 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
 
           setCountryCode(data.country_code);
           setCountryName(data.country_name);
-          setCity(data.city);
           setTimezone(data.timezone);
           setSignupIp(data.ip);
 
@@ -328,10 +412,10 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
   const handleNextStep = () => {
     // 필수 필드 검증
     if (!birthYear || !birthMonth || !birthDay || !formData.occupation) {
-      setError('Please fill in all required fields: date of birth and occupation');
+      setError(t.fillRequired);
       return;
     }
-    
+
     setError(''); // 에러 메시지 초기화
     setCurrentStep(2);
   };
@@ -361,7 +445,6 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
         // Add location and language data
         country_code: countryCode,
         country_name: countryName,
-        city: city || null,
         timezone: timezone,
         preferred_language: preferredLanguage,
         signup_ip: signupIp || null,
@@ -403,33 +486,82 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
   };
 
   return (
-    <div className="profile-form-container">
-      <div className="profile-form glass-strong">
-        <div className="profile-form-header">
-          <div className="hero-teacup">👤</div>
-          <h2>Profile Setup</h2>
-          <p>Tell us about yourself for a more personalized dream interpretation experience</p>
+    <div className="profile-form-container" style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+      padding: '2rem',
+      fontFamily: preferredLanguage === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
+    }}>
+      <div className="profile-form" style={{
+        width: '100%',
+        maxWidth: '600px',
+        padding: '40px',
+        borderRadius: '24px',
+        backdropFilter: 'blur(30px) saturate(180%)',
+        background: 'rgba(255, 255, 255, 0.85)',
+        border: '2px solid rgba(127, 176, 105, 0.3)',
+        boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2), 0 2px 8px rgba(0, 0, 0, 0.05)',
+        maxHeight: '90vh',
+        overflowY: 'auto'
+      }}>
+        <style>{`
+          .profile-form::-webkit-scrollbar {
+            width: 8px;
+          }
+          .profile-form::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+          }
+          .profile-form::-webkit-scrollbar-thumb {
+            background: white;
+            border-radius: 10px;
+          }
+          .profile-form::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.9);
+          }
+        `}</style>
+        <div className="profile-form-header" style={{
+          textAlign: 'center',
+          marginBottom: '30px'
+        }}>
+          <h2 style={{
+            fontSize: '28px',
+            fontWeight: '600',
+            color: 'var(--matcha-dark)',
+            marginBottom: '8px',
+            lineHeight: '1.3'
+          }}>{t.profileSetup}</h2>
+          <p style={{
+            fontSize: '14px',
+            color: 'var(--sage)',
+            lineHeight: '1.4',
+            opacity: 0.85
+          }}>{t.subtitle}</p>
         </div>
 
         {currentStep === 1 ? (
           <form onSubmit={(e) => { e.preventDefault(); handleNextStep(); }} className="profile-form-content">
             {/* Basic Information */}
-            <div className="form-section">
-              <h3>Basic Information</h3>
-              
-              <div className="form-group">
-                <label htmlFor="full_name">Name</label>
+            <div className="form-section" style={{marginBottom: '24px'}}>
+              <h3 style={{fontSize: '18px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '16px', lineHeight: '1.3'}}>{t.basicInfo}</h3>
+
+              <div className="form-group" style={{marginBottom: '16px'}}>
+                <label htmlFor="full_name" style={{display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3'}}>{t.name}</label>
                 <input
                   type="text"
                   id="full_name"
                   value={formData.full_name || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                  placeholder="Your name or nickname"
+                  placeholder={t.namePlaceholder}
+                  style={{width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)'}}
                 />
               </div>
 
-              <div className="form-group">
-                <label>Date of Birth</label>
+              <div className="form-group" style={{marginBottom: '16px'}}>
+                <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3'}}>{t.dateOfBirth}</label>
                 <div className="birth-date-selectors">
                   <div className="birth-selector">
                     <label htmlFor="birth_year">Year</label>
@@ -493,15 +625,15 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
 
               {/* Location & Language */}
               {detectingLocation && (
-                <div style={{ textAlign: 'center', padding: '10px', color: 'var(--matcha-green)', fontSize: '14px' }}>
-                  Detecting your location...
+                <div style={{ textAlign: 'center', padding: '10px', color: 'var(--matcha-green)', fontSize: '14px', lineHeight: '1.3' }}>
+                  {t.detectingLocation}
                 </div>
               )}
 
               {!detectingLocation && (
                 <>
-                  <div className="form-group">
-                    <label htmlFor="country">Country</label>
+                  <div className="form-group" style={{marginBottom: '16px'}}>
+                    <label htmlFor="country" style={{display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3'}}>{t.country}</label>
                     <select
                       id="country"
                       value={countryCode}
@@ -519,24 +651,46 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
                     </select>
                   </div>
 
-                  <div className="form-group">
-                    <label>Preferred Language</label>
+                  <div className="form-group" style={{marginBottom: '16px'}}>
+                    <label style={{display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3'}}>{t.preferredLanguage}</label>
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <button
                         type="button"
                         onClick={() => setPreferredLanguage('en')}
-                        className={`interest-tag ${preferredLanguage === 'en' ? 'selected' : ''}`}
-                        style={{ flex: 1 }}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '12px',
+                          border: '2px solid',
+                          borderColor: preferredLanguage === 'en' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                          background: preferredLanguage === 'en' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                          color: 'var(--matcha-dark)',
+                          fontSize: '14px',
+                          fontWeight: preferredLanguage === 'en' ? '600' : '400',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s'
+                        }}
                       >
-                        English
+                        {t.english}
                       </button>
                       <button
                         type="button"
                         onClick={() => setPreferredLanguage('ko')}
-                        className={`interest-tag ${preferredLanguage === 'ko' ? 'selected' : ''}`}
-                        style={{ flex: 1 }}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '12px',
+                          border: '2px solid',
+                          borderColor: preferredLanguage === 'ko' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                          background: preferredLanguage === 'ko' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                          color: 'var(--matcha-dark)',
+                          fontSize: '14px',
+                          fontWeight: preferredLanguage === 'ko' ? '600' : '400',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s'
+                        }}
                       >
-                        한국어
+                        {t.korean}
                       </button>
                     </div>
                   </div>
@@ -545,12 +699,24 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
             </div>
 
             {error && currentStep === 1 && (
-              <div className="error-message">{error}</div>
+              <div className="error-message" style={{padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#dc2626', fontSize: '14px', lineHeight: '1.4', marginBottom: '16px'}}>{error}</div>
             )}
 
-            <div className="form-actions">
-              <button type="submit" className="btn-primary">
-                Next
+            <div className="form-actions" style={{display: 'flex', gap: '12px', marginTop: '20px'}}>
+              <button type="submit" style={{
+                flex: 1,
+                padding: '12px',
+                borderRadius: '12px',
+                border: 'none',
+                background: 'var(--matcha-green)',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+                boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)'
+              }}>
+                {t.next}
               </button>
             </div>
           </form>
@@ -719,12 +885,36 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
             <div className="error-message">{error}</div>
           )}
 
-            <div className="form-actions">
-              <button type="button" onClick={handlePrevStep} className="btn-secondary">
-                Back
+            <div className="form-actions" style={{display: 'flex', gap: '12px', marginTop: '20px'}}>
+              <button type="button" onClick={handlePrevStep} style={{
+                flex: 1,
+                padding: '12px',
+                borderRadius: '12px',
+                border: '2px solid rgba(127, 176, 105, 0.3)',
+                background: 'transparent',
+                color: 'var(--matcha-dark)',
+                fontSize: '15px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.3s'
+              }}>
+                {t.back}
               </button>
-              <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? 'Saving...' : 'Complete Profile'}
+              <button type="submit" disabled={loading} style={{
+                flex: 2,
+                padding: '12px',
+                borderRadius: '12px',
+                border: 'none',
+                background: loading ? '#9ca3af' : 'var(--matcha-green)',
+                color: 'white',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.5 : 1,
+                transition: 'all 0.3s',
+                boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)'
+              }}>
+                {loading ? t.saving : t.completeProfile}
               </button>
             </div>
           </form>
