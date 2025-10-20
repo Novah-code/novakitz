@@ -18,7 +18,7 @@ const translations = {
   },
   ko: {
     loading: '로딩 중...',
-    dreamJournal: '꿈 일기',
+    dreamJournal: '드림 저널',
     history: '기록',
     language: '언어',
     signOut: '로그아웃'
@@ -243,7 +243,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             boxShadow: '-2px 0 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
             padding: '80px 0 20px 0',
-            fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
             animation: 'slideInRight 0.3s ease-out'
           }}>
             <style>{`

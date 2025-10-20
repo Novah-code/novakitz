@@ -122,7 +122,7 @@ const translations = {
     charactersReady: '준비됨',
     brewing: '분석 중...',
     brew: '분석하기',
-    dreamJournal: '꿈 일기',
+    dreamJournal: '드림 저널',
     showing: '표시 중',
     of: '/',
     dreams: '개의 꿈',
@@ -822,7 +822,7 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
         body {
-          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family: ${language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
           background: #e8f5e8;
           color: #1f2937;
           overflow-x: hidden;
