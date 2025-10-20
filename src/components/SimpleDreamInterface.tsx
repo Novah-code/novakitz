@@ -303,8 +303,8 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
     saveDreamWithTags(dreamText, response, []);
   };
 
-  const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[]) => {
-    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags });
+  const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = []) => {
+    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords });
 
     // If this is the first dream and no image is selected, use default image
     const isFirstDream = savedDreams.length === 0;
@@ -358,6 +358,29 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
           localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
         } else {
           console.log('Saved to Supabase:', data);
+
+          // Save keywords to dream_keywords table
+          if (keywords && keywords.length > 0) {
+            const keywordRecords = keywords.map(kw => ({
+              user_id: user.id,
+              dream_id: data.id,
+              keyword: kw.keyword,
+              category: kw.category,
+              sentiment: kw.sentiment,
+              confidence: 0.8 // Default confidence
+            }));
+
+            const { error: keywordError } = await supabase
+              .from('dream_keywords')
+              .insert(keywordRecords);
+
+            if (keywordError) {
+              console.error('Error saving keywords:', keywordError);
+            } else {
+              console.log('Keywords saved successfully:', keywordRecords.length);
+            }
+          }
+
           // Update local state with Supabase ID
           const dreamWithSupabaseId = { ...newDream, id: data.id };
           const updatedDreams = [dreamWithSupabaseId, ...savedDreams];
@@ -643,8 +666,8 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
       console.log('Analysis received in handleSubmitDream:', result);
       setDreamResponse(result.analysis);
       console.log('About to save dream with analysis:', { dreamText, result });
-      saveDreamWithTags(dreamText, result.analysis, result.autoTags || []); // Save the dream with tags
-      
+      saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || []); // Save dream with tags and keywords
+
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image

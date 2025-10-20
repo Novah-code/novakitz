@@ -81,21 +81,51 @@ async function retryWithExponentialBackoff<T>(
   throw lastError!;
 }
 
-async function generateAutoTags(dreamText: string, language: 'en' | 'ko' = 'en'): Promise<string[]> {
+interface DreamKeyword {
+  keyword: string;
+  category: 'emotion' | 'symbol' | 'person' | 'place' | 'action' | 'theme';
+  sentiment: 'positive' | 'negative' | 'neutral' | 'mixed';
+}
+
+async function extractDreamKeywords(dreamText: string, language: 'en' | 'ko' = 'en'): Promise<DreamKeyword[]> {
   try {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
 
-    const tagPrompt = language === 'ko'
-      ? `이 꿈에서 3-5개의 핵심 태그를 추출하세요. 쉼표로 구분된 태그만 반환하고 다른 텍스트는 포함하지 마세요. 초점: 감정, 상징, 사람, 장소, 행동, 주제.
+    const keywordPrompt = language === 'ko'
+      ? `다음 꿈에서 5-8개의 핵심 키워드를 추출하고 분석하세요. JSON 배열 형식으로만 응답하세요.
 
 꿈: "${dreamText}"
 
-예시 태그: 비행, 물, 가족, 불안, 어린시절, 변화, 동물 등`
-      : `Extract 3-5 key tags from this dream for categorization. Return only the tags separated by commas, no other text. Focus on: emotions, symbols, people, places, actions, themes.
+각 키워드에 대해 다음 정보를 포함하세요:
+- keyword: 키워드 (한국어)
+- category: emotion(감정), symbol(상징), person(인물), place(장소), action(행동), theme(주제) 중 하나
+- sentiment: positive(긍정), negative(부정), neutral(중립), mixed(복합) 중 하나
+
+JSON 형식 예시:
+[
+  {"keyword": "물", "category": "symbol", "sentiment": "neutral"},
+  {"keyword": "불안", "category": "emotion", "sentiment": "negative"},
+  {"keyword": "가족", "category": "person", "sentiment": "mixed"}
+]
+
+JSON 배열만 반환하고 다른 텍스트는 포함하지 마세요.`
+      : `Extract 5-8 key keywords from this dream and analyze them. Respond ONLY with a JSON array.
 
 Dream: "${dreamText}"
 
-Example tags: flying, water, family, anxiety, childhood, transformation, animals, etc.`;
+For each keyword include:
+- keyword: the keyword (in English)
+- category: one of: emotion, symbol, person, place, action, theme
+- sentiment: one of: positive, negative, neutral, mixed
+
+JSON format example:
+[
+  {"keyword": "water", "category": "symbol", "sentiment": "neutral"},
+  {"keyword": "anxiety", "category": "emotion", "sentiment": "negative"},
+  {"keyword": "family", "category": "person", "sentiment": "mixed"}
+]
+
+Return ONLY the JSON array, no other text.`;
 
     const response = await retryWithExponentialBackoff(async () => {
       const res = await fetch(
@@ -109,7 +139,7 @@ Example tags: flying, water, family, anxiety, childhood, transformation, animals
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: tagPrompt
+                text: keywordPrompt
               }]
             }]
           })
@@ -124,20 +154,34 @@ Example tags: flying, water, family, anxiety, childhood, transformation, animals
       }
 
       return res;
-    }, { maxRetries: 2, baseDelay: 500, maxDelay: 5000 }); // Less aggressive retry for tags
+    }, { maxRetries: 2, baseDelay: 500, maxDelay: 5000 });
 
     const data = await response.json();
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-      const tagsText = data.candidates[0].content.parts[0].text.trim();
-      const tags = tagsText.split(',').map((tag: string) => tag.trim().toLowerCase()).filter((tag: string) => tag.length > 0);
-      return tags.slice(0, 5); // Limit to 5 tags
+      const responseText = data.candidates[0].content.parts[0].text.trim();
+
+      // Extract JSON from response (handle markdown code blocks if present)
+      let jsonText = responseText;
+      if (responseText.includes('```json')) {
+        jsonText = responseText.split('```json')[1].split('```')[0].trim();
+      } else if (responseText.includes('```')) {
+        jsonText = responseText.split('```')[1].split('```')[0].trim();
+      }
+
+      const keywords = JSON.parse(jsonText);
+      return Array.isArray(keywords) ? keywords.slice(0, 8) : [];
     }
-    
+
     return [];
   } catch (error) {
-    console.error('Error generating auto tags:', error);
+    console.error('Error extracting dream keywords:', error);
     return [];
   }
+}
+
+// Keep old function for backward compatibility (simple tags for UI)
+async function generateAutoTags(keywords: DreamKeyword[]): Promise<string[]> {
+  return keywords.map(k => k.keyword);
 }
 
 export async function POST(request: NextRequest) {
@@ -248,7 +292,7 @@ Close with: "How does this feel to you? Your own intuition completes the meaning
 Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wise friend who really sees you. 250-300 words.`;
 
     // Start both API calls in parallel for faster response
-    const [response, autoTags] = await Promise.all([
+    const [response, keywords] = await Promise.all([
       retryWithExponentialBackoff(async () => {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
@@ -283,7 +327,7 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
 
       return res;
     }, { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 }), // More aggressive retry for main analysis
-      generateAutoTags(dreamText, language) // Run tag generation in parallel with language support
+      extractDreamKeywords(dreamText, language) // Extract structured keywords with sentiment
     ]);
 
     const data = await response.json();
@@ -291,7 +335,8 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
 
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
       const analysisText = data.candidates[0].content.parts[0].text;
-      
+      const autoTags = generateAutoTags(keywords); // Convert keywords to simple tags for UI
+
       // 성공 로깅
       logAPIMetrics({
         startTime,
@@ -302,7 +347,8 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
 
       return NextResponse.json({
         analysis: analysisText,
-        autoTags: autoTags
+        autoTags: await autoTags, // Simple tags for backward compatibility
+        keywords: keywords // Structured keywords for database storage
       });
     } else {
       console.error('Invalid API response structure:', data);
