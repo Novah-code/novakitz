@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import SimpleDreamInterface from './SimpleDreamInterface';
 import UserProfileForm from './UserProfileForm';
+import DreamInsights from './DreamInsights';
 
 // Translations
 const translations = {
@@ -13,6 +14,7 @@ const translations = {
     loading: 'Loading...',
     dreamJournal: 'Dream Journal',
     history: 'History',
+    insights: 'Insights',
     language: 'Language',
     signOut: 'Sign Out'
   },
@@ -20,6 +22,7 @@ const translations = {
     loading: '로딩 중...',
     dreamJournal: '드림 저널',
     history: '기록',
+    insights: '인사이트',
     language: '언어',
     signOut: '로그아웃'
   }
@@ -33,6 +36,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
   const t = translations[language];
 
@@ -338,6 +342,39 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{t.history}</span>
               </button>
 
+              <button
+                onClick={() => {
+                  setShowInsights(true);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                  <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                </svg>
+                <span>{t.insights}</span>
+              </button>
+
               <div style={{
                 height: '1px',
                 background: 'rgba(127, 176, 105, 0.2)',
@@ -466,6 +503,11 @@ export default function SimpleDreamInterfaceWithAuth() {
       )}
 
       <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} />
+
+      {/* Dream Insights Modal */}
+      {showInsights && user && (
+        <DreamInsights user={user} language={language} onClose={() => setShowInsights(false)} />
+      )}
     </>
   );
 }
