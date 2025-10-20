@@ -71,17 +71,23 @@ export default function SimpleDreamInterfaceWithAuth() {
   useEffect(() => {
     // Get initial session
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setLoading(false);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        setLoading(false);
 
-      if (currentUser) {
-        // Check if user has profile
-        const profileExists = await checkUserProfile(currentUser.id);
-        setHasProfile(profileExists);
-        setCheckingProfile(false);
-      } else {
+        if (currentUser) {
+          // Check if user has profile
+          const profileExists = await checkUserProfile(currentUser.id);
+          setHasProfile(profileExists);
+          setCheckingProfile(false);
+        } else {
+          setCheckingProfile(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
         setCheckingProfile(false);
       }
     };
@@ -97,10 +103,15 @@ export default function SimpleDreamInterfaceWithAuth() {
       setUser(currentUser);
 
       if (currentUser) {
-        setCheckingProfile(true);
-        const profileExists = await checkUserProfile(currentUser.id);
-        setHasProfile(profileExists);
-        setCheckingProfile(false);
+        try {
+          setCheckingProfile(true);
+          const profileExists = await checkUserProfile(currentUser.id);
+          setHasProfile(profileExists);
+          setCheckingProfile(false);
+        } catch (error) {
+          console.error('Error checking profile on auth change:', error);
+          setCheckingProfile(false);
+        }
       } else {
         setHasProfile(null);
         setCheckingProfile(false);
