@@ -32,6 +32,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
 
   const t = translations[language];
 
@@ -295,8 +296,8 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               <button
                 onClick={() => {
+                  setShowHistory(true);
                   setMenuOpen(false);
-                  // Trigger history view - we'll need to pass this to SimpleDreamInterface
                 }}
                 style={{
                   padding: '1rem 2rem',
@@ -453,7 +454,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         </>
       )}
 
-      <SimpleDreamInterface user={user} language={language} />
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} />
     </>
   );
 }

@@ -8,6 +8,8 @@ import APIMonitoringDashboard from './APIMonitoringDashboard';
 interface SimpleDreamInterfaceProps {
   user?: User | null;
   language?: 'en' | 'ko';
+  initialShowHistory?: boolean;
+  onHistoryClose?: () => void;
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -140,7 +142,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -149,8 +151,13 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
   const [dreamText, setDreamText] = useState('');
   const [dreamTitle, setDreamTitle] = useState('');
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(initialShowHistory);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
+
+  // Sync with external history state
+  useEffect(() => {
+    setShowHistory(initialShowHistory);
+  }, [initialShowHistory]);
   const [editingDream, setEditingDream] = useState<DreamEntry | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
@@ -3059,7 +3066,10 @@ export default function SimpleDreamInterface({ user, language = 'en' }: SimpleDr
                 zIndex: 10
               }}>
                 <button
-                  onClick={() => {setShowHistory(false);}}
+                  onClick={() => {
+                    setShowHistory(false);
+                    onHistoryClose?.();
+                  }}
                   className="journal-close-btn"
                 >
                   Close
