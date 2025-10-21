@@ -133,7 +133,7 @@ const translations = {
 
     // Step titles
     step1Title: 'Basic Information',
-    step2Title: 'Your Name',
+    step2Title: 'Your Nickname',
     step3Title: 'Your Occupation',
     step4Title: 'Your Interests',
     step5Title: 'Sleep Pattern',
@@ -150,8 +150,8 @@ const translations = {
     detectingLocation: 'Detecting your location...',
 
     // Step 2
-    name: 'Name',
-    namePlaceholder: 'Your name or nickname',
+    name: 'Nickname',
+    namePlaceholder: 'Enter a unique nickname',
 
     // Step 3
     occupation: 'Occupation',
@@ -187,7 +187,9 @@ const translations = {
     saving: 'Saving...',
 
     // Validation
-    fillRequired: 'Please fill in all required fields'
+    fillRequired: 'Please fill in all required fields',
+    nicknameTaken: 'This nickname is already taken. Please choose another one.',
+    checkingNickname: 'Checking availability...'
   },
   ko: {
     profileSetup: '프로필 설정',
@@ -197,7 +199,7 @@ const translations = {
 
     // Step titles
     step1Title: '기본 정보',
-    step2Title: '이름',
+    step2Title: '닉네임',
     step3Title: '직업',
     step4Title: '관심사',
     step5Title: '수면 패턴',
@@ -214,8 +216,8 @@ const translations = {
     detectingLocation: '위치를 감지하는 중...',
 
     // Step 2
-    name: '이름',
-    namePlaceholder: '이름 또는 닉네임',
+    name: '닉네임',
+    namePlaceholder: '고유한 닉네임을 입력하세요',
 
     // Step 3
     occupation: '직업',
@@ -251,7 +253,9 @@ const translations = {
     saving: '저장 중...',
 
     // Validation
-    fillRequired: '필수 항목을 모두 입력해주세요'
+    fillRequired: '필수 항목을 모두 입력해주세요',
+    nicknameTaken: '이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.',
+    checkingNickname: '사용 가능 여부 확인 중...'
   }
 };
 
@@ -343,7 +347,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     (_, i) => i + 1
   );
 
-  const handleNext = () => {
+  const handleNext = async () => {
     setError('');
 
     // Validate Step 1 (required fields)
@@ -351,6 +355,31 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       if (!birthYear || !birthMonth || !birthDay) {
         setError(t.fillRequired);
         return;
+      }
+    }
+
+    // Validate Step 2 (nickname uniqueness)
+    if (currentStep === 2 && fullName) {
+      setLoading(true);
+      try {
+        const { data, error: queryError } = await supabase
+          .from('user_profiles')
+          .select('user_id')
+          .eq('full_name', fullName)
+          .neq('user_id', user.id)
+          .maybeSingle();
+
+        if (queryError) throw queryError;
+
+        if (data) {
+          setError(t.nicknameTaken);
+          setLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking nickname:', err);
+      } finally {
+        setLoading(false);
       }
     }
 
