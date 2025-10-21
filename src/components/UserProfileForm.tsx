@@ -1,239 +1,328 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase, UserProfile, UserProfileUpdate } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+
+interface LocationData {
+  ip: string;
+  country_code: string;
+  country_name: string;
+  city: string;
+  timezone: string;
+  isMock?: boolean;
+}
 
 interface UserProfileFormProps {
   user: User;
-  language: 'en' | 'ko';
-  onComplete: () => void;
+  profile?: UserProfile;
+  onComplete?: () => void;
+  onCancel?: () => void;
 }
 
+const INTEREST_OPTIONS = [
+  'Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies',
+  'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing',
+  'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'
+];
+
+const OCCUPATION_OPTIONS = [
+  'Student', 'Employee', 'Freelancer', 'Entrepreneur', 'Artist', 'Healthcare',
+  'Educator', 'Government', 'Service Industry', 'IT/Development', 'Design', 'Marketing',
+  'Finance', 'Legal', 'Construction', 'Other', 'Job Seeking', 'Retired'
+];
+
+const DREAM_GOAL_OPTIONS = [
+  'Understanding inner emotions',
+  'Stress relief and relaxation',
+  'Creative inspiration',
+  'Problem solving insights',
+  'Self-discovery and growth',
+  'Spiritual guidance',
+  'Processing daily experiences',
+  'Overcoming fears and anxieties',
+  'Exploring subconscious thoughts',
+  'Entertainment and curiosity',
+  'Relationship insights',
+  'Career guidance',
+  'Health and wellness awareness',
+  'Personal healing'
+];
+
+const COUNTRIES = [
+  { code: 'US', name: 'United States' },
+  { code: 'KR', name: 'South Korea (대한민국)' },
+  { code: 'JP', name: 'Japan (日本)' },
+  { code: 'CN', name: 'China (中国)' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'IN', name: 'India' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'TH', name: 'Thailand' },
+  { code: 'VN', name: 'Vietnam' },
+  { code: 'PH', name: 'Philippines' },
+  { code: 'ID', name: 'Indonesia' },
+  { code: 'MY', name: 'Malaysia' }
+];
+
+// Translations
 const translations = {
   en: {
-    title: 'Welcome to Novakitz',
-    subtitle: 'Help us personalize your dream journey',
+    profileSetup: 'Profile Setup',
+    subtitle: 'Tell us about yourself for personalized dream interpretation',
     step: 'Step',
     of: 'of',
 
-    // Navigation buttons
-    next: 'Next',
-    back: 'Back',
-    skip: 'Skip',
-    complete: 'Complete',
+    // Step titles
+    step1Title: 'Basic Information (Required)',
+    step2Title: 'Your Name (Optional)',
+    step3Title: 'Your Occupation (Optional)',
+    step4Title: 'Your Interests (Optional)',
+    step5Title: 'Sleep Pattern (Optional)',
+    step6Title: 'Dream Goals (Optional)',
+    step7Title: 'Additional Notes (Optional)',
 
-    // Step 1: Required fields
-    step1Title: 'Basic Information',
-    step1Subtitle: 'Required to get started',
-    fullName: 'Full Name',
-    namePlaceholder: 'Enter your name',
-    birthDate: 'Birth Date',
+    // Step 1
+    dateOfBirth: 'Date of Birth',
     year: 'Year',
     month: 'Month',
     day: 'Day',
-    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     country: 'Country',
-    autoDetected: 'Auto-detected',
-    language: 'Preferred Language',
-    english: 'English',
-    korean: '한국어',
-    fillRequired: 'Please fill in all required fields',
+    preferredLanguage: 'Preferred Language',
+    detectingLocation: 'Detecting your location...',
 
-    // Occupation options
-    occupations: ['Student', 'Employee', 'Freelancer', 'Entrepreneur', 'Artist', 'Healthcare', 'Educator', 'Government', 'Service Industry', 'IT/Development', 'Design', 'Marketing', 'Finance', 'Legal', 'Construction', 'Other', 'Job Seeking', 'Retired'],
+    // Step 2
+    name: 'Name',
+    namePlaceholder: 'Your name or nickname',
 
-    // Step 2: Occupation + Interests
-    step2Title: 'Tell us about yourself',
-    step2Subtitle: 'Optional - helps understand your dream context',
+    // Step 3
     occupation: 'Occupation',
-    occupationPlaceholder: 'Select your occupation',
-    interests: 'Interests',
-    interestsSubtitle: 'Select interests that might help us understand your dreams better (multiple selection allowed)',
-    interestOptions: ['Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies', 'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing', 'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'],
+    selectOccupation: 'Select your occupation',
 
-    // Step 3: Sleep
-    step3Title: 'Tell us about your sleep',
-    step3Subtitle: 'Optional - understanding your sleep patterns',
-    avgSleepHours: 'Average Sleep Hours',
+    // Step 4
+    interestsDesc: 'Select interests that help us understand your dreams better',
+
+    // Step 5
+    typicalBedtime: 'Typical Bedtime',
+    typicalWakeTime: 'Typical Wake Time',
+    hour: 'Hour',
+    min: 'Min',
+    am: 'AM',
+    pm: 'PM',
     sleepQuality: 'Sleep Quality',
-    sleepTime: 'Usual Sleep Time',
-    sleepTimePlaceholder: 'e.g., 11pm - 7am',
-    sleepHourOptions: ['Less than 5 hours', '5-6 hours', '6-7 hours', '7-8 hours', 'More than 8 hours'],
-    sleepQualityOptions: ['Very Poor', 'Poor', 'Fair', 'Good', 'Very Good'],
+    poor: 'Poor',
+    fair: 'Fair',
+    good: 'Good',
+    excellent: 'Excellent',
 
-    // Step 4: Goals + Bio
-    step4Title: 'What are your dream goals?',
-    step4Subtitle: 'Optional - what do you hope to achieve?',
-    dreamGoals: 'Dream Goals',
-    dreamGoalsSubtitle: 'What do you hope to gain from dream interpretation? (select all that apply)',
-    dreamGoalOptions: [
-      'Understanding inner emotions',
-      'Stress relief and relaxation',
-      'Creative inspiration',
-      'Problem solving insights',
-      'Self-discovery and growth',
-      'Spiritual guidance',
-      'Processing daily experiences',
-      'Overcoming fears and anxieties',
-      'Exploring subconscious thoughts',
-      'Entertainment and curiosity',
-      'Relationship insights',
-      'Career guidance',
-      'Health and wellness awareness',
-      'Personal healing'
-    ],
-    bio: 'Bio / Notes',
-    bioPlaceholder: 'Any other information that might help with dream analysis',
+    // Step 6
+    dreamGoalsDesc: 'What do you hope to gain from dream interpretation?',
 
+    // Step 7
+    additionalNotes: 'Any additional notes or thoughts...',
+
+    // Buttons
+    next: 'Next',
+    skip: 'Skip',
+    back: 'Back',
+    complete: 'Complete',
     saving: 'Saving...',
-    error: 'Error saving profile. Please try again.',
+
+    // Validation
+    fillRequired: 'Please fill in all required fields'
   },
   ko: {
-    title: 'Novakitz에 오신 것을 환영합니다',
-    subtitle: '당신의 꿈 여정을 개인화하는 데 도움을 주세요',
+    profileSetup: '프로필 설정',
+    subtitle: '개인화된 꿈 해석을 위해 자신에 대해 알려주세요',
     step: '단계',
     of: '/',
 
-    next: '다음',
-    back: '이전',
-    skip: '건너뛰기',
-    complete: '완료',
+    // Step titles
+    step1Title: '기본 정보 (필수)',
+    step2Title: '이름 (선택)',
+    step3Title: '직업 (선택)',
+    step4Title: '관심사 (선택)',
+    step5Title: '수면 패턴 (선택)',
+    step6Title: '꿈 목표 (선택)',
+    step7Title: '추가 메모 (선택)',
 
-    step1Title: '기본 정보',
-    step1Subtitle: '시작하기 위해 필요한 정보입니다',
-    fullName: '이름',
-    namePlaceholder: '이름을 입력하세요',
-    birthDate: '생년월일',
+    // Step 1
+    dateOfBirth: '생년월일',
     year: '년',
     month: '월',
     day: '일',
-    months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
     country: '국가',
-    autoDetected: '자동 감지됨',
-    language: '선호 언어',
-    english: 'English',
-    korean: '한국어',
-    fillRequired: '모든 필수 항목을 입력해주세요',
+    preferredLanguage: '선호 언어',
+    detectingLocation: '위치를 감지하는 중...',
 
-    occupations: ['학생', '직장인', '프리랜서', '사업가', '예술가', '의료인', '교육자', '공무원', '서비스업', 'IT/개발', '디자인', '마케팅', '금융', '법조인', '건설업', '기타', '구직 중', '은퇴'],
+    // Step 2
+    name: '이름',
+    namePlaceholder: '이름 또는 닉네임',
 
-    step2Title: '자신에 대해 알려주세요',
-    step2Subtitle: '선택사항 - 꿈의 맥락을 이해하는 데 도움이 됩니다',
+    // Step 3
     occupation: '직업',
-    occupationPlaceholder: '직업을 선택하세요',
-    interests: '관심사',
-    interestsSubtitle: '꿈을 더 잘 이해하는 데 도움이 될 수 있는 관심사를 선택하세요 (다중 선택 가능)',
-    interestOptions: ['심리학', '자기계발', '명상', '요가', '독서', '영화', '음악', '여행', '요리', '운동', '예술', '글쓰기', '게임', '기술', '자연', '동물', '패션', '뷰티'],
+    selectOccupation: '직업을 선택하세요',
 
-    step3Title: '수면 패턴을 알려주세요',
-    step3Subtitle: '선택사항 - 수면 패턴 이해하기',
-    avgSleepHours: '평균 수면 시간',
-    sleepQuality: '수면의 질',
-    sleepTime: '주로 자는 시간대',
-    sleepTimePlaceholder: '예: 밤 11시 - 아침 7시',
-    sleepHourOptions: ['5시간 미만', '5-6시간', '6-7시간', '7-8시간', '8시간 이상'],
-    sleepQualityOptions: ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'],
+    // Step 4
+    interestsDesc: '꿈을 더 잘 이해하는 데 도움이 될 관심사를 선택하세요',
 
-    step4Title: '꿈 일기의 목표는 무엇인가요?',
-    step4Subtitle: '선택사항 - 무엇을 이루고 싶으신가요?',
-    dreamGoals: '꿈 일기 목표',
-    dreamGoalsSubtitle: '꿈 해석을 통해 무엇을 얻고 싶으신가요? (모두 선택 가능)',
-    dreamGoalOptions: [
-      '내면의 감정 이해하기',
-      '스트레스 해소와 이완',
-      '창의적 영감',
-      '문제 해결 통찰',
-      '자기 발견과 성장',
-      '영적 안내',
-      '일상 경험 처리',
-      '두려움과 불안 극복',
-      '무의식적 생각 탐구',
-      '재미와 호기심',
-      '관계 통찰',
-      '커리어 안내',
-      '건강과 웰빙 인식',
-      '개인적 치유'
-    ],
-    bio: '소개 / 메모',
-    bioPlaceholder: '꿈 분석에 도움이 될 수 있는 기타 정보',
+    // Step 5
+    typicalBedtime: '평균 취침 시간',
+    typicalWakeTime: '평균 기상 시간',
+    hour: '시',
+    min: '분',
+    am: '오전',
+    pm: '오후',
+    sleepQuality: '수면 질',
+    poor: '나쁨',
+    fair: '보통',
+    good: '좋음',
+    excellent: '매우 좋음',
 
+    // Step 6
+    dreamGoalsDesc: '꿈 해석을 통해 무엇을 얻고 싶으신가요?',
+
+    // Step 7
+    additionalNotes: '추가 메모나 생각...',
+
+    // Buttons
+    next: '다음',
+    skip: '건너뛰기',
+    back: '이전',
+    complete: '완료',
     saving: '저장 중...',
-    error: '프로필 저장 중 오류가 발생했습니다. 다시 시도해주세요.',
-  },
+
+    // Validation
+    fillRequired: '필수 항목을 모두 입력해주세요'
+  }
 };
 
-export default function UserProfileForm({ user, language, onComplete }: UserProfileFormProps) {
-  const t = translations[language];
-  const totalSteps = 4;
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+const monthOptions = [
+  { value: '01', label: 'January', labelKo: '1월' },
+  { value: '02', label: 'February', labelKo: '2월' },
+  { value: '03', label: 'March', labelKo: '3월' },
+  { value: '04', label: 'April', labelKo: '4월' },
+  { value: '05', label: 'May', labelKo: '5월' },
+  { value: '06', label: 'June', labelKo: '6월' },
+  { value: '07', label: 'July', labelKo: '7월' },
+  { value: '08', label: 'August', labelKo: '8월' },
+  { value: '09', label: 'September', labelKo: '9월' },
+  { value: '10', label: 'October', labelKo: '10월' },
+  { value: '11', label: 'November', labelKo: '11월' },
+  { value: '12', label: 'December', labelKo: '12월' }
+];
 
-  // Step 1: Required fields
-  const [fullName, setFullName] = useState('');
+export default function UserProfileForm({ user, profile, onComplete }: UserProfileFormProps) {
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 7;
+
+  // Language state (must be first to use in translations)
+  const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
+  const t = translations[preferredLanguage];
+
+  // Form data
+  const [fullName, setFullName] = useState(profile?.full_name || '');
   const [birthYear, setBirthYear] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
-  const [countryCode, setCountryCode] = useState('');
-  const [countryName, setCountryName] = useState('');
+  const [occupation, setOccupation] = useState(profile?.occupation || '');
+  const [interests, setInterests] = useState<string[]>(profile?.interests || []);
+  const [dreamGoals, setDreamGoals] = useState<string[]>(
+    profile?.dream_goals ? profile.dream_goals.split(', ') : []
+  );
+  const [bedtimeHour, setBedtimeHour] = useState('');
+  const [bedtimeMin, setBedtimeMin] = useState('');
+  const [bedtimeAmPm, setBedtimeAmPm] = useState('PM');
+  const [waketimeHour, setWaketimeHour] = useState('');
+  const [waketimeMin, setWaketimeMin] = useState('');
+  const [waketimeAmPm, setWaketimeAmPm] = useState('AM');
+  const [sleepQuality, setSleepQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('fair');
+  const [bio, setBio] = useState(profile?.bio || '');
+
+  // Location data
+  const [countryCode, setCountryCode] = useState('US');
+  const [countryName, setCountryName] = useState('United States');
   const [timezone, setTimezone] = useState('');
-  const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(language);
-
-  // Step 2: Occupation + Interests
-  const [occupation, setOccupation] = useState('');
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-
-  // Step 3: Sleep
-  const [avgSleepHours, setAvgSleepHours] = useState('');
-  const [sleepQuality, setSleepQuality] = useState('');
-  const [sleepTime, setSleepTime] = useState('');
-
-  // Step 4: Dream Goals + Bio
-  const [selectedDreamGoals, setSelectedDreamGoals] = useState<string[]>([]);
-  const [bio, setBio] = useState('');
-
-  // IP-based geolocation
   const [signupIp, setSignupIp] = useState('');
-  const [lastLoginIp, setLastLoginIp] = useState('');
+  const [detectingLocation, setDetectingLocation] = useState(true);
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Fetch location on mount
   useEffect(() => {
-    const detectLocation = async () => {
+    const fetchLocation = async () => {
       try {
         const response = await fetch('/api/get-location');
-        const data = await response.json();
+        const data: LocationData = await response.json();
 
-        if (data.country) {
-          setCountryCode(data.country);
-          setCountryName(data.countryName || data.country);
-          setTimezone(data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
-          setSignupIp(data.ip || '');
-          setLastLoginIp(data.ip || '');
+        setCountryCode(data.country_code);
+        setCountryName(data.country_name);
+        setTimezone(data.timezone);
+        setSignupIp(data.ip);
+
+        if (data.country_code === 'KR') {
+          setPreferredLanguage('ko');
         }
       } catch (error) {
-        console.error('Error detecting location:', error);
-        setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        console.error('Error fetching location:', error);
+      } finally {
+        setDetectingLocation(false);
       }
     };
 
-    detectLocation();
-  }, []);
+    if (!profile) {
+      fetchLocation();
+    } else {
+      setDetectingLocation(false);
+    }
+  }, [profile]);
+
+  // Generate year options
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({length: 87}, (_, i) => currentYear - 13 - i);
+
+  // Generate day options
+  const getDaysInMonth = (year: string, month: string) => {
+    if (!year || !month) return 31;
+    return new Date(parseInt(year), parseInt(month), 0).getDate();
+  };
+  const dayOptions = Array.from(
+    {length: getDaysInMonth(birthYear, birthMonth)},
+    (_, i) => i + 1
+  );
+
+  // Time options
+  const hourOptions = Array.from({length: 12}, (_, i) => i + 1);
+  const minuteOptions = ['00', '15', '30', '45'];
 
   const handleNext = () => {
     setError('');
 
     // Validate Step 1 (required fields)
     if (currentStep === 1) {
-      if (!fullName || !birthYear || !birthMonth || !birthDay) {
-        setError(t.fillRequired);
-        return;
-      }
-      if (!countryName || !preferredLanguage) {
+      if (!birthYear || !birthMonth || !birthDay) {
         setError(t.fillRequired);
         return;
       }
     }
 
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSubmit();
+    }
+  };
+
+  const handleSkip = () => {
+    setError('');
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -248,13 +337,16 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
     }
   };
 
-  const handleSkip = () => {
-    setError('');
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleSubmit();
+  const calculateAge = () => {
+    if (!birthYear || !birthMonth || !birthDay) return undefined;
+    const today = new Date();
+    const birth = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
     }
+    return age;
   };
 
   const handleSubmit = async () => {
@@ -262,770 +354,533 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
     setError('');
 
     try {
-      const birthDate = birthYear + '-' + birthMonth.padStart(2, '0') + '-' + birthDay.padStart(2, '0');
-      const age = new Date().getFullYear() - parseInt(birthYear);
-
-      const updateData = {
-        user_id: user.id,
+      const updateData: any = {
         full_name: fullName || null,
-        birth_date: birthDate,
-        age: age,
+        birth_date: birthYear && birthMonth && birthDay ? `${birthYear}-${birthMonth}-${birthDay}` : null,
+        age: calculateAge(),
         country_code: countryCode,
         country_name: countryName,
         timezone: timezone,
         preferred_language: preferredLanguage,
         occupation: occupation || null,
-        interests: selectedInterests.length > 0 ? selectedInterests : null,
+        interests: interests.length > 0 ? interests : null,
+        dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
         bio: bio || null,
-        dream_goals: selectedDreamGoals.length > 0 ? selectedDreamGoals.join(', ') : null,
-        sleep_schedule: (avgSleepHours || sleepQuality || sleepTime) ? {
-          avg_hours: avgSleepHours,
-          quality: sleepQuality,
-          sleep_time: sleepTime
-        } : null,
+        sleep_schedule: {
+          bedtime: bedtimeHour && bedtimeMin ? `${bedtimeHour}:${bedtimeMin} ${bedtimeAmPm}` : null,
+          wake_time: waketimeHour && waketimeMin ? `${waketimeHour}:${waketimeMin} ${waketimeAmPm}` : null,
+          sleep_quality: sleepQuality
+        },
         signup_ip: signupIp || null,
-        last_login_ip: lastLoginIp || null,
+        last_login_ip: signupIp || null,
         last_login_at: new Date().toISOString(),
-        profile_completed: true,
+        profile_completed: true
       };
 
       const { error } = await supabase
         .from('user_profiles')
-        .upsert(updateData, { onConflict: 'user_id' })
-        .select();
+        .upsert(
+          { user_id: user.id, ...updateData },
+          { onConflict: 'user_id' }
+        );
 
       if (error) throw error;
 
-      onComplete();
-    } catch (err) {
-      console.error('Error saving profile:', err);
-      setError(t.error);
+      if (onComplete) {
+        onComplete();
+      }
+    } catch (err: any) {
+      console.error('Profile update error:', err);
+      setError(err.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
+  const toggleInterest = (interest: string) => {
+    setInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
+  const toggleDreamGoal = (goal: string) => {
+    setDreamGoals(prev =>
+      prev.includes(goal)
+        ? prev.filter(g => g !== goal)
+        : [...prev, goal]
+    );
+  };
+
+  const getStepTitle = () => {
+    const titles = [
+      t.step1Title, t.step2Title, t.step3Title, t.step4Title,
+      t.step5Title, t.step6Title, t.step7Title
+    ];
+    return titles[currentStep - 1];
+  };
+
   return (
     <div style={{
-      position: 'fixed',
-      inset: 0,
       display: 'flex',
-      alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 50,
-      padding: '16px',
-      background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.3), rgba(159, 193, 130, 0.3), rgba(191, 210, 155, 0.3))',
-      backdropFilter: 'blur(8px)',
-      overflowY: 'auto',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+      padding: '2rem',
+      fontFamily: preferredLanguage === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '672px',
-        margin: '32px 0',
+        maxWidth: '600px',
+        padding: '40px',
+        borderRadius: '24px',
+        backdropFilter: 'blur(30px) saturate(180%)',
+        background: 'rgba(255, 255, 255, 0.85)',
+        border: '2px solid rgba(127, 176, 105, 0.3)',
+        boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2), 0 2px 8px rgba(0, 0, 0, 0.05)',
+        maxHeight: '90vh',
+        overflowY: 'auto'
       }}>
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.15), rgba(159, 193, 130, 0.15))',
-          backdropFilter: 'blur(40px)',
-          borderRadius: '24px',
-          padding: '32px',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h2 style={{
-              fontSize: '1.875rem',
-              fontWeight: 'bold',
-              color: 'white',
-              marginBottom: '8px',
-              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-            }}>{t.title}</h2>
-            <p style={{
-              color: 'rgba(167, 243, 208, 1)',
-              fontSize: '0.875rem',
-              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-              fontWeight: language === 'ko' ? 300 : 400,
-            }}>{t.subtitle}</p>
-          </div>
+        <style>{`
+          div::-webkit-scrollbar {
+            width: 8px;
+          }
+          div::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+          }
+          div::-webkit-scrollbar-thumb {
+            background: white;
+            border-radius: 10px;
+          }
+        `}</style>
 
-          {/* Progress Bar */}
-          <div style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{
-                fontSize: '0.875rem',
-                color: 'rgba(167, 243, 208, 1)',
-                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                fontWeight: language === 'ko' ? 300 : 400,
-              }}>
-                {t.step} {currentStep} {t.of} {totalSteps}
-              </span>
-              <span style={{
-                fontSize: '0.875rem',
-                color: 'rgba(167, 243, 208, 1)',
-                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                fontWeight: language === 'ko' ? 300 : 400,
-              }}>
-                {Math.round((currentStep / totalSteps) * 100)}%
-              </span>
-            </div>
-            <div style={{
-              width: '100%',
-              height: '8px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '9999px',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                height: '100%',
-                background: 'linear-gradient(to right, rgb(52, 211, 153), rgb(20, 184, 166))',
-                transition: 'all 0.3s',
-                width: `${(currentStep / totalSteps) * 100}%`,
-              }} />
-            </div>
-          </div>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <h2 style={{
+            fontSize: '28px',
+            fontWeight: '600',
+            color: 'var(--matcha-dark)',
+            marginBottom: '8px',
+            lineHeight: '1.3'
+          }}>{t.profileSetup}</h2>
+          <p style={{
+            fontSize: '14px',
+            color: 'var(--sage)',
+            lineHeight: '1.4',
+            opacity: 0.85,
+            marginBottom: '8px'
+          }}>{t.subtitle}</p>
+          <p style={{
+            fontSize: '12px',
+            color: 'var(--matcha-green)',
+            lineHeight: '1.3'
+          }}>{t.step} {currentStep} {t.of} {totalSteps}</p>
+        </div>
 
-          {/* Step Content */}
+        {/* Step Title */}
+        <h3 style={{
+          fontSize: '18px',
+          fontWeight: '600',
+          color: 'var(--matcha-dark)',
+          marginBottom: '20px',
+          lineHeight: '1.3',
+          textAlign: 'center'
+        }}>{getStepTitle()}</h3>
+
+        {/* Step Content */}
+        <div style={{ marginBottom: '24px' }}>
+          {/* Step 1: Birth Date, Country, Language */}
           {currentStep === 1 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '8px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                }}>{t.step1Title}</h3>
-                <p style={{
-                  color: 'rgba(167, 243, 208, 1)',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.step1Subtitle}</p>
-              </div>
+            <>
+              {detectingLocation ? (
+                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--matcha-green)' }}>
+                  {t.detectingLocation}
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                      {t.dateOfBirth}
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                      <select
+                        value={birthYear}
+                        onChange={(e) => setBirthYear(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                      >
+                        <option value="">{t.year}</option>
+                        {yearOptions.map(year => (
+                          <option key={year} value={year}>{year}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={birthMonth}
+                        onChange={(e) => setBirthMonth(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                      >
+                        <option value="">{t.month}</option>
+                        {monthOptions.map(month => (
+                          <option key={month.value} value={month.value}>
+                            {preferredLanguage === 'ko' ? month.labelKo : month.label}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={birthDay}
+                        onChange={(e) => setBirthDay(e.target.value)}
+                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                      >
+                        <option value="">{t.day}</option>
+                        {dayOptions.map(day => (
+                          <option key={day} value={day.toString().padStart(2, '0')}>{day}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-              {/* Full Name */}
-              <div>
-                <label htmlFor="fullName" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.fullName} *</label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder={t.namePlaceholder}
-                  autoComplete="name"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  }}
-                />
-              </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                      {t.country}
+                    </label>
+                    <select
+                      value={countryCode}
+                      onChange={(e) => {
+                        const selected = COUNTRIES.find(c => c.code === e.target.value);
+                        setCountryCode(e.target.value);
+                        setCountryName(selected?.name || e.target.value);
+                      }}
+                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                    >
+                      {COUNTRIES.map(country => (
+                        <option key={country.code} value={country.code}>{country.name}</option>
+                      ))}
+                    </select>
+                  </div>
 
-              {/* Birth Date */}
-              <div>
-                <label htmlFor="birthYear" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.birthDate} *</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                  <input
-                    id="birthYear"
-                    name="birthYear"
-                    type="number"
-                    placeholder={t.year}
-                    value={birthYear}
-                    onChange={(e) => setBirthYear(e.target.value)}
-                    autoComplete="bday-year"
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                      {t.preferredLanguage}
+                    </label>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('en')}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '12px',
+                          border: '2px solid',
+                          borderColor: preferredLanguage === 'en' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                          background: preferredLanguage === 'en' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                          color: 'var(--matcha-dark)',
+                          fontSize: '14px',
+                          fontWeight: preferredLanguage === 'en' ? '600' : '400',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        English
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreferredLanguage('ko')}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          borderRadius: '12px',
+                          border: '2px solid',
+                          borderColor: preferredLanguage === 'ko' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                          background: preferredLanguage === 'ko' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                          color: 'var(--matcha-dark)',
+                          fontSize: '14px',
+                          fontWeight: preferredLanguage === 'ko' ? '600' : '400',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        한국어
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* Step 2: Name */}
+          {currentStep === 2 && (
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                {t.name}
+              </label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder={t.namePlaceholder}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
+              />
+            </div>
+          )}
+
+          {/* Step 3: Occupation */}
+          {currentStep === 3 && (
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                {t.occupation}
+              </label>
+              <select
+                value={occupation}
+                onChange={(e) => setOccupation(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+              >
+                <option value="">{t.selectOccupation}</option>
+                {OCCUPATION_OPTIONS.map(option => (
+                  <option key={option} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Step 4: Interests */}
+          {currentStep === 4 && (
+            <div>
+              <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
+                {t.interestsDesc}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
+                {INTEREST_OPTIONS.map(interest => (
+                  <button
+                    key={interest}
+                    type="button"
+                    onClick={() => toggleInterest(interest)}
                     style={{
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      fontSize: '0.95rem',
-                      outline: 'none',
-                      fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                    }}
-                    min="1900"
-                    max={new Date().getFullYear()}
-                  />
-                  <select
-                    id="birthMonth"
-                    name="birthMonth"
-                    value={birthMonth}
-                    onChange={(e) => setBirthMonth(e.target.value)}
-                    autoComplete="bday-month"
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      fontSize: '0.95rem',
-                      outline: 'none',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '2px solid',
+                      borderColor: interests.includes(interest) ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                      background: interests.includes(interest) ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                      color: 'var(--matcha-dark)',
+                      fontSize: '13px',
                       cursor: 'pointer',
-                      fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                      transition: 'all 0.2s'
                     }}
                   >
-                    <option value="" style={{ background: '#065f46' }}>{t.month}</option>
-                    {t.months.map((monthName, index) => (
-                      <option key={index} value={String(index + 1).padStart(2, '0')} style={{ background: '#065f46' }}>
-                        {monthName}
-                      </option>
+                    {interest}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Sleep Pattern */}
+          {currentStep === 5 && (
+            <div>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                  {t.typicalBedtime}
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  <select
+                    value={bedtimeHour}
+                    onChange={(e) => setBedtimeHour(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    <option value="">{t.hour}</option>
+                    {hourOptions.map(hour => (
+                      <option key={hour} value={hour}>{hour}</option>
                     ))}
                   </select>
-                  <input
-                    id="birthDay"
-                    name="birthDay"
-                    type="number"
-                    placeholder={t.day}
-                    value={birthDay}
-                    onChange={(e) => setBirthDay(e.target.value)}
-                    autoComplete="bday-day"
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      fontSize: '0.95rem',
-                      outline: 'none',
-                      fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                    }}
-                    min="1"
-                    max="31"
-                  />
+                  <select
+                    value={bedtimeMin}
+                    onChange={(e) => setBedtimeMin(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    <option value="">{t.min}</option>
+                    {minuteOptions.map(min => (
+                      <option key={min} value={min}>{min}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={bedtimeAmPm}
+                    onChange={(e) => setBedtimeAmPm(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    <option value="AM">{t.am}</option>
+                    <option value="PM">{t.pm}</option>
+                  </select>
                 </div>
               </div>
 
-              {/* Country */}
-              <div>
-                <label htmlFor="country" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>
-                  {t.country} *
-                  {countryName && (
-                    <span style={{ marginLeft: '8px', fontSize: '0.75rem', color: 'rgba(110, 231, 183, 1)' }}>
-                      ({t.autoDetected})
-                    </span>
-                  )}
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                  {t.typicalWakeTime}
                 </label>
-                <input
-                  id="country"
-                  name="country"
-                  type="text"
-                  value={countryName}
-                  onChange={(e) => setCountryName(e.target.value)}
-                  autoComplete="country-name"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  }}
-                />
-              </div>
-
-              {/* Language */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.language} *</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setPreferredLanguage('en')}
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: preferredLanguage === 'en' ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                      background: preferredLanguage === 'en' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                      color: preferredLanguage === 'en' ? 'white' : 'rgba(167, 243, 208, 1)',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                      fontWeight: language === 'ko' ? 300 : 400,
-                    }}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  <select
+                    value={waketimeHour}
+                    onChange={(e) => setWaketimeHour(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
                   >
-                    {t.english}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreferredLanguage('ko')}
-                    style={{
-                      padding: '12px 16px',
-                      borderRadius: '12px',
-                      border: preferredLanguage === 'ko' ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                      background: preferredLanguage === 'ko' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                      color: preferredLanguage === 'ko' ? 'white' : 'rgba(167, 243, 208, 1)',
-                      fontSize: '0.875rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                      fontWeight: language === 'ko' ? 300 : 400,
-                    }}
+                    <option value="">{t.hour}</option>
+                    {hourOptions.map(hour => (
+                      <option key={hour} value={hour}>{hour}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={waketimeMin}
+                    onChange={(e) => setWaketimeMin(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
                   >
-                    {t.korean}
-                  </button>
+                    <option value="">{t.min}</option>
+                    {minuteOptions.map(min => (
+                      <option key={min} value={min}>{min}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={waketimeAmPm}
+                    onChange={(e) => setWaketimeAmPm(e.target.value)}
+                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    <option value="AM">{t.am}</option>
+                    <option value="PM">{t.pm}</option>
+                  </select>
                 </div>
               </div>
-            </div>
-          )}
-
-          {currentStep === 2 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '8px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                }}>{t.step2Title}</h3>
-                <p style={{
-                  color: 'rgba(167, 243, 208, 1)',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.step2Subtitle}</p>
-              </div>
 
               <div>
-                <label htmlFor="occupation" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.occupation}</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
+                  {t.sleepQuality}
+                </label>
                 <select
-                  id="occupation"
-                  name="occupation"
-                  value={occupation}
-                  onChange={(e) => setOccupation(e.target.value)}
-                  autoComplete="organization-title"
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    cursor: 'pointer',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  }}
+                  value={sleepQuality}
+                  onChange={(e) => setSleepQuality(e.target.value as any)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
                 >
-                  <option value="" style={{ background: '#065f46' }}>{t.occupationPlaceholder}</option>
-                  {t.occupations.map((occ) => (
-                    <option key={occ} value={occ} style={{ background: '#065f46' }}>
-                      {occ}
-                    </option>
-                  ))}
+                  <option value="poor">{t.poor}</option>
+                  <option value="fair">{t.fair}</option>
+                  <option value="good">{t.good}</option>
+                  <option value="excellent">{t.excellent}</option>
                 </select>
               </div>
+            </div>
+          )}
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.interests}</label>
-                <p style={{
-                  color: 'rgba(110, 231, 183, 0.7)',
-                  fontSize: '0.75rem',
-                  marginBottom: '16px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.interestsSubtitle}</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-                  {t.interestOptions.map((interest) => (
-                    <button
-                      key={interest}
-                      type="button"
-                      onClick={() => {
-                        setSelectedInterests(prev =>
-                          prev.includes(interest)
-                            ? prev.filter(i => i !== interest)
-                            : [...prev, interest]
-                        );
-                      }}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: selectedInterests.includes(interest) ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                        background: selectedInterests.includes(interest) ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                        color: selectedInterests.includes(interest) ? 'white' : 'rgba(167, 243, 208, 1)',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                        fontWeight: language === 'ko' ? 300 : 400,
-                      }}
-                    >
-                      {interest}
-                    </button>
-                  ))}
-                </div>
+          {/* Step 6: Dream Goals */}
+          {currentStep === 6 && (
+            <div>
+              <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
+                {t.dreamGoalsDesc}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {DREAM_GOAL_OPTIONS.map(goal => (
+                  <button
+                    key={goal}
+                    type="button"
+                    onClick={() => toggleDreamGoal(goal)}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid',
+                      borderColor: dreamGoals.includes(goal) ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
+                      background: dreamGoals.includes(goal) ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
+                      color: 'var(--matcha-dark)',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    {goal}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          {currentStep === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '8px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                }}>{t.step3Title}</h3>
-                <p style={{
-                  color: 'rgba(167, 243, 208, 1)',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.step3Subtitle}</p>
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.avgSleepHours}</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {t.sleepHourOptions.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setAvgSleepHours(option)}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: avgSleepHours === option ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                        background: avgSleepHours === option ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                        color: avgSleepHours === option ? 'white' : 'rgba(167, 243, 208, 1)',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                        fontWeight: language === 'ko' ? 300 : 400,
-                      }}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.sleepQuality}</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {t.sleepQualityOptions.map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => setSleepQuality(option)}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: sleepQuality === option ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                        background: sleepQuality === option ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                        color: sleepQuality === option ? 'white' : 'rgba(167, 243, 208, 1)',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                        fontWeight: language === 'ko' ? 300 : 400,
-                      }}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="sleepTime" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.sleepTime}</label>
-                <input
-                  id="sleepTime"
-                  name="sleepTime"
-                  type="text"
-                  value={sleepTime}
-                  onChange={(e) => setSleepTime(e.target.value)}
-                  placeholder={t.sleepTimePlaceholder}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  }}
-                />
-              </div>
+          {/* Step 7: Bio */}
+          {currentStep === 7 && (
+            <div>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder={t.additionalNotes}
+                rows={6}
+                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)', resize: 'vertical' }}
+              />
             </div>
           )}
+        </div>
 
-          {currentStep === 4 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div>
-                <h3 style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginBottom: '8px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                }}>{t.step4Title}</h3>
-                <p style={{
-                  color: 'rgba(167, 243, 208, 1)',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.step4Subtitle}</p>
-              </div>
+        {/* Error Message */}
+        {error && (
+          <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#dc2626', fontSize: '14px', lineHeight: '1.4', marginBottom: '16px' }}>
+            {error}
+          </div>
+        )}
 
-              <div>
-                <label style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.dreamGoals}</label>
-                <p style={{
-                  color: 'rgba(110, 231, 183, 0.7)',
-                  fontSize: '0.75rem',
-                  marginBottom: '16px',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.dreamGoalsSubtitle}</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                  {t.dreamGoalOptions.map((goal) => (
-                    <button
-                      key={goal}
-                      type="button"
-                      onClick={() => {
-                        setSelectedDreamGoals(prev =>
-                          prev.includes(goal)
-                            ? prev.filter(g => g !== goal)
-                            : [...prev, goal]
-                        );
-                      }}
-                      style={{
-                        padding: '12px 16px',
-                        borderRadius: '12px',
-                        border: selectedDreamGoals.includes(goal) ? '2px solid rgba(52, 211, 153, 1)' : '2px solid rgba(255, 255, 255, 0.2)',
-                        background: selectedDreamGoals.includes(goal) ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                        color: selectedDreamGoals.includes(goal) ? 'white' : 'rgba(167, 243, 208, 1)',
-                        fontSize: '0.875rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                        fontWeight: language === 'ko' ? 300 : 400,
-                      }}
-                    >
-                      {goal}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="bio" style={{
-                  display: 'block',
-                  color: 'rgba(167, 243, 208, 1)',
-                  marginBottom: '8px',
-                  fontSize: '0.875rem',
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 400,
-                }}>{t.bio}</label>
-                <textarea
-                  id="bio"
-                  name="bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder={t.bioPlaceholder}
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: 'white',
-                    fontSize: '0.95rem',
-                    outline: 'none',
-                    resize: 'none',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              marginTop: '24px',
-              padding: '16px',
-              background: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid rgba(239, 68, 68, 0.5)',
-              borderRadius: '12px',
-              color: 'rgba(252, 165, 165, 1)',
-              fontSize: '0.875rem',
-              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-              fontWeight: language === 'ko' ? 300 : 400,
-            }}>
-              {error}
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-            {/* Back Button */}
-            {currentStep > 1 && (
-              <button
-                onClick={handleBack}
-                disabled={loading}
-                style={{
-                  flex: 1,
-                  padding: '12px 24px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'white',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.3s',
-                  opacity: loading ? 0.5 : 1,
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 500,
-                  fontSize: '0.95rem',
-                }}
-              >
-                {t.back}
-              </button>
-            )}
-
-            {/* Skip Button */}
-            {currentStep > 1 && currentStep < totalSteps && (
-              <button
-                onClick={handleSkip}
-                disabled={loading}
-                style={{
-                  flex: 1,
-                  padding: '12px 24px',
-                  borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'rgba(167, 243, 208, 1)',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.3s',
-                  opacity: loading ? 0.5 : 1,
-                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                  fontWeight: language === 'ko' ? 300 : 500,
-                  fontSize: '0.95rem',
-                }}
-              >
-                {t.skip}
-              </button>
-            )}
-
-            {/* Next/Complete Button */}
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {currentStep > 1 && (
             <button
-              onClick={handleNext}
+              onClick={handleBack}
+              style={{
+                flex: 1,
+                padding: '12px',
+                borderRadius: '12px',
+                border: '2px solid rgba(127, 176, 105, 0.3)',
+                background: 'transparent',
+                color: 'var(--matcha-dark)',
+                fontSize: '15px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              {t.back}
+            </button>
+          )}
+
+          {currentStep > 1 && currentStep < totalSteps && (
+            <button
+              onClick={handleSkip}
               disabled={loading}
               style={{
                 flex: 1,
-                padding: '12px 24px',
+                padding: '12px',
                 borderRadius: '12px',
-                background: 'linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166))',
-                color: 'white',
-                fontWeight: language === 'ko' ? 400 : 500,
+                border: '2px solid rgba(127, 176, 105, 0.3)',
+                background: 'transparent',
+                color: 'var(--matcha-dark)',
+                fontSize: '15px',
+                fontWeight: '500',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s',
-                opacity: loading ? 0.5 : 1,
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                border: 'none',
-                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
-                fontSize: '0.95rem',
+                opacity: loading ? 0.5 : 1
               }}
             >
-              {loading ? t.saving : currentStep === totalSteps ? t.complete : t.next}
+              {t.skip}
             </button>
-          </div>
+          )}
+
+          <button
+            onClick={currentStep === totalSteps ? handleSubmit : handleNext}
+            disabled={loading || (currentStep === 1 && detectingLocation)}
+            style={{
+              flex: 2,
+              padding: '12px',
+              borderRadius: '12px',
+              border: 'none',
+              background: loading ? '#9ca3af' : 'var(--matcha-green)',
+              color: 'white',
+              fontSize: '15px',
+              fontWeight: '600',
+              cursor: (loading || (currentStep === 1 && detectingLocation)) ? 'not-allowed' : 'pointer',
+              opacity: (loading || (currentStep === 1 && detectingLocation)) ? 0.5 : 1,
+              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)'
+            }}
+          >
+            {loading ? t.saving : (currentStep === totalSteps ? t.complete : t.next)}
+          </button>
         </div>
       </div>
     </div>
