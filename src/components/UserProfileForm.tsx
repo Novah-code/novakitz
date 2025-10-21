@@ -272,7 +272,7 @@ const monthOptions = [
 
 export default function UserProfileForm({ user, profile, onComplete }: UserProfileFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 7;
+  const totalSteps = 6;
 
   // Language state (must be first to use in translations)
   const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
@@ -291,7 +291,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [bedtime, setBedtime] = useState('');
   const [waketime, setWaketime] = useState('');
   const [sleepQuality, setSleepQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('fair');
-  const [bio, setBio] = useState(profile?.bio || '');
 
   // Location data
   const [countryCode, setCountryCode] = useState('US');
@@ -406,7 +405,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         occupation: occupation || null,
         interests: interests.length > 0 ? interests : null,
         dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
-        bio: bio || null,
         sleep_schedule: (bedtime || waketime || sleepQuality) ? {
           bedtime: bedtime || null,
           wake_time: waketime || null,
@@ -454,7 +452,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const getStepTitle = () => {
     const titles = [
       t.step1Title, t.step2Title, t.step3Title, t.step4Title,
-      t.step5Title, t.step6Title, t.step7Title
+      t.step5Title, t.step6Title
     ];
     return titles[currentStep - 1];
   };
@@ -765,7 +763,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
               <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
                 {t.dreamGoalsDesc}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {DREAM_GOAL_OPTIONS[preferredLanguage].map(goal => (
                   <button
                     key={goal}
@@ -788,19 +786,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-
-          {/* Step 7: Bio */}
-          {currentStep === 7 && (
-            <div>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder={t.additionalNotes}
-                rows={6}
-                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)', resize: 'vertical' }}
-              />
             </div>
           )}
         </div>
