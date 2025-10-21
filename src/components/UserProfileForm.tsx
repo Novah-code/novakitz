@@ -297,7 +297,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [countryCode, setCountryCode] = useState('US');
   const [countryName, setCountryName] = useState('United States');
   const [timezone, setTimezone] = useState('');
-  const [signupIp, setSignupIp] = useState('');
   const [detectingLocation, setDetectingLocation] = useState(true);
 
   const [loading, setLoading] = useState(false);
@@ -313,7 +312,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         setCountryCode(data.country_code);
         setCountryName(data.country_name);
         setTimezone(data.timezone);
-        setSignupIp(data.ip);
 
         if (data.country_code === 'KR') {
           setPreferredLanguage('ko');
@@ -414,8 +412,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
           wake_time: waketime || null,
           sleep_quality: sleepQuality
         } : null,
-        signup_ip: signupIp || null,
-        last_login_ip: signupIp || null,
         profile_completed: true
       };
 
