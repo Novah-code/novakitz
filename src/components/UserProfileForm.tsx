@@ -416,7 +416,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         } : null,
         signup_ip: signupIp || null,
         last_login_ip: signupIp || null,
-        last_login_at: new Date().toISOString(),
         profile_completed: true
       };
 
