@@ -184,7 +184,6 @@ export default function SimpleDreamInterfaceWithAuth() {
     return (
       <UserProfileForm
         user={user}
-        language={language}
         onComplete={() => {
           setHasProfile(true);
           // Reload profile to get language preference
