@@ -310,10 +310,10 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
     width: '100%',
     padding: '12px 16px',
     borderRadius: '12px',
-    background: 'rgba(255, 255, 255, 0.1)',
+    background: 'rgba(255, 255, 255, 0.8)',
     backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    color: 'white',
+    border: '1px solid rgba(127, 176, 105, 0.3)',
+    color: 'var(--matcha-dark)',
     fontSize: '0.95rem',
     outline: 'none',
     fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
@@ -321,7 +321,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    color: 'rgba(167, 243, 208, 1)',
+    color: 'var(--matcha-dark)',
     marginBottom: '8px',
     fontSize: '0.875rem',
     fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
@@ -331,9 +331,9 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
   const buttonStyle: React.CSSProperties = {
     padding: '12px 16px',
     borderRadius: '12px',
-    border: '2px solid rgba(255, 255, 255, 0.2)',
-    background: 'rgba(255, 255, 255, 0.05)',
-    color: 'rgba(167, 243, 208, 1)',
+    border: '2px solid rgba(127, 176, 105, 0.3)',
+    background: 'rgba(255, 255, 255, 0.1)',
+    color: 'var(--matcha-dark)',
     fontSize: '0.875rem',
     cursor: 'pointer',
     transition: 'all 0.2s',
@@ -343,8 +343,8 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
 
   const buttonSelectedStyle: React.CSSProperties = {
     ...buttonStyle,
-    background: 'rgba(16, 185, 129, 0.3)',
-    borderColor: 'rgba(52, 211, 153, 1)',
+    background: 'rgba(127, 176, 105, 0.4)',
+    borderColor: 'var(--matcha-green)',
     color: 'white',
   };
 
@@ -359,7 +359,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
         }}>{t.step1Title}</h3>
         <p style={{
-          color: 'rgba(167, 243, 208, 1)',
+          color: 'var(--sage)',
           fontSize: '0.875rem',
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
           fontWeight: language === 'ko' ? 300 : 400,
@@ -502,7 +502,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
         }}>{t.step2Title}</h3>
         <p style={{
-          color: 'rgba(167, 243, 208, 1)',
+          color: 'var(--sage)',
           fontSize: '0.875rem',
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
           fontWeight: language === 'ko' ? 300 : 400,
@@ -580,7 +580,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
         }}>{t.step3Title}</h3>
         <p style={{
-          color: 'rgba(167, 243, 208, 1)',
+          color: 'var(--sage)',
           fontSize: '0.875rem',
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
           fontWeight: language === 'ko' ? 300 : 400,
@@ -665,7 +665,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
         }}>{t.step4Title}</h3>
         <p style={{
-          color: 'rgba(167, 243, 208, 1)',
+          color: 'var(--sage)',
           fontSize: '0.875rem',
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
           fontWeight: language === 'ko' ? 300 : 400,
@@ -753,7 +753,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       justifyContent: 'center',
       zIndex: 50,
       padding: '16px',
-      background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.95) 0%, rgba(19, 78, 74, 0.95) 50%, rgba(22, 78, 99, 0.95) 100%)',
+      background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.3) 0%, rgba(159, 193, 130, 0.3) 50%, rgba(191, 210, 155, 0.3) 100%)',
       backdropFilter: 'blur(8px)',
       overflowY: 'auto',
     }}>
@@ -763,7 +763,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
         margin: '32px 0',
       }}>
         <div style={{
-          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%)',
+          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(159, 193, 130, 0.15) 100%)',
           backdropFilter: 'blur(40px)',
           borderRadius: '24px',
           padding: '32px',
@@ -780,7 +780,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
               fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
             }}>{t.title}</h2>
             <p style={{
-              color: 'rgba(167, 243, 208, 1)',
+              color: 'var(--sage)',
               fontSize: '0.875rem',
               fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
               fontWeight: language === 'ko' ? 300 : 400,
@@ -792,7 +792,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{
                 fontSize: '0.875rem',
-                color: 'rgba(167, 243, 208, 1)',
+                color: 'var(--matcha-dark)',
                 fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
                 fontWeight: language === 'ko' ? 300 : 400,
               }}>
@@ -800,7 +800,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
               </span>
               <span style={{
                 fontSize: '0.875rem',
-                color: 'rgba(167, 243, 208, 1)',
+                color: 'var(--matcha-dark)',
                 fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
                 fontWeight: language === 'ko' ? 300 : 400,
               }}>
@@ -810,13 +810,13 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             <div style={{
               width: '100%',
               height: '8px',
-              background: 'rgba(255, 255, 255, 0.1)',
+              background: 'rgba(255, 255, 255, 0.2)',
               borderRadius: '9999px',
               overflow: 'hidden',
             }}>
               <div style={{
                 height: '100%',
-                background: 'linear-gradient(to right, rgb(52, 211, 153), rgb(20, 184, 166))',
+                background: 'var(--matcha-green)',
                 transition: 'all 0.3s',
                 width: `${(currentStep / totalSteps) * 100}%`,
               }} />
@@ -919,7 +919,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
                 flex: 1,
                 padding: '12px 24px',
                 borderRadius: '12px',
-                background: 'linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166))',
+                background: 'var(--matcha-green)',
                 color: 'white',
                 fontWeight: language === 'ko' ? 400 : 500,
                 cursor: loading ? 'not-allowed' : 'pointer',
@@ -932,11 +932,11 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.background = 'linear-gradient(to right, rgb(5, 150, 105), rgb(17, 94, 89))';
+                  e.currentTarget.style.background = '#6d996b';
                 }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166))';
+                e.currentTarget.style.background = 'var(--matcha-green)';
               }}
             >
               {loading ? t.saving : currentStep === totalSteps ? t.complete : t.next}
