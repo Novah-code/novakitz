@@ -314,7 +314,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       justifyContent: 'center',
       zIndex: 50,
       padding: '16px',
-      background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.95), rgba(19, 78, 74, 0.95), rgba(22, 78, 99, 0.95))',
+      background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.3), rgba(159, 193, 130, 0.3), rgba(191, 210, 155, 0.3))',
       backdropFilter: 'blur(8px)',
       overflowY: 'auto',
     }}>
@@ -324,7 +324,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
         margin: '32px 0',
       }}>
         <div style={{
-          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(20, 184, 166, 0.2))',
+          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.15), rgba(159, 193, 130, 0.15))',
           backdropFilter: 'blur(40px)',
           borderRadius: '24px',
           padding: '32px',
