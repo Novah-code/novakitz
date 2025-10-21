@@ -42,6 +42,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   // Check if user has a completed profile
   const checkUserProfile = async (userId: string) => {
+    console.log('checkUserProfile called for userId:', userId);
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -49,12 +50,15 @@ export default function SimpleDreamInterfaceWithAuth() {
         .eq('user_id', userId)
         .single();
 
+      console.log('Profile query result - data:', data, 'error:', error);
+
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         console.error('Error checking profile:', error);
         return false;
       }
 
       if (data) {
+        console.log('Profile found! profile_completed:', data.profile_completed);
         // Load user's preferred language
         if (data.preferred_language) {
           setLanguage(data.preferred_language as 'en' | 'ko');
@@ -65,6 +69,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         return data.profile_completed === true;
       }
 
+      console.log('No profile data found - should show form');
       return false;
     } catch (error) {
       console.error('Error checking profile:', error);
@@ -84,6 +89,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         if (currentUser) {
           // Check if user has profile
           const profileExists = await checkUserProfile(currentUser.id);
+          console.log('Profile check result:', profileExists);
           setHasProfile(profileExists);
           setCheckingProfile(false);
         } else {
@@ -110,6 +116,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         try {
           setCheckingProfile(true);
           const profileExists = await checkUserProfile(currentUser.id);
+          console.log('Profile check result (auth change):', profileExists);
           setHasProfile(profileExists);
           setCheckingProfile(false);
         } catch (error) {
@@ -129,7 +136,10 @@ export default function SimpleDreamInterfaceWithAuth() {
     await supabase.auth.signOut();
   };
 
-  if (loading || checkingProfile) {
+  console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
+
+  // Only show loading on initial load, not on profile checks
+  if (loading) {
     return (
       <div style={{
         display: 'flex',
@@ -170,9 +180,11 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   // Show profile setup if user doesn't have a profile
   if (user && hasProfile === false) {
+    console.log('Showing profile form for user:', user.id);
     return (
       <UserProfileForm
         user={user}
+        language={language}
         onComplete={() => {
           setHasProfile(true);
           // Reload profile to get language preference
@@ -311,6 +323,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               <button
                 onClick={() => {
+                  console.log('History button clicked!');
                   setShowHistory(true);
                   setMenuOpen(false);
                 }}
@@ -344,6 +357,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               <button
                 onClick={() => {
+                  console.log('Insights button clicked!');
                   setShowInsights(true);
                   setMenuOpen(false);
                 }}

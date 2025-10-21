@@ -222,9 +222,8 @@ export default function DreamApp() {
     return (
       <UserProfileForm
         user={user}
-        profile={userProfile || undefined}
+        language={(userProfile?.preferred_language as 'en' | 'ko') || 'en'}
         onComplete={handleProfileComplete}
-        onCancel={() => setShowProfileForm(false)}
       />
     );
   }

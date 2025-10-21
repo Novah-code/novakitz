@@ -117,7 +117,7 @@ const translations = {
   ko: {
     dreamEntry: '꿈 기록',
     myDream: '나의 꿈',
-    titlePlaceholder: '꿈에 제목을 붙여보세요...',
+    titlePlaceholder: '제목',
     listeningVoice: '음성을 듣고 있습니다...',
     voiceInProgress: '음성 인식 진행 중...',
     dreamPlaceholder: '어떤 꿈을 꾸셨나요? (최소 10자 이상 작성해주세요)',
@@ -359,6 +359,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
         if (error) {
           console.error('Error saving to Supabase:', error);
+          console.error('Error details:', error.message, error.details, error.hint);
+          console.error('Error code:', error.code);
           // Fall back to localStorage on error
           const updatedDreams = [newDream, ...savedDreams];
           setSavedDreams(updatedDreams);
