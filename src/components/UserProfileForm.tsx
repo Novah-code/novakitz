@@ -26,6 +26,8 @@ const translations = {
     // Step 1: Required fields
     step1Title: 'Basic Information',
     step1Subtitle: 'Required to get started',
+    fullName: 'Full Name',
+    namePlaceholder: 'Enter your name',
     birthDate: 'Birth Date',
     year: 'Year',
     month: 'Month',
@@ -45,14 +47,10 @@ const translations = {
     step2Title: 'Tell us about yourself',
     step2Subtitle: 'Optional - helps understand your dream context',
     occupation: 'Occupation',
-    occupationPlaceholder: 'e.g., Student, Designer, Developer',
+    occupationPlaceholder: 'Select your occupation',
     interests: 'Interests',
     interestsSubtitle: 'Select interests that might help us understand your dreams better (multiple selection allowed)',
     interestOptions: ['Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies', 'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing', 'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'],
-
-    // Name field (now in Step 1)
-    fullName: 'Full Name',
-    namePlaceholder: 'Enter your name',
 
     // Step 3: Sleep
     step3Title: 'Tell us about your sleep',
@@ -104,6 +102,8 @@ const translations = {
 
     step1Title: '기본 정보',
     step1Subtitle: '시작하기 위해 필요한 정보입니다',
+    fullName: '이름',
+    namePlaceholder: '이름을 입력하세요',
     birthDate: '생년월일',
     year: '년',
     month: '월',
@@ -125,9 +125,6 @@ const translations = {
     interests: '관심사',
     interestsSubtitle: '꿈을 더 잘 이해하는 데 도움이 될 수 있는 관심사를 선택하세요 (다중 선택 가능)',
     interestOptions: ['심리학', '자기계발', '명상', '요가', '독서', '영화', '음악', '여행', '요리', '운동', '예술', '글쓰기', '게임', '기술', '자연', '동물', '패션', '뷰티'],
-
-    fullName: '이름',
-    namePlaceholder: '이름을 입력하세요',
 
     step3Title: '수면 패턴을 알려주세요',
     step3Subtitle: '선택사항 - 수면 패턴 이해하기',
@@ -173,7 +170,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Step 1: Required fields (Name, Birth Date, Country, Language)
+  // Step 1: Required fields
   const [fullName, setFullName] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
@@ -265,7 +262,6 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
     setError('');
 
     try {
-      // Calculate age
       const birthDate = birthYear + '-' + birthMonth.padStart(2, '0') + '-' + birthDay.padStart(2, '0');
       const age = new Date().getFullYear() - parseInt(birthYear);
 
@@ -309,35 +305,70 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
     }
   };
 
-  const renderProgressBar = () => (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-emerald-200">
-          {t.step} {currentStep} {t.of} {totalSteps}
-        </span>
-        <span className="text-sm text-emerald-200">
-          {Math.round((currentStep / totalSteps) * 100)}%
-        </span>
-      </div>
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-300"
-          style={{ width: (currentStep / totalSteps) * 100 + '%' }}
-        />
-      </div>
-    </div>
-  );
+  // Shared styles
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    color: 'white',
+    fontSize: '0.95rem',
+    outline: 'none',
+    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    color: 'rgba(167, 243, 208, 1)',
+    marginBottom: '8px',
+    fontSize: '0.875rem',
+    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+    fontWeight: language === 'ko' ? 300 : 400,
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '2px solid rgba(255, 255, 255, 0.2)',
+    background: 'rgba(255, 255, 255, 0.05)',
+    color: 'rgba(167, 243, 208, 1)',
+    fontSize: '0.875rem',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+    fontWeight: language === 'ko' ? 300 : 400,
+  };
+
+  const buttonSelectedStyle: React.CSSProperties = {
+    ...buttonStyle,
+    background: 'rgba(16, 185, 129, 0.3)',
+    borderColor: 'rgba(52, 211, 153, 1)',
+    color: 'white',
+  };
 
   const renderStep1 = () => (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">{t.step1Title}</h3>
-        <p className="text-emerald-200 text-sm">{t.step1Subtitle}</p>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '8px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        }}>{t.step1Title}</h3>
+        <p style={{
+          color: 'rgba(167, 243, 208, 1)',
+          fontSize: '0.875rem',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.step1Subtitle}</p>
       </div>
 
       {/* Full Name */}
       <div>
-        <label htmlFor="fullName" className="block text-emerald-100 mb-2 text-sm">{t.fullName} *</label>
+        <label htmlFor="fullName" style={labelStyle}>{t.fullName} *</label>
         <input
           id="fullName"
           name="fullName"
@@ -346,14 +377,14 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           onChange={(e) => setFullName(e.target.value)}
           placeholder={t.namePlaceholder}
           autoComplete="name"
-          className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+          style={inputStyle}
         />
       </div>
 
       {/* Birth Date */}
       <div>
-        <label htmlFor="birthYear" className="block text-emerald-100 mb-2 text-sm">{t.birthDate} *</label>
-        <div className="grid grid-cols-3 gap-3">
+        <label htmlFor="birthYear" style={labelStyle}>{t.birthDate} *</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
           <input
             id="birthYear"
             name="birthYear"
@@ -362,7 +393,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             value={birthYear}
             onChange={(e) => setBirthYear(e.target.value)}
             autoComplete="bday-year"
-            className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+            style={inputStyle}
             min="1900"
             max={new Date().getFullYear()}
           />
@@ -372,11 +403,11 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             value={birthMonth}
             onChange={(e) => setBirthMonth(e.target.value)}
             autoComplete="bday-month"
-            className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 appearance-none cursor-pointer"
+            style={{...inputStyle, cursor: 'pointer'}}
           >
-            <option value="" className="bg-emerald-900">{t.month}</option>
+            <option value="" style={{ background: '#065f46' }}>{t.month}</option>
             {t.months.map((monthName, index) => (
-              <option key={index} value={String(index + 1).padStart(2, '0')} className="bg-emerald-900">
+              <option key={index} value={String(index + 1).padStart(2, '0')} style={{ background: '#065f46' }}>
                 {monthName}
               </option>
             ))}
@@ -389,7 +420,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             value={birthDay}
             onChange={(e) => setBirthDay(e.target.value)}
             autoComplete="bday-day"
-            className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+            style={inputStyle}
             min="1"
             max="31"
           />
@@ -398,10 +429,12 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
 
       {/* Country */}
       <div>
-        <label htmlFor="country" className="block text-emerald-100 mb-2 text-sm">
+        <label htmlFor="country" style={labelStyle}>
           {t.country} *
           {countryName && (
-            <span className="ml-2 text-xs text-emerald-300">({t.autoDetected})</span>
+            <span style={{ marginLeft: '8px', fontSize: '0.75rem', color: 'rgba(110, 231, 183, 1)' }}>
+              ({t.autoDetected})
+            </span>
           )}
         </label>
         <input
@@ -411,33 +444,45 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           value={countryName}
           onChange={(e) => setCountryName(e.target.value)}
           autoComplete="country-name"
-          className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+          style={inputStyle}
         />
       </div>
 
       {/* Language */}
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.language} *</label>
-        <div className="grid grid-cols-2 gap-3">
+        <label style={labelStyle}>{t.language} *</label>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <button
             type="button"
             onClick={() => setPreferredLanguage('en')}
-            className={'px-4 py-3 rounded-xl border transition-all ' + (
-              preferredLanguage === 'en'
-                ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                : 'bg-white/10 border-white/20 text-emerald-200 hover:bg-white/20'
-            )}
+            style={preferredLanguage === 'en' ? buttonSelectedStyle : buttonStyle}
+            onMouseEnter={(e) => {
+              if (preferredLanguage !== 'en') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (preferredLanguage !== 'en') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              }
+            }}
           >
             {t.english}
           </button>
           <button
             type="button"
             onClick={() => setPreferredLanguage('ko')}
-            className={'px-4 py-3 rounded-xl border transition-all ' + (
-              preferredLanguage === 'ko'
-                ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                : 'bg-white/10 border-white/20 text-emerald-200 hover:bg-white/20'
-            )}
+            style={preferredLanguage === 'ko' ? buttonSelectedStyle : buttonStyle}
+            onMouseEnter={(e) => {
+              if (preferredLanguage !== 'ko') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (preferredLanguage !== 'ko') {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+              }
+            }}
           >
             {t.korean}
           </button>
@@ -447,25 +492,36 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
   );
 
   const renderStep2 = () => (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">{t.step2Title}</h3>
-        <p className="text-emerald-200 text-sm">{t.step2Subtitle}</p>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '8px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        }}>{t.step2Title}</h3>
+        <p style={{
+          color: 'rgba(167, 243, 208, 1)',
+          fontSize: '0.875rem',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.step2Subtitle}</p>
       </div>
 
       <div>
-        <label htmlFor="occupation" className="block text-emerald-100 mb-2 text-sm">{t.occupation}</label>
+        <label htmlFor="occupation" style={labelStyle}>{t.occupation}</label>
         <select
           id="occupation"
           name="occupation"
           value={occupation}
           onChange={(e) => setOccupation(e.target.value)}
           autoComplete="organization-title"
-          className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 appearance-none cursor-pointer"
+          style={{...inputStyle, cursor: 'pointer'}}
         >
-          <option value="" className="bg-emerald-900">{t.occupationPlaceholder}</option>
+          <option value="" style={{ background: '#065f46' }}>{t.occupationPlaceholder}</option>
           {t.occupations.map((occ) => (
-            <option key={occ} value={occ} className="bg-emerald-900">
+            <option key={occ} value={occ} style={{ background: '#065f46' }}>
               {occ}
             </option>
           ))}
@@ -473,9 +529,15 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-3 text-sm">{t.interests}</label>
-        <p className="text-emerald-300/70 text-xs mb-4">{t.interestsSubtitle}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <label style={labelStyle}>{t.interests}</label>
+        <p style={{
+          color: 'rgba(110, 231, 183, 0.7)',
+          fontSize: '0.75rem',
+          marginBottom: '16px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.interestsSubtitle}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
           {t.interestOptions.map((interest) => (
             <button
               key={interest}
@@ -487,11 +549,17 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
                     : [...prev, interest]
                 );
               }}
-              className={'px-4 py-3 rounded-xl border-2 transition-all text-sm ' + (
-                selectedInterests.includes(interest)
-                  ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                  : 'bg-white/5 border-white/20 text-emerald-200 hover:bg-white/10'
-              )}
+              style={selectedInterests.includes(interest) ? buttonSelectedStyle : buttonStyle}
+              onMouseEnter={(e) => {
+                if (!selectedInterests.includes(interest)) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!selectedInterests.includes(interest)) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }
+              }}
             >
               {interest}
             </button>
@@ -502,25 +570,42 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
   );
 
   const renderStep3 = () => (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">{t.step3Title}</h3>
-        <p className="text-emerald-200 text-sm">{t.step3Subtitle}</p>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '8px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        }}>{t.step3Title}</h3>
+        <p style={{
+          color: 'rgba(167, 243, 208, 1)',
+          fontSize: '0.875rem',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.step3Subtitle}</p>
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.avgSleepHours}</label>
-        <div className="grid grid-cols-1 gap-2">
+        <label style={labelStyle}>{t.avgSleepHours}</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {t.sleepHourOptions.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => setAvgSleepHours(option)}
-              className={'px-4 py-3 rounded-xl border-2 transition-all text-sm ' + (
-                avgSleepHours === option
-                  ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                  : 'bg-white/5 border-white/20 text-emerald-200 hover:bg-white/10'
-              )}
+              style={avgSleepHours === option ? buttonSelectedStyle : buttonStyle}
+              onMouseEnter={(e) => {
+                if (avgSleepHours !== option) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (avgSleepHours !== option) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }
+              }}
             >
               {option}
             </button>
@@ -529,18 +614,24 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.sleepQuality}</label>
-        <div className="grid grid-cols-1 gap-2">
+        <label style={labelStyle}>{t.sleepQuality}</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {t.sleepQualityOptions.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => setSleepQuality(option)}
-              className={'px-4 py-3 rounded-xl border-2 transition-all text-sm ' + (
-                sleepQuality === option
-                  ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                  : 'bg-white/5 border-white/20 text-emerald-200 hover:bg-white/10'
-              )}
+              style={sleepQuality === option ? buttonSelectedStyle : buttonStyle}
+              onMouseEnter={(e) => {
+                if (sleepQuality !== option) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (sleepQuality !== option) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }
+              }}
             >
               {option}
             </button>
@@ -549,7 +640,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label htmlFor="sleepTime" className="block text-emerald-100 mb-2 text-sm">{t.sleepTime}</label>
+        <label htmlFor="sleepTime" style={labelStyle}>{t.sleepTime}</label>
         <input
           id="sleepTime"
           name="sleepTime"
@@ -557,23 +648,40 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           value={sleepTime}
           onChange={(e) => setSleepTime(e.target.value)}
           placeholder={t.sleepTimePlaceholder}
-          className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+          style={inputStyle}
         />
       </div>
     </div>
   );
 
   const renderStep4 = () => (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
-        <h3 className="text-2xl font-bold text-white mb-2">{t.step4Title}</h3>
-        <p className="text-emerald-200 text-sm">{t.step4Subtitle}</p>
+        <h3 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: 'white',
+          marginBottom: '8px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        }}>{t.step4Title}</h3>
+        <p style={{
+          color: 'rgba(167, 243, 208, 1)',
+          fontSize: '0.875rem',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.step4Subtitle}</p>
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-3 text-sm">{t.dreamGoals}</label>
-        <p className="text-emerald-300/70 text-xs mb-4">{t.dreamGoalsSubtitle}</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label style={labelStyle}>{t.dreamGoals}</label>
+        <p style={{
+          color: 'rgba(110, 231, 183, 0.7)',
+          fontSize: '0.75rem',
+          marginBottom: '16px',
+          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+          fontWeight: language === 'ko' ? 300 : 400,
+        }}>{t.dreamGoalsSubtitle}</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
           {t.dreamGoalOptions.map((goal) => (
             <button
               key={goal}
@@ -585,11 +693,17 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
                     : [...prev, goal]
                 );
               }}
-              className={'px-4 py-3 rounded-xl border-2 transition-all text-sm ' + (
-                selectedDreamGoals.includes(goal)
-                  ? 'bg-emerald-500/30 border-emerald-400 text-white'
-                  : 'bg-white/5 border-white/20 text-emerald-200 hover:bg-white/10'
-              )}
+              style={selectedDreamGoals.includes(goal) ? buttonSelectedStyle : buttonStyle}
+              onMouseEnter={(e) => {
+                if (!selectedDreamGoals.includes(goal)) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!selectedDreamGoals.includes(goal)) {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }
+              }}
             >
               {goal}
             </button>
@@ -598,7 +712,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label htmlFor="bio" className="block text-emerald-100 mb-2 text-sm">{t.bio}</label>
+        <label htmlFor="bio" style={labelStyle}>{t.bio}</label>
         <textarea
           id="bio"
           name="bio"
@@ -606,7 +720,10 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
           onChange={(e) => setBio(e.target.value)}
           placeholder={t.bioPlaceholder}
           rows={3}
-          className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 resize-none"
+          style={{
+            ...inputStyle,
+            resize: 'none',
+          }}
         />
       </div>
     </div>
@@ -628,47 +745,167 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-gradient-to-br from-emerald-900/95 via-teal-900/95 to-cyan-900/95 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-2xl my-8">
-        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-xl rounded-3xl p-8 border border-white/20 shadow-2xl">
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 50,
+      padding: '16px',
+      background: 'linear-gradient(135deg, rgba(6, 95, 70, 0.95) 0%, rgba(19, 78, 74, 0.95) 50%, rgba(22, 78, 99, 0.95) 100%)',
+      backdropFilter: 'blur(8px)',
+      overflowY: 'auto',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '672px',
+        margin: '32px 0',
+      }}>
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%)',
+          backdropFilter: 'blur(40px)',
+          borderRadius: '24px',
+          padding: '32px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        }}>
           {/* Header */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">{t.title}</h2>
-            <p className="text-emerald-200 text-sm">{t.subtitle}</p>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h2 style={{
+              fontSize: '1.875rem',
+              fontWeight: 'bold',
+              color: 'white',
+              marginBottom: '8px',
+              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+            }}>{t.title}</h2>
+            <p style={{
+              color: 'rgba(167, 243, 208, 1)',
+              fontSize: '0.875rem',
+              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+              fontWeight: language === 'ko' ? 300 : 400,
+            }}>{t.subtitle}</p>
           </div>
 
           {/* Progress Bar */}
-          {renderProgressBar()}
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{
+                fontSize: '0.875rem',
+                color: 'rgba(167, 243, 208, 1)',
+                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                fontWeight: language === 'ko' ? 300 : 400,
+              }}>
+                {t.step} {currentStep} {t.of} {totalSteps}
+              </span>
+              <span style={{
+                fontSize: '0.875rem',
+                color: 'rgba(167, 243, 208, 1)',
+                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                fontWeight: language === 'ko' ? 300 : 400,
+              }}>
+                {Math.round((currentStep / totalSteps) * 100)}%
+              </span>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '8px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '9999px',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                height: '100%',
+                background: 'linear-gradient(to right, rgb(52, 211, 153), rgb(20, 184, 166))',
+                transition: 'all 0.3s',
+                width: `${(currentStep / totalSteps) * 100}%`,
+              }} />
+            </div>
+          </div>
 
           {/* Current Step Content */}
           {renderCurrentStep()}
 
           {/* Error Message */}
           {error && (
-            <div className="mt-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200 text-sm">
+            <div style={{
+              marginTop: '24px',
+              padding: '16px',
+              background: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid rgba(239, 68, 68, 0.5)',
+              borderRadius: '12px',
+              color: 'rgba(252, 165, 165, 1)',
+              fontSize: '0.875rem',
+              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+              fontWeight: language === 'ko' ? 300 : 400,
+            }}>
               {error}
             </div>
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex gap-3 mt-8">
-            {/* Back Button (steps 2-7) */}
+          <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+            {/* Back Button */}
             {currentStep > 1 && (
               <button
                 onClick={handleBack}
                 disabled={loading}
-                className="flex-1 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s',
+                  opacity: loading ? 0.5 : 1,
+                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                  fontWeight: language === 'ko' ? 300 : 500,
+                  fontSize: '0.95rem',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }}
               >
                 {t.back}
               </button>
             )}
 
-            {/* Skip Button (steps 2-6 only) */}
+            {/* Skip Button */}
             {currentStep > 1 && currentStep < totalSteps && (
               <button
                 onClick={handleSkip}
                 disabled={loading}
-                className="flex-1 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-emerald-200 hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'rgba(167, 243, 208, 1)',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s',
+                  opacity: loading ? 0.5 : 1,
+                  fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                  fontWeight: language === 'ko' ? 300 : 500,
+                  fontSize: '0.95rem',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                }}
               >
                 {t.skip}
               </button>
@@ -678,7 +915,29 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             <button
               onClick={handleNext}
               disabled={loading}
-              className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium hover:from-emerald-600 hover:to-teal-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              style={{
+                flex: 1,
+                padding: '12px 24px',
+                borderRadius: '12px',
+                background: 'linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166))',
+                color: 'white',
+                fontWeight: language === 'ko' ? 400 : 500,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s',
+                opacity: loading ? 0.5 : 1,
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                border: 'none',
+                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+                fontSize: '0.95rem',
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.background = 'linear-gradient(to right, rgb(5, 150, 105), rgb(17, 94, 89))';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(to right, rgb(16, 185, 129), rgb(20, 184, 166))';
+              }}
             >
               {loading ? t.saving : currentStep === totalSteps ? t.complete : t.next}
             </button>
