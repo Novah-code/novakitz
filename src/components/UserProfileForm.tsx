@@ -20,34 +20,58 @@ interface UserProfileFormProps {
   onCancel?: () => void;
 }
 
-const INTEREST_OPTIONS = [
-  'Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies',
-  'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing',
-  'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'
-];
+const INTEREST_OPTIONS = {
+  en: ['Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies',
+       'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing',
+       'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'],
+  ko: ['심리학', '자기계발', '명상', '요가', '독서', '영화',
+       '음악', '여행', '요리', '운동', '예술', '글쓰기',
+       '게임', '기술', '자연', '동물', '패션', '뷰티']
+};
 
-const OCCUPATION_OPTIONS = [
-  'Student', 'Employee', 'Freelancer', 'Entrepreneur', 'Artist', 'Healthcare',
-  'Educator', 'Government', 'Service Industry', 'IT/Development', 'Design', 'Marketing',
-  'Finance', 'Legal', 'Construction', 'Other', 'Job Seeking', 'Retired'
-];
+const OCCUPATION_OPTIONS = {
+  en: ['Student', 'Employee', 'Freelancer', 'Entrepreneur', 'Artist', 'Healthcare',
+       'Educator', 'Government', 'Service Industry', 'IT/Development', 'Design', 'Marketing',
+       'Finance', 'Legal', 'Construction', 'Other', 'Job Seeking', 'Retired'],
+  ko: ['학생', '직장인', '프리랜서', '사업가', '예술가', '의료인',
+       '교육자', '공무원', '서비스업', 'IT/개발', '디자인', '마케팅',
+       '금융', '법조인', '건설업', '기타', '구직 중', '은퇴']
+};
 
-const DREAM_GOAL_OPTIONS = [
-  'Understanding inner emotions',
-  'Stress relief and relaxation',
-  'Creative inspiration',
-  'Problem solving insights',
-  'Self-discovery and growth',
-  'Spiritual guidance',
-  'Processing daily experiences',
-  'Overcoming fears and anxieties',
-  'Exploring subconscious thoughts',
-  'Entertainment and curiosity',
-  'Relationship insights',
-  'Career guidance',
-  'Health and wellness awareness',
-  'Personal healing'
-];
+const DREAM_GOAL_OPTIONS = {
+  en: [
+    'Understanding inner emotions',
+    'Stress relief and relaxation',
+    'Creative inspiration',
+    'Problem solving insights',
+    'Self-discovery and growth',
+    'Spiritual guidance',
+    'Processing daily experiences',
+    'Overcoming fears and anxieties',
+    'Exploring subconscious thoughts',
+    'Entertainment and curiosity',
+    'Relationship insights',
+    'Career guidance',
+    'Health and wellness awareness',
+    'Personal healing'
+  ],
+  ko: [
+    '내면의 감정 이해하기',
+    '스트레스 해소와 이완',
+    '창의적 영감',
+    '문제 해결 통찰',
+    '자기 발견과 성장',
+    '영적 안내',
+    '일상 경험 처리',
+    '두려움과 불안 극복',
+    '무의식적 생각 탐구',
+    '재미와 호기심',
+    '관계 통찰',
+    '커리어 안내',
+    '건강과 웰빙 인식',
+    '개인적 치유'
+  ]
+};
 
 const COUNTRIES = [
   { code: 'US', name: 'United States' },
@@ -69,7 +93,34 @@ const COUNTRIES = [
   { code: 'VN', name: 'Vietnam' },
   { code: 'PH', name: 'Philippines' },
   { code: 'ID', name: 'Indonesia' },
-  { code: 'MY', name: 'Malaysia' }
+  { code: 'MY', name: 'Malaysia' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'CZ', name: 'Czech Republic' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'TR', name: 'Turkey' },
+  { code: 'IL', name: 'Israel' },
+  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'AE', name: 'UAE' },
+  { code: 'EG', name: 'Egypt' },
+  { code: 'ZA', name: 'South Africa' },
+  { code: 'NZ', name: 'New Zealand' },
+  { code: 'AR', name: 'Argentina' },
+  { code: 'CL', name: 'Chile' },
+  { code: 'CO', name: 'Colombia' },
+  { code: 'PE', name: 'Peru' },
+  { code: 'TW', name: 'Taiwan' },
+  { code: 'HK', name: 'Hong Kong' }
 ];
 
 // Translations
@@ -81,13 +132,13 @@ const translations = {
     of: 'of',
 
     // Step titles
-    step1Title: 'Basic Information (Required)',
-    step2Title: 'Your Name (Optional)',
-    step3Title: 'Your Occupation (Optional)',
-    step4Title: 'Your Interests (Optional)',
-    step5Title: 'Sleep Pattern (Optional)',
-    step6Title: 'Dream Goals (Optional)',
-    step7Title: 'Additional Notes (Optional)',
+    step1Title: 'Basic Information',
+    step2Title: 'Your Name',
+    step3Title: 'Your Occupation',
+    step4Title: 'Your Interests',
+    step5Title: 'Sleep Pattern',
+    step6Title: 'Dream Goals',
+    step7Title: 'Additional Notes',
 
     // Step 1
     dateOfBirth: 'Date of Birth',
@@ -126,7 +177,7 @@ const translations = {
     dreamGoalsDesc: 'What do you hope to gain from dream interpretation?',
 
     // Step 7
-    additionalNotes: 'Any additional notes or thoughts...',
+    additionalNotes: '',
 
     // Buttons
     next: 'Next',
@@ -145,13 +196,13 @@ const translations = {
     of: '/',
 
     // Step titles
-    step1Title: '기본 정보 (필수)',
-    step2Title: '이름 (선택)',
-    step3Title: '직업 (선택)',
-    step4Title: '관심사 (선택)',
-    step5Title: '수면 패턴 (선택)',
-    step6Title: '꿈 목표 (선택)',
-    step7Title: '추가 메모 (선택)',
+    step1Title: '기본 정보',
+    step2Title: '이름',
+    step3Title: '직업',
+    step4Title: '관심사',
+    step5Title: '수면 패턴',
+    step6Title: '꿈 목표',
+    step7Title: '추가 메모',
 
     // Step 1
     dateOfBirth: '생년월일',
@@ -190,7 +241,7 @@ const translations = {
     dreamGoalsDesc: '꿈 해석을 통해 무엇을 얻고 싶으신가요?',
 
     // Step 7
-    additionalNotes: '추가 메모나 생각...',
+    additionalNotes: '',
 
     // Buttons
     next: '다음',
@@ -237,12 +288,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [dreamGoals, setDreamGoals] = useState<string[]>(
     profile?.dream_goals ? profile.dream_goals.split(', ') : []
   );
-  const [bedtimeHour, setBedtimeHour] = useState('');
-  const [bedtimeMin, setBedtimeMin] = useState('');
-  const [bedtimeAmPm, setBedtimeAmPm] = useState('PM');
-  const [waketimeHour, setWaketimeHour] = useState('');
-  const [waketimeMin, setWaketimeMin] = useState('');
-  const [waketimeAmPm, setWaketimeAmPm] = useState('AM');
+  const [bedtime, setBedtime] = useState('');
+  const [waketime, setWaketime] = useState('');
   const [sleepQuality, setSleepQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('fair');
   const [bio, setBio] = useState(profile?.bio || '');
 
@@ -298,10 +345,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     {length: getDaysInMonth(birthYear, birthMonth)},
     (_, i) => i + 1
   );
-
-  // Time options
-  const hourOptions = Array.from({length: 12}, (_, i) => i + 1);
-  const minuteOptions = ['00', '15', '30', '45'];
 
   const handleNext = () => {
     setError('');
@@ -366,11 +409,11 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         interests: interests.length > 0 ? interests : null,
         dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
         bio: bio || null,
-        sleep_schedule: {
-          bedtime: bedtimeHour && bedtimeMin ? `${bedtimeHour}:${bedtimeMin} ${bedtimeAmPm}` : null,
-          wake_time: waketimeHour && waketimeMin ? `${waketimeHour}:${waketimeMin} ${waketimeAmPm}` : null,
+        sleep_schedule: (bedtime || waketime || sleepQuality) ? {
+          bedtime: bedtime || null,
+          wake_time: waketime || null,
           sleep_quality: sleepQuality
-        },
+        } : null,
         signup_ip: signupIp || null,
         last_login_ip: signupIp || null,
         last_login_at: new Date().toISOString(),
@@ -636,7 +679,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
               >
                 <option value="">{t.selectOccupation}</option>
-                {OCCUPATION_OPTIONS.map(option => (
+                {OCCUPATION_OPTIONS[preferredLanguage].map(option => (
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
@@ -650,7 +693,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 {t.interestsDesc}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-                {INTEREST_OPTIONS.map(interest => (
+                {INTEREST_OPTIONS[preferredLanguage].map(interest => (
                   <button
                     key={interest}
                     type="button"
@@ -681,72 +724,26 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
                   {t.typicalBedtime}
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  <select
-                    value={bedtimeHour}
-                    onChange={(e) => setBedtimeHour(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="">{t.hour}</option>
-                    {hourOptions.map(hour => (
-                      <option key={hour} value={hour}>{hour}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={bedtimeMin}
-                    onChange={(e) => setBedtimeMin(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="">{t.min}</option>
-                    {minuteOptions.map(min => (
-                      <option key={min} value={min}>{min}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={bedtimeAmPm}
-                    onChange={(e) => setBedtimeAmPm(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="AM">{t.am}</option>
-                    <option value="PM">{t.pm}</option>
-                  </select>
-                </div>
+                <input
+                  type="text"
+                  value={bedtime}
+                  onChange={(e) => setBedtime(e.target.value)}
+                  placeholder="e.g., 11:00 PM"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
+                />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
                   {t.typicalWakeTime}
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  <select
-                    value={waketimeHour}
-                    onChange={(e) => setWaketimeHour(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="">{t.hour}</option>
-                    {hourOptions.map(hour => (
-                      <option key={hour} value={hour}>{hour}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={waketimeMin}
-                    onChange={(e) => setWaketimeMin(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="">{t.min}</option>
-                    {minuteOptions.map(min => (
-                      <option key={min} value={min}>{min}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={waketimeAmPm}
-                    onChange={(e) => setWaketimeAmPm(e.target.value)}
-                    style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                  >
-                    <option value="AM">{t.am}</option>
-                    <option value="PM">{t.pm}</option>
-                  </select>
-                </div>
+                <input
+                  type="text"
+                  value={waketime}
+                  onChange={(e) => setWaketime(e.target.value)}
+                  placeholder="e.g., 7:00 AM"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
+                />
               </div>
 
               <div>
@@ -774,7 +771,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 {t.dreamGoalsDesc}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {DREAM_GOAL_OPTIONS.map(goal => (
+                {DREAM_GOAL_OPTIONS[preferredLanguage].map(goal => (
                   <button
                     key={goal}
                     type="button"
