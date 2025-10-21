@@ -457,8 +457,10 @@ export default function UserProfileForm({ user, profile, onComplete, onCancel }:
 
       const { data, error } = await supabase
         .from('user_profiles')
-        .update(updateData)
-        .eq('user_id', user.id)
+        .upsert(
+          { user_id: user.id, ...updateData },
+          { onConflict: 'user_id' }
+        )
         .select();
 
       console.log('Upsert result:', { data, error });
