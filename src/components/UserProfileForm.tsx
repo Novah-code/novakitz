@@ -430,7 +430,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         country_code: countryCode,
         country_name: countryName,
         timezone: timezone,
-        preferred_language: preferredLanguage,
         occupation: occupation || null,
         interests: interests.length > 0 ? interests : null,
         dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
