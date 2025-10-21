@@ -222,7 +222,7 @@ export default function DreamApp() {
     return (
       <UserProfileForm
         user={user}
-        language={(userProfile?.preferred_language as 'en' | 'ko') || 'en'}
+        profile={userProfile || undefined}
         onComplete={handleProfileComplete}
       />
     );
