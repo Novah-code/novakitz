@@ -337,32 +337,41 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
 
       {/* Full Name */}
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.fullName} *</label>
+        <label htmlFor="fullName" className="block text-emerald-100 mb-2 text-sm">{t.fullName} *</label>
         <input
+          id="fullName"
+          name="fullName"
           type="text"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           placeholder={t.namePlaceholder}
+          autoComplete="name"
           className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
         />
       </div>
 
       {/* Birth Date */}
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.birthDate} *</label>
+        <label htmlFor="birthYear" className="block text-emerald-100 mb-2 text-sm">{t.birthDate} *</label>
         <div className="grid grid-cols-3 gap-3">
           <input
+            id="birthYear"
+            name="birthYear"
             type="number"
             placeholder={t.year}
             value={birthYear}
             onChange={(e) => setBirthYear(e.target.value)}
+            autoComplete="bday-year"
             className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
             min="1900"
             max={new Date().getFullYear()}
           />
           <select
+            id="birthMonth"
+            name="birthMonth"
             value={birthMonth}
             onChange={(e) => setBirthMonth(e.target.value)}
+            autoComplete="bday-month"
             className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 appearance-none cursor-pointer"
           >
             <option value="" className="bg-emerald-900">{t.month}</option>
@@ -373,10 +382,13 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
             ))}
           </select>
           <input
+            id="birthDay"
+            name="birthDay"
             type="number"
             placeholder={t.day}
             value={birthDay}
             onChange={(e) => setBirthDay(e.target.value)}
+            autoComplete="bday-day"
             className="px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
             min="1"
             max="31"
@@ -386,16 +398,19 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
 
       {/* Country */}
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">
+        <label htmlFor="country" className="block text-emerald-100 mb-2 text-sm">
           {t.country} *
           {countryName && (
             <span className="ml-2 text-xs text-emerald-300">({t.autoDetected})</span>
           )}
         </label>
         <input
+          id="country"
+          name="country"
           type="text"
           value={countryName}
           onChange={(e) => setCountryName(e.target.value)}
+          autoComplete="country-name"
           className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
         />
       </div>
@@ -439,10 +454,13 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.occupation}</label>
+        <label htmlFor="occupation" className="block text-emerald-100 mb-2 text-sm">{t.occupation}</label>
         <select
+          id="occupation"
+          name="occupation"
           value={occupation}
           onChange={(e) => setOccupation(e.target.value)}
+          autoComplete="organization-title"
           className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 appearance-none cursor-pointer"
         >
           <option value="" className="bg-emerald-900">{t.occupationPlaceholder}</option>
@@ -531,8 +549,10 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.sleepTime}</label>
+        <label htmlFor="sleepTime" className="block text-emerald-100 mb-2 text-sm">{t.sleepTime}</label>
         <input
+          id="sleepTime"
+          name="sleepTime"
           type="text"
           value={sleepTime}
           onChange={(e) => setSleepTime(e.target.value)}
@@ -578,8 +598,10 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
       </div>
 
       <div>
-        <label className="block text-emerald-100 mb-2 text-sm">{t.bio}</label>
+        <label htmlFor="bio" className="block text-emerald-100 mb-2 text-sm">{t.bio}</label>
         <textarea
+          id="bio"
+          name="bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder={t.bioPlaceholder}
