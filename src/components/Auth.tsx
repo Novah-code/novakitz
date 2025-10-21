@@ -39,9 +39,9 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
     <div className="auth-container">
       <div className="auth-form-container glass-strong">
         <div className="auth-header">
-          <h2 className="auth-title">Welcome to Novakitz</h2>
+          <h2 className="auth-title" style={{ fontFamily: "'Cormorant', serif" }}>Welcome to Novakitz</h2>
           <p className="auth-subtitle">
-            Start your dream journaling journey with Google
+            Turn your dreams into daily growth insights
           </p>
         </div>
 
@@ -72,9 +72,9 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
           )}
         </div>
 
-        <div className="auth-footer">
-          <p>Your dreams are private and secure</p>
-          <p className="auth-note">Sign in with Google to save and sync your dreams across devices</p>
+        <div className="auth-footer" style={{ lineHeight: '1.5' }}>
+          <p style={{ marginBottom: '0.5rem' }}>Your dreams are private and secure</p>
+          <p className="auth-note" style={{ lineHeight: '1.4' }}>Sign in with Google to save and sync your dreams across devices</p>
         </div>
       </div>
     </div>
