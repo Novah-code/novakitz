@@ -48,7 +48,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       console.log('Profile query result - data:', data, 'error:', error);
 
