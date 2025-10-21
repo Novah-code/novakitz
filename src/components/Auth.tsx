@@ -72,9 +72,9 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
           )}
         </div>
 
-        <div className="auth-footer" style={{ lineHeight: '1.5' }}>
-          <p style={{ marginBottom: '0.5rem' }}>Your dreams are private and secure</p>
-          <p className="auth-note" style={{ lineHeight: '1.4' }}>Sign in with Google to save and sync your dreams across devices</p>
+        <div className="auth-footer" style={{ lineHeight: '1.3' }}>
+          <p style={{ marginBottom: '0.3rem', fontSize: '0.85rem' }}>Your dreams are private and secure</p>
+          <p className="auth-note" style={{ lineHeight: '1.2', fontSize: '0.8rem' }}>Sign in with Google to save and sync your dreams across devices</p>
         </div>
       </div>
     </div>
