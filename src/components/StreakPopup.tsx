@@ -75,10 +75,11 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
 
       if (dreamDates.has(today) || dreamDates.has(yesterday)) {
         currentStreak = 1;
-        let checkDate = dreamDates.has(today) ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const startDate = dreamDates.has(today) ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-        while (true) {
-          checkDate.setDate(checkDate.getDate() - 1);
+        for (let i = 1; i < 365; i++) { // Check up to 1 year back
+          const checkDate = new Date(startDate);
+          checkDate.setDate(startDate.getDate() - i);
           const dateStr = checkDate.toDateString();
           if (dreamDates.has(dateStr)) {
             currentStreak++;
