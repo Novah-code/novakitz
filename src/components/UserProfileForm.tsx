@@ -427,6 +427,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         full_name: fullName || null,
         birth_date: birthYear && birthMonth && birthDay ? `${birthYear}-${birthMonth}-${birthDay}` : null,
         age: calculateAge(),
+        country_name: countryName || null,
         occupation: occupation || null,
         interests: interests.length > 0 ? interests : null,
         dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
