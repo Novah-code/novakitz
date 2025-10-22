@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
+import BadgeNotification from './BadgeNotification';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -167,6 +168,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editImage, setEditImage] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
+  const [newBadge, setNewBadge] = useState<string | null>(null);
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
@@ -409,6 +411,79 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       setSavedDreams(updatedDreams);
       localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
       console.log('Saved to localStorage and updated state');
+    }
+
+    // Check for badges after saving
+    if (user) {
+      checkAndAwardBadges(user.id);
+    }
+  };
+
+  // Check and award badges based on dream count
+  const checkAndAwardBadges = async (userId: string) => {
+    try {
+      // Get total dream count
+      const { count, error: countError } = await supabase
+        .from('dreams')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      if (countError) {
+        console.error('Error counting dreams:', countError);
+        return;
+      }
+
+      const dreamCount = count || 0;
+      console.log('Total dream count:', dreamCount);
+
+      // Get user's current badges
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('badges')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching badges:', profileError);
+        return;
+      }
+
+      const currentBadges = profileData?.badges || [];
+      console.log('Current badges:', currentBadges);
+
+      // Define badge thresholds
+      const badgeThresholds = [
+        { count: 1, badge: 'first_record' },
+        { count: 3, badge: '3_records' },
+        { count: 7, badge: '7_records' },
+        { count: 30, badge: '30_records' }
+      ];
+
+      // Check which new badge should be awarded
+      let newBadgeAwarded: string | null = null;
+      for (const threshold of badgeThresholds) {
+        if (dreamCount >= threshold.count && !currentBadges.includes(threshold.badge)) {
+          newBadgeAwarded = threshold.badge;
+
+          // Add badge to user profile
+          const updatedBadges = [...currentBadges, threshold.badge];
+          const { error: updateError } = await supabase
+            .from('user_profiles')
+            .update({ badges: updatedBadges })
+            .eq('user_id', userId);
+
+          if (updateError) {
+            console.error('Error updating badges:', updateError);
+          } else {
+            console.log('Badge awarded:', threshold.badge);
+            // Show badge notification
+            setNewBadge(threshold.badge);
+          }
+          break; // Award only one badge at a time
+        }
+      }
+    } catch (error) {
+      console.error('Error checking badges:', error);
     }
   };
 
@@ -3459,6 +3534,15 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       </div>
       </div>
+
+      {/* Badge Notification */}
+      {newBadge && (
+        <BadgeNotification
+          badgeType={newBadge}
+          onClose={() => setNewBadge(null)}
+          language={language}
+        />
+      )}
 
       {/* API Monitoring Dashboard - 개발 환경에서만 표시 */}
       {process.env.NODE_ENV === 'development' && <APIMonitoringDashboard />}
