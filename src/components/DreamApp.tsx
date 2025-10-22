@@ -89,7 +89,7 @@ export default function DreamApp() {
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       console.log('Profile query result:', { data, error });
 
@@ -113,7 +113,7 @@ export default function DreamApp() {
             .from('user_profiles')
             .select('*')
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
           
           if (retryData) {
             console.log('Profile found after retry:', retryData);
