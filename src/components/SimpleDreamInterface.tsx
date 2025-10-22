@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
+import StreakPopup from './StreakPopup';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -169,6 +170,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
+  const [showStreakPopup, setShowStreakPopup] = useState(false);
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
@@ -416,6 +418,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     // Check for badges after saving
     if (user) {
       checkAndAwardBadges(user.id);
+      // Show streak popup after dream is saved
+      setShowStreakPopup(true);
     }
   };
 
@@ -3541,6 +3545,15 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           badgeType={newBadge}
           onClose={() => setNewBadge(null)}
           language={language}
+        />
+      )}
+
+      {/* Streak Popup */}
+      {showStreakPopup && user && (
+        <StreakPopup
+          user={user}
+          language={language}
+          onClose={() => setShowStreakPopup(false)}
         />
       )}
 

@@ -8,6 +8,7 @@ import SimpleDreamInterface from './SimpleDreamInterface';
 import UserProfileForm from './UserProfileForm';
 import DreamInsights from './DreamInsights';
 import BadgesDisplay from './BadgesDisplay';
+import StreakPopup from './StreakPopup';
 
 // Translations
 const translations = {
@@ -16,6 +17,7 @@ const translations = {
     dreamJournal: 'Dream Journal',
     history: 'History',
     insights: 'Insights',
+    streak: 'Streak',
     badges: 'Badges',
     language: 'Language',
     signOut: 'Sign Out'
@@ -25,6 +27,7 @@ const translations = {
     dreamJournal: '드림 저널',
     history: '기록',
     insights: '인사이트',
+    streak: 'Streak',
     badges: '뱃지',
     language: '언어',
     signOut: '로그아웃'
@@ -40,6 +43,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [showStreak, setShowStreak] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
 
   const t = translations[language];
@@ -390,6 +394,39 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               <button
                 onClick={() => {
+                  console.log('Streak button clicked!');
+                  setShowStreak(true);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+                </svg>
+                <span>{t.streak}</span>
+              </button>
+
+              <button
+                onClick={() => {
                   console.log('Badges button clicked!');
                   setShowBadges(true);
                   setMenuOpen(false);
@@ -611,6 +648,11 @@ export default function SimpleDreamInterfaceWithAuth() {
             <BadgesDisplay user={user} language={language} />
           </div>
         </div>
+      )}
+
+      {/* Streak Modal */}
+      {showStreak && user && (
+        <StreakPopup user={user} language={language} onClose={() => setShowStreak(false)} />
       )}
     </>
   );
