@@ -38,6 +38,7 @@ interface DreamStats {
   shortestDream: number;
   topTags: { tag: string; count: number }[];
   currentStreak: number;
+  aiPatternAnalysis: string | null;
 }
 
 const translations = {
@@ -63,6 +64,9 @@ const translations = {
     monthlyTrends: 'Monthly Trends',
     topTags: 'Popular Tags',
     recentPatterns: 'Recent Patterns',
+    aiPatternAnalysis: 'AI Pattern Analysis',
+    aiAnalyzing: 'Analyzing your dream patterns...',
+    yourDreamStory: 'Your Dream Story',
     days: 'days',
     positive: 'Positive',
     negative: 'Negative',
@@ -102,6 +106,9 @@ const translations = {
     monthlyTrends: '월별 추이',
     topTags: '인기 태그',
     recentPatterns: '최근 패턴',
+    aiPatternAnalysis: 'AI 패턴 분석',
+    aiAnalyzing: '꿈 패턴을 분석하는 중...',
+    yourDreamStory: '당신의 꿈 이야기',
     days: '일',
     positive: '긍정',
     negative: '부정',
@@ -142,6 +149,62 @@ const moodColors = {
   anxious: '#E07A5F',
   joyful: '#F2CC8F',
   mysterious: '#81B29A'
+};
+
+// AI Pattern Analysis Function
+const analyzePatterns = async (dreams: any[], language: 'en' | 'ko') => {
+  try {
+    // Prepare dream summaries for analysis
+    const dreamSummaries = dreams.slice(0, 30).map((dream, idx) => {
+      const content = dream.content.split('\n\n---\n\n')[0]; // Get dream text only
+      return `Dream ${idx + 1} (${dream.mood}): ${content.substring(0, 200)}...`;
+    }).join('\n\n');
+
+    const prompt = language === 'ko'
+      ? `다음은 사용자의 최근 꿈 기록들입니다. 이 꿈들을 분석해서 패턴과 인사이트를 제공해주세요.
+
+${dreamSummaries}
+
+다음 형식으로 분석해주세요:
+1. **반복되는 테마**: 자주 나타나는 주제나 상징
+2. **감정 패턴**: 꿈에서의 전반적인 감정 변화
+3. **개인적 해석**: 이 꿈들이 보여주는 사용자의 심리 상태나 관심사
+4. **조언**: 꿈을 통해 발견할 수 있는 것들
+
+각 섹션을 2-3문장으로 간결하게 작성해주세요. 친근하고 따뜻한 톤으로 작성하되, 과도한 해석은 피해주세요.`
+      : `Here are the user's recent dream records. Please analyze these dreams and provide patterns and insights.
+
+${dreamSummaries}
+
+Please provide analysis in the following format:
+1. **Recurring Themes**: Frequently appearing subjects or symbols
+2. **Emotional Patterns**: Overall emotional trends in dreams
+3. **Personal Interpretation**: What these dreams reveal about the user's psychological state or interests
+4. **Advice**: Insights that can be discovered through dreams
+
+Keep each section concise (2-3 sentences). Use a warm, friendly tone and avoid over-interpretation.`;
+
+    const response = await fetch('/api/analyze-dream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        dreamText: '' // Not needed for pattern analysis
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to analyze patterns');
+    }
+
+    const data = await response.json();
+    return data.analysis || null;
+  } catch (error) {
+    console.error('Pattern analysis error:', error);
+    return null;
+  }
 };
 
 export default function DreamInsights({ user, language = 'en', onClose }: DreamInsightsProps) {
@@ -358,6 +421,16 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         .slice(0, 10)
         .map(([tag, count]) => ({ tag, count }));
 
+      // AI Pattern Analysis (only if 5+ dreams)
+      let aiPatternAnalysis = null;
+      if (dreamCount && dreamCount >= 5 && dreamsData) {
+        try {
+          aiPatternAnalysis = await analyzePatterns(dreamsData, language);
+        } catch (error) {
+          console.error('Error analyzing patterns:', error);
+        }
+      }
+
       const statsData = {
         totalDreams: dreamCount || 0,
         totalKeywords: keywordsData?.length || 0,
@@ -372,7 +445,8 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         longestDream,
         shortestDream,
         topTags,
-        currentStreak: calculatedCurrentStreak
+        currentStreak: calculatedCurrentStreak,
+        aiPatternAnalysis
       };
 
       console.log('Stats calculated successfully:', statsData);
@@ -395,7 +469,8 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         longestDream: 0,
         shortestDream: 0,
         topTags: [],
-        currentStreak: 0
+        currentStreak: 0,
+        aiPatternAnalysis: null
       });
       setLoading(false);
     }
@@ -855,6 +930,43 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* AI Pattern Analysis */}
+        {stats.aiPatternAnalysis && (
+          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+            <h2 style={{
+              color: '#5A8449',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <span>✨</span>
+              {t.yourDreamStory}
+            </h2>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              border: '2px solid rgba(127, 176, 105, 0.2)',
+              lineHeight: 1.8,
+              whiteSpace: 'pre-wrap',
+              color: '#2c3e50',
+              fontSize: '0.95rem'
+            }}>
+              {stats.aiPatternAnalysis}
+            </div>
+            <p style={{
+              marginTop: '0.75rem',
+              fontSize: '0.8rem',
+              color: '#999',
+              textAlign: 'right',
+              fontStyle: 'italic'
+            }}>
+              {language === 'ko' ? '🤖 AI가 분석한 당신의 꿈 패턴' : '🤖 AI-analyzed dream patterns'}
+            </p>
           </div>
         )}
 
