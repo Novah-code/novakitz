@@ -156,12 +156,18 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
   const loadDreamInsights = async () => {
     try {
       setLoading(true);
+      console.log('Loading dream insights for user:', user.id);
 
       // Fetch total dreams count
-      const { count: dreamCount } = await supabase
+      const { count: dreamCount, error: countError } = await supabase
         .from('dreams')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
+
+      console.log('Dream count:', dreamCount);
+      if (countError) {
+        console.error('Error counting dreams:', countError);
+      }
 
       // Fetch all keywords for this user
       const { data: keywordsData, error: keywordsError } = await supabase
@@ -169,7 +175,10 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         .select('keyword, category, sentiment')
         .eq('user_id', user.id);
 
-      if (keywordsError) throw keywordsError;
+      if (keywordsError) {
+        console.error('Error fetching keywords:', keywordsError);
+        // Continue without keywords data
+      }
 
       // Calculate keyword frequency
       const keywordFrequency: { [key: string]: KeywordData } = {};
@@ -219,11 +228,17 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       }));
 
       // Fetch dreams with all data for comprehensive analysis
-      const { data: dreamsData } = await supabase
+      const { data: dreamsData, error: dreamsError } = await supabase
         .from('dreams')
         .select('created_at, content, mood, tags')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
+
+      console.log('Dreams data count:', dreamsData?.length || 0);
+      if (dreamsError) {
+        console.error('Error fetching dreams:', dreamsError);
+        throw dreamsError;
+      }
 
       // Calculate average dreams per week
       let averageDreamsPerWeek = 0;
@@ -343,7 +358,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         .slice(0, 10)
         .map(([tag, count]) => ({ tag, count }));
 
-      setStats({
+      const statsData = {
         totalDreams: dreamCount || 0,
         totalKeywords: keywordsData?.length || 0,
         topKeywords,
@@ -358,11 +373,30 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         shortestDream,
         topTags,
         currentStreak: calculatedCurrentStreak
-      });
+      };
 
+      console.log('Stats calculated successfully:', statsData);
+      setStats(statsData);
       setLoading(false);
     } catch (error) {
       console.error('Error loading dream insights:', error);
+      // Set empty stats to show "no data" message
+      setStats({
+        totalDreams: 0,
+        totalKeywords: 0,
+        topKeywords: [],
+        emotionDistribution: [],
+        categoryDistribution: [],
+        averageDreamsPerWeek: 0,
+        longestStreak: 0,
+        moodDistribution: [],
+        monthlyDistribution: [],
+        averageLength: 0,
+        longestDream: 0,
+        shortestDream: 0,
+        topTags: [],
+        currentStreak: 0
+      });
       setLoading(false);
     }
   };
