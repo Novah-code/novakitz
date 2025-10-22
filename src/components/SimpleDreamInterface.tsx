@@ -3618,7 +3618,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
           zIndex: 10000,
           fontWeight: '500',
-          animation: 'fadeInUp 0.3s ease'
+          opacity: 1,
+          transition: 'opacity 0.3s ease'
         }}>
           {language === 'ko' ? '링크가 복사되었어요! 📋' : 'Link copied! 📋'}
         </div>
@@ -3626,19 +3627,6 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       {/* API Monitoring Dashboard - 개발 환경에서만 표시 */}
       {process.env.NODE_ENV === 'development' && <APIMonitoringDashboard />}
-
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translate(-50%, 10px);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, 0);
-          }
-        }
-      `}</style>
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */
