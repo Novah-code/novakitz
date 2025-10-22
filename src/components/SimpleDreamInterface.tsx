@@ -878,15 +878,30 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setActiveMenu(null);
   };
 
-  const shareDream = (dream: DreamEntry) => {
-    const shareText = `${dream.title || t.myDream}\n\n${dream.text}\n\nShared from novakitz`;
+  const [showShareToast, setShowShareToast] = useState(false);
+
+  const shareDream = (dream: DreamEntry, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    const dreamTitle = dream.title || t.dreamEntry;
+    const dreamText = dream.text.length > 200 ? dream.text.substring(0, 200) + '...' : dream.text;
+
+    const shareText = language === 'ko'
+      ? `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
+      : `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
+
     if (navigator.share) {
       navigator.share({
-        title: dream.title || t.myDream,
+        title: dreamTitle,
         text: shareText
-      });
+      }).catch(err => console.log('Share cancelled', err));
     } else {
-      navigator.clipboard.writeText(shareText);
+      navigator.clipboard.writeText(shareText).then(() => {
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 2000);
+      });
       // You could add a toast notification here
     }
     setActiveMenu(null);
@@ -3244,6 +3259,38 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      shareDream(selectedDream, e);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '15px',
+                      right: '110px',
+                      background: 'rgba(255, 255, 255, 0.3)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'white',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                      <polyline points="16 6 12 2 8 6"></polyline>
+                      <line x1="12" y1="2" x2="12" y2="15"></line>
+                    </svg>
+                    {language === 'ko' ? '공유' : 'Share'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setSelectedDream(null);
                       startEditDream(selectedDream);
                     }}
@@ -3557,8 +3604,41 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         />
       )}
 
+      {/* Share Toast */}
+      {showShareToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '30px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#7FB069',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+          zIndex: 10000,
+          fontWeight: '500',
+          animation: 'fadeInUp 0.3s ease'
+        }}>
+          {language === 'ko' ? '링크가 복사되었어요! 📋' : 'Link copied! 📋'}
+        </div>
+      )}
+
       {/* API Monitoring Dashboard - 개발 환경에서만 표시 */}
       {process.env.NODE_ENV === 'development' && <APIMonitoringDashboard />}
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 10px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+      `}</style>
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */
