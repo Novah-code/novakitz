@@ -31,6 +31,13 @@ interface DreamStats {
   categoryDistribution: { category: string; count: number }[];
   averageDreamsPerWeek: number;
   longestStreak: number;
+  moodDistribution: { mood: string; count: number; percentage: number }[];
+  monthlyDistribution: { month: string; count: number }[];
+  averageLength: number;
+  longestDream: number;
+  shortestDream: number;
+  topTags: { tag: string; count: number }[];
+  currentStreak: number;
 }
 
 const translations = {
@@ -39,13 +46,22 @@ const translations = {
     subtitle: 'Discover patterns in your dreams',
     loading: 'Analyzing your dreams...',
     noData: 'No dream data yet. Start recording your dreams to see insights!',
+    minRecords: 'Record at least 5 dreams to see detailed insights',
     totalDreams: 'Total Dreams',
     totalKeywords: 'Keywords Extracted',
     avgPerWeek: 'Dreams per Week',
     longestStreak: 'Longest Streak',
+    currentStreak: 'Current Streak',
+    avgLength: 'Average Length',
+    longestDream: 'Longest Dream',
+    shortestDream: 'Shortest Dream',
+    characters: 'characters',
     topKeywords: 'Most Common Keywords',
     emotionDistribution: 'Emotional Patterns',
     categoryBreakdown: 'Dream Categories',
+    moodDistribution: 'Mood Distribution',
+    monthlyTrends: 'Monthly Trends',
+    topTags: 'Popular Tags',
     recentPatterns: 'Recent Patterns',
     days: 'days',
     positive: 'Positive',
@@ -58,6 +74,10 @@ const translations = {
     place: 'Place',
     action: 'Action',
     theme: 'Theme',
+    peaceful: 'Peaceful',
+    anxious: 'Anxious',
+    joyful: 'Joyful',
+    mysterious: 'Mysterious',
     close: 'Close'
   },
   ko: {
@@ -65,13 +85,22 @@ const translations = {
     subtitle: '당신의 꿈 패턴을 발견하세요',
     loading: '꿈을 분석하는 중...',
     noData: '아직 꿈 데이터가 없어요. 꿈을 기록하고 인사이트를 확인하세요!',
+    minRecords: '자세한 인사이트를 보려면 최소 5개의 꿈을 기록하세요',
     totalDreams: '총 꿈 기록',
     totalKeywords: '추출된 키워드',
     avgPerWeek: '주간 평균',
-    longestStreak: '최장 연속 기록',
+    longestStreak: '최장 연속',
+    currentStreak: '현재 연속',
+    avgLength: '평균 길이',
+    longestDream: '가장 긴 꿈',
+    shortestDream: '가장 짧은 꿈',
+    characters: '자',
     topKeywords: '자주 나타나는 키워드',
     emotionDistribution: '감정 패턴',
     categoryBreakdown: '꿈 카테고리',
+    moodDistribution: '무드 분포',
+    monthlyTrends: '월별 추이',
+    topTags: '인기 태그',
     recentPatterns: '최근 패턴',
     days: '일',
     positive: '긍정',
@@ -84,6 +113,10 @@ const translations = {
     place: '장소',
     action: '행동',
     theme: '주제',
+    peaceful: '평온',
+    anxious: '불안',
+    joyful: '기쁨',
+    mysterious: '신비',
     close: '닫기'
   }
 };
@@ -102,6 +135,13 @@ const categoryColors = {
   place: '#E07A5F',
   action: '#3D5A80',
   theme: '#98C1D9'
+};
+
+const moodColors = {
+  peaceful: '#7FB069',
+  anxious: '#E07A5F',
+  joyful: '#F2CC8F',
+  mysterious: '#81B29A'
 };
 
 export default function DreamInsights({ user, language = 'en', onClose }: DreamInsightsProps) {
@@ -178,10 +218,10 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         count
       }));
 
-      // Fetch dreams with timestamps for streak calculation
+      // Fetch dreams with all data for comprehensive analysis
       const { data: dreamsData } = await supabase
         .from('dreams')
-        .select('created_at')
+        .select('created_at, content, mood, tags')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -194,31 +234,114 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         averageDreamsPerWeek = Math.round((dreamsData.length / weeksDiff) * 10) / 10;
       }
 
-      // Calculate longest streak
+      // Calculate longest streak and current streak
       let longestStreak = 0;
-      let currentStreak = 0;
+      let tempStreak = 0;
+      let calculatedCurrentStreak = 0;
       if (dreamsData && dreamsData.length > 0) {
         const dates = dreamsData.map(d => new Date(d.created_at).toDateString());
-        const uniqueDates = [...new Set(dates)].sort();
+        const uniqueDates = [...new Set(dates)].sort().reverse(); // Most recent first
 
-        for (let i = 0; i < uniqueDates.length; i++) {
-          const currentDate = new Date(uniqueDates[i]);
-          const prevDate = i > 0 ? new Date(uniqueDates[i - 1]) : null;
+        // Calculate current streak (from today backwards)
+        const today = new Date().toDateString();
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
 
-          if (prevDate) {
-            const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
+        if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+          calculatedCurrentStreak = 1;
+          for (let i = 1; i < uniqueDates.length; i++) {
+            const currentDate = new Date(uniqueDates[i]);
+            const prevDate = new Date(uniqueDates[i - 1]);
+            const diffDays = Math.round((prevDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
             if (diffDays === 1) {
-              currentStreak++;
+              calculatedCurrentStreak++;
             } else {
-              longestStreak = Math.max(longestStreak, currentStreak);
-              currentStreak = 1;
+              break;
             }
-          } else {
-            currentStreak = 1;
           }
         }
-        longestStreak = Math.max(longestStreak, currentStreak);
+
+        // Calculate longest streak
+        tempStreak = 1;
+        for (let i = 1; i < uniqueDates.length; i++) {
+          const currentDate = new Date(uniqueDates[i]);
+          const prevDate = new Date(uniqueDates[i - 1]);
+          const diffDays = Math.round((prevDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
+          if (diffDays === 1) {
+            tempStreak++;
+          } else {
+            longestStreak = Math.max(longestStreak, tempStreak);
+            tempStreak = 1;
+          }
+        }
+        longestStreak = Math.max(longestStreak, tempStreak);
       }
+
+      // Calculate mood distribution
+      const moodCounts: { [key: string]: number } = {};
+      dreamsData?.forEach((dream) => {
+        if (dream.mood) {
+          moodCounts[dream.mood] = (moodCounts[dream.mood] || 0) + 1;
+        }
+      });
+
+      const totalMoods = Object.values(moodCounts).reduce((sum, count) => sum + count, 0);
+      const moodDistribution = Object.entries(moodCounts).map(([mood, count]) => ({
+        mood,
+        count,
+        percentage: totalMoods > 0 ? Math.round((count / totalMoods) * 100) : 0
+      }));
+
+      // Calculate monthly distribution (last 6 months)
+      const monthCounts: { [key: string]: number } = {};
+      const monthNames = language === 'ko'
+        ? ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
+        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      dreamsData?.forEach((dream) => {
+        const date = new Date(dream.created_at);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+      });
+
+      const monthlyDistribution = Object.entries(monthCounts)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-6) // Last 6 months
+        .map(([monthKey, count]) => {
+          const [year, month] = monthKey.split('-');
+          const monthName = monthNames[parseInt(month) - 1];
+          return {
+            month: `${monthName} ${year.slice(2)}`,
+            count
+          };
+        });
+
+      // Calculate average, longest, and shortest dream length
+      let averageLength = 0;
+      let longestDream = 0;
+      let shortestDream = 0;
+      if (dreamsData && dreamsData.length > 0) {
+        const lengths = dreamsData.map(d => {
+          // Extract dream text from content (before "---\n\nAnalysis:")
+          const dreamText = d.content.split('\n\n---\n\n')[0];
+          return dreamText.length;
+        });
+        averageLength = Math.round(lengths.reduce((sum, len) => sum + len, 0) / lengths.length);
+        longestDream = Math.max(...lengths);
+        shortestDream = Math.min(...lengths);
+      }
+
+      // Calculate top tags
+      const tagCounts: { [key: string]: number } = {};
+      dreamsData?.forEach((dream) => {
+        dream.tags?.forEach((tag: string) => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      });
+
+      const topTags = Object.entries(tagCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([tag, count]) => ({ tag, count }));
 
       setStats({
         totalDreams: dreamCount || 0,
@@ -227,7 +350,14 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         emotionDistribution,
         categoryDistribution,
         averageDreamsPerWeek,
-        longestStreak
+        longestStreak,
+        moodDistribution,
+        monthlyDistribution,
+        averageLength,
+        longestDream,
+        shortestDream,
+        topTags,
+        currentStreak: calculatedCurrentStreak
       });
 
       setLoading(false);
@@ -353,7 +483,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         <div style={{
           padding: '2rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '1rem'
         }}>
           <div style={{
@@ -365,7 +495,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
               {stats.totalDreams}
             </div>
-            <div style={{ color: '#666', marginTop: '0.5rem' }}>{t.totalDreams}</div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.totalDreams}</div>
           </div>
 
           <div style={{
@@ -375,21 +505,9 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.totalKeywords}
+              {stats.currentStreak}
             </div>
-            <div style={{ color: '#666', marginTop: '0.5rem' }}>{t.totalKeywords}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.averageDreamsPerWeek}
-            </div>
-            <div style={{ color: '#666', marginTop: '0.5rem' }}>{t.avgPerWeek}</div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.currentStreak}</div>
           </div>
 
           <div style={{
@@ -401,7 +519,43 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
               {stats.longestStreak}
             </div>
-            <div style={{ color: '#666', marginTop: '0.5rem' }}>{t.longestStreak} {t.days}</div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestStreak}</div>
+          </div>
+
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
+              {stats.averageLength}
+            </div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.avgLength}</div>
+          </div>
+
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
+              {stats.longestDream}
+            </div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestDream}</div>
+          </div>
+
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
+              {stats.shortestDream}
+            </div>
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.shortestDream}</div>
           </div>
         </div>
 
@@ -505,6 +659,165 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                     {cat.count}
                   </div>
                   <div style={{ opacity: 0.9 }}>{t[cat.category as keyof typeof t] as string}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mood Distribution (Pie Chart) */}
+        {stats.moodDistribution.length > 0 && (
+          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.moodDistribution}</h2>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              alignItems: 'center'
+            }}>
+              {/* Simple Pie Chart */}
+              <div style={{
+                width: '200px',
+                height: '200px',
+                borderRadius: '50%',
+                background: `conic-gradient(${
+                  stats.moodDistribution.map((mood, idx) => {
+                    const prevPercentage = stats.moodDistribution.slice(0, idx).reduce((sum, m) => sum + m.percentage, 0);
+                    const color = moodColors[mood.mood as keyof typeof moodColors] || '#ccc';
+                    return `${color} ${prevPercentage}% ${prevPercentage + mood.percentage}%`;
+                  }).join(', ')
+                })`,
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+              }}></div>
+
+              {/* Legend */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '1rem',
+                width: '100%',
+                maxWidth: '400px'
+              }}>
+                {stats.moodDistribution.map((mood, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem',
+                    background: '#f8f9fa',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '4px',
+                      background: moodColors[mood.mood as keyof typeof moodColors] || '#ccc',
+                      flexShrink: 0
+                    }}></div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+                        {t[mood.mood as keyof typeof t] as string}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                        {mood.count} ({mood.percentage}%)
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Monthly Trends (Bar Chart) */}
+        {stats.monthlyDistribution.length > 0 && (
+          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.monthlyTrends}</h2>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              {stats.monthlyDistribution.map((month, idx) => {
+                const maxCount = Math.max(...stats.monthlyDistribution.map(m => m.count));
+                const barWidth = maxCount > 0 ? (month.count / maxCount) * 100 : 0;
+
+                return (
+                  <div key={idx}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem'
+                    }}>
+                      <span style={{ fontWeight: '600' }}>{month.month}</span>
+                      <span style={{ color: '#666' }}>{month.count} {language === 'ko' ? '개' : 'dreams'}</span>
+                    </div>
+                    <div style={{
+                      height: '32px',
+                      background: '#e8f5e8',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${barWidth}%`,
+                        background: 'linear-gradient(135deg, #7FB069 0%, #5A8449 100%)',
+                        borderRadius: '8px',
+                        transition: 'width 0.5s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        paddingRight: '12px',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem'
+                      }}>
+                        {month.count > 0 && month.count}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Top Tags */}
+        {stats.topTags.length > 0 && (
+          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.topTags}</h2>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.75rem'
+            }}>
+              {stats.topTags.map((tag, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: '0.75rem 1.25rem',
+                    background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                    borderRadius: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    border: '2px solid #7FB069'
+                  }}
+                >
+                  <span style={{ fontWeight: '600', color: '#5A8449' }}>
+                    {tag.tag}
+                  </span>
+                  <span style={{
+                    background: '#7FB069',
+                    color: 'white',
+                    borderRadius: '12px',
+                    padding: '2px 8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 'bold'
+                  }}>
+                    {tag.count}
+                  </span>
                 </div>
               ))}
             </div>
