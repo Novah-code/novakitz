@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
+import OfflineIndicator from './OfflineIndicator';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -242,6 +244,102 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
   }, [user]);
 
+  // Sync offline dreams when back online
+  useEffect(() => {
+    if (!user) return;
+
+    const syncOfflineDreams = async () => {
+      console.log('Syncing offline dreams...');
+      window.dispatchEvent(new Event('sync-start'));
+
+      try {
+        const unsyncedDreams = await offlineStorage.getUnsyncedDreams();
+        console.log('Found unsynced dreams:', unsyncedDreams.length);
+
+        for (const dream of unsyncedDreams) {
+          try {
+            // Upload to Supabase
+            const { data, error } = await supabase
+              .from('dreams')
+              .insert([{
+                user_id: dream.user_id,
+                title: dream.title,
+                content: dream.content,
+                mood: dream.mood,
+                tags: dream.tags,
+                date: dream.date,
+                time: dream.time,
+                created_at: dream.created_at
+              }])
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error syncing dream:', error);
+            } else {
+              console.log('Synced dream:', data.id);
+              // Mark as synced in IndexedDB
+              await offlineStorage.markAsSynced(dream.id);
+            }
+          } catch (error) {
+            console.error('Exception syncing dream:', error);
+          }
+        }
+
+        // Reload dreams from Supabase after sync
+        const { data, error } = await supabase
+          .from('dreams')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          const dreams: DreamEntry[] = data.map(dream => ({
+            id: dream.id,
+            text: dream.content.split('\n\n---\n\n')[0] || dream.content,
+            response: dream.content.split('Analysis:\n')[1] || '',
+            title: dream.title,
+            date: dream.date,
+            time: dream.time,
+            timestamp: new Date(dream.created_at).getTime(),
+            tags: dream.tags || [],
+            autoTags: dream.tags || []
+          }));
+          setSavedDreams(dreams);
+        }
+
+        // Clear synced dreams from IndexedDB
+        await offlineStorage.clearSyncedDreams();
+
+        window.dispatchEvent(new Event('sync-complete'));
+        console.log('Sync complete');
+      } catch (error) {
+        console.error('Error during sync:', error);
+        window.dispatchEvent(new Event('sync-complete'));
+      }
+    };
+
+    // Listen for sync trigger
+    const handleSyncTrigger = () => {
+      syncOfflineDreams();
+    };
+
+    window.addEventListener('sync-offline-dreams', handleSyncTrigger);
+
+    // Try to sync on mount if online
+    if (isOnline()) {
+      offlineStorage.getUnsyncedCount().then(count => {
+        if (count > 0) {
+          syncOfflineDreams();
+        }
+      });
+    }
+
+    return () => {
+      window.removeEventListener('sync-offline-dreams', handleSyncTrigger);
+    };
+  }, [user]);
+
   // Check microphone permission status
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.permissions) {
@@ -346,6 +444,35 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
     // Save to Supabase if user is logged in
     if (user) {
+      const online = isOnline();
+
+      // If offline, save to IndexedDB
+      if (!online) {
+        console.log('Offline - saving to IndexedDB');
+        try {
+          await offlineStorage.saveDream({
+            id: newDream.id,
+            user_id: user.id,
+            title: newDream.title,
+            content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
+            mood: 'peaceful',
+            tags: [...autoTags, ...(newDream.tags || [])],
+            date: newDream.date,
+            time: newDream.time,
+            created_at: new Date().toISOString()
+          });
+
+          // Update local state
+          const updatedDreams = [newDream, ...savedDreams];
+          setSavedDreams(updatedDreams);
+          console.log('Saved to IndexedDB successfully');
+        } catch (error) {
+          console.error('Error saving to IndexedDB:', error);
+        }
+        return;
+      }
+
+      // Online - save to Supabase
       try {
         const { data, error } = await supabase
           .from('dreams')
@@ -365,10 +492,23 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           console.error('Error saving to Supabase:', error);
           console.error('Error details:', error.message, error.details, error.hint);
           console.error('Error code:', error.code);
-          // Fall back to localStorage on error
+
+          // Save to IndexedDB as fallback
+          console.log('Supabase error - saving to IndexedDB as fallback');
+          await offlineStorage.saveDream({
+            id: newDream.id,
+            user_id: user.id,
+            title: newDream.title,
+            content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
+            mood: 'peaceful',
+            tags: [...autoTags, ...(newDream.tags || [])],
+            date: newDream.date,
+            time: newDream.time,
+            created_at: new Date().toISOString()
+          });
+
           const updatedDreams = [newDream, ...savedDreams];
           setSavedDreams(updatedDreams);
-          localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
         } else {
           console.log('Saved to Supabase:', data);
 
@@ -945,6 +1085,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
+      {/* Offline Indicator */}
+      {user && <OfflineIndicator language={language} />}
+
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
         body {
