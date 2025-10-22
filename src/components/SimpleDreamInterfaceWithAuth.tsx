@@ -59,10 +59,6 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       if (data) {
         console.log('Profile found! profile_completed:', data.profile_completed);
-        // Load user's preferred language
-        if (data.preferred_language) {
-          setLanguage(data.preferred_language as 'en' | 'ko');
-        }
 
         // Check if profile is actually completed
         // Return true only if profile_completed is explicitly true
