@@ -50,18 +50,21 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
 
   const loadStreakData = async () => {
     try {
-      // Fetch dreams for the last week
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      console.log('Loading streak data for user:', user.id);
 
+      // Fetch ALL dreams to calculate streak properly
       const { data: dreamsData, error } = await supabase
         .from('dreams')
         .select('created_at')
         .eq('user_id', user.id)
-        .gte('created_at', oneWeekAgo.toISOString())
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Dreams fetched:', dreamsData?.length || 0);
 
       // Get unique dates with dreams
       const dreamDates = new Set(
@@ -104,6 +107,9 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         });
       }
 
+      console.log('Streak calculated:', currentStreak);
+      console.log('Week days:', weekDays);
+
       setStreakData({
         currentStreak,
         weekDays
@@ -111,6 +117,19 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       setLoading(false);
     } catch (error) {
       console.error('Error loading streak data:', error);
+      // Set empty streak data on error instead of staying in loading state
+      setStreakData({
+        currentStreak: 0,
+        weekDays: Array(7).fill(null).map((_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - (6 - i));
+          return {
+            day: t.days[date.getDay()],
+            date: date.toDateString(),
+            completed: false
+          };
+        })
+      });
       setLoading(false);
     }
   };
