@@ -27,7 +27,7 @@ const translations = {
     dreamJournal: '드림 저널',
     history: '기록',
     insights: '인사이트',
-    streak: 'Streak',
+    streak: '연속 기록',
     badges: '뱃지',
     language: '언어',
     signOut: '로그아웃'

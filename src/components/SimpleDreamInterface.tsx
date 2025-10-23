@@ -3545,26 +3545,26 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             <div className="modal-content voice-guide-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
-                  Voice Input Guide
+                  {language === 'ko' ? '음성 입력 가이드' : 'Voice Input Guide'}
                 </h2>
               </div>
               <div className="modal-body" style={{padding: '20px', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
                 <div style={{marginBottom: '20px', fontSize: '16px', lineHeight: '1.6'}}>
                   <div style={{marginBottom: '15px', padding: '12px', background: '#f0f9f0', borderRadius: '8px', fontSize: '14px', color: '#5a8449'}}>
-                    💡 <strong>First time?</strong> Your browser will ask for microphone permission once. Choose "Allow" to enable voice input.
+                    💡 <strong>{language === 'ko' ? '처음 사용하시나요?' : 'First time?'}</strong> {language === 'ko' ? '브라우저가 마이크 권한을 요청할 거예요. "허용"을 선택하면 음성 입력을 사용할 수 있어요.' : 'Your browser will ask for microphone permission once. Choose "Allow" to enable voice input.'}
                   </div>
                   <div style={{marginBottom: '15px'}}>
-                    <strong>Short click:</strong> Type your dream
+                    <strong>{language === 'ko' ? '짧게 클릭:' : 'Short click:'}</strong> {language === 'ko' ? '텍스트로 입력하기' : 'Type your dream'}
                   </div>
                   <div style={{marginBottom: '15px'}}>
-                    <strong>Long press:</strong> Speak your dream
+                    <strong>{language === 'ko' ? '길게 누르기:' : 'Long press:'}</strong> {language === 'ko' ? '음성으로 말하기' : 'Speak your dream'}
                   </div>
                   <div style={{fontSize: '14px', color: '#666', marginTop: '15px'}}>
-                    Voice recognition is supported in Chrome, Safari and other modern browsers
+                    {language === 'ko' ? '음성 인식은 Chrome, Safari 등 최신 브라우저에서 지원돼요' : 'Voice recognition is supported in Chrome, Safari and other modern browsers'}
                   </div>
                 </div>
                 <div style={{display: 'flex', gap: '10px', justifyContent: 'center'}}>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowVoiceGuide(false);
                       localStorage.setItem('hasSeenVoiceGuide', 'true');
@@ -3574,9 +3574,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                     className="btn-secondary"
                     style={{padding: '10px 20px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}
                   >
-                    Text Input
+                    {language === 'ko' ? '텍스트 입력' : 'Text Input'}
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setShowVoiceGuide(false);
                       localStorage.setItem('hasSeenVoiceGuide', 'true');
@@ -3586,7 +3586,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                     className="btn-primary"
                     style={{padding: '10px 20px', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}
                   >
-                    Voice Input
+                    {language === 'ko' ? '음성 입력' : 'Voice Input'}
                   </button>
                 </div>
               </div>
