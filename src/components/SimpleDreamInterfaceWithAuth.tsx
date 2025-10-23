@@ -88,7 +88,6 @@ export default function SimpleDreamInterfaceWithAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         const currentUser = session?.user ?? null;
         setUser(currentUser);
-        setLoading(false);
 
         if (currentUser) {
           // Check if user has profile
@@ -99,6 +98,9 @@ export default function SimpleDreamInterfaceWithAuth() {
         } else {
           setCheckingProfile(false);
         }
+
+        // Set loading to false AFTER all checks are done
+        setLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
         setLoading(false);
