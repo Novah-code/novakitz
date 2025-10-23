@@ -453,7 +453,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           await offlineStorage.saveDream({
             id: newDream.id,
             user_id: user.id,
-            title: newDream.title,
+            title: newDream.title || t.dreamEntry,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
             mood: 'peaceful',
             tags: [...autoTags, ...(newDream.tags || [])],
@@ -498,7 +498,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           await offlineStorage.saveDream({
             id: newDream.id,
             user_id: user.id,
-            title: newDream.title,
+            title: newDream.title || t.dreamEntry,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
             mood: 'peaceful',
             tags: [...autoTags, ...(newDream.tags || [])],
