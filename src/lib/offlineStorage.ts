@@ -11,7 +11,7 @@ interface OfflineDream {
   mood: string;
   tags: string[];
   date: string;
-  time: string;
+  time?: string;
   created_at: string;
   synced: boolean;
 }
