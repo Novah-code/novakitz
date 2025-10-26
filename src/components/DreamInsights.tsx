@@ -631,41 +631,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestStreak}</div>
           </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.averageLength}
-            </div>
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.avgLength}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.longestDream}
-            </div>
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestDream}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.shortestDream}
-            </div>
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.shortestDream}</div>
-          </div>
         </div>
 
         {/* Top Keywords */}
@@ -901,7 +866,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
               flexWrap: 'wrap',
               gap: '0.75rem'
             }}>
-              {stats.topTags.map((tag, idx) => (
+              {stats.topTags.slice(0, 3).map((tag, idx) => (
                 <div
                   key={idx}
                   style={{

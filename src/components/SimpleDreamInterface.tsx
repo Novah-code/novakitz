@@ -90,6 +90,36 @@ interface DreamEntry {
   autoTags?: string[];
 }
 
+// Helper function to derive mood from tags
+const deriveMoodFromTags = (tags: string[]): string => {
+  if (!tags || tags.length === 0) return 'peaceful';
+
+  const tagStr = tags.join(' ').toLowerCase();
+
+  // Check for different emotional states in tags
+  if (tagStr.includes('anxious') || tagStr.includes('anxiety') || tagStr.includes('nervous') || tagStr.includes('scared') || tagStr.includes('fear')) {
+    return 'anxious';
+  }
+  if (tagStr.includes('sad') || tagStr.includes('sadness') || tagStr.includes('depressed') || tagStr.includes('melancholy')) {
+    return 'melancholic';
+  }
+  if (tagStr.includes('happy') || tagStr.includes('joy') || tagStr.includes('joyful') || tagStr.includes('excited') || tagStr.includes('excited')) {
+    return 'joyful';
+  }
+  if (tagStr.includes('angry') || tagStr.includes('rage') || tagStr.includes('furious') || tagStr.includes('frustrated')) {
+    return 'angry';
+  }
+  if (tagStr.includes('confused') || tagStr.includes('confusion') || tagStr.includes('puzzled')) {
+    return 'confused';
+  }
+  if (tagStr.includes('calm') || tagStr.includes('peaceful') || tagStr.includes('serene') || tagStr.includes('relaxed')) {
+    return 'peaceful';
+  }
+
+  // Default to peaceful if no specific mood detected
+  return 'peaceful';
+};
+
 // Translations
 const translations = {
   en: {
@@ -363,7 +393,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             user_id: user.id,
             title: newDream.title,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
-            mood: 'peaceful', // Default mood
+            mood: deriveMoodFromTags(autoTags), // Derive mood from tags
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time
