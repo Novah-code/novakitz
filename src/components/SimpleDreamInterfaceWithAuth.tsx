@@ -52,29 +52,39 @@ export default function SimpleDreamInterfaceWithAuth() {
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Add timeout - if query takes more than 5 seconds, return false
+      const timeoutPromise = new Promise((resolve) => {
+        setTimeout(() => {
+          console.warn('Profile query timeout - returning false');
+          resolve(false);
+        }, 5000);
+      });
 
-      console.log('Profile query result - data:', data, 'error:', error);
+      const queryPromise = (async () => {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Error checking profile:', error);
+        console.log('Profile query result - data:', data, 'error:', error);
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          console.error('Error checking profile:', error);
+          return false;
+        }
+
+        if (data) {
+          console.log('Profile found! profile_completed:', data.profile_completed);
+          return data.profile_completed === true;
+        }
+
+        console.log('No profile data found - should show form');
         return false;
-      }
+      })();
 
-      if (data) {
-        console.log('Profile found! profile_completed:', data.profile_completed);
-
-        // Check if profile is actually completed
-        // Return true only if profile_completed is explicitly true
-        return data.profile_completed === true;
-      }
-
-      console.log('No profile data found - should show form');
-      return false;
+      const result = await Promise.race([queryPromise, timeoutPromise]);
+      return result as boolean;
     } catch (error) {
       console.error('Error checking profile:', error);
       return false;
