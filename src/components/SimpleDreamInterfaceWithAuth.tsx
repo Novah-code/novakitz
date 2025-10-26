@@ -95,24 +95,44 @@ export default function SimpleDreamInterfaceWithAuth() {
     // Get initial session
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
+        // Add timeout for entire initialization - max 10 seconds
+        const initTimeoutPromise = new Promise<void>((resolve) => {
+          setTimeout(() => {
+            console.warn('Auth initialization timeout - forcing to complete');
+            setLoading(false);
+            setCheckingProfile(false);
+            resolve();
+          }, 10000);
+        });
 
-        if (currentUser) {
-          // Check if user has profile
-          const profileExists = await checkUserProfile(currentUser.id);
-          console.log('Profile check result:', profileExists);
-          setHasProfile(profileExists);
-          setCheckingProfile(false);
-        } else {
-          setCheckingProfile(false);
-        }
+        const initPromise = (async () => {
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
 
-        // Set loading to false AFTER all checks are done
-        setLoading(false);
+            if (currentUser) {
+              // Check if user has profile
+              const profileExists = await checkUserProfile(currentUser.id);
+              console.log('Profile check result:', profileExists);
+              setHasProfile(profileExists);
+              setCheckingProfile(false);
+            } else {
+              setCheckingProfile(false);
+            }
+
+            // Set loading to false AFTER all checks are done
+            setLoading(false);
+          } catch (error) {
+            console.error('Error initializing auth:', error);
+            setLoading(false);
+            setCheckingProfile(false);
+          }
+        })();
+
+        await Promise.race([initPromise, initTimeoutPromise]);
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Unexpected error in initAuth:', error);
         setLoading(false);
         setCheckingProfile(false);
       }

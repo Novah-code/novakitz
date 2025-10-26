@@ -678,84 +678,96 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const analyzeDreamWithGemini = async (dreamText: string) => {
     console.log('Starting dream analysis for:', dreamText);
     const startTime = Date.now();
-    
+
     try {
-      const response = await retryApiCall(() =>
-        fetch('/api/analyze-dream', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            dreamText: dreamText,
-            language: language
-          })
-        }),
-        3, // 3 retries
-        1000 // 1 second base delay
-      );
+      // Add a 30-second timeout for the entire analysis operation
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          console.error('Dream analysis timeout exceeded - forcing completion');
+          reject(new Error('The AI service is taking too long to respond. Please try again.'));
+        }, 30000); // 30 seconds timeout
+      });
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
+      const analysisPromise = (async () => {
+        const response = await retryApiCall(() =>
+          fetch('/api/analyze-dream', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              dreamText: dreamText,
+              language: language
+            })
+          }),
+          3, // 3 retries
+          1000 // 1 second base delay
+        );
 
-      // API 호출 결과를 로컬스토리지에 기록 (에러만)
-      if (!response.ok) {
-        const responseTime = Date.now() - startTime;
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        
-        try {
-          const errorLog = {
-            timestamp: new Date().toISOString(),
-            endpoint: '/api/analyze-dream',
-            status: response.status,
-            error: errorData.error || 'Unknown error',
-            responseTime
-          };
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
 
-          const existing = localStorage.getItem('api-errors') || '[]';
-          const errors = JSON.parse(existing);
-          errors.push(errorLog);
-          
-          // 최근 100개 에러만 저장
-          const recentErrors = errors.slice(-100);
-          localStorage.setItem('api-errors', JSON.stringify(recentErrors));
-        } catch (storageError) {
-          console.error('Failed to log error to storage:', storageError);
+        // API 호출 결과를 로컬스토리지에 기록 (에러만)
+        if (!response.ok) {
+          const responseTime = Date.now() - startTime;
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+
+          try {
+            const errorLog = {
+              timestamp: new Date().toISOString(),
+              endpoint: '/api/analyze-dream',
+              status: response.status,
+              error: errorData.error || 'Unknown error',
+              responseTime
+            };
+
+            const existing = localStorage.getItem('api-errors') || '[]';
+            const errors = JSON.parse(existing);
+            errors.push(errorLog);
+
+            // 최근 100개 에러만 저장
+            const recentErrors = errors.slice(-100);
+            localStorage.setItem('api-errors', JSON.stringify(recentErrors));
+          } catch (storageError) {
+            console.error('Failed to log error to storage:', storageError);
+          }
         }
-      }
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.log('ERROR RESPONSE DETAILS:', JSON.stringify(errorData, null, 2));
-        console.log('Full error object:', errorData);
-        
-        // Provide user-friendly error messages
-        let userMessage = errorData.error || 'Unknown error occurred';
-        
-        if (response.status === 503) {
-          userMessage = 'The AI service is experiencing high demand. Please try again in a few moments. ⏳';
-        } else if (response.status === 429) {
-          userMessage = 'Too many requests. Please wait a moment before trying again. ⏰';
-        } else if (response.status === 502) {
-          userMessage = 'The AI service is temporarily unavailable. Please try again shortly. 🔄';
-        } else if (response.status >= 500) {
-          userMessage = 'The AI service is experiencing technical difficulties. Please try again later. 🛠️';
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.log('ERROR RESPONSE DETAILS:', JSON.stringify(errorData, null, 2));
+          console.log('Full error object:', errorData);
+
+          // Provide user-friendly error messages
+          let userMessage = errorData.error || 'Unknown error occurred';
+
+          if (response.status === 503) {
+            userMessage = 'The AI service is experiencing high demand. Please try again in a few moments.';
+          } else if (response.status === 429) {
+            userMessage = 'Too many requests. Please wait a moment before trying again.';
+          } else if (response.status === 502) {
+            userMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
+          } else if (response.status >= 500) {
+            userMessage = 'The AI service is experiencing technical difficulties. Please try again later.';
+          }
+
+          throw new Error(userMessage);
         }
-        
-        throw new Error(userMessage);
-      }
 
-      const data = await response.json();
-      console.log('Dream analysis successful');
+        const data = await response.json();
+        console.log('Dream analysis successful');
 
-      if (data.analysis) {
-        console.log('Analysis result:', data.analysis);
-        console.log('Auto tags:', data.autoTags);
-        return data;
-      } else {
-        console.log('Invalid response structure:', data);
-        throw new Error('The AI service returned an unexpected response. Please try again.');
-      }
+        if (data.analysis) {
+          console.log('Analysis result:', data.analysis);
+          console.log('Auto tags:', data.autoTags);
+          return data;
+        } else {
+          console.log('Invalid response structure:', data);
+          throw new Error('The AI service returned an unexpected response. Please try again.');
+        }
+      })();
+
+      return await Promise.race([analysisPromise, timeoutPromise]);
     } catch (error) {
       console.error('Dream Analysis Error:', error);
       throw error;
