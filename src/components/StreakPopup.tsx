@@ -25,7 +25,7 @@ const translations = {
     days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
     share: 'Share',
     close: 'Close',
-    shareMessage: (streak: number) => `I've been recording my dreams for ${streak} day${streak > 1 ? 's' : ''} straight! 🌙✨`,
+    shareMessage: (streak: number) => `I've been recording my dreams for ${streak} day${streak > 1 ? 's' : ''} straight!`,
     linkCopied: 'Link copied!'
   },
   ko: {
@@ -33,7 +33,7 @@ const translations = {
     days: ['일', '월', '화', '수', '목', '금', '토'],
     share: 'Share',
     close: 'Close',
-    shareMessage: (streak: number) => `나는 연속 ${streak}일 꿈을 기록했어요! 🌙✨`,
+    shareMessage: (streak: number) => `나는 연속 ${streak}일 꿈을 기록했어요!`,
     linkCopied: '링크가 복사되었어요!'
   }
 };
@@ -329,13 +329,6 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                 lineHeight: 1
               }}>
                 {streakData.currentStreak}
-              </div>
-              <div style={{
-                fontSize: '1.5rem',
-                color: '#7FB069',
-                marginTop: '4px'
-              }}>
-                ✨
               </div>
             </div>
           </div>

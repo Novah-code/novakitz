@@ -3113,10 +3113,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                         <div className="dream-meta">
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
-                        <div className="dream-text">
-                          {dream.text}
-                        </div>
-                        
+
                         {/* Tags Display */}
                         {(dream.autoTags && dream.autoTags.length > 0) && (
                           <div className="dream-tags" style={{marginTop: '12px'}}>
