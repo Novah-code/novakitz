@@ -3272,7 +3272,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                     style={{
                       position: 'absolute',
                       top: '15px',
-                      right: '110px',
+                      right: window.innerWidth < 640 ? '60px' : '110px',
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
