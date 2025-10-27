@@ -282,8 +282,33 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
   const t = translations[preferredLanguage];
 
+  // Validate nickname: 영문, 숫자, 한글만 허용, 공백 제외, 3-20자
+  const validateNickname = (nickname: string): { isValid: boolean; error: string } => {
+    // 공백 확인
+    if (nickname.includes(' ')) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '공백은 사용할 수 없습니다' : 'Spaces are not allowed' };
+    }
+
+    // 길이 확인
+    if (nickname.length < 3) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '최소 3자 이상입니다' : 'Minimum 3 characters' };
+    }
+    if (nickname.length > 20) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '최대 20자 이내입니다' : 'Maximum 20 characters' };
+    }
+
+    // 영문, 숫자, 한글만 허용
+    const validPattern = /^[a-zA-Z0-9가-힣]+$/;
+    if (!validPattern.test(nickname)) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '영문, 숫자, 한글만 사용 가능합니다' : 'Only English, numbers, and Korean allowed' };
+    }
+
+    return { isValid: true, error: '' };
+  };
+
   // Form data
   const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [nicknameError, setNicknameError] = useState('');
   const [birthYear, setBirthYear] = useState('');
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
@@ -359,8 +384,15 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       }
     }
 
-    // Validate Step 2 (nickname uniqueness)
+    // Validate Step 2 (nickname format and uniqueness)
     if (currentStep === 2 && fullName) {
+      // First validate nickname format
+      const validation = validateNickname(fullName);
+      if (!validation.isValid) {
+        setError(validation.error);
+        return;
+      }
+
       console.log('Step 2: Checking nickname uniqueness for:', fullName);
       setLoading(true);
       try {
@@ -702,10 +734,34 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
               <input
                 type="text"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setFullName(newValue);
+                  // 실시간 검증
+                  if (newValue.length > 0) {
+                    const validation = validateNickname(newValue);
+                    setNicknameError(validation.error);
+                  } else {
+                    setNicknameError('');
+                  }
+                }}
                 placeholder={t.namePlaceholder}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  borderRadius: '12px',
+                  border: nicknameError ? '2px solid #d32f2f' : '2px solid rgba(127, 176, 105, 0.2)',
+                  fontSize: '14px',
+                  outline: 'none',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  transition: 'border-color 0.3s'
+                }}
               />
+              {nicknameError && (
+                <div style={{ color: '#d32f2f', fontSize: '12px', marginTop: '6px', fontWeight: '500' }}>
+                  {nicknameError}
+                </div>
+              )}
             </div>
           )}
 
