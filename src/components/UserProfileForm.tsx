@@ -348,6 +348,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   );
 
   const handleNext = async () => {
+    console.log('handleNext called - currentStep:', currentStep, 'totalSteps:', totalSteps, 'fullName:', fullName);
     setError('');
 
     // Validate Step 1 (required fields)
@@ -360,14 +361,18 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
 
     // Validate Step 2 (nickname uniqueness)
     if (currentStep === 2 && fullName) {
+      console.log('Step 2: Checking nickname uniqueness for:', fullName);
       setLoading(true);
       try {
         // Check if nickname already exists in nicknames table
+        console.log('Querying nicknames table for:', fullName);
         const { data, error: queryError } = await supabase
           .from('nicknames')
           .select('id')
           .eq('nickname', fullName)
           .maybeSingle();
+
+        console.log('Nickname query result:', { data, error: queryError });
 
         if (queryError) throw queryError;
 
@@ -377,6 +382,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
           setLoading(false);
           return;
         }
+
+        console.log('Nickname is available:', fullName);
       } catch (err) {
         console.error('Error checking nickname:', err);
       } finally {
