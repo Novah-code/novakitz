@@ -1923,8 +1923,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         
         .dream-detail-close {
           position: absolute;
-          top: 16px;
-          right: 16px;
+          top: 12px;
+          right: 12px;
           background: rgba(255, 255, 255, 0.2);
           border: none;
           color: white;
@@ -1937,10 +1937,37 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           cursor: pointer;
           font-size: 18px;
           transition: all 0.2s ease;
+          z-index: 10;
         }
-        
+
         .dream-detail-close:hover {
           background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 640px) {
+          .dream-detail-header {
+            padding: 16px 12px;
+          }
+
+          .dream-detail-close {
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dream-detail-header {
+            padding: 12px 8px;
+          }
+
+          .dream-detail-close {
+            width: 26px;
+            height: 26px;
+            font-size: 14px;
+            top: 8px;
+            right: 8px;
+          }
         }
         
         .edit-modal-overlay {
@@ -3311,22 +3338,24 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                       e.stopPropagation();
                       shareDream(selectedDream, e);
                     }}
+                    className="dream-detail-share-btn"
                     style={{
                       position: 'absolute',
-                      top: '15px',
-                      right: window.innerWidth < 640 ? '60px' : '110px',
+                      top: '12px',
+                      right: window.innerWidth < 480 ? '110px' : (window.innerWidth < 640 ? '100px' : '130px'),
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '8px 12px',
-                      fontSize: '14px',
+                      padding: window.innerWidth < 480 ? '6px 10px' : '8px 12px',
+                      fontSize: window.innerWidth < 480 ? '12px' : '14px',
                       fontWeight: '600',
                       color: 'white',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      gap: '4px',
+                      whiteSpace: 'nowrap'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
@@ -3344,25 +3373,27 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                       setSelectedDream(null);
                       startEditDream(selectedDream);
                     }}
+                    className="dream-detail-edit-btn"
                     style={{
                       position: 'absolute',
-                      top: '15px',
-                      right: '60px',
+                      top: '12px',
+                      right: window.innerWidth < 480 ? '55px' : '70px',
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '14px',
+                      padding: window.innerWidth < 480 ? '6px 12px' : '8px 16px',
+                      fontSize: window.innerWidth < 480 ? '12px' : '14px',
                       fontWeight: '600',
                       color: 'white',
                       cursor: 'pointer',
                       transition: 'all 0.2s',
-                      fontFamily: 'Georgia, serif'
+                      fontFamily: 'Georgia, serif',
+                      whiteSpace: 'nowrap'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                   >
-                    Edit
+                    {language === 'ko' ? '수정' : 'Edit'}
                   </button>
                   <div className="dream-detail-title">{selectedDream.title || t.dreamEntry}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
