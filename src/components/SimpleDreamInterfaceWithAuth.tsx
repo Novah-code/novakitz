@@ -68,15 +68,20 @@ export default function SimpleDreamInterfaceWithAuth() {
           .maybeSingle();
 
         console.log('Profile query result - data:', data, 'error:', error);
+        console.log('Data type check - typeof data:', typeof data, 'data:', JSON.stringify(data));
 
         if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
           console.error('Error checking profile:', error);
           return false;
         }
 
-        if (data && data.profile_completed === true) {
-          console.log('Profile found and completed! profile_completed:', data.profile_completed);
-          return true;
+        // Check for data and profile_completed being true (handle both boolean and string 'true')
+        if (data) {
+          const isCompleted = data.profile_completed === true || data.profile_completed === 'true';
+          console.log('Profile found! profile_completed:', data.profile_completed, 'isCompleted:', isCompleted);
+          if (isCompleted) {
+            return true;
+          }
         }
 
         console.log('No profile data found or profile not completed - should show form');
@@ -110,12 +115,13 @@ export default function SimpleDreamInterfaceWithAuth() {
           try {
             const { data: { session } } = await supabase.auth.getSession();
             const currentUser = session?.user ?? null;
+            console.log('Initial session check - user:', currentUser?.id);
             setUser(currentUser);
 
             if (currentUser) {
               // Check if user has profile
               const profileExists = await checkUserProfile(currentUser.id);
-              console.log('Profile check result:', profileExists);
+              console.log('Initial profile check result:', profileExists);
               setHasProfile(profileExists);
               setCheckingProfile(false);
             } else {
@@ -141,26 +147,33 @@ export default function SimpleDreamInterfaceWithAuth() {
 
     initAuth();
 
-    // Listen for auth changes
+    // Listen for auth changes (only update on actual user change or login/logout)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event);
+      console.log('Auth state change event:', event);
       const currentUser = session?.user ?? null;
-      setUser(currentUser);
 
-      if (currentUser) {
-        try {
-          setCheckingProfile(true);
-          const profileExists = await checkUserProfile(currentUser.id);
-          console.log('Profile check result (auth change):', profileExists);
-          setHasProfile(profileExists);
-          setCheckingProfile(false);
-        } catch (error) {
-          console.error('Error checking profile on auth change:', error);
-          setCheckingProfile(false);
+      // Only process SIGNED_IN and SIGNED_OUT events for profile check
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        console.log('SIGNED_IN or INITIAL_SESSION - checking profile');
+        setUser(currentUser);
+
+        if (currentUser) {
+          try {
+            setCheckingProfile(true);
+            const profileExists = await checkUserProfile(currentUser.id);
+            console.log('Profile check result (auth change):', profileExists);
+            setHasProfile(profileExists);
+            setCheckingProfile(false);
+          } catch (error) {
+            console.error('Error checking profile on auth change:', error);
+            setCheckingProfile(false);
+          }
         }
-      } else {
+      } else if (event === 'SIGNED_OUT') {
+        console.log('SIGNED_OUT - clearing user');
+        setUser(null);
         setHasProfile(null);
         setCheckingProfile(false);
       }
