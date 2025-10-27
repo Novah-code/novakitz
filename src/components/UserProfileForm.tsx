@@ -362,16 +362,17 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     if (currentStep === 2 && fullName) {
       setLoading(true);
       try {
+        // Check if nickname already exists in nicknames table
         const { data, error: queryError } = await supabase
-          .from('user_profiles')
-          .select('user_id')
-          .eq('full_name', fullName)
-          .neq('user_id', user.id)
+          .from('nicknames')
+          .select('id')
+          .eq('nickname', fullName)
           .maybeSingle();
 
         if (queryError) throw queryError;
 
         if (data) {
+          console.warn('Nickname already taken:', fullName);
           setError(t.nicknameTaken);
           setLoading(false);
           return;
@@ -447,6 +448,21 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         );
 
       if (error) throw error;
+
+      // Save nickname to nicknames table for duplicate checking
+      if (fullName) {
+        const { error: nicknameError } = await supabase
+          .from('nicknames')
+          .upsert(
+            { user_id: user.id, nickname: fullName },
+            { onConflict: 'user_id' }
+          );
+
+        if (nicknameError) {
+          console.error('Error saving nickname:', nicknameError);
+          // Don't throw - profile is already saved
+        }
+      }
 
       if (onComplete) {
         onComplete();
