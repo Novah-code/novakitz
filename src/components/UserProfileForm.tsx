@@ -364,12 +364,13 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       console.log('Step 2: Checking nickname uniqueness for:', fullName);
       setLoading(true);
       try {
-        // Check if nickname already exists in nicknames table
-        console.log('Querying nicknames table for:', fullName);
+        // Check if nickname already exists in user_profiles table
+        console.log('Querying user_profiles for fullName:', fullName);
         const { data, error: queryError } = await supabase
-          .from('nicknames')
-          .select('id')
-          .eq('nickname', fullName)
+          .from('user_profiles')
+          .select('user_id')
+          .eq('full_name', fullName)
+          .neq('user_id', user.id)
           .maybeSingle();
 
         console.log('Nickname query result:', { data, error: queryError });
@@ -455,21 +456,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         );
 
       if (error) throw error;
-
-      // Save nickname to nicknames table for duplicate checking
-      if (fullName) {
-        const { error: nicknameError } = await supabase
-          .from('nicknames')
-          .upsert(
-            { user_id: user.id, nickname: fullName },
-            { onConflict: 'user_id' }
-          );
-
-        if (nicknameError) {
-          console.error('Error saving nickname:', nicknameError);
-          // Don't throw - profile is already saved
-        }
-      }
 
       if (onComplete) {
         onComplete();
