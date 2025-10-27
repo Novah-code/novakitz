@@ -209,6 +209,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isRecording, setIsRecording] = useState(false);
   const [showVoiceGuide, setShowVoiceGuide] = useState(false);
   const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -243,7 +245,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               time: dream.time,
               timestamp: new Date(dream.created_at).getTime(),
               tags: dream.tags || [],
-              autoTags: dream.tags || []
+              autoTags: dream.tags || [],
+              image: dream.image || undefined
             }));
             setSavedDreams(dreams);
             console.log('Loaded dreams from Supabase:', dreams.length);
@@ -456,9 +459,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       console.log('Saved to localStorage and updated state');
     }
 
-    // Check for badges after saving
+    // Check for badges after saving (with delay to allow DB update)
     if (user) {
-      checkAndAwardBadges(user.id);
+      setTimeout(() => {
+        checkAndAwardBadges(user.id);
+      }, 1000);
       // Show streak popup after dream is saved
       setShowStreakPopup(true);
     }
@@ -937,25 +942,41 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (e) {
       e.stopPropagation();
     }
+    setShareModalDream(dream);
+    setShowShareModal(true);
+  };
 
-    const dreamTitle = dream.title || t.dreamEntry;
-    const dreamText = dream.text.length > 200 ? dream.text.substring(0, 200) + '...' : dream.text;
+  const handleShareOption = (platform: 'link' | 'instagram' | 'native') => {
+    if (!shareModalDream) return;
+
+    const dreamTitle = shareModalDream.title || t.dreamEntry;
+    const dreamText = shareModalDream.text.length > 200
+      ? shareModalDream.text.substring(0, 200) + '...'
+      : shareModalDream.text;
 
     const shareText = language === 'ko'
       ? `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
       : `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
 
-    if (navigator.share) {
-      navigator.share({
-        title: dreamTitle,
-        text: shareText
-      }).catch(err => console.log('Share cancelled', err));
-    } else {
+    if (platform === 'link') {
       navigator.clipboard.writeText(shareText).then(() => {
         setShowShareToast(true);
+        setShowShareModal(false);
         setTimeout(() => setShowShareToast(false), 2000);
       });
-      // You could add a toast notification here
+    } else if (platform === 'instagram') {
+      // Instagram share via web intent
+      const instagramShareUrl = `https://www.instagram.com/share?url=${encodeURIComponent(window.location.origin)}&quote=${encodeURIComponent(shareText)}`;
+      window.open(instagramShareUrl, '_blank');
+      setShowShareModal(false);
+    } else if (platform === 'native') {
+      if (navigator.share) {
+        navigator.share({
+          title: dreamTitle,
+          text: shareText
+        }).catch(err => console.log('Share cancelled', err));
+      }
+      setShowShareModal(false);
     }
     setActiveMenu(null);
   };
@@ -3683,6 +3704,174 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           language={language}
           onClose={() => setShowStreakPopup(false)}
         />
+      )}
+
+      {/* Share Modal with Glassmorphism */}
+      {showShareModal && shareModalDream && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10001
+        }} onClick={() => setShowShareModal(false)}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '20px',
+            padding: '28px',
+            width: '90%',
+            maxWidth: '420px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            animation: 'slideUp 0.3s ease'
+          }} onClick={(e) => e.stopPropagation()}>
+            <h2 style={{
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#1a1a1a',
+              marginBottom: '20px',
+              textAlign: 'center'
+            }}>
+              {language === 'ko' ? '꿈을 공유하세요' : 'Share Your Dream'}
+            </h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {/* Copy Link Button */}
+              <button
+                onClick={() => handleShareOption('link')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '14px 16px',
+                  background: 'linear-gradient(135deg, #7FB069 0%, #a8d5a8 100%)',
+                  border: 'none',
+                  borderRadius: '14px',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(127, 176, 105, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.2)';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M8 17v-3m0 0v-6m0 6l-6-6m6 6l6-6" />
+                  <path d="M16 7h-4v6h4V7z" />
+                </svg>
+                {language === 'ko' ? '링크 복사' : 'Copy Link'}
+              </button>
+
+              {/* Instagram Button */}
+              <button
+                onClick={() => handleShareOption('instagram')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '14px 16px',
+                  background: 'linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+                  border: 'none',
+                  borderRadius: '14px',
+                  color: 'white',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 4px 12px rgba(220, 39, 67, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(220, 39, 67, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(220, 39, 67, 0.2)';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.204-.012 3.584-.07 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.322a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z"/>
+                </svg>
+                {language === 'ko' ? 'Instagram' : 'Instagram'}
+              </button>
+
+              {/* Native Share Button */}
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <button
+                  onClick={() => handleShareOption('native')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '14px 16px',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    border: '2px solid #7FB069',
+                    borderRadius: '14px',
+                    color: '#7FB069',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                  {language === 'ko' ? '더 많이 공유' : 'More Options'}
+                </button>
+              )}
+
+              {/* Cancel Button */}
+              <button
+                onClick={() => setShowShareModal(false)}
+                style={{
+                  padding: '12px 16px',
+                  background: 'transparent',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '14px',
+                  color: '#666',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                {language === 'ko' ? '닫기' : 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Share Toast */}
