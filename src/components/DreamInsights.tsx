@@ -857,44 +857,65 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           </div>
         )}
 
-        {/* Top Tags */}
+        {/* Dream Keywords: Emotion & Symbols */}
         {stats.topTags.length > 0 && (
           <div style={{ padding: '0 2rem 2rem 2rem' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.topTags}</h2>
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0.75rem'
-            }}>
-              {stats.topTags.slice(0, 3).map((tag, idx) => (
+            <h2 style={{ color: '#5A8449', marginBottom: '1.5rem' }}>
+              {language === 'ko' ? '꿈의 핵심 요소' : 'Dream Essence'}
+            </h2>
+
+            {/* Primary Emotion */}
+            {stats.topTags[0] && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.85rem', color: '#7FB069', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  {language === 'ko' ? '대표 감정' : 'Primary Emotion'}
+                </div>
                 <div
-                  key={idx}
                   style={{
-                    padding: '0.75rem 1.25rem',
-                    background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-                    borderRadius: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    border: '2px solid #7FB069'
+                    padding: '1rem 1.5rem',
+                    background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)',
+                    borderRadius: '12px',
+                    display: 'inline-block',
+                    border: '2px solid #ec407a'
                   }}
                 >
-                  <span style={{ fontWeight: '600', color: '#5A8449' }}>
-                    {tag.tag}
-                  </span>
-                  <span style={{
-                    background: '#7FB069',
-                    color: 'white',
-                    borderRadius: '12px',
-                    padding: '2px 8px',
-                    fontSize: '0.85rem',
-                    fontWeight: 'bold'
-                  }}>
-                    {tag.count}
+                  <span style={{ fontWeight: '700', color: '#c2185b', fontSize: '1.1rem' }}>
+                    {stats.topTags[0].tag}
                   </span>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
+
+            {/* Important Symbols */}
+            {stats.topTags.slice(1, 3).length > 0 && (
+              <div>
+                <div style={{ fontSize: '0.85rem', color: '#7FB069', fontWeight: '600', marginBottom: '0.5rem' }}>
+                  {language === 'ko' ? '중요 상징' : 'Key Symbols'}
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
+                }}>
+                  {stats.topTags.slice(1, 3).map((tag, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '0.75rem 1.25rem',
+                        background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                        borderRadius: '20px',
+                        display: 'inline-block',
+                        border: '2px solid #7FB069'
+                      }}
+                    >
+                      <span style={{ fontWeight: '600', color: '#5A8449' }}>
+                        {tag.tag}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

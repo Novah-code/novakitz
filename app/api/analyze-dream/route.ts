@@ -92,40 +92,48 @@ async function extractDreamKeywords(dreamText: string, language: 'en' | 'ko' = '
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
 
     const keywordPrompt = language === 'ko'
-      ? `다음 꿈에서 5-8개의 핵심 키워드를 추출하고 분석하세요. JSON 배열 형식으로만 응답하세요.
+      ? `다음 꿈을 분석하여 정확히 3개의 키워드만 추출하세요: 대표 감정 1개 + 중요 상징 2개. JSON 배열 형식으로만 응답하세요.
 
 꿈: "${dreamText}"
 
-각 키워드에 대해 다음 정보를 포함하세요:
+반드시 다음 구조를 따르세요:
+1. 첫 번째: 꿈의 가장 주요한 감정 (category: "emotion")
+2. 두 번째, 세 번째: 꿈에서 가장 의미 있는 상징 (category: "symbol")
+
+각 항목:
 - keyword: 키워드 (한국어)
-- category: emotion(감정), symbol(상징), person(인물), place(장소), action(행동), theme(주제) 중 하나
+- category: emotion 또는 symbol만 사용
 - sentiment: positive(긍정), negative(부정), neutral(중립), mixed(복합) 중 하나
 
 JSON 형식 예시:
 [
-  {"keyword": "물", "category": "symbol", "sentiment": "neutral"},
   {"keyword": "불안", "category": "emotion", "sentiment": "negative"},
-  {"keyword": "가족", "category": "person", "sentiment": "mixed"}
+  {"keyword": "물", "category": "symbol", "sentiment": "neutral"},
+  {"keyword": "어둠", "category": "symbol", "sentiment": "negative"}
 ]
 
-JSON 배열만 반환하고 다른 텍스트는 포함하지 마세요.`
-      : `Extract 5-8 key keywords from this dream and analyze them. Respond ONLY with a JSON array.
+정확히 3개만 반환하고 다른 텍스트는 포함하지 마세요.`
+      : `Analyze this dream and extract EXACTLY 3 keywords only: 1 dominant emotion + 2 important symbols. Respond ONLY with a JSON array.
 
 Dream: "${dreamText}"
 
-For each keyword include:
+Follow this structure strictly:
+1. First: The most prominent emotion in the dream (category: "emotion")
+2. Second, Third: The most meaningful symbols (category: "symbol")
+
+Each item:
 - keyword: the keyword (in English)
-- category: one of: emotion, symbol, person, place, action, theme
+- category: emotion or symbol only
 - sentiment: one of: positive, negative, neutral, mixed
 
 JSON format example:
 [
-  {"keyword": "water", "category": "symbol", "sentiment": "neutral"},
   {"keyword": "anxiety", "category": "emotion", "sentiment": "negative"},
-  {"keyword": "family", "category": "person", "sentiment": "mixed"}
+  {"keyword": "water", "category": "symbol", "sentiment": "neutral"},
+  {"keyword": "darkness", "category": "symbol", "sentiment": "negative"}
 ]
 
-Return ONLY the JSON array, no other text.`;
+Return EXACTLY 3 items and no other text.`;
 
     const response = await retryWithExponentialBackoff(async () => {
       const res = await fetch(
