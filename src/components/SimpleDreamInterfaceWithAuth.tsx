@@ -53,17 +53,17 @@ export default function SimpleDreamInterfaceWithAuth() {
     console.log('checkUserProfile called for userId:', userId);
     try {
       // Add timeout - if query takes more than 5 seconds, return false
-      const timeoutPromise = new Promise((resolve) => {
+      const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
           console.warn('Profile query timeout - returning false');
           resolve(false);
         }, 5000);
       });
 
-      const queryPromise = (async () => {
+      const queryPromise = (async (): Promise<boolean> => {
         const { data, error } = await supabase
           .from('user_profiles')
-          .select('*')
+          .select('profile_completed')
           .eq('user_id', userId)
           .maybeSingle();
 
@@ -74,17 +74,18 @@ export default function SimpleDreamInterfaceWithAuth() {
           return false;
         }
 
-        if (data) {
-          console.log('Profile found! profile_completed:', data.profile_completed);
-          return data.profile_completed === true;
+        if (data && data.profile_completed === true) {
+          console.log('Profile found and completed! profile_completed:', data.profile_completed);
+          return true;
         }
 
-        console.log('No profile data found - should show form');
+        console.log('No profile data found or profile not completed - should show form');
         return false;
       })();
 
       const result = await Promise.race([queryPromise, timeoutPromise]);
-      return result as boolean;
+      console.log('checkUserProfile final result:', result);
+      return result;
     } catch (error) {
       console.error('Error checking profile:', error);
       return false;
@@ -221,9 +222,12 @@ export default function SimpleDreamInterfaceWithAuth() {
       <UserProfileForm
         user={user}
         onComplete={() => {
+          console.log('Profile completed, setting hasProfile to true');
           setHasProfile(true);
           // Reload profile to get language preference
-          checkUserProfile(user.id);
+          checkUserProfile(user.id).then((result) => {
+            console.log('Profile reload result:', result);
+          });
         }}
       />
     );
