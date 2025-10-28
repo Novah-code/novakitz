@@ -237,10 +237,6 @@ export default function SimpleDreamInterfaceWithAuth() {
         onComplete={() => {
           console.log('Profile completed, setting hasProfile to true');
           setHasProfile(true);
-          // Reload profile to get language preference
-          checkUserProfile(user.id).then((result) => {
-            console.log('Profile reload result:', result);
-          });
         }}
       />
     );
