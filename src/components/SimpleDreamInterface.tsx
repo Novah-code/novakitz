@@ -485,6 +485,24 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = []) => {
     console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords });
 
+    // Get user's nickname for display
+    let userNickname = '';
+    if (user) {
+      try {
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        userNickname = profileData?.full_name || user.email || 'Anonymous';
+        console.log('User nickname fetched:', userNickname);
+      } catch (err) {
+        console.error('Error fetching user nickname:', err);
+        userNickname = user.email || 'Anonymous';
+      }
+    }
+
     // If this is the first dream and no image is selected, use default image
     const isFirstDream = savedDreams.length === 0;
     const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
@@ -530,7 +548,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             date: newDream.date,
             time: newDream.time || '',
             created_at: new Date().toISOString()
-          });
+          } as any); // Cast to any to handle user_nickname not being in OfflineDream interface
 
           const updatedDreams = [newDream, ...savedDreams];
           setSavedDreams(updatedDreams);
@@ -547,6 +565,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           .from('dreams')
           .insert([{
             user_id: user.id,
+            user_nickname: userNickname,
             title: newDream.title,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
             mood: deriveMoodFromTags(autoTags), // Derive mood from tags
@@ -574,7 +593,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               date: newDream.date,
               time: newDream.time || '',
               created_at: new Date().toISOString()
-            });
+            } as any);
           } catch (offlineErr) {
             console.error('Error saving to offline storage:', offlineErr);
           }
