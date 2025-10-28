@@ -72,8 +72,7 @@ export default function EveningReflection({
           .from('evening_reflections')
           .select('id')
           .eq('user_id', userId)
-          .gte('created_at', `${today}T00:00:00`)
-          .lt('created_at', `${today}T23:59:59`)
+          .eq('reflection_date', today)
           .maybeSingle();
 
         if (reflectionData) {
@@ -104,7 +103,7 @@ export default function EveningReflection({
         .insert([
           {
             user_id: userId,
-            date: today,
+            reflection_date: today,
             intention_1_achieved: achieved[1 as keyof typeof achieved],
             intention_2_achieved: achieved[2 as keyof typeof achieved],
             intention_3_achieved: achieved[3 as keyof typeof achieved],

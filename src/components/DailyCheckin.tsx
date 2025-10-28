@@ -49,8 +49,7 @@ export default function DailyCheckin({
           .from('checkins')
           .select('id, time_of_day, mood, energy_level, progress_note, created_at')
           .eq('user_id', userId)
-          .gte('created_at', `${today}T00:00:00`)
-          .lt('created_at', `${today}T23:59:59`);
+          .eq('check_date', today);
 
         if (error) {
           console.error('Error fetching checkins:', error);
@@ -80,7 +79,7 @@ export default function DailyCheckin({
         .insert([
           {
             user_id: userId,
-            date: today,
+            check_date: today,
             time_of_day: timeOfDay,
             mood,
             energy_level: energyLevel,
