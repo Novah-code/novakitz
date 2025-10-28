@@ -52,13 +52,12 @@ export default function SimpleDreamInterfaceWithAuth() {
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
-      // Add timeout - if query takes more than 15 seconds, return false
-      // Increased from 5s to 15s to account for slow network conditions
+      // Shorter timeout - 5 seconds max
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.warn('Profile query timeout (15s) - returning false');
-          resolve(false);
-        }, 15000);
+          console.warn('Profile query timeout - returning true (assume completed)');
+          resolve(true); // Return true on timeout to avoid showing profile form
+        }, 5000);
       });
 
       const queryPromise = (async (): Promise<boolean> => {
@@ -69,28 +68,21 @@ export default function SimpleDreamInterfaceWithAuth() {
             .eq('user_id', userId)
             .maybeSingle();
 
-          console.log('Profile query result - data:', data, 'error:', error);
-          console.log('Data type check - typeof data:', typeof data, 'data:', JSON.stringify(data));
-
-          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          if (error && error.code !== 'PGRST116') {
             console.error('Error checking profile:', error);
-            return false;
+            return true; // Default to true on error
           }
 
-          // Check for data and profile_completed being true (handle both boolean and string 'true')
-          if (data) {
-            const isCompleted = data.profile_completed === true || data.profile_completed === 'true';
-            console.log('Profile found! profile_completed:', data.profile_completed, 'isCompleted:', isCompleted);
-            if (isCompleted) {
-              return true;
-            }
+          if (data && (data.profile_completed === true || data.profile_completed === 'true')) {
+            console.log('Profile completed');
+            return true;
           }
 
-          console.log('No profile data found or profile not completed - should show form');
+          console.log('Profile not completed');
           return false;
         } catch (queryError) {
           console.error('Exception in queryPromise:', queryError);
-          return false;
+          return true; // Default to true on exception
         }
       })();
 
@@ -99,7 +91,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       return result;
     } catch (error) {
       console.error('Error checking profile:', error);
-      return false;
+      return true; // Default to true on error
     }
   };
 
@@ -153,19 +145,21 @@ export default function SimpleDreamInterfaceWithAuth() {
 
     initAuth();
 
-    // Listen for auth changes (only update on actual user change or login/logout)
+    // Listen for auth changes (only on login/logout, skip INITIAL_SESSION to avoid race condition)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change event:', event);
-      const currentUser = session?.user ?? null;
 
-      // Only process SIGNED_IN and SIGNED_OUT events for profile check
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        console.log('SIGNED_IN or INITIAL_SESSION - checking profile');
+      // Only handle SIGNED_IN (actual sign in) and SIGNED_OUT
+      // Skip INITIAL_SESSION and TOKEN_REFRESHED to avoid race conditions
+      if (event === 'SIGNED_IN') {
+        console.log('SIGNED_IN - updating user state');
+        const currentUser = session?.user ?? null;
         setUser(currentUser);
 
-        if (currentUser) {
+        if (currentUser && hasProfile === null) {
+          // Only check profile if we haven't checked yet
           try {
             setCheckingProfile(true);
             const profileExists = await checkUserProfile(currentUser.id);
