@@ -213,9 +213,11 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           transform: 'translate(-50%, -50%)',
           background: 'white',
           borderRadius: '32px',
-          padding: '2.5rem 2rem',
+          padding: window.innerWidth < 480 ? '1.5rem 1rem' : '2.5rem 2rem',
           maxWidth: '600px',
-          width: '90%',
+          width: window.innerWidth < 480 ? '95%' : '90%',
+          maxHeight: window.innerWidth < 480 ? '85vh' : '90vh',
+          overflowY: 'auto',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
           zIndex: 10001,
           fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
@@ -270,7 +272,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         {/* Title */}
         <h2 style={{
           margin: '0 0 2rem 0',
-          fontSize: '1.75rem',
+          fontSize: window.innerWidth < 480 ? '1.4rem' : '1.75rem',
           fontWeight: '600',
           color: '#2c3e50',
           textAlign: 'center'
@@ -281,18 +283,25 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         {/* Streak Circle */}
         <div style={{
           display: 'flex',
+          flexDirection: window.innerWidth < 480 ? 'column' : 'row',
           alignItems: 'center',
-          gap: '3rem',
+          justifyContent: 'center',
+          gap: window.innerWidth < 480 ? '1.5rem' : '3rem',
           marginBottom: '2.5rem'
         }}>
           {/* Circle with number */}
           <div style={{
             position: 'relative',
-            width: '120px',
-            height: '120px',
+            width: window.innerWidth < 480 ? '100px' : '120px',
+            height: window.innerWidth < 480 ? '100px' : '120px',
             flexShrink: 0
           }}>
-            <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
+            <svg
+              width={window.innerWidth < 480 ? "100" : "120"}
+              height={window.innerWidth < 480 ? "100" : "120"}
+              viewBox="0 0 120 120"
+              style={{ transform: 'rotate(-90deg)' }}
+            >
               {/* Background circle */}
               <circle
                 cx="60"
@@ -323,7 +332,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
               textAlign: 'center'
             }}>
               <div style={{
-                fontSize: '2.5rem',
+                fontSize: window.innerWidth < 480 ? '2rem' : '2.5rem',
                 fontWeight: 'bold',
                 color: '#5A8449',
                 lineHeight: 1
@@ -334,11 +343,11 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           </div>
 
           {/* Week Calendar */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, width: window.innerWidth < 480 ? '100%' : 'auto' }}>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: '8px'
+              gap: window.innerWidth < 480 ? '6px' : '8px'
             }}>
               {streakData.weekDays.map((day, idx) => (
                 <div
@@ -348,16 +357,16 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                   }}
                 >
                   <div style={{
-                    fontSize: '0.75rem',
+                    fontSize: window.innerWidth < 480 ? '0.65rem' : '0.75rem',
                     fontWeight: '600',
                     color: day.completed ? '#5A8449' : '#9ca3af',
-                    marginBottom: '6px'
+                    marginBottom: window.innerWidth < 480 ? '4px' : '6px'
                   }}>
                     {day.day}
                   </div>
                   <div style={{
-                    width: '44px',
-                    height: '44px',
+                    width: window.innerWidth < 480 ? '36px' : '44px',
+                    height: window.innerWidth < 480 ? '36px' : '44px',
                     borderRadius: '50%',
                     background: day.completed ? '#7FB069' : '#e5e7eb',
                     display: 'flex',
@@ -367,7 +376,16 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                     margin: '0 auto'
                   }}>
                     {day.completed && (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        width={window.innerWidth < 480 ? "16" : "20"}
+                        height={window.innerWidth < 480 ? "16" : "20"}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     )}
@@ -383,12 +401,12 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           onClick={onClose}
           style={{
             width: '100%',
-            padding: '14px',
+            padding: window.innerWidth < 480 ? '12px' : '14px',
             background: 'linear-gradient(135deg, #7FB069 0%, #5A8449 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '12px',
-            fontSize: '1rem',
+            fontSize: window.innerWidth < 480 ? '0.95rem' : '1rem',
             fontWeight: '600',
             cursor: 'pointer',
             transition: 'all 0.2s',
