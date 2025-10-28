@@ -221,22 +221,30 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       setLoading(true);
       console.log('Loading dream insights for user:', user.id);
 
-      // Fetch total dreams count
-      const { count: dreamCount, error: countError } = await supabase
+      // Fetch dreams with all data for comprehensive analysis (get all dream data first)
+      const { data: dreamsData, error: dreamsError } = await supabase
         .from('dreams')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id, created_at, content, mood, tags')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      console.log('Dream count:', dreamCount);
-      if (countError) {
-        console.error('Error counting dreams:', countError);
+      console.log('Dreams data count:', dreamsData?.length || 0);
+      if (dreamsError) {
+        console.error('Error fetching dreams:', dreamsError);
+        throw dreamsError;
       }
 
-      // Fetch all keywords for this user
+      const dreamCount = dreamsData?.length || 0;
+      console.log('Dream count:', dreamCount);
+
+      // Get only keywords for existing dreams (filter by dream_id)
+      const existingDreamIds = dreamsData?.map(d => d.id) || [];
+
+      // Fetch keywords only for existing dreams
       const { data: keywordsData, error: keywordsError } = await supabase
         .from('dream_keywords')
         .select('keyword, category, sentiment')
-        .eq('user_id', user.id);
+        .in('dream_id', existingDreamIds.length > 0 ? existingDreamIds : ['null']);
 
       if (keywordsError) {
         console.error('Error fetching keywords:', keywordsError);
@@ -289,19 +297,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         category,
         count
       }));
-
-      // Fetch dreams with all data for comprehensive analysis
-      const { data: dreamsData, error: dreamsError } = await supabase
-        .from('dreams')
-        .select('created_at, content, mood, tags')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      console.log('Dreams data count:', dreamsData?.length || 0);
-      if (dreamsError) {
-        console.error('Error fetching dreams:', dreamsError);
-        throw dreamsError;
-      }
 
       // Calculate average dreams per week
       let averageDreamsPerWeek = 0;
