@@ -52,40 +52,46 @@ export default function SimpleDreamInterfaceWithAuth() {
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
-      // Add timeout - if query takes more than 5 seconds, return false
+      // Add timeout - if query takes more than 15 seconds, return false
+      // Increased from 5s to 15s to account for slow network conditions
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.warn('Profile query timeout - returning false');
+          console.warn('Profile query timeout (15s) - returning false');
           resolve(false);
-        }, 5000);
+        }, 15000);
       });
 
       const queryPromise = (async (): Promise<boolean> => {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('profile_completed')
-          .eq('user_id', userId)
-          .maybeSingle();
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('profile_completed')
+            .eq('user_id', userId)
+            .maybeSingle();
 
-        console.log('Profile query result - data:', data, 'error:', error);
-        console.log('Data type check - typeof data:', typeof data, 'data:', JSON.stringify(data));
+          console.log('Profile query result - data:', data, 'error:', error);
+          console.log('Data type check - typeof data:', typeof data, 'data:', JSON.stringify(data));
 
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-          console.error('Error checking profile:', error);
+          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('Error checking profile:', error);
+            return false;
+          }
+
+          // Check for data and profile_completed being true (handle both boolean and string 'true')
+          if (data) {
+            const isCompleted = data.profile_completed === true || data.profile_completed === 'true';
+            console.log('Profile found! profile_completed:', data.profile_completed, 'isCompleted:', isCompleted);
+            if (isCompleted) {
+              return true;
+            }
+          }
+
+          console.log('No profile data found or profile not completed - should show form');
+          return false;
+        } catch (queryError) {
+          console.error('Exception in queryPromise:', queryError);
           return false;
         }
-
-        // Check for data and profile_completed being true (handle both boolean and string 'true')
-        if (data) {
-          const isCompleted = data.profile_completed === true || data.profile_completed === 'true';
-          console.log('Profile found! profile_completed:', data.profile_completed, 'isCompleted:', isCompleted);
-          if (isCompleted) {
-            return true;
-          }
-        }
-
-        console.log('No profile data found or profile not completed - should show form');
-        return false;
       })();
 
       const result = await Promise.race([queryPromise, timeoutPromise]);
