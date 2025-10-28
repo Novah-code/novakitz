@@ -329,9 +329,71 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleOnline = () => {
+    const handleOnline = async () => {
       console.log('Online status changed: online');
       setIsOnlineStatus(true);
+
+      // Auto-analyze unanalyzed offline dreams when coming back online
+      if (user) {
+        try {
+          console.log('Checking for unanalyzed dreams...');
+          const allDreams = await offlineStorage.getAllDreams();
+
+          // Find dreams that were saved offline without analysis
+          // (dreams with "Analysis unavailable" in response or empty response)
+          const dreamsToAnalyze = savedDreams.filter(dream =>
+            !dream.response ||
+            dream.response.includes('Analysis unavailable') ||
+            dream.response.includes('AI service')
+          );
+
+          console.log('Found unanalyzed dreams:', dreamsToAnalyze.length);
+
+          if (dreamsToAnalyze.length > 0) {
+            // Auto-analyze the first unanalyzed dream
+            // (to avoid overwhelming the API)
+            const dreamToAnalyze = dreamsToAnalyze[0];
+            console.log('Auto-analyzing dream:', dreamToAnalyze.id);
+
+            try {
+              const result = await analyzeDreamWithGemini(dreamToAnalyze.text);
+              console.log('Auto-analysis completed:', result);
+
+              // Update the dream with the new analysis
+              const updatedDreams = savedDreams.map(d =>
+                d.id === dreamToAnalyze.id
+                  ? { ...d, response: result.analysis, autoTags: result.autoTags || [] }
+                  : d
+              );
+              setSavedDreams(updatedDreams);
+
+              // Save updated dream to Supabase
+              try {
+                const { error } = await supabase
+                  .from('dreams')
+                  .update({
+                    content: `${dreamToAnalyze.text}\n\n---\n\nAnalysis:\n${result.analysis}`,
+                    tags: [...(result.autoTags || []), ...(dreamToAnalyze.tags || [])]
+                  })
+                  .eq('id', dreamToAnalyze.id)
+                  .eq('user_id', user.id);
+
+                if (error) {
+                  console.error('Error updating dream with analysis:', error);
+                } else {
+                  console.log('Dream updated with analysis on Supabase');
+                }
+              } catch (err) {
+                console.error('Error updating dream on Supabase:', err);
+              }
+            } catch (analysisErr) {
+              console.error('Error during auto-analysis:', analysisErr);
+            }
+          }
+        } catch (err) {
+          console.error('Error checking for unanalyzed dreams:', err);
+        }
+      }
     };
 
     const handleOffline = () => {
@@ -346,7 +408,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [user, savedDreams]);
 
   // Check microphone permission status
   useEffect(() => {
@@ -888,7 +950,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   const handleSubmitDream = async () => {
     const trimmedText = dreamText.trim();
-    
+
     // Basic length check
     if (!trimmedText || trimmedText.length < 10) {
       alert('Please describe your dream in more detail. Minimum 10 characters required.');
@@ -901,20 +963,35 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       alert('Please write a meaningful dream description with different words.');
       return;
     }
-    
+
     // Check for actual words (at least 2 words with 2+ characters each)
     const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
     if (words.length < 2) {
       alert('Please describe your dream with at least a few words. Tell us what happened!');
       return;
     }
-    
+
     setIsLoading(true);
     setShowInput(false); // Close input modal immediately
     setShowResponse(true); // Show analysis modal immediately with loading state
     setDreamResponse(''); // Clear previous response
 
     try {
+      // If offline, skip analysis and save dream with a message
+      if (!isOnlineStatus) {
+        console.log('Offline mode: Skipping analysis');
+        const offlineMessage = language === 'ko'
+          ? '오프라인 모드입니다. 꿈이 저장되었으며, 인터넷 연결 시 자동으로 분석됩니다.'
+          : 'You are in offline mode. Your dream has been saved and will be analyzed automatically when you go online.';
+
+        setDreamResponse(offlineMessage);
+        saveDream(dreamText, offlineMessage); // Save without analysis
+        setDreamText(''); // Reset dream text
+        setDreamTitle(''); // Reset dream title
+        setDreamImage(''); // Reset dream image
+        return;
+      }
+
       const result = await analyzeDreamWithGemini(dreamText);
       console.log('Analysis received in handleSubmitDream:', result);
       setDreamResponse(result.analysis);
@@ -926,10 +1003,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
-      
+
       // Use the user-friendly error message from the API or a default fallback
       const errorMessage = error instanceof Error ? error.message : "Dream analysis temporarily unavailable. Please try again later.";
-      
+
       setDreamResponse(errorMessage);
       saveDream(dreamText, `Analysis unavailable: ${errorMessage}`); // Save the dream even on error
       setDreamText(''); // Reset dream text
