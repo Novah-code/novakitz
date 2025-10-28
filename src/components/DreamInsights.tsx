@@ -527,14 +527,24 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           <button
             onClick={onClose}
             style={{
-              background: '#7FB069',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
               color: 'white',
               border: 'none',
               padding: '0.75rem 2rem',
               borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '1rem',
-              fontFamily: 'inherit'
+              fontFamily: 'inherit',
+              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
             }}
           >
             {t.close}
@@ -833,7 +843,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                       <div style={{
                         height: '100%',
                         width: `${barWidth}%`,
-                        background: 'linear-gradient(135deg, #7FB069 0%, #5A8449 100%)',
+                        background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
                         borderRadius: '8px',
                         transition: 'width 0.5s ease',
                         display: 'flex',
