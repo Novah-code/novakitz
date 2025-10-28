@@ -630,6 +630,15 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           const dreamWithSupabaseId = { ...newDream, id: data.id };
           const updatedDreams = [dreamWithSupabaseId, ...savedDreams];
           setSavedDreams(updatedDreams);
+
+          // Generate daily intentions after saving dream
+          if (user && data.id) {
+            console.log('Dream saved with ID:', data.id);
+            // Generate intentions with a small delay to ensure dream is saved
+            setTimeout(async () => {
+              await generateDailyIntention(response, dreamText, data.id);
+            }, 500);
+          }
         }
       } catch (error) {
         console.error('Exception saving to Supabase:', error);
@@ -964,6 +973,165 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     } catch (error) {
       console.error('Dream Analysis Error:', error);
       throw error;
+    }
+  };
+
+  // Generate daily intentions based on dream analysis and user profile
+  const generateDailyIntention = async (dreamAnalysis: string, dreamText: string, dreamId: string) => {
+    console.log('Generating daily intention...');
+
+    if (!user) {
+      console.log('User not logged in, skipping intention generation');
+      return null;
+    }
+
+    try {
+      // Fetch user profile for personalization
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('occupation, interests, dream_goals')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
+        return null;
+      }
+
+      // Create personalized prompt
+      const userContext = profileData ? `
+사용자의 직업: ${profileData.occupation || '미지정'}
+사용자의 관심사: ${profileData.interests?.join(', ') || '없음'}
+사용자의 꿈 목표: ${profileData.dream_goals || '없음'}
+      ` : '';
+
+      const prompt = language === 'ko' ? `
+당신은 Carl Jung의 심리학과 꿈 해석에 기반한 전문가입니다.
+
+사용자의 꿈: "${dreamText}"
+
+꿈의 분석: ${dreamAnalysis}
+
+${userContext}
+
+이 꿈을 바탕으로 오늘의 의도 3개를 생성해주세요.
+
+각 의도는:
+1. 꿈의 핵심 메시지를 반영
+2. 사용자의 직업과 관심사와 연결
+3. 오늘 실행 가능한 수준
+4. 긍정적이고 행동 지향적
+
+다음 형식으로 정확히 응답해주세요:
+
+의도1: [구체적인 의도]
+의도2: [구체적인 의도]
+의도3: [구체적인 의도]
+
+예시:
+의도1: 오늘 하루 새로운 관점에서 한 가지 문제 살펴보기
+의도2: 팀원과 의미 있는 대화 한 번 나누기
+의도3: 저녁에 5분이라도 명상이나 산책으로 자신과 연결되기
+      ` : `
+You are an expert in Carl Jung's psychology and dream interpretation.
+
+User's Dream: "${dreamText}"
+
+Dream Analysis: ${dreamAnalysis}
+
+${userContext}
+
+Based on this dream, generate 3 daily intentions for today.
+
+Each intention should:
+1. Reflect the core message of the dream
+2. Connect to the user's occupation and interests
+3. Be achievable within one day
+4. Be positive and action-oriented
+
+Respond in this exact format:
+
+Intention1: [specific intention]
+Intention2: [specific intention]
+Intention3: [specific intention]
+
+Example:
+Intention1: Look at one problem from a new perspective today
+Intention2: Have one meaningful conversation with a colleague
+Intention3: Spend 5 minutes in the evening connecting with yourself through meditation or walking
+      `;
+
+      // Call Gemini API
+      const response = await fetch('/api/analyze-dream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          dreamText: prompt,
+          language: language
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Error generating intentions');
+        return null;
+      }
+
+      const data = await response.json();
+      const intentionText = data.analysis || '';
+
+      // Parse intentions from response
+      const parseIntentions = (text: string) => {
+        const lines = text.split('\n').filter(line => line.trim());
+        const intentions = [];
+
+        for (const line of lines) {
+          if (line.includes('의도') || line.includes('Intention')) {
+            const match = line.match(/[^:]*:\s*(.+)/);
+            if (match && match[1]) {
+              intentions.push(match[1].trim());
+            }
+          }
+        }
+
+        return intentions.slice(0, 3); // Get first 3
+      };
+
+      const intentions = parseIntentions(intentionText);
+
+      // Ensure we have 3 intentions
+      while (intentions.length < 3) {
+        intentions.push(language === 'ko' ? '오늘 한 가지 작은 좋은 일 하기' : 'Do one small good thing today');
+      }
+
+      console.log('Generated intentions:', intentions);
+
+      // Save to Supabase
+      const { data: intentionData, error: intentionError } = await supabase
+        .from('daily_intentions')
+        .insert([{
+          user_id: user.id,
+          dream_id: dreamId,
+          intention_1: intentions[0],
+          intention_2: intentions[1],
+          intention_3: intentions[2],
+          full_intention_text: intentionText,
+          date: new Date().toISOString().split('T')[0]
+        }])
+        .select()
+        .single();
+
+      if (intentionError) {
+        console.error('Error saving intentions:', intentionError);
+        return null;
+      }
+
+      console.log('Intentions saved successfully');
+      return intentionData;
+    } catch (error) {
+      console.error('Error in generateDailyIntention:', error);
+      return null;
     }
   };
 
