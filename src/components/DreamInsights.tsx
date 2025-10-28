@@ -571,16 +571,18 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       }}>
         {/* Header */}
         <div style={{
-          background: 'linear-gradient(135deg, #7FB069 0%, #5A8449 100%)',
-          color: 'white',
+          background: 'linear-gradient(135deg, rgba(196, 226, 195, 0.6) 0%, rgba(168, 213, 168, 0.4) 100%)',
+          color: '#5A8449',
           padding: '2rem',
           borderRadius: '24px 24px 0 0',
           position: 'sticky',
           top: 0,
-          zIndex: 10
+          zIndex: 10,
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(127, 176, 105, 0.15)'
         }}>
-          <h1 style={{ margin: 0, fontSize: '2rem', marginBottom: '0.5rem' }}>{t.title}</h1>
-          <p style={{ margin: 0, opacity: 0.9 }}>{t.subtitle}</p>
+          <h1 style={{ margin: 0, fontSize: '2rem', marginBottom: '0.5rem', fontWeight: 700 }}>{t.title}</h1>
+          <p style={{ margin: 0, opacity: 0.75 }}>{t.subtitle}</p>
         </div>
 
         {/* Stats Cards */}
@@ -956,7 +958,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           <button
             onClick={onClose}
             style={{
-              background: '#7FB069',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
               color: 'white',
               border: 'none',
               padding: '1rem 3rem',
@@ -965,15 +967,16 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
               fontSize: '1.1rem',
               fontWeight: '600',
               fontFamily: 'inherit',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#5A8449';
               e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#7FB069';
               e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
             }}
           >
             {t.close}

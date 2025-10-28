@@ -88,7 +88,7 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
         textAlign: 'center',
         color: 'rgba(0, 0, 0, 0.5)'
       }}>
-        {language === 'ko' ? '오늘의 의도 로드 중...' : 'Loading today\'s intentions...'}
+        {language === 'ko' ? '오늘의 확언 로드 중...' : 'Loading today\'s affirmations...'}
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
           color: 'var(--matcha-dark)',
           fontFamily: "'Cormorant', serif"
         }}>
-          {language === 'ko' ? '오늘의 의도' : 'Today\'s Intentions'}
+          {language === 'ko' ? '오늘의 확언' : 'Today\'s Affirmations'}
         </h2>
         <p style={{
           margin: 0,
@@ -240,7 +240,7 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
                 letterSpacing: '0.5px',
                 marginBottom: '8px'
               }}>
-                {language === 'ko' ? `의도 ${intention.num}` : `Intention ${intention.num}`}
+                {language === 'ko' ? `확언 ${intention.num}` : `Affirmation ${intention.num}`}
               </div>
               <p style={{
                 margin: 0,

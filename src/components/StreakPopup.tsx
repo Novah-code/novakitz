@@ -402,7 +402,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           style={{
             width: '100%',
             padding: window.innerWidth < 480 ? '12px' : '14px',
-            background: 'linear-gradient(135deg, #7FB069 0%, #5A8449 100%)',
+            background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '12px',
@@ -410,15 +410,16 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
             fontWeight: '600',
             cursor: 'pointer',
             transition: 'all 0.2s',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 176, 105, 0.4)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
           }}
         >
           {t.close}

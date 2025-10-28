@@ -1017,9 +1017,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
 ${userContext}
 
-이 꿈을 바탕으로 오늘의 의도 3개를 생성해주세요.
+이 꿈을 바탕으로 오늘의 확언 3개를 생성해주세요.
 
-각 의도는:
+각 확언은:
 1. 꿈의 핵심 메시지를 반영
 2. 사용자의 직업과 관심사와 연결
 3. 오늘 실행 가능한 수준
@@ -1027,9 +1027,9 @@ ${userContext}
 
 다음 형식으로 정확히 응답해주세요:
 
-의도1: [구체적인 의도]
-의도2: [구체적인 의도]
-의도3: [구체적인 의도]
+의도1: [구체적인 확언]
+의도2: [구체적인 확언]
+의도3: [구체적인 확언]
 
 예시:
 의도1: 오늘 하루 새로운 관점에서 한 가지 문제 살펴보기
@@ -1044,9 +1044,9 @@ Dream Analysis: ${dreamAnalysis}
 
 ${userContext}
 
-Based on this dream, generate 3 daily intentions for today.
+Based on this dream, generate 3 daily affirmations for today.
 
-Each intention should:
+Each affirmation should:
 1. Reflect the core message of the dream
 2. Connect to the user's occupation and interests
 3. Be achievable within one day
@@ -1054,9 +1054,9 @@ Each intention should:
 
 Respond in this exact format:
 
-Intention1: [specific intention]
-Intention2: [specific intention]
-Intention3: [specific intention]
+Intention1: [specific affirmation]
+Intention2: [specific affirmation]
+Intention3: [specific affirmation]
 
 Example:
 Intention1: Look at one problem from a new perspective today
@@ -3462,7 +3462,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   color: '#1f2937',
                   margin: '0 0 20px 0'
                 }}>
-                  {language === 'ko' ? '오늘의 의도와 성찰' : 'Daily Rituals'}
+                  {language === 'ko' ? '오늘의 확언과 성찰' : 'Daily Affirmations & Reflection'}
                 </h3>
 
                 {user && (
