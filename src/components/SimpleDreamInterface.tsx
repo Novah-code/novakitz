@@ -4289,20 +4289,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 onClick={() => setShowShareModal(false)}
                 style={{
                   padding: '12px 16px',
-                  background: 'transparent',
-                  border: '1px solid #e0e0e0',
+                  background: 'rgba(127, 176, 105, 0.08)',
+                  border: '1px solid rgba(127, 176, 105, 0.2)',
                   borderRadius: '14px',
-                  color: '#666',
+                  color: '#7FB069',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                 }}
               >
                 {language === 'ko' ? '닫기' : 'Cancel'}

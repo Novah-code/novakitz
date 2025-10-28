@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface Intention {
   intention_1: string;
@@ -42,11 +42,6 @@ export default function EveningReflection({
   const [overallScore, setOverallScore] = useState(5);
   const [reflectionNote, setReflectionNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
 
   useEffect(() => {
     if (!userId) return;
@@ -463,9 +458,9 @@ export default function EveningReflection({
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: 'transparent',
+                  background: 'rgba(127, 176, 105, 0.08)',
                   color: '#7FB069',
-                  border: '1px solid rgba(127, 176, 105, 0.3)',
+                  border: '1px solid rgba(127, 176, 105, 0.2)',
                   borderRadius: '8px',
                   fontSize: '0.95rem',
                   fontWeight: 500,
@@ -473,10 +468,10 @@ export default function EveningReflection({
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.05)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                 }}
               >
                 {language === 'ko' ? '취소' : 'Cancel'}

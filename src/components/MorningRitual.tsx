@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface Intention {
   intention_1: string;
@@ -24,11 +24,6 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
     2: false,
     3: false
   });
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
 
   useEffect(() => {
     if (!userId) return;

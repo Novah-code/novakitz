@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 interface CheckinRecord {
   id: string;
@@ -33,11 +33,6 @@ export default function DailyCheckin({
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
-
   useEffect(() => {
     if (!userId) return;
 
@@ -68,11 +63,23 @@ export default function DailyCheckin({
   }, [userId]);
 
   const handleSubmit = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.warn('DailyCheckin: No userId provided');
+      return;
+    }
 
     try {
       setSubmitting(true);
       const today = new Date().toISOString().split('T')[0];
+
+      console.log('DailyCheckin: Starting submission', {
+        userId,
+        check_date: today,
+        time_of_day: timeOfDay,
+        mood,
+        energy_level: energyLevel,
+        progress_note: progressNote
+      });
 
       const { data, error } = await supabase
         .from('checkins')
@@ -89,11 +96,22 @@ export default function DailyCheckin({
         .select()
         .single();
 
+      console.log('DailyCheckin: Insert response', { data, error });
+
       if (error) {
-        console.error('Error saving checkin:', error);
-        alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving check-in');
+        console.error('DailyCheckin: Error saving checkin:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: error.status,
+          fullError: error
+        });
+        alert(language === 'ko'
+          ? `저장 중 오류 발생: ${error.message}`
+          : `Error saving check-in: ${error.message}`);
       } else if (data) {
-        console.log('Checkin saved:', data);
+        console.log('DailyCheckin: Successfully saved:', data);
         setHasCheckedInToday(true);
         setIsOpen(false);
 
@@ -114,10 +132,15 @@ export default function DailyCheckin({
         alert(language === 'ko'
           ? '체크인이 완료되었습니다! 좋은 하루 보내세요!'
           : 'Check-in complete! Have a great day!');
+      } else {
+        console.warn('DailyCheckin: No error but no data returned');
+        alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving check-in');
       }
     } catch (error) {
-      console.error('Exception saving checkin:', error);
-      alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving check-in');
+      console.error('DailyCheckin: Exception during submit:', error);
+      alert(language === 'ko'
+        ? `저장 중 오류 발생: ${error instanceof Error ? error.message : 'Unknown error'}`
+        : `Error saving check-in: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }
@@ -397,9 +420,9 @@ export default function DailyCheckin({
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: 'transparent',
+                  background: 'rgba(127, 176, 105, 0.08)',
                   color: '#7FB069',
-                  border: '1px solid rgba(127, 176, 105, 0.3)',
+                  border: '1px solid rgba(127, 176, 105, 0.2)',
                   borderRadius: '8px',
                   fontSize: '0.95rem',
                   fontWeight: 500,
@@ -407,10 +430,10 @@ export default function DailyCheckin({
                   transition: 'all 0.2s'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.05)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                 }}
               >
                 {language === 'ko' ? '취소' : 'Cancel'}

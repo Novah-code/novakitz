@@ -70,3 +70,37 @@ export interface UserProfile {
 
 export interface UserProfileInsert extends Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> {}
 export interface UserProfileUpdate extends Partial<UserProfileInsert> {}
+
+// Daily Checkin types
+export interface Checkin {
+  id?: string
+  user_id: string
+  check_date: string
+  time_of_day: 'morning' | 'afternoon' | 'evening'
+  mood: number
+  energy_level: number
+  progress_note?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface CheckinInsert extends Omit<Checkin, 'id' | 'created_at' | 'updated_at'> {}
+export interface CheckinUpdate extends Partial<CheckinInsert> {}
+
+// Evening Reflection types
+export interface EveningReflection {
+  id?: string
+  user_id: string
+  reflection_date: string
+  highlights?: string
+  challenges?: string
+  learnings?: string
+  gratitude?: string
+  tomorrow_focus?: string
+  mood?: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface EveningReflectionInsert extends Omit<EveningReflection, 'id' | 'created_at' | 'updated_at'> {}
+export interface EveningReflectionUpdate extends Partial<EveningReflectionInsert> {}
