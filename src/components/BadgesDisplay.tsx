@@ -60,18 +60,37 @@ export default function BadgesDisplay({ user, language }: BadgesDisplayProps) {
     try {
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('badges')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error fetching badges:', error);
+        setLoading(false);
         return;
       }
 
-      setBadges(data?.badges || []);
+      console.log('User profile data:', data);
+
+      // Handle badges - could be array or null
+      const badgesData = data?.badges || [];
+      console.log('Badges data:', badgesData);
+
+      if (Array.isArray(badgesData)) {
+        setBadges(badgesData);
+      } else if (typeof badgesData === 'string') {
+        // If it's a string, try to parse it
+        try {
+          setBadges(JSON.parse(badgesData));
+        } catch {
+          setBadges([]);
+        }
+      } else {
+        setBadges([]);
+      }
     } catch (error) {
       console.error('Error fetching badges:', error);
+      setBadges([]);
     } finally {
       setLoading(false);
     }

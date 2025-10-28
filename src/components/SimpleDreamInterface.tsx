@@ -689,7 +689,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       // Get user's current badges
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
-        .select('badges')
+        .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
@@ -698,7 +698,18 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         return;
       }
 
-      const currentBadges = profileData?.badges || [];
+      let currentBadges = [];
+      if (profileData?.badges) {
+        if (Array.isArray(profileData.badges)) {
+          currentBadges = profileData.badges;
+        } else if (typeof profileData.badges === 'string') {
+          try {
+            currentBadges = JSON.parse(profileData.badges);
+          } catch {
+            currentBadges = [];
+          }
+        }
+      }
       console.log('Current badges:', currentBadges);
 
       // Define badge thresholds
