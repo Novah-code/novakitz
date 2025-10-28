@@ -632,7 +632,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (user) {
       setTimeout(() => {
         checkAndAwardBadges(user.id);
-      }, 1000);
+      }, 2000); // Increased delay to 2 seconds to ensure DB is updated
       // Show streak popup after dream is saved
       setShowStreakPopup(true);
     }
