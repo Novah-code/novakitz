@@ -3372,6 +3372,61 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       </span>
                     </div>
                   )}
+
+                  {/* Quick Selection Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '12px',
+                    justifyContent: 'center'
+                  }}>
+                    <button
+                      onClick={async () => {
+                        const noDreamText = language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.';
+
+                        setIsLoading(true);
+                        setShowInput(false);
+                        setShowResponse(true);
+
+                        const noDreamMessage = language === 'ko'
+                          ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다. 내일의 꿈을 기대해봅시다! 🌙'
+                          : 'You didn\'t remember a dream today. That\'s okay! Let\'s look forward to tomorrow\'s dreams! 🌙';
+
+                        setDreamResponse(noDreamMessage);
+                        saveDream(noDreamText, noDreamMessage);
+
+                        setDreamText('');
+                        setDreamTitle('');
+                        setDreamImage('');
+
+                        setTimeout(() => {
+                          setShowResponse(false);
+                          setIsLoading(false);
+                        }, 2000);
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        background: 'rgba(127, 176, 105, 0.1)',
+                        color: '#7FB069',
+                        border: '1px solid rgba(127, 176, 105, 0.3)',
+                        borderRadius: '8px',
+                        fontSize: '0.9rem',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                      }}
+                    >
+                      {language === 'ko' ? '꿈 안 꿈 💤' : 'No dream 💤'}
+                    </button>
+                  </div>
+
                   <textarea
                     className="dream-input"
                     value={dreamText}
