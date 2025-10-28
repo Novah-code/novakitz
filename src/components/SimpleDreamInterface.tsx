@@ -8,6 +8,9 @@ import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
+import MorningRitual from './MorningRitual';
+import DailyCheckin from './DailyCheckin';
+import EveningReflection from './EveningReflection';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -3444,6 +3447,56 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Daily Rituals Section */}
+              <div style={{
+                padding: '20px 24px',
+                borderTop: '1px solid #e5e7eb',
+                borderBottom: '1px solid #e5e7eb',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 250, 245, 0.3) 100%)'
+              }}>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: '#1f2937',
+                  margin: '0 0 20px 0'
+                }}>
+                  {language === 'ko' ? '오늘의 의도와 성찰' : 'Daily Rituals'}
+                </h3>
+
+                {user && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Morning Ritual */}
+                    <div>
+                      <MorningRitual userId={user.id} language={language || 'en'} />
+                    </div>
+
+                    {/* Check-in Options */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '12px'
+                    }}>
+                      <DailyCheckin
+                        userId={user.id}
+                        language={language || 'en'}
+                        timeOfDay="afternoon"
+                      />
+                      <DailyCheckin
+                        userId={user.id}
+                        language={language || 'en'}
+                        timeOfDay="evening"
+                      />
+                    </div>
+
+                    {/* Evening Reflection */}
+                    <EveningReflection
+                      userId={user.id}
+                      language={language || 'en'}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="dream-history-container" style={{paddingTop: '20px'}}>
