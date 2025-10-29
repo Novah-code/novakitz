@@ -443,9 +443,9 @@ export default function DailyCheckin({
                 style={{
                   flex: 1,
                   padding: '12px',
-                  background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                  color: 'white',
-                  border: 'none',
+                  background: 'rgba(127, 176, 105, 0.08)',
+                  color: '#7FB069',
+                  border: '1px solid rgba(127, 176, 105, 0.2)',
                   borderRadius: '8px',
                   fontSize: '0.95rem',
                   fontWeight: 600,
@@ -455,11 +455,11 @@ export default function DailyCheckin({
                 }}
                 onMouseEnter={(e) => {
                   if (!submitting) {
-                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                   }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                 }}
               >
                 {submitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '저장' : 'Save')}

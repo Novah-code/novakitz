@@ -3405,22 +3405,22 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         }, 2000);
                       }}
                       style={{
-                        flex: 1,
-                        padding: '10px',
-                        background: 'rgba(127, 176, 105, 0.1)',
+                        padding: '8px 16px',
+                        background: 'rgba(127, 176, 105, 0.08)',
                         color: '#7FB069',
-                        border: '1px solid rgba(127, 176, 105, 0.3)',
+                        border: '1px solid rgba(127, 176, 105, 0.2)',
                         borderRadius: '8px',
-                        fontSize: '0.9rem',
+                        fontSize: '0.85rem',
                         fontWeight: '500',
                         cursor: 'pointer',
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                       }}
                     >
                       {language === 'ko' ? '꿈 안 꿈 💤' : 'No dream 💤'}
