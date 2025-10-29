@@ -104,3 +104,46 @@ export interface EveningReflection {
 
 export interface EveningReflectionInsert extends Omit<EveningReflection, 'id' | 'created_at' | 'updated_at'> {}
 export interface EveningReflectionUpdate extends Partial<EveningReflectionInsert> {}
+
+// Subscription types
+export interface SubscriptionPlan {
+  id?: string
+  plan_name: string
+  plan_slug: string
+  price_cents?: number
+  ai_interpretations_per_month: number
+  history_days: number
+  description?: string
+  created_at?: string
+}
+
+export interface UserSubscription {
+  id?: string
+  user_id: string
+  plan_id: string
+  gumroad_license_key?: string
+  gumroad_product_id?: string
+  status: 'active' | 'inactive' | 'cancelled' | 'expired'
+  started_at?: string
+  expires_at?: string
+  renewed_at?: string
+  cancelled_at?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface AIUsage {
+  id?: string
+  user_id: string
+  year_month: string
+  dream_id?: string
+  interpretation_type?: string
+  tokens_used?: number
+  created_at?: string
+}
+
+export interface PlanInfo {
+  plan_slug: string
+  ai_interpretations_per_month: number
+  history_days: number
+}
