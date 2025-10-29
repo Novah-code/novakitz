@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase, Dream } from '../lib/supabase';
 import DreamCalendar from './DreamCalendar';
+import SubscriptionManager from './SubscriptionManager';
+import { filterDreamsByHistoryLimit, getUserPlanInfo } from '../lib/subscription';
 
 interface DreamJournalProps {
   user: User | null;
@@ -42,6 +44,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [userPlanInfo, setUserPlanInfo] = useState<any>(null);
 
   // Load dreams from Supabase
   useEffect(() => {
@@ -57,7 +60,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
 
     try {
       setLoading(true);
-      
+
       // Load from Supabase for logged-in users
       const { data, error } = await supabase
         .from('dreams')
@@ -66,7 +69,14 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDreams(data || []);
+
+      // Apply history limit filtering based on subscription tier
+      const filteredDreams = await filterDreamsByHistoryLimit(user.id, data || []);
+      setDreams(filteredDreams as Dream[]);
+
+      // Load user's plan info
+      const planInfo = await getUserPlanInfo(user.id);
+      setUserPlanInfo(planInfo);
     } catch (error: any) {
       setError(error.message);
       console.error('Error loading dreams:', error);
@@ -248,6 +258,9 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
           </div>
         )}
 
+        {/* Subscription Manager - Show to authenticated users */}
+        {user && <SubscriptionManager user={user} />}
+
         {/* Header */}
         <div className="hero-section">
           <div className="hero-teacup">🍵</div>
@@ -369,22 +382,22 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
         {currentView === 'history' && (
           <div className="dream-history">
             <div className="history-header">
-              <button 
+              <button
                 className="back-btn"
                 onClick={() => setCurrentView('new')}
               >
                 ← Back to Recording
               </button>
               <h2 className="history-title">
-                {selectedDate ? `Dreams from ${new Date(selectedDate).toLocaleDateString('en-US', { 
+                {selectedDate ? `Dreams from ${new Date(selectedDate).toLocaleDateString('en-US', {
                   weekday: 'long',
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}` : 'My Dream Journal'}
               </h2>
               {selectedDate && (
-                <button 
+                <button
                   className="clear-filter-btn"
                   onClick={clearDateFilter}
                   title="Show all dreams"
@@ -393,6 +406,20 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                 </button>
               )}
             </div>
+
+            {/* History Limit Notice for Free Users */}
+            {userPlanInfo && !userPlanInfo.isUnlimited && (
+              <div className="history-limit-notice">
+                <span className="notice-icon">ℹ️</span>
+                <span className="notice-text">
+                  Free plan: Viewing last {userPlanInfo.historyDays} days of dreams.{' '}
+                  <a href="https://gumroad.com/novakitz" target="_blank" rel="noopener noreferrer">
+                    Upgrade to Premium
+                  </a>
+                  {' '}for full history access.
+                </span>
+              </div>
+            )}
             
             {getFilteredDreams().length === 0 ? (
               <div className="empty-state glass">

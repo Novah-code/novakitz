@@ -195,3 +195,110 @@ export async function getRemainingAIInterpretations(userId: string): Promise<{
     };
   }
 }
+
+/**
+ * Get the history cutoff date based on user's subscription tier
+ * Free: 30 days, Premium: unlimited (returns null)
+ */
+export async function getHistoryCutoffDate(userId: string): Promise<Date | null> {
+  try {
+    const plan = await getUserPlan(userId);
+
+    // Premium users have unlimited history
+    if (plan.historyDays === 999999) {
+      return null;
+    }
+
+    // Free users: return cutoff date
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - plan.historyDays);
+    return cutoffDate;
+  } catch (error) {
+    console.error('Error getting history cutoff date:', error);
+    // Default to 30-day cutoff on error
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 30);
+    return cutoffDate;
+  }
+}
+
+/**
+ * Check if a dream should be visible to the user based on history limits
+ * Returns true if the dream is within the user's allowed history window
+ */
+export async function isDreamWithinHistoryLimit(userId: string, dreamCreatedAt: string | Date): Promise<boolean> {
+  try {
+    const cutoffDate = await getHistoryCutoffDate(userId);
+
+    // No cutoff = unlimited history (premium)
+    if (!cutoffDate) {
+      return true;
+    }
+
+    // Check if dream is within the allowed window
+    const dreamDate = new Date(dreamCreatedAt);
+    return dreamDate >= cutoffDate;
+  } catch (error) {
+    console.error('Error checking dream history limit:', error);
+    return true; // Allow by default on error
+  }
+}
+
+/**
+ * Filter dreams to only show those within the user's history limit
+ */
+export async function filterDreamsByHistoryLimit(
+  userId: string,
+  dreams: Array<{ id?: string; created_at?: string }>
+): Promise<Array<{ id?: string; created_at?: string }>> {
+  try {
+    const cutoffDate = await getHistoryCutoffDate(userId);
+
+    // No cutoff = unlimited history (premium)
+    if (!cutoffDate) {
+      return dreams;
+    }
+
+    // Filter dreams within the allowed window
+    return dreams.filter(dream => {
+      if (!dream.created_at) return true;
+      const dreamDate = new Date(dream.created_at);
+      return dreamDate >= cutoffDate;
+    });
+  } catch (error) {
+    console.error('Error filtering dreams by history limit:', error);
+    return dreams; // Return all dreams on error
+  }
+}
+
+/**
+ * Get user's plan info including history limits
+ */
+export async function getUserPlanInfo(userId: string): Promise<{
+  planSlug: string;
+  planName: string;
+  aiInterpretationsPerMonth: number;
+  historyDays: number;
+  isUnlimited: boolean;
+}> {
+  try {
+    const plan = await getUserPlan(userId);
+
+    return {
+      planSlug: plan.planSlug,
+      planName: plan.planSlug === 'premium' ? 'Premium' : 'Free',
+      aiInterpretationsPerMonth: plan.aiInterpretationsPerMonth,
+      historyDays: plan.historyDays,
+      isUnlimited: plan.historyDays === 999999
+    };
+  } catch (error) {
+    console.error('Error getting plan info:', error);
+    return {
+      planSlug: 'free',
+      planName: 'Free',
+      aiInterpretationsPerMonth: 10,
+      historyDays: 30,
+      isUnlimited: false
+    };
+  }
+}

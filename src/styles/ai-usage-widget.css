@@ -1,0 +1,319 @@
+.ai-usage-widget {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  max-width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  z-index: 1000;
+}
+
+.usage-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: max-content;
+}
+
+.usage-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Status colors */
+.ai-usage-widget.status-healthy .usage-toggle {
+  border-color: rgba(127, 176, 105, 0.6);
+  color: rgba(127, 176, 105, 0.9);
+}
+
+.ai-usage-widget.status-healthy .usage-toggle:hover {
+  background: rgba(127, 176, 105, 0.05);
+}
+
+.ai-usage-widget.status-warning .usage-toggle {
+  border-color: rgba(244, 164, 96, 0.6);
+  color: rgba(210, 105, 30, 0.9);
+}
+
+.ai-usage-widget.status-warning .usage-toggle:hover {
+  background: rgba(244, 164, 96, 0.05);
+}
+
+.ai-usage-widget.status-critical .usage-toggle {
+  border-color: rgba(231, 76, 60, 0.6);
+  color: rgba(192, 57, 43, 0.9);
+}
+
+.ai-usage-widget.status-critical .usage-toggle:hover {
+  background: rgba(231, 76, 60, 0.05);
+}
+
+.ai-usage-widget.status-unlimited .usage-toggle {
+  border-color: rgba(155, 89, 182, 0.6);
+  color: rgba(155, 89, 182, 0.9);
+}
+
+.ai-usage-widget.status-unlimited .usage-toggle:hover {
+  background: rgba(155, 89, 182, 0.05);
+}
+
+.status-icon {
+  font-size: 18px;
+}
+
+.status-text {
+  flex: 1;
+}
+
+.toggle-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+/* Expanded Details */
+.usage-details {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  width: 320px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 16px;
+  animation: slideUp 0.2s ease;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.detail-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Unlimited Info */
+.unlimited-info {
+  text-align: center;
+  padding: 12px 0;
+}
+
+.unlimited-label {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(155, 89, 182, 0.9);
+}
+
+.unlimited-desc {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(44, 62, 80, 0.6);
+  line-height: 1.4;
+}
+
+/* Usage Info */
+.usage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.usage-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(44, 62, 80, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(127, 176, 105, 0.9);
+}
+
+.stat-value.used {
+  color: rgba(244, 164, 96, 0.9);
+}
+
+.stat-value.limit {
+  color: rgba(44, 62, 80, 0.5);
+}
+
+.stat-divider {
+  font-size: 18px;
+  color: rgba(44, 62, 80, 0.3);
+  margin: 0 2px;
+}
+
+/* Usage Bar */
+.usage-bar {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(127, 176, 105, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.usage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(127, 176, 105, 0.7) 0%, rgba(127, 176, 105, 0.9) 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.ai-usage-widget.status-warning .usage-fill {
+  background: linear-gradient(90deg, rgba(244, 164, 96, 0.7) 0%, rgba(244, 164, 96, 0.9) 100%);
+}
+
+.ai-usage-widget.status-critical .usage-fill {
+  background: linear-gradient(90deg, rgba(231, 76, 60, 0.7) 0%, rgba(231, 76, 60, 0.9) 100%);
+}
+
+/* Usage Message */
+.usage-message {
+  margin-top: 4px;
+}
+
+.usage-message p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.usage-message .info {
+  color: rgba(44, 62, 80, 0.7);
+}
+
+.usage-message .error {
+  color: rgba(192, 57, 43, 0.9);
+  font-weight: 500;
+}
+
+/* Upgrade Prompt */
+.upgrade-prompt {
+  padding-top: 12px;
+  border-top: 1px solid rgba(127, 176, 105, 0.1);
+  margin-top: 12px;
+}
+
+.upgrade-prompt p {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: rgba(44, 62, 80, 0.7);
+}
+
+.upgrade-prompt a {
+  display: block;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(127, 176, 105, 0.05) 100%);
+  color: rgba(127, 176, 105, 0.9);
+  text-align: center;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.upgrade-prompt a:hover {
+  background: linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(127, 176, 105, 0.1) 100%);
+  color: rgba(127, 176, 105, 1);
+}
+
+/* Scrollbar styling for details */
+.usage-details::-webkit-scrollbar {
+  width: 6px;
+}
+
+.usage-details::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.usage-details::-webkit-scrollbar-thumb {
+  background: rgba(127, 176, 105, 0.3);
+  border-radius: 3px;
+}
+
+.usage-details::-webkit-scrollbar-thumb:hover {
+  background: rgba(127, 176, 105, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .ai-usage-widget {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .usage-details {
+    width: 90vw;
+    max-width: 280px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .usage-toggle {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .status-icon {
+    font-size: 16px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .usage-toggle {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .usage-details {
+    background: rgba(255, 255, 255, 0.98);
+  }
+}

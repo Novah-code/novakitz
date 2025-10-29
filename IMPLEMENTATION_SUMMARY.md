@@ -438,5 +438,71 @@
 
 ---
 
+## 7. 구독 시스템 (Subscription System)
+### 구현 내용
+
+#### 데이터베이스 스키마
+- **subscription_plans 테이블**
+  - Free: 10 AI 해석/월, 30일 히스토리
+  - Premium: 무제한 AI 해석, 전체 히스토리
+  - 가격: $4.99/월
+
+- **user_subscriptions 테이블**
+  - Gumroad 라이선스 키 저장
+  - 구독 상태 추적 (active/inactive/cancelled/expired)
+  - 자동 만료 시간 관리
+
+- **ai_usage 테이블**
+  - 월별 AI 해석 사용량 추적
+  - year_month 필드로 쉬운 월별 그룹핑
+  - 사용자별 해석 이력 기록
+
+#### API 엔드포인트
+- **POST /api/gumroad-webhook**
+  - Gumroad 결제 이벤트 처리
+  - 판매(sale), 환불(refund), 구독 업데이트
+  - 자동 구독 활성화/취소
+
+#### 구독 관련 유틸리티 (`src/lib/subscription.ts`)
+- `getUserPlan()` - 사용자의 현재 구독 정보 조회
+- `getCurrentMonthAIUsage()` - 이달 AI 해석 사용량 확인
+- `canAnalyzeDream()` - 꿈 분석 가능 여부 확인
+- `recordAIUsage()` - 해석 후 사용량 기록
+- `getRemainingAIInterpretations()` - 남은 해석 횟수 조회
+- `getHistoryCutoffDate()` - 구독별 히스토리 조회 범위 계산
+- `filterDreamsByHistoryLimit()` - 히스토리 제한에 따른 꿈 필터링
+
+#### UI 컴포넌트
+
+1. **SubscriptionManager** (`src/components/SubscriptionManager.tsx`)
+   - 현재 구독 상태 표시
+   - 월별 AI 해석 사용량 시각화
+   - 업그레이드 버튼 (Free → Premium)
+   - Gumroad 구독 관리 링크
+   - 확장 가능한 상세 정보 패널
+
+2. **AIUsageWidget** (`src/components/AIUsageWidget.tsx`)
+   - 고정 위치 플로팅 위젯 (우측 하단)
+   - 실시간 사용량 표시
+   - 상태 아이콘 (✅/⚠️/🚫/♾️)
+   - 클릭하여 상세 정보 확인 가능
+   - 30초마다 자동 갱신
+
+#### 주요 기능
+- ✅ AI 해석 한도 도달 시 경고 메시지 (한글/영문 동시 지원)
+- ✅ Free 사용자: 30일 히스토리만 표시
+- ✅ Premium 사용자: 전체 히스토리 접근
+- ✅ 꿈 분석 전 자동 한도 확인
+- ✅ 해석 후 사용량 자동 기록
+- ✅ 월별 자동 리셋 (YYYY-MM-01 형식 사용)
+
+#### 보안 및 권한
+- RLS(Row Level Security) 정책 적용
+- 인증된 사용자만 자신의 사용량 조회 가능
+- Gumroad 웹훅: 서비스 롤 키 사용으로 구독 자동 처리
+- 라이선스 키 중복 불가
+
+---
+
 **마지막 업데이트:** 2025년 10월 29일
-**프로젝트 상태:** 핵심 기능 완성, 안정화 단계
+**프로젝트 상태:** 핵심 기능 + 구독 시스템 완성, 테스트 단계

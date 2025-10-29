@@ -7,6 +7,7 @@ import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import DreamJournal from './DreamJournal';
 import UserProfileForm from './UserProfileForm';
+import AIUsageWidget from './AIUsageWidget';
 
 export default function DreamApp() {
   const searchParams = useSearchParams();
@@ -237,7 +238,7 @@ export default function DreamApp() {
             <span className="nav-logo">🍵</span>
             <span className="nav-title">Novakitz</span>
           </div>
-          
+
           <div className="nav-actions">
             {user ? (
               <div className="user-menu">
@@ -250,8 +251,8 @@ export default function DreamApp() {
               </div>
             ) : (
               <div className="auth-buttons">
-                <button 
-                  onClick={() => setShowAuth(true)} 
+                <button
+                  onClick={() => setShowAuth(true)}
                   className="sign-in-btn"
                 >
                   Sign In
@@ -272,13 +273,16 @@ export default function DreamApp() {
 
       {/* Main Content */}
       <div className="main-content">
-        <DreamJournal 
-          user={user} 
-          onSignOut={handleSignOut} 
+        <DreamJournal
+          user={user}
+          onSignOut={handleSignOut}
           showGuestMode={!user}
           onShowAuth={() => setShowAuth(true)}
         />
       </div>
+
+      {/* AI Usage Widget - Shown when user is authenticated */}
+      {user && <AIUsageWidget user={user} />}
 
       {/* Auth Modal */}
       {showAuth && !user && (
