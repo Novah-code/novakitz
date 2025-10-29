@@ -568,7 +568,6 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           .from('dreams')
           .insert([{
             user_id: user.id,
-            user_nickname: userNickname,
             title: newDream.title,
             content: `${dreamText}\n\n---\n\nAnalysis:\n${response}`,
             mood: deriveMoodFromTags(autoTags), // Derive mood from tags
@@ -896,15 +895,17 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const startTime = Date.now();
 
     try {
-      // Add a 30-second timeout for the entire analysis operation
+      // Add a 60-second timeout for the entire analysis operation
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
-          console.error('Dream analysis timeout exceeded - forcing completion');
+          console.error('Dream analysis timeout exceeded - forcing completion after 60s');
           reject(new Error('The AI service is taking too long to respond. Please try again.'));
-        }, 30000); // 30 seconds timeout
+        }, 60000); // 60 seconds timeout
       });
 
       const analysisPromise = (async () => {
+        console.log('Fetching dream analysis from API...');
+        const fetchStart = Date.now();
         const response = await retryApiCall(() =>
           fetch('/api/analyze-dream', {
             method: 'POST',
@@ -916,9 +917,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               language: language
             })
           }),
-          3, // 3 retries
-          1000 // 1 second base delay
+          5, // 5 retries
+          2000 // 2 second base delay
         );
+        const fetchEnd = Date.now();
+        console.log(`API fetch completed in ${fetchEnd - fetchStart}ms`);
 
         console.log('Response status:', response.status);
         console.log('Response ok:', response.ok);
