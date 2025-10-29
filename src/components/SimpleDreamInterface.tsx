@@ -1202,7 +1202,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           : 'You are in offline mode. Your dream has been saved and will be analyzed automatically when you go online.';
 
         setDreamResponse(offlineMessage);
-        saveDream(dreamText, offlineMessage); // Save without analysis
+        saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
         setDreamImage(''); // Reset dream image
@@ -1222,7 +1222,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           const noAnalysisMsg = language === 'ko'
             ? '한도 초과로 인해 AI 분석 없이 저장되었습니다.'
             : 'Saved without AI analysis due to limit exceeded.';
-          saveDream(dreamText, noAnalysisMsg);
+          saveDreamWithTags(dreamText, noAnalysisMsg, []);
           setDreamText('');
           setDreamTitle('');
           setDreamImage('');
@@ -1253,7 +1253,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       const errorMessage = error instanceof Error ? error.message : "Dream analysis temporarily unavailable. Please try again later.";
 
       setDreamResponse(errorMessage);
-      saveDream(dreamText, `Analysis unavailable: ${errorMessage}`); // Save the dream even on error
+      saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamImage(''); // Reset dream image
@@ -3605,20 +3605,28 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 <DreamCalendar
                   dreams={filteredDreams as any}
                   onDateSelect={(date) => {
-                    const selectedDream = filteredDreams.find(d => {
-                      // DreamEntry has 'date' field (string)
+                    // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
+                    const dreamsForDate = filteredDreams.filter(d => {
+                      // Check both date field (from SimpleDreamInterface) and created_at field (from Supabase)
                       if ('date' in d && typeof (d as any).date === 'string') {
-                        // SimpleDreamInterface DreamEntry
-                        return (d as any).date === new Date(date).toLocaleDateString('en-US', {
+                        // SimpleDreamInterface DreamEntry with formatted date
+                        const formattedDate = new Date(date).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
                         });
+                        return (d as any).date === formattedDate;
+                      }
+                      if ('created_at' in d && typeof (d as any).created_at === 'string') {
+                        // Supabase Dream with ISO created_at
+                        return new Date((d as any).created_at).toDateString() === date;
                       }
                       return false;
                     });
-                    if (selectedDream) {
-                      setSelectedDream(selectedDream as DreamEntry);
+
+                    // Select the first dream and show all dreams from that date
+                    if (dreamsForDate.length > 0) {
+                      setSelectedDream(dreamsForDate[0] as DreamEntry);
                     }
                   }}
                   selectedDate={null}
