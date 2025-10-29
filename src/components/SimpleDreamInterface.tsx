@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
+import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
@@ -1206,7 +1207,35 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         return;
       }
 
+      // Check AI usage limit before analyzing
+      if (user) {
+        const canAnalyze = await canAnalyzeDream(user.id);
+        if (!canAnalyze.allowed) {
+          const limitMessage = language === 'ko'
+            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). 프리미엄으로 업그레이드하면 무제한 해석이 가능합니다.`
+            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Premium for unlimited interpretations.`;
+
+          setDreamResponse(limitMessage);
+          // Still save the dream without analysis
+          const noAnalysisMsg = language === 'ko'
+            ? '한도 초과로 인해 AI 분석 없이 저장되었습니다.'
+            : 'Saved without AI analysis due to limit exceeded.';
+          saveDream(dreamText, noAnalysisMsg);
+          setDreamText('');
+          setDreamTitle('');
+          setDreamImage('');
+          return;
+        }
+
+        console.log(`AI interpretations remaining: ${canAnalyze.remaining}/${canAnalyze.limit}`);
+      }
+
       const result = await analyzeDreamWithGemini(dreamText);
+
+      // Record the AI usage after successful analysis
+      if (user) {
+        await recordAIUsage(user.id, undefined, 'full_analysis');
+      }
       console.log('Analysis received in handleSubmitDream:', result);
       setDreamResponse(result.analysis);
       console.log('About to save dream with analysis:', { dreamText, result });
