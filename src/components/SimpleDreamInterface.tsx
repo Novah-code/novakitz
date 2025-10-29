@@ -91,6 +91,7 @@ interface DreamEntry {
   isPrivate?: boolean;
   tags?: string[];
   autoTags?: string[];
+  userName?: string; // User's nickname/full_name
 }
 
 // Helper function to derive mood from tags
@@ -227,7 +228,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         try {
           const { data, error } = await supabase
             .from('dreams')
-            .select('*')
+            .select(`
+              *,
+              user_profiles:user_id(full_name)
+            `)
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
@@ -240,7 +244,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             }
           } else if (data) {
             // Convert Supabase dreams to DreamEntry format
-            const dreams: DreamEntry[] = data.map(dream => ({
+            const dreams: DreamEntry[] = data.map((dream: any) => ({
               id: dream.id,
               text: dream.content.split('\n\n---\n\n')[0] || dream.content,
               response: dream.content.split('Analysis:\n')[1] || '',
@@ -250,7 +254,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               timestamp: new Date(dream.created_at).getTime(),
               tags: dream.tags || [],
               autoTags: dream.tags || [],
-              image: dream.image || undefined
+              image: dream.image || undefined,
+              userName: dream.user_profiles?.full_name || 'Anonymous'
             }));
             setSavedDreams(dreams);
             console.log('Loaded dreams from Supabase:', dreams.length);
@@ -3694,9 +3699,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           <span className="dream-title-text">{dream.title || t.dreamEntry}</span>
                         </div>
                         <div className="dream-date">
+                          {dream.userName && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
                         <div className="dream-meta">
+                          {dream.userName && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
 
