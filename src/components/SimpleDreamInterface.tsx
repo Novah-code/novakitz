@@ -228,10 +228,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         try {
           const { data, error } = await supabase
             .from('dreams')
-            .select(`
-              *,
-              user_profiles:user_id(full_name)
-            `)
+            .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
 
@@ -243,6 +240,13 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               setSavedDreams(JSON.parse(saved));
             }
           } else if (data) {
+            // Get user profile for display
+            const { data: profileData } = await supabase
+              .from('user_profiles')
+              .select('full_name')
+              .eq('user_id', user.id)
+              .maybeSingle();
+
             // Convert Supabase dreams to DreamEntry format
             const dreams: DreamEntry[] = data.map((dream: any) => ({
               id: dream.id,
@@ -255,7 +259,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               tags: dream.tags || [],
               autoTags: dream.tags || [],
               image: dream.image || undefined,
-              userName: dream.user_profiles?.full_name || 'Anonymous'
+              userName: profileData?.full_name || 'Anonymous'
             }));
             setSavedDreams(dreams);
             console.log('Loaded dreams from Supabase:', dreams.length);
@@ -578,7 +582,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             mood: deriveMoodFromTags(autoTags), // Derive mood from tags
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
-            time: newDream.time
+            time: newDream.time,
+            image: defaultImage || undefined
           }])
           .select()
           .single();
