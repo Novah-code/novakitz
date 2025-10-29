@@ -3433,23 +3433,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 <div className="modal-actions" style={{display: 'flex', gap: '12px'}}>
                   <button
                     onClick={async () => {
-                      const noDreamText = language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.';
-
-                      setIsLoading(true);
-                      setShowInput(false);
-                      setShowResponse(true);
-
                       const noDreamMessage = language === 'ko'
                         ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다. 내일의 꿈을 기대해봅시다! 🌙'
                         : 'You didn\'t remember a dream today. That\'s okay! Let\'s look forward to tomorrow\'s dreams! 🌙';
 
+                      setIsLoading(true);
+                      setShowInput(false);
+                      setShowResponse(true);
                       setDreamResponse(noDreamMessage);
-                      saveDream(noDreamText, noDreamMessage);
 
+                      // Reset form
                       setDreamText('');
                       setDreamTitle('');
                       setDreamImage('');
 
+                      // Just show the message, don't save anything to database
                       setTimeout(() => {
                         setShowResponse(false);
                         setIsLoading(false);
@@ -3626,24 +3624,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   selectedDate={null}
                 />
                 <div style={{
-                  paddingTop: '20px',
-                  borderTop: '1px solid #e5e7eb',
-                  marginTop: '20px',
+                  paddingTop: '30px',
+                  marginTop: '30px',
                   display: 'flex',
                   justifyContent: 'flex-end'
                 }}>
                   <button
                     onClick={() => setViewMode('card')}
                     style={{
-                      padding: '8px 16px',
-                      background: 'rgba(127, 176, 105, 0.1)',
+                      padding: '10px 20px',
+                      background: 'rgba(127, 176, 105, 0.08)',
                       color: '#7FB069',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '13px',
+                      border: '1px solid rgba(127, 176, 105, 0.2)',
+                      borderRadius: '8px',
+                      fontSize: '0.95rem',
                       fontWeight: '600',
                       cursor: 'pointer',
                       transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                     }}
                   >
                     Close
