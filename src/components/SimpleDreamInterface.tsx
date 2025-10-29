@@ -575,6 +575,16 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       // Save to Supabase (online mode)
       try {
+        console.log('About to save dream to Supabase with user_id:', user.id);
+        console.log('Dream data:', {
+          title: newDream.title,
+          content: dreamText.substring(0, 100) + '...',
+          mood: deriveMoodFromTags(autoTags),
+          tags: [...autoTags, ...(newDream.tags || [])],
+          date: newDream.date,
+          created_at: new Date().toISOString()
+        });
+
         const { data, error } = await supabase
           .from('dreams')
           .insert([{
@@ -592,9 +602,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           .single();
 
         if (error) {
+          console.error('Supabase insert failed!');
           console.error('Error saving to Supabase:', error);
           console.error('Error details:', error.message, error.details, error.hint);
           console.error('Error code:', error.code);
+          console.error('User ID was:', user.id);
 
           // Fall back to offline storage on error
           try {
@@ -617,7 +629,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           setSavedDreams(updatedDreams);
           localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
         } else {
-          console.log('Saved to Supabase:', data);
+          console.log('✅ Dream saved to Supabase successfully!');
+          console.log('Saved dream ID:', data?.id);
+          console.log('Dream data returned:', data);
 
           // Save keywords to dream_keywords table
           if (keywords && keywords.length > 0) {
@@ -637,7 +651,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             if (keywordError) {
               console.error('Error saving keywords:', keywordError);
             } else {
-              console.log('Keywords saved successfully:', keywordRecords.length);
+              console.log('✅ Keywords saved successfully:', keywordRecords.length);
             }
           }
 
@@ -645,6 +659,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           const dreamWithSupabaseId = { ...newDream, id: data.id };
           const updatedDreams = [dreamWithSupabaseId, ...savedDreams];
           setSavedDreams(updatedDreams);
+          console.log('✅ Local state updated. Total dreams:', updatedDreams.length);
 
           // Generate daily intentions after saving dream
           if (user && data.id) {
