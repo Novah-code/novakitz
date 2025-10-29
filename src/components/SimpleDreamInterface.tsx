@@ -3699,11 +3699,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           <span className="dream-title-text">{dream.title || t.dreamEntry}</span>
                         </div>
                         <div className="dream-date">
-                          {dream.userName && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
+                          {dream.userName && dream.userName !== 'Anonymous' && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
                         <div className="dream-meta">
-                          {dream.userName && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
+                          {dream.userName && dream.userName !== 'Anonymous' && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
 
