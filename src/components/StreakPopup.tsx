@@ -55,7 +55,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       // Fetch ALL dreams to calculate streak properly
       const { data: dreamsData, error } = await supabase
         .from('dreams')
-        .select('created_at')
+        .select('created_at, date')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -65,47 +65,98 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       }
 
       console.log('Dreams fetched:', dreamsData?.length || 0);
+      console.log('Dream data sample:', dreamsData?.slice(0, 2));
 
-      // Get unique dates with dreams
+      // Get unique dates with dreams - use 'date' field if available, otherwise parse created_at in UTC
       const dreamDates = new Set(
-        dreamsData?.map(d => new Date(d.created_at).toDateString()) || []
+        dreamsData?.map(d => {
+          // Prefer 'date' field which is already in the correct format from dream record
+          if (d.date) {
+            // date field is formatted like "November 29, 2024" or "2025-10-29"
+            // Convert to consistent format for comparison
+            const dateObj = new Date(d.date);
+            return dateObj.toISOString().split('T')[0]; // Get YYYY-MM-DD in UTC
+          }
+          // Fallback to created_at in UTC only
+          const dateObj = new Date(d.created_at);
+          return dateObj.toISOString().split('T')[0]; // Get YYYY-MM-DD in UTC
+        }) || []
       );
 
-      // Calculate current streak
-      let currentStreak = 0;
-      const today = new Date().toDateString();
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
+      console.log('Dream dates (unique):', Array.from(dreamDates));
 
-      if (dreamDates.has(today) || dreamDates.has(yesterday)) {
+      // Calculate current streak using UTC dates
+      let currentStreak = 0;
+
+      // Get today's date in YYYY-MM-DD format (local time, not UTC for user's perspective)
+      const getTodayString = () => {
+        const date = new Date();
+        return date.getFullYear() + '-' +
+               String(date.getMonth() + 1).padStart(2, '0') + '-' +
+               String(date.getDate()).padStart(2, '0');
+      };
+
+      const getTodayUTC = () => {
+        const date = new Date();
+        return date.toISOString().split('T')[0];
+      };
+
+      const getYesterdayUTC = () => {
+        const date = new Date();
+        date.setDate(date.getDate() - 1);
+        return date.toISOString().split('T')[0];
+      };
+
+      const todayUTC = getTodayUTC();
+      const yesterdayUTC = getYesterdayUTC();
+
+      console.log('Today (UTC):', todayUTC);
+      console.log('Yesterday (UTC):', yesterdayUTC);
+      console.log('Has dream today?:', dreamDates.has(todayUTC));
+      console.log('Has dream yesterday?:', dreamDates.has(yesterdayUTC));
+
+      if (dreamDates.has(todayUTC) || dreamDates.has(yesterdayUTC)) {
         currentStreak = 1;
-        const startDate = dreamDates.has(today) ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const startDateUTC = dreamDates.has(todayUTC) ? todayUTC : yesterdayUTC;
+
+        console.log('Streak started from:', startDateUTC);
+
+        // Parse the start date and go backwards
+        const [year, month, day] = startDateUTC.split('-').map(Number);
+        const checkDate = new Date(year, month - 1, day);
 
         for (let i = 1; i < 365; i++) { // Check up to 1 year back
-          const checkDate = new Date(startDate);
-          checkDate.setDate(startDate.getDate() - i);
-          const dateStr = checkDate.toDateString();
-          if (dreamDates.has(dateStr)) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          const checkDateUTC = checkDate.toISOString().split('T')[0];
+
+          if (dreamDates.has(checkDateUTC)) {
             currentStreak++;
           } else {
+            console.log('Streak broken at:', checkDateUTC);
             break;
           }
         }
       }
+
+      console.log('Final streak:', currentStreak);
 
       // Build week days array (last 7 days, starting from today going back)
       const weekDays = [];
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
+
         const dayIndex = date.getDay();
-        const dateStr = date.toDateString();
+        const dateUTC = date.toISOString().split('T')[0];
 
         weekDays.push({
           day: t.days[dayIndex],
-          date: dateStr,
-          completed: dreamDates.has(dateStr)
+          date: dateUTC,
+          completed: dreamDates.has(dateUTC)
         });
       }
+
+      console.log('Week days:', weekDays);
 
       console.log('Streak calculated:', currentStreak);
       console.log('Week days:', weekDays);
