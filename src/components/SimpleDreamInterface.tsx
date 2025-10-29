@@ -12,6 +12,7 @@ import OfflineIndicator from './OfflineIndicator';
 import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
 import EveningReflection from './EveningReflection';
+import DreamCalendar from './DreamCalendar';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -202,7 +203,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editText, setEditText] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'calendar'>('card');
   const [editImage, setEditImage] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
@@ -3543,7 +3544,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                     <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px'}}>
                       <button onClick={() => setViewMode('card')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
-                      <button onClick={() => setViewMode('list')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'list' ? '#ffffff' : 'transparent', color: viewMode === 'list' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'list' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.list}</button>
+                      <button onClick={() => setViewMode('calendar')} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>📅 Calendar</button>
                     </div>
                   </div>
                 </div>
@@ -3600,7 +3601,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               </div>
 
               <div className="dream-history-container" style={{paddingTop: '20px'}}>
-              <div className={viewMode === 'list' ? 'dream-grid-list' : 'dream-grid'} style={{
+              {viewMode === 'calendar' ? (
+                <DreamCalendar
+                  dreams={filteredDreams as any}
+                  onDateSelect={(date) => {
+                    const selectedDream = filteredDreams.find(d =>
+                      new Date(d.timestamp * 1000).toDateString() === new Date(date).toDateString()
+                    );
+                    if (selectedDream) {
+                      setSelectedDream(selectedDream);
+                    }
+                  }}
+                  selectedDate={null}
+                />
+              ) : (
+              <div className="dream-grid" style={{
                 paddingBottom: '20px'
               }}>
                 {filteredDreams.slice(0, 9).map((dream, index) => {
@@ -3761,7 +3776,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   );
                 })}
-                </div>
                 {savedDreams.length === 0 && (
                   <div style={{
                     position: 'absolute',
@@ -3777,6 +3791,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
                 )}
+              </div>
+              )}
               </div>
 
               <div style={{
