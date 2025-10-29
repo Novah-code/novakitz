@@ -144,15 +144,23 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
               <div className="day-number">{day}</div>
               {hasDreams && (
                 <div className="dream-indicators">
-                  {dreams.slice(0, 3).map((dream, idx) => (
-                    <span 
-                      key={dream.id || idx} 
-                      className="dream-indicator"
-                      title={dream.title}
-                    >
-                      {moodEmojis[dream.mood as keyof typeof moodEmojis] || '💭'}
-                    </span>
-                  ))}
+                  {dreams.slice(0, 3).map((dream, idx) => {
+                    // Check if this is a "no dream" marker
+                    const isNoDream = dream.tags?.includes('꿈안꿈') || dream.tags?.includes('no-dream') || dream.title?.includes('꿈 안 꿈') || dream.title?.includes('No Dream');
+                    return (
+                      <span
+                        key={dream.id || idx}
+                        className="dream-indicator"
+                        title={dream.title}
+                        style={isNoDream ? {
+                          opacity: 0.5,
+                          fontSize: '0.8em'
+                        } : {}}
+                      >
+                        {isNoDream ? '😴' : (moodEmojis[dream.mood as keyof typeof moodEmojis] || '💭')}
+                      </span>
+                    );
+                  })}
                   {dreams.length > 3 && (
                     <span className="more-dreams">+{dreams.length - 3}</span>
                   )}

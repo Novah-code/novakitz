@@ -1428,15 +1428,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
   // Filter dreams based on search term and selected tag
   const filteredDreams = savedDreams.filter(dream => {
-    const matchesSearch = searchTerm === '' || 
+    // Filter out "no dream" markers from card view (only show in calendar)
+    const isNoDream = dream.tags?.includes('꿈안꿈') || dream.tags?.includes('no-dream') ||
+                      dream.title?.includes('꿈 안 꿈') || dream.title?.includes('No Dream');
+    if (isNoDream) return false;
+
+    const matchesSearch = searchTerm === '' ||
       dream.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dream.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dream.response.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesTag = selectedTag === '' ||
       dream.autoTags?.includes(selectedTag) ||
       dream.tags?.includes(selectedTag);
-    
+
     return matchesSearch && matchesTag;
   });
 
@@ -3442,12 +3447,40 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setShowResponse(true);
                       setDreamResponse(noDreamMessage);
 
+                      // Save "no dream" marker to Supabase for calendar display
+                      if (user) {
+                        try {
+                          const today = new Date().toISOString().split('T')[0];
+                          await supabase
+                            .from('dreams')
+                            .insert([{
+                              user_id: user.id,
+                              title: language === 'ko' ? '꿈 안 꿈' : 'No Dream',
+                              content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
+                              mood: 'peaceful',
+                              tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
+                              date: new Date().toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              }),
+                              time: new Date().toLocaleTimeString('en-US', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }),
+                              created_at: new Date().toISOString()
+                            }]);
+                          console.log('No dream marker saved to calendar');
+                        } catch (error) {
+                          console.error('Error saving no dream marker:', error);
+                        }
+                      }
+
                       // Reset form
                       setDreamText('');
                       setDreamTitle('');
                       setDreamImage('');
 
-                      // Just show the message, don't save anything to database
                       setTimeout(() => {
                         setShowResponse(false);
                         setIsLoading(false);
@@ -3601,66 +3634,78 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
               <div className="dream-history-container" style={{paddingTop: '20px', position: 'relative', minHeight: '600px'}}>
               {viewMode === 'calendar' ? (
-                <>
-                <DreamCalendar
-                  dreams={filteredDreams as any}
-                  onDateSelect={(date) => {
-                    // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
-                    const dreamsForDate = filteredDreams.filter(d => {
-                      // Check both date field (from SimpleDreamInterface) and created_at field (from Supabase)
-                      if ('date' in d && typeof (d as any).date === 'string') {
-                        // SimpleDreamInterface DreamEntry with formatted date
-                        const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        });
-                        return (d as any).date === formattedDate;
-                      }
-                      if ('created_at' in d && typeof (d as any).created_at === 'string') {
-                        // Supabase Dream with ISO created_at
-                        return new Date((d as any).created_at).toDateString() === date;
-                      }
-                      return false;
-                    });
-
-                    // Select the first dream and show all dreams from that date
-                    if (dreamsForDate.length > 0) {
-                      setSelectedDream(dreamsForDate[0] as DreamEntry);
-                    }
-                  }}
-                  selectedDate={null}
-                />
                 <div style={{
-                  paddingTop: '30px',
-                  marginTop: '30px',
                   display: 'flex',
-                  justifyContent: 'flex-end'
+                  flexDirection: 'column',
+                  height: '100%',
+                  gap: '20px'
                 }}>
-                  <button
-                    onClick={() => setViewMode('card')}
-                    style={{
-                      padding: '10px 20px',
-                      background: 'rgba(127, 176, 105, 0.08)',
-                      color: '#7FB069',
-                      border: '1px solid rgba(127, 176, 105, 0.2)',
-                      borderRadius: '8px',
-                      fontSize: '0.95rem',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
-                    }}
-                  >
-                    Close
-                  </button>
+                  <div style={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    minHeight: 0
+                  }}>
+                    <DreamCalendar
+                      dreams={filteredDreams as any}
+                      onDateSelect={(date) => {
+                        // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
+                        const dreamsForDate = filteredDreams.filter(d => {
+                          // Check both date field (from SimpleDreamInterface) and created_at field (from Supabase)
+                          if ('date' in d && typeof (d as any).date === 'string') {
+                            // SimpleDreamInterface DreamEntry with formatted date
+                            const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            });
+                            return (d as any).date === formattedDate;
+                          }
+                          if ('created_at' in d && typeof (d as any).created_at === 'string') {
+                            // Supabase Dream with ISO created_at
+                            return new Date((d as any).created_at).toDateString() === date;
+                          }
+                          return false;
+                        });
+
+                        // Select the first dream and show all dreams from that date
+                        if (dreamsForDate.length > 0) {
+                          setSelectedDream(dreamsForDate[0] as DreamEntry);
+                        }
+                      }}
+                      selectedDate={null}
+                    />
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    paddingBottom: '20px',
+                    borderTop: '1px solid #e5e7eb',
+                    paddingTop: '20px'
+                  }}>
+                    <button
+                      onClick={() => setViewMode('card')}
+                      style={{
+                        padding: '10px 20px',
+                        background: 'rgba(127, 176, 105, 0.08)',
+                        color: '#7FB069',
+                        border: '1px solid rgba(127, 176, 105, 0.2)',
+                        borderRadius: '8px',
+                        fontSize: '0.95rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
-                </>
               ) : (
               <div className="dream-grid" style={{
                 paddingBottom: '20px'
