@@ -244,6 +244,8 @@ export async function POST(request: NextRequest) {
     const analysisPrompt = language === 'ko'
       ? `당신은 융(Jung) 심리학에 기반을 둔 따뜻하고 사려 깊은 꿈 안내자입니다. 깊은 개념을 일상적인 언어로 풀어서 전달하세요. 진정한 호기심과 공감으로 이 꿈을 분석하세요.
 
+사용자가 키워드로만 입력했을 수도 있고 상세 내용으로 입력했을 수도 있습니다. 어떤 형태든 상관없이 분석해주세요.
+
 꿈: "${dreamText}"
 
 마크다운 형식 없이 자연스럽고 대화하는 듯한 언어로 작성하세요. 분석적이면서도 개인적인 느낌으로 - 마치 차를 마시며 의미 있는 대화를 나누는 것처럼.
@@ -271,6 +273,8 @@ export async function POST(request: NextRequest) {
 
 어조: 따뜻하되 과하게 달콤하지 않게. 심리학적으로 통찰력 있되 겸손하게. 당신을 진정으로 이해하는 지혜로운 친구처럼. 250-300 단어.`
       : `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Analyze this dream with genuine curiosity and compassion.
+
+Note: The user may have entered either detailed dream content or just keywords separated by commas. Please analyze whatever they provided.
 
 Dream: "${dreamText}"
 
