@@ -663,11 +663,20 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
           // Generate daily intentions after saving dream
           if (user && data.id) {
-            console.log('Dream saved with ID:', data.id);
+            console.log('✅ Dream saved with ID:', data.id);
             // Generate intentions with a small delay to ensure dream is saved
+            console.log('⏱️  Scheduling intention generation in 500ms...');
             setTimeout(async () => {
-              await generateDailyIntention(response, dreamText, data.id);
+              console.log('🚀 Starting intention generation for dream:', data.id);
+              const result = await generateDailyIntention(response, dreamText, data.id);
+              if (result) {
+                console.log('✅ Intention generation completed successfully');
+              } else {
+                console.warn('⚠️  Intention generation did not return data');
+              }
             }, 500);
+          } else {
+            console.warn('⚠️  Cannot generate intentions: user=', !!user, 'data.id=', data?.id);
           }
         }
       } catch (error) {
@@ -1107,6 +1116,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       `;
 
       // Call Gemini API
+      console.log('🤖 Calling Gemini API for intention generation...');
       const response = await fetch('/api/analyze-dream', {
         method: 'POST',
         headers: {
@@ -1119,20 +1129,28 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       });
 
       if (!response.ok) {
-        console.error('Error generating intentions');
+        console.error('❌ API Error:', response.status, response.statusText);
+        console.error('API response body:', await response.text());
         return null;
       }
 
       const data = await response.json();
       const intentionText = data.analysis || '';
 
+      console.log('✅ API Response received');
+      console.log('Intention text length:', intentionText.length);
+      console.log('Intention text sample:', intentionText.substring(0, 200));
+
       // Parse intentions from response
       const parseIntentions = (text: string) => {
+        console.log('Parsing intentions from text...');
         const lines = text.split('\n').filter(line => line.trim());
+        console.log('Total lines:', lines.length);
         const intentions = [];
 
         for (const line of lines) {
           if (line.includes('의도') || line.includes('Intention')) {
+            console.log('Found intention line:', line);
             const match = line.match(/[^:]*:\s*(.+)/);
             if (match && match[1]) {
               intentions.push(match[1].trim());
@@ -1140,6 +1158,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           }
         }
 
+        console.log('Parsed intentions count:', intentions.length);
         return intentions.slice(0, 3); // Get first 3
       };
 
@@ -1150,9 +1169,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         intentions.push(language === 'ko' ? '오늘 한 가지 작은 좋은 일 하기' : 'Do one small good thing today');
       }
 
-      console.log('Generated intentions:', intentions);
+      console.log('✅ Final intentions:', intentions);
 
       // Save to Supabase
+      console.log('💾 Saving intentions to Supabase for user:', user.id, 'dream:', dreamId);
       const { data: intentionData, error: intentionError } = await supabase
         .from('daily_intentions')
         .insert([{
@@ -1168,11 +1188,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         .single();
 
       if (intentionError) {
-        console.error('Error saving intentions:', intentionError);
+        console.error('❌ Error saving intentions to Supabase:', intentionError);
+        console.error('Error details:', intentionError.message, intentionError.details);
         return null;
       }
 
-      console.log('Intentions saved successfully');
+      console.log('✅ Intentions saved successfully to Supabase');
+      console.log('Intention data:', intentionData);
       return intentionData;
     } catch (error) {
       console.error('Error in generateDailyIntention:', error);
