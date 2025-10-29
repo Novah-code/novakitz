@@ -92,22 +92,22 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
     <div className="dream-calendar glass">
       {/* Calendar Header */}
       <div className="calendar-header">
-        <button 
+        <button
           onClick={goToPreviousMonth}
           className="calendar-nav-btn"
           title="Previous month"
         >
           ←
         </button>
-        
+
         <div className="calendar-title-header">
           <h3>{monthNames[currentMonth]} {currentYear}</h3>
           <button onClick={goToToday} className="today-btn">
             Today
           </button>
         </div>
-        
-        <button 
+
+        <button
           onClick={goToNextMonth}
           className="calendar-nav-btn"
           title="Next month"

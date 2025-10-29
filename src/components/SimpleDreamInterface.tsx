@@ -585,7 +585,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time,
-            image: defaultImage || undefined
+            image: defaultImage || undefined,
+            created_at: new Date().toISOString()
           }])
           .select()
           .single();
@@ -3600,20 +3601,55 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
               </div>
 
-              <div className="dream-history-container" style={{paddingTop: '20px'}}>
+              <div className="dream-history-container" style={{paddingTop: '20px', position: 'relative', minHeight: '600px'}}>
               {viewMode === 'calendar' ? (
+                <>
                 <DreamCalendar
                   dreams={filteredDreams as any}
                   onDateSelect={(date) => {
-                    const selectedDream = filteredDreams.find(d =>
-                      new Date(d.timestamp * 1000).toDateString() === new Date(date).toDateString()
-                    );
+                    const selectedDream = filteredDreams.find(d => {
+                      // DreamEntry has 'date' field (string)
+                      if ('date' in d && typeof (d as any).date === 'string') {
+                        // SimpleDreamInterface DreamEntry
+                        return (d as any).date === new Date(date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        });
+                      }
+                      return false;
+                    });
                     if (selectedDream) {
-                      setSelectedDream(selectedDream);
+                      setSelectedDream(selectedDream as DreamEntry);
                     }
                   }}
                   selectedDate={null}
                 />
+                <div style={{
+                  paddingTop: '20px',
+                  borderTop: '1px solid #e5e7eb',
+                  marginTop: '20px',
+                  display: 'flex',
+                  justifyContent: 'flex-end'
+                }}>
+                  <button
+                    onClick={() => setViewMode('card')}
+                    style={{
+                      padding: '8px 16px',
+                      background: 'rgba(127, 176, 105, 0.1)',
+                      color: '#7FB069',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+                </>
               ) : (
               <div className="dream-grid" style={{
                 paddingBottom: '20px'

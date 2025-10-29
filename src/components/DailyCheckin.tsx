@@ -204,24 +204,24 @@ export default function DailyCheckin({
         style={{
           width: '100%',
           padding: '14px 16px',
-          background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-          color: 'white',
-          border: 'none',
+          background: 'rgba(127, 176, 105, 0.08)',
+          color: '#7FB069',
+          border: '1px solid rgba(127, 176, 105, 0.2)',
           borderRadius: '12px',
           fontSize: '0.95rem',
           fontWeight: 600,
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           marginBottom: '16px',
-          boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)'
+          boxShadow: '0 2px 8px rgba(127, 176, 105, 0.1)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
+          e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.15)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
+          e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.1)';
         }}
       >
         {language === 'ko'
