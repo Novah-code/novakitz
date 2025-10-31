@@ -596,7 +596,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             date: newDream.date,
             time: newDream.time,
             image: defaultImage || undefined,
-            created_at: new Date().toISOString()
+            created_at: now.toISOString()
           }])
           .select()
           .single();
@@ -3711,36 +3711,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       }}
                       selectedDate={null}
                     />
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    paddingBottom: '20px',
-                    borderTop: '1px solid #e5e7eb',
-                    paddingTop: '20px'
-                  }}>
-                    <button
-                      onClick={() => setViewMode('card')}
-                      style={{
-                        padding: '10px 20px',
-                        background: 'rgba(127, 176, 105, 0.08)',
-                        color: '#7FB069',
-                        border: '1px solid rgba(127, 176, 105, 0.2)',
-                        borderRadius: '8px',
-                        fontSize: '0.95rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
-                      }}
-                    >
-                      Close
-                    </button>
                   </div>
                 </div>
               ) : (
