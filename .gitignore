@@ -9,6 +9,14 @@ node_modules
 dist/
 build/
 
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
 # PWA files
 public/sw.js
 public/sw.js.map
@@ -20,3 +28,16 @@ NovaKitzFinal/
 NovaKitzMobile/
 NovaKitzNew/
 NovaKitzTest/
+
+# Security: Never commit these files
+.env.*.local
+.env.*.production.local
+.env.*.development.local
+.secrets
+secrets/
+*.key
+*.pem
+
+# OS specific
+.AppleDouble
+.LSOverride

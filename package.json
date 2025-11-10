@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "security-check": "bash scripts/security-check.sh",
+    "prebuild": "bash scripts/security-check.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.54.0",

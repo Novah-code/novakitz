@@ -13,6 +13,7 @@ import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
 import EveningReflection from './EveningReflection';
 import DreamCalendar from './DreamCalendar';
+import PremiumPromptModal from './PremiumPromptModal';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -218,6 +219,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 10, remaining: 10, isUnlimited: false });
+  const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -284,6 +288,37 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     };
 
     loadDreams();
+
+    // Load premium status and AI usage
+    const loadPremiumStatus = async () => {
+      if (user) {
+        try {
+          // Check if user has active premium subscription
+          const { data: subscription } = await supabase
+            .from('user_subscriptions')
+            .select(`
+              *,
+              subscription_plans:plan_id(
+                plan_slug,
+                ai_interpretations_per_month
+              )
+            `)
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .maybeSingle();
+
+          const isPremiumUser = subscription && subscription.subscription_plans?.plan_slug === 'premium';
+          setIsPremium(isPremiumUser || false);
+
+          // Load AI usage
+          const usage = await getRemainingAIInterpretations(user.id);
+          setRemainingAIUsage(usage);
+        } catch (error) {
+          console.error('Error loading premium status:', error);
+        }
+      }
+    };
+    loadPremiumStatus();
 
     // Check if user has seen voice guide
     const seenGuide = localStorage.getItem('hasSeenVoiceGuide');
@@ -561,12 +596,27 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time || '',
-            created_at: new Date().toISOString()
+            created_at: now.toISOString()
           } as any); // Cast to any to handle user_nickname not being in OfflineDream interface
 
           const updatedDreams = [newDream, ...savedDreams];
           setSavedDreams(updatedDreams);
           console.log('Dream saved to offline storage');
+
+          // Generate daily intentions even in offline mode
+          if (user && newDream.id) {
+            console.log('⏱️  Scheduling intention generation in 500ms (offline mode)...');
+            setTimeout(async () => {
+              console.log('🚀 Starting intention generation for offline dream:', newDream.id);
+              const result = await generateDailyIntention(response, dreamText, newDream.id);
+              if (result) {
+                console.log('✅ Intention generation completed successfully (offline)');
+              } else {
+                console.warn('⚠️  Intention generation did not return data (offline)');
+              }
+            }, 500);
+          }
+
           return; // Exit early - don't try Supabase
         } catch (err) {
           console.error('Error saving to offline storage:', err);
@@ -619,7 +669,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               tags: [...autoTags, ...(newDream.tags || [])],
               date: newDream.date,
               time: newDream.time || '',
-              created_at: new Date().toISOString()
+              created_at: now.toISOString()
             } as any);
           } catch (offlineErr) {
             console.error('Error saving to offline storage:', offlineErr);
@@ -1490,6 +1540,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
+      {/* Premium Prompt Modal */}
+      <PremiumPromptModal
+        user={user || null}
+        onClose={() => setShowPremiumPrompt(false)}
+        language={language}
+      />
+
       {/* Offline Indicator */}
       {!isOnlineStatus && <OfflineIndicator language={language} />}
 
@@ -3388,10 +3445,61 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         </div>
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
-          
+          {/* Top Right Controls: Premium Badge + Language Selector */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            display: 'flex',
+            gap: '12px',
+            zIndex: 1000,
+            alignItems: 'center'
+          }}>
+            {/* Language Selector */}
+            <select
+              value={language}
+              onChange={(e) => {
+                const newLang = e.target.value as 'en' | 'ko';
+                localStorage.setItem('preferredLanguage', newLang);
+                // 페이지 새로고침으로 언어 변경 적용
+                window.location.reload();
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                color: '#1f2937',
+                border: '1px solid rgba(127, 176, 105, 0.3)',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <option value="en">🌎 English</option>
+              <option value="ko">🇰🇷 한국어</option>
+            </select>
+
+            {/* Premium Badge */}
+            {isPremium && (
+              <div style={{
+                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                color: '#1f2937',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)',
+                whiteSpace: 'nowrap'
+              }}>
+                ✨ Premium
+              </div>
+            )}
+          </div>
+
           {!showInput && !showResponse && !showHistory && (
-            <div 
-              className="dream-orb flex items-center justify-center fade-in" 
+            <div
+              className="dream-orb flex items-center justify-center fade-in"
               onMouseDown={handleOrbMouseDown}
               onMouseUp={handleOrbMouseUp}
               onMouseLeave={handleOrbMouseLeave}

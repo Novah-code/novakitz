@@ -32,7 +32,7 @@ export async function getUserPlan(userId: string) {
     // No active subscription - return free plan
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 10,
+      aiInterpretationsPerMonth: 5,
       historyDays: 30,
       isActive: false
     };
@@ -41,7 +41,7 @@ export async function getUserPlan(userId: string) {
     // Default to free plan on error
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 10,
+      aiInterpretationsPerMonth: 5,
       historyDays: 30,
       isActive: false
     };

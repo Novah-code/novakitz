@@ -12,6 +12,7 @@ interface DreamJournalProps {
   onSignOut: () => void;
   showGuestMode?: boolean;
   onShowAuth: () => void;
+  language?: 'en' | 'ko';
 }
 
 interface DreamPattern {
@@ -31,7 +32,7 @@ const moodEmojis = {
   surreal: '🌀'
 };
 
-export default function DreamJournal({ user, onSignOut, showGuestMode = false, onShowAuth }: DreamJournalProps) {
+export default function DreamJournal({ user, onSignOut, showGuestMode = false, onShowAuth, language = 'en' }: DreamJournalProps) {
   const [currentView, setCurrentView] = useState<'new' | 'history' | 'patterns' | 'calendar'>('new');
   const [dreams, setDreams] = useState<Dream[]>([]);
   const [newDream, setNewDream] = useState({
@@ -61,17 +62,15 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
     try {
       setLoading(true);
 
-      // Load from Supabase for logged-in users
+      // Load from Supabase using RPC function (secure with RLS)
       const { data, error } = await supabase
-        .from('dreams')
-        .select('*')
-        .eq('user_id', user.id)
+        .rpc('get_dreams_with_user')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Apply history limit filtering based on subscription tier
-      const filteredDreams = await filterDreamsByHistoryLimit(user.id, data || []);
+      const filteredDreams = await filterDreamsByHistoryLimit(user.id, (data as Dream[]) || []);
       setDreams(filteredDreams as Dream[]);
 
       // Load user's plan info

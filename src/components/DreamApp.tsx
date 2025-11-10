@@ -19,14 +19,21 @@ export default function DreamApp() {
   const [authMessage, setAuthMessage] = useState('');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ko'>('en');
 
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Load preferred language from localStorage
+        const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
+        if (savedLanguage) {
+          setLanguage(savedLanguage);
+        }
+
         // Check for auth messages from URL params
         const error = searchParams.get('error');
         const success = searchParams.get('success');
-        
+
         if (error) {
           if (error === 'auth_failed') {
             setAuthMessage('로그인에 실패했습니다. 다시 시도해 주세요.');
@@ -43,13 +50,13 @@ export default function DreamApp() {
         // Get initial session
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
           await loadUserProfile(session.user.id);
         } else {
           setLoading(false);
         }
-        
+
         setInitialLoadComplete(true);
       } catch (error) {
         console.error('Auth initialization error:', error);
@@ -278,6 +285,7 @@ export default function DreamApp() {
           onSignOut={handleSignOut}
           showGuestMode={!user}
           onShowAuth={() => setShowAuth(true)}
+          language={language}
         />
       </div>
 

@@ -9,6 +9,7 @@ import UserProfileForm from './UserProfileForm';
 import DreamInsights from './DreamInsights';
 import BadgesDisplay from './BadgesDisplay';
 import StreakPopup from './StreakPopup';
+import MonthlyDreamReport from './MonthlyDreamReport';
 
 // Translations
 const translations = {
@@ -19,6 +20,7 @@ const translations = {
     insights: 'Insights',
     streak: 'Streak',
     badges: 'Badges',
+    monthlyReport: 'Monthly Report',
     language: 'Language',
     signOut: 'Sign Out'
   },
@@ -29,6 +31,7 @@ const translations = {
     insights: '인사이트',
     streak: '연속 기록',
     badges: '뱃지',
+    monthlyReport: '월간 리포트',
     language: '언어',
     signOut: '로그아웃'
   }
@@ -45,6 +48,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
+  const [showMonthlyReport, setShowMonthlyReport] = useState(false);
 
   const t = translations[language];
 
@@ -96,6 +100,12 @@ export default function SimpleDreamInterfaceWithAuth() {
   };
 
   useEffect(() => {
+    // Load preferred language from localStorage on mount
+    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
+
     // Get initial session
     const initAuth = async () => {
       try {
@@ -504,6 +514,40 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{t.badges}</span>
               </button>
 
+              <button
+                onClick={() => {
+                  console.log('Monthly Report button clicked!');
+                  setShowMonthlyReport(true);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>📊 {t.monthlyReport}</span>
+              </button>
+
               <div style={{
                 height: '1px',
                 background: 'rgba(127, 176, 105, 0.2)',
@@ -525,7 +569,11 @@ export default function SimpleDreamInterfaceWithAuth() {
                   {t.language}
                 </div>
                 <button
-                  onClick={() => setLanguage(language === 'en' ? 'ko' : 'en')}
+                  onClick={() => {
+                    const newLanguage = language === 'en' ? 'ko' : 'en';
+                    setLanguage(newLanguage);
+                    localStorage.setItem('preferredLanguage', newLanguage);
+                  }}
                   style={{
                     position: 'relative',
                     width: '80px',
@@ -698,6 +746,24 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Streak Modal */}
       {showStreak && user && (
         <StreakPopup user={user} language={language} onClose={() => setShowStreak(false)} />
+      )}
+
+      {/* Monthly Dream Report Modal */}
+      {showMonthlyReport && user && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>📊 {t.monthlyReport}</h2>
+              <button
+                onClick={() => setShowMonthlyReport(false)}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}
+              >
+                ✕
+              </button>
+            </div>
+            <MonthlyDreamReport user={user} language={language} />
+          </div>
+        </div>
       )}
     </>
   );

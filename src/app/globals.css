@@ -3414,6 +3414,42 @@ body {
     opacity: 0.8;
 }
 
+.dream-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 4px;
+    margin-top: 6px;
+}
+
+.dream-badge {
+    background: rgba(127, 176, 105, 0.08);
+    border: 1px solid rgba(127, 176, 105, 0.2);
+    color: #1f2937;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.dream-badge:hover {
+    background: rgba(127, 176, 105, 0.15);
+    border-color: rgba(127, 176, 105, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(127, 176, 105, 0.15);
+}
+
+.dream-badge:active {
+    transform: translateY(0);
+}
+
 .more-dreams {
     font-size: 10px;
     color: var(--matcha-dark);

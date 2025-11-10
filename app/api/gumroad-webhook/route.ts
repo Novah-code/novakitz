@@ -46,10 +46,34 @@ async function verifyGumroadSignature(
   payload: string,
   signature: string
 ): Promise<boolean> {
-  // TODO: Implement Gumroad signature verification
-  // For now, we'll do basic validation
-  // In production, you should verify the HMAC signature from Gumroad
-  return true; // Placeholder - implement actual verification
+  try {
+    // Get the webhook secret from environment variables
+    const webhookSecret = process.env.GUMROAD_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      console.warn('⚠️ GUMROAD_WEBHOOK_SECRET not configured, skipping signature verification');
+      return true; // Allow if secret not configured (development mode)
+    }
+
+    // Use crypto to verify HMAC
+    const crypto = require('crypto');
+    const hmac = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(payload)
+      .digest('hex');
+
+    // Compare signatures
+    const isValid = hmac === signature;
+
+    if (!isValid) {
+      console.error('❌ Invalid Gumroad webhook signature');
+    }
+
+    return isValid;
+  } catch (error) {
+    console.error('Error verifying Gumroad signature:', error);
+    return false;
+  }
 }
 
 /**

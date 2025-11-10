@@ -465,6 +465,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     try {
       const updateData: any = {
         full_name: fullName || null,
+        display_name: fullName || null,  // Also save to display_name for table display
         birth_date: birthYear && birthMonth && birthDay ? `${birthYear}-${birthMonth}-${birthDay}` : null,
         age: calculateAge(),
         country_name: countryName || null,
