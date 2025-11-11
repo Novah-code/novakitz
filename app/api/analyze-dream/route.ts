@@ -164,11 +164,15 @@ Return EXACTLY 3 items and no other text.`;
 
       if (!res.ok) {
         const errorText = await res.text();
+        console.error('❌ [extractDreamKeywords] API Error:');
+        console.error('  Status:', res.status);
+        console.error('  Body:', errorText);
         const error = new Error(`API request failed: ${res.status} - ${errorText}`) as any;
         error.status = res.status;
         throw error;
       }
 
+      console.log('[extractDreamKeywords] ✅ API call successful, status:', res.status);
       return res;
     }, { maxRetries: 2, baseDelay: 500, maxDelay: 5000 });
 
@@ -248,6 +252,12 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
     console.log('Using environment variable API key');
+
+    // Log first and last 10 chars of API key for debugging
+    if (apiKey) {
+      const masked = apiKey.substring(0, 10) + '...' + apiKey.substring(apiKey.length - 10);
+      console.log('API Key (masked):', masked);
+    }
 
     if (!apiKey) {
       console.error('API key is not available');
@@ -368,8 +378,16 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
 
       if (!res.ok) {
         const errorText = await res.text();
-        console.error('Gemini API error status:', res.status);
-        console.error('Gemini API error body:', errorText);
+        console.error('❌ Gemini API error status:', res.status);
+        console.error('❌ Gemini API error body:', errorText);
+
+        // Log headers for debugging
+        console.error('❌ Response headers:', {
+          'content-type': res.headers.get('content-type'),
+          'status': res.status,
+          'statusText': res.statusText
+        });
+
         const error = new Error(`Gemini API failed: ${res.status} - ${errorText}`) as any;
         error.status = res.status;
         throw error;
