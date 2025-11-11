@@ -117,10 +117,11 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
 
         // Parse the start date and go backwards
         const [year, month, day] = startDate.split('-').map(Number);
-        let checkDate = new Date(year, month - 1, day);
+        const baseDate = new Date(year, month - 1, day);
 
         for (let i = 1; i < 365; i++) { // Check up to 1 year back
-          checkDate.setDate(checkDate.getDate() - 1);
+          const checkDate = new Date(baseDate);
+          checkDate.setDate(checkDate.getDate() - i);
           const checkDateString = checkDate.getFullYear() + '-' +
             String(checkDate.getMonth() + 1).padStart(2, '0') + '-' +
             String(checkDate.getDate()).padStart(2, '0');
