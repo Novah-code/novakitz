@@ -2266,9 +2266,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
         
         .journal-close-btn {
-          position: absolute;
-          bottom: 20px;
-          right: 20px;
           background: #f1f5f9;
           color: #64748b;
           border: 1px solid #e2e8f0;

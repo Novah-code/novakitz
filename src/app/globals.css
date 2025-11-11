@@ -3424,6 +3424,7 @@ body {
     width: 100%;
     overflow: hidden;
     flex-shrink: 1;
+    max-height: 60px;
 }
 
 .dream-badge {
