@@ -6,7 +6,7 @@ import AffirmationsDisplay from './AffirmationsDisplay';
 
 interface CheckinRecord {
   id: string;
-  time_of_day: 'morning' | 'afternoon' | 'evening';
+  time_of_day: 'morning' | 'evening';
   mood: number;
   energy_level: number;
   progress_note: string;
@@ -16,7 +16,7 @@ interface CheckinRecord {
 interface DailyCheckinProps {
   userId: string;
   language: 'en' | 'ko';
-  timeOfDay?: 'morning' | 'afternoon' | 'evening';
+  timeOfDay?: 'morning' | 'evening';
   onCheckInComplete?: () => void;
   dreamText?: string;
   dreamId?: string;
@@ -26,7 +26,7 @@ interface DailyCheckinProps {
 export default function DailyCheckin({
   userId,
   language,
-  timeOfDay = 'afternoon',
+  timeOfDay = 'evening',
   onCheckInComplete,
   dreamText = '',
   dreamId,

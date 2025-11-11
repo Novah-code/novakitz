@@ -2477,7 +2477,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         .dream-detail-close {
           position: absolute;
-          top: 12px;
+          bottom: 12px;
           background: rgba(255, 255, 255, 0.3);
           border: none;
           borderRadius: 50%;
@@ -3767,7 +3767,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       <DailyCheckin
                         userId={user.id}
                         language={language || 'en'}
-                        timeOfDay="afternoon"
+                        timeOfDay="morning"
                         dreamText={dreamText}
                         dreamId={lastSavedDreamId}
                         isPremium={isPremium}
@@ -3781,16 +3781,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         isPremium={isPremium}
                       />
                     </div>
-
-                    {/* Evening Check-in */}
-                    <DailyCheckin
-                      userId={user.id}
-                      language={language || 'en'}
-                      timeOfDay="evening"
-                      dreamText={dreamText}
-                      dreamId={lastSavedDreamId}
-                      isPremium={isPremium}
-                    />
                   </div>
                 )}
               </div>
@@ -4097,7 +4087,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     className="dream-detail-close"
                     onClick={() => setSelectedDream(null)}
                     style={{
-                      right: window.innerWidth < 480 ? '110px' : (window.innerWidth < 640 ? '110px' : '135px')
+                      right: '12px'
                     }}
                   >
                     ×
