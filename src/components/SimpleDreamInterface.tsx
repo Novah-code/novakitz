@@ -4103,11 +4103,31 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
                   <button
-                    className="dream-detail-close"
-                    onClick={() => setSelectedDream(null)}
-                    style={{
-                      right: '12px'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedDream(null);
                     }}
+                    className="dream-detail-close"
+                    style={{
+                      position: 'absolute',
+                      top: '12px',
+                      right: '12px',
+                      background: 'rgba(255, 255, 255, 0.3)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: '24px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      zIndex: 15
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                   >
                     ×
                   </button>
@@ -4119,8 +4139,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     className="dream-detail-share-btn"
                     style={{
                       position: 'absolute',
-                      top: '12px',
-                      right: window.innerWidth < 480 ? '55px' : (window.innerWidth < 640 ? '50px' : '70px'),
+                      bottom: '12px',
+                      right: window.innerWidth < 480 ? '70px' : (window.innerWidth < 640 ? '110px' : '130px'),
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
@@ -4154,7 +4174,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     className="dream-detail-edit-btn"
                     style={{
                       position: 'absolute',
-                      top: '12px',
+                      bottom: '12px',
                       right: window.innerWidth < 480 ? '10px' : '12px',
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
