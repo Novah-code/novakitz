@@ -31,7 +31,7 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [gumroadUrl] = useState(
-    process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://gumroad.com/l/dream-journal-premium'
+    process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://novakitz.gumroad.com/l/novakitz'
   );
 
   useEffect(() => {

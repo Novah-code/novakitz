@@ -29,7 +29,7 @@ export default function PremiumPromptModal({
   };
 
   const gumroadUrl = process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL ||
-    'https://gumroad.com/l/dream-journal-premium';
+    'https://novakitz.gumroad.com/l/novakitz';
 
   useEffect(() => {
     if (!user) {

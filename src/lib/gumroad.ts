@@ -72,7 +72,7 @@ export async function verifyGumroadLicense(licenseKey: string): Promise<{
  * Get Gumroad product URL for purchase
  */
 export function getGumroadProductUrl(): string {
-  return process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://gumroad.com/products/premium';
+  return process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://novakitz.gumroad.com/l/novakitz';
 }
 
 /**
