@@ -2537,7 +2537,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             width: 26px;
             height: 26px;
             font-size: 14px;
-            top: 8px;
+            bottom: 8px;
             right: 8px;
           }
         }
