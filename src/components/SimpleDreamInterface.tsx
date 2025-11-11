@@ -3696,7 +3696,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                     <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px'}}>
                       <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
-                      <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>📅 Calendar</button>
+                      <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
                     </div>
                   </div>
                 </div>
