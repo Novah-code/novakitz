@@ -394,13 +394,16 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
     }
   } catch (error) {
     console.error('Server error:', error);
-    
+
     // 에러 상태 결정
     let status = 500;
     let errorMessage = 'Internal server error';
-    
+
     // Handle specific API overload errors
-    if (error instanceof Error && error.message.includes('503')) {
+    if (error instanceof Error && error.message.includes('403')) {
+      status = 403;
+      errorMessage = 'The AI service is currently unavailable. This is a configuration issue that the admin team is working on. Please try again later.';
+    } else if (error instanceof Error && error.message.includes('503')) {
       status = 503;
       errorMessage = 'The AI service is currently experiencing high demand. Please try again in a few moments.';
     } else if (error instanceof Error && error.message.includes('429')) {
@@ -419,12 +422,13 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
       responseTime: Date.now() - startTime,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
-    
+
     const responseBody: any = { error: errorMessage };
     if (status === 503) responseBody.retryAfter = 30;
     if (status === 429) responseBody.retryAfter = 60;
+    if (status === 403) responseBody.retryAfter = 300; // 5 minutes
     if (status === 502) responseBody.retryAfter = 15;
-    
+
     return NextResponse.json(responseBody, { status });
   }
 }

@@ -43,6 +43,22 @@ export default function PremiumPromptModal({
       try {
         console.log('Checking premium status for user:', user.id);
 
+        // Check if user has seen prompt recently (within 24 hours)
+        const lastShownKey = `premium_prompt_last_shown_${user.id}`;
+        const lastShownTime = localStorage.getItem(lastShownKey);
+
+        if (lastShownTime) {
+          const lastShown = new Date(lastShownTime);
+          const now = new Date();
+          const hoursSinceShown = (now.getTime() - lastShown.getTime()) / (1000 * 60 * 60);
+
+          if (hoursSinceShown < 24) {
+            console.log('Premium prompt shown within last 24 hours, skipping');
+            setShowModal(false);
+            return;
+          }
+        }
+
         // Check subscription status - simplified query
         const { data: subscription, error } = await supabase
           .from('user_subscriptions')
@@ -97,7 +113,11 @@ export default function PremiumPromptModal({
   }, [user]);
 
   const handleClose = () => {
-    // Don't save to localStorage - show prompt every time for free users
+    // Save the last shown time to localStorage - show prompt max once per day
+    if (user) {
+      const lastShownKey = `premium_prompt_last_shown_${user.id}`;
+      localStorage.setItem(lastShownKey, new Date().toISOString());
+    }
     setShowModal(false);
     onClose();
   };

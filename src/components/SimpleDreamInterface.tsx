@@ -11,7 +11,6 @@ import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
 import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
-import EveningReflection from './EveningReflection';
 import DreamCalendar from './DreamCalendar';
 import PremiumPromptModal from './PremiumPromptModal';
 
@@ -3780,10 +3779,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       />
                     </div>
 
-                    {/* Evening Reflection */}
-                    <EveningReflection
+                    {/* Evening Check-in */}
+                    <DailyCheckin
                       userId={user.id}
                       language={language || 'en'}
+                      timeOfDay="evening"
+                      dreamText={dreamText}
+                      dreamId={lastSavedDreamId}
+                      isPremium={isPremium}
                     />
                   </div>
                 )}
@@ -4204,21 +4207,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                   <div className="dream-detail-response">
                     <div className="dream-detail-response-title">Dream Analysis</div>
-                    <div style={{
-                      backgroundColor: 'rgba(255, 193, 7, 0.08)',
-                      border: '1px solid rgba(255, 193, 7, 0.2)',
-                      borderRadius: '8px',
-                      padding: '12px',
-                      marginBottom: '16px',
-                      fontSize: '12px',
-                      color: '#6b7280',
-                      lineHeight: '1.5'
-                    }}>
-                      <span style={{ fontWeight: '600', color: '#f59e0b' }}>ℹ️ {language === 'ko' ? '참고' : 'Note'}: </span>
-                      {language === 'ko'
-                        ? '이 해석은 AI가 제공하는 참고 자료이며, 전문적인 심리 상담이나 진단이 아닙니다. 개인의 감정과 생각을 깊이 있게 반영하기 위해 참고만 해주세요.'
-                        : 'This interpretation is AI-generated for reference only and is not a professional psychological consultation or diagnosis. Please use it as a guide for personal reflection.'}
-                    </div>
                     <div className="analysis-content">
                       {selectedDream.response.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
@@ -4338,21 +4326,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   </div>
                   <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
-                    <div style={{
-                      backgroundColor: 'rgba(255, 193, 7, 0.08)',
-                      border: '1px solid rgba(255, 193, 7, 0.2)',
-                      borderRadius: '8px',
-                      padding: '12px',
-                      marginBottom: '20px',
-                      fontSize: '12px',
-                      color: '#6b7280',
-                      lineHeight: '1.5'
-                    }}>
-                      <span style={{ fontWeight: '600', color: '#f59e0b' }}>ℹ️ {language === 'ko' ? '참고' : 'Note'}: </span>
-                      {language === 'ko'
-                        ? '이 해석은 AI가 제공하는 참고 자료이며, 전문적인 심리 상담이나 진단이 아닙니다. 개인의 감정과 생각을 깊이 있게 반영하기 위해 참고만 해주세요.'
-                        : 'This interpretation is AI-generated for reference only and is not a professional psychological consultation or diagnosis. Please use it as a guide for personal reflection.'}
-                    </div>
                     <div className="analysis-content">
                       {dreamResponse.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
