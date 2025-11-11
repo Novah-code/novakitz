@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import AffirmationsDisplay from './AffirmationsDisplay';
 
 interface CheckinRecord {
   id: string;
@@ -17,13 +18,19 @@ interface DailyCheckinProps {
   language: 'en' | 'ko';
   timeOfDay?: 'morning' | 'afternoon' | 'evening';
   onCheckInComplete?: () => void;
+  dreamText?: string;
+  dreamId?: string;
+  isPremium?: boolean;
 }
 
 export default function DailyCheckin({
   userId,
   language,
   timeOfDay = 'afternoon',
-  onCheckInComplete
+  onCheckInComplete,
+  dreamText = '',
+  dreamId,
+  isPremium = false
 }: DailyCheckinProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
@@ -198,6 +205,18 @@ export default function DailyCheckin({
 
   return (
     <>
+      {/* Affirmations Display */}
+      {dreamText && (
+        <AffirmationsDisplay
+          user={{ id: userId } as any}
+          checkInTime={timeOfDay}
+          dreamText={dreamText}
+          dreamId={dreamId}
+          language={language}
+          isPremium={isPremium}
+        />
+      )}
+
       {/* Checkin Button */}
       <button
         onClick={() => setIsOpen(true)}

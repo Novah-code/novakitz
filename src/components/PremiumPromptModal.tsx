@@ -28,8 +28,10 @@ export default function PremiumPromptModal({
     }
   };
 
-  const gumroadUrl = process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL ||
+  const gumroadMonthlyUrl = process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL ||
     'https://novakitz.gumroad.com/l/novakitz';
+  const gumroadYearlyUrl = process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL ||
+    'https://novakitz.gumroad.com/l/novakitz_year';
 
   useEffect(() => {
     if (!user) {
@@ -198,7 +200,7 @@ export default function PremiumPromptModal({
               <span className="period">{language === 'ko' ? '/년' : '/year'}</span>
             </div>
             <div style={{fontSize: '12px', color: '#7fb069', fontWeight: '600', marginBottom: '12px'}}>
-              {language === 'ko' ? '50% 절감' : '50% Off'}
+              {language === 'ko' ? '17% 절감' : '17% Off'}
             </div>
             <ul className="plan-features">
               <li>
@@ -235,10 +237,10 @@ export default function PremiumPromptModal({
         {/* CTA Buttons */}
         <div className="premium-prompt-actions" style={{flexDirection: 'column', gap: '8px'}}>
           <div style={{display: 'flex', gap: '8px'}}>
-            <a href={gumroadUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1}}>
+            <a href={gumroadMonthlyUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1}}>
               {language === 'ko' ? '월간 구독' : 'Monthly ($4.99)'}
             </a>
-            <a href={gumroadUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1, background: 'linear-gradient(135deg, #7fb069 0%, #5a8449 100%)'}}>
+            <a href={gumroadYearlyUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1, background: 'linear-gradient(135deg, #7fb069 0%, #5a8449 100%)'}}>
               {language === 'ko' ? '연간 구독' : 'Yearly ($49.99)'}
             </a>
           </div>

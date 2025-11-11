@@ -1001,7 +1001,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             },
             body: JSON.stringify({
               dreamText: dreamText,
-              language: language
+              language: language,
+              isPremium: isPremium
             })
           }),
           5, // 5 retries
@@ -3539,6 +3540,34 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       <span style={{color: '#7FB069', fontWeight: '500', fontFamily: 'Georgia, "Times New Roman", Times, serif', fontSize: '14px'}}>
                         {t.listeningVoice}
                       </span>
+                    </div>
+                  )}
+
+                  {!isPremium && remainingAIUsage.limit > 0 && (
+                    <div style={{marginBottom: '12px'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px'}}>
+                        <label style={{fontSize: '0.85rem', color: '#6b7280', fontWeight: '500'}}>
+                          {language === 'ko' ? 'AI 해석 사용 횟수' : 'AI Interpretations'}
+                        </label>
+                        <span style={{fontSize: '0.85rem', color: '#7fb069', fontWeight: '600'}}>
+                          {remainingAIUsage.remaining}/{remainingAIUsage.limit}
+                        </span>
+                      </div>
+                      <div style={{
+                        width: '100%',
+                        height: '6px',
+                        backgroundColor: '#e5e7eb',
+                        borderRadius: '3px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          height: '100%',
+                          width: `${(remainingAIUsage.remaining / remainingAIUsage.limit) * 100}%`,
+                          backgroundColor: remainingAIUsage.remaining > 3 ? '#7fb069' : remainingAIUsage.remaining > 0 ? '#fbbf24' : '#ef4444',
+                          transition: 'width 0.3s ease',
+                          borderRadius: '3px'
+                        }}></div>
+                      </div>
                     </div>
                   )}
 

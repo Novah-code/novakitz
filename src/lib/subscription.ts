@@ -32,8 +32,8 @@ export async function getUserPlan(userId: string) {
     // No active subscription - return free plan
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 5,
-      historyDays: 30,
+      aiInterpretationsPerMonth: 10,
+      historyDays: 999999, // Unlimited history for free users now
       isActive: false
     };
   } catch (error) {
@@ -41,8 +41,8 @@ export async function getUserPlan(userId: string) {
     // Default to free plan on error
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 5,
-      historyDays: 30,
+      aiInterpretationsPerMonth: 10,
+      historyDays: 999999,
       isActive: false
     };
   }
