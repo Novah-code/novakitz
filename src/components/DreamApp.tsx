@@ -7,7 +7,6 @@ import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import DreamJournal from './DreamJournal';
 import UserProfileForm from './UserProfileForm';
-import AIUsageWidget from './AIUsageWidget';
 
 export default function DreamApp() {
   const searchParams = useSearchParams();
@@ -288,9 +287,6 @@ export default function DreamApp() {
           language={language}
         />
       </div>
-
-      {/* AI Usage Widget - Shown when user is authenticated */}
-      {user && <AIUsageWidget user={user} />}
 
       {/* Auth Modal */}
       {showAuth && !user && (

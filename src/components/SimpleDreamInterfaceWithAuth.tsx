@@ -10,6 +10,7 @@ import DreamInsights from './DreamInsights';
 import BadgesDisplay from './BadgesDisplay';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
+import AIUsageWidget from './AIUsageWidget';
 
 // Translations
 const translations = {
@@ -674,6 +675,16 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </svg>
                 <span>{t.signOut}</span>
               </button>
+
+              {/* AI Usage Widget */}
+              {user && (
+                <div style={{
+                  padding: '1rem 1rem',
+                  margin: '1rem 0'
+                }}>
+                  <AIUsageWidget user={user} />
+                </div>
+              )}
 
               {/* Divider */}
               <div style={{
