@@ -96,6 +96,10 @@ async function extractDreamKeywords(dreamText: string, language: 'en' | 'ko' = '
       apiKey_length: apiKey?.length
     });
 
+    if (!apiKey) {
+      throw new Error('GEMINI_API_KEY environment variable is not set');
+    }
+
     const keywordPrompt = language === 'ko'
       ? `다음 꿈을 분석하여 정확히 3개의 키워드만 추출하세요: 대표 감정 1개 + 중요 상징 2개. JSON 배열 형식으로만 응답하세요.
 
