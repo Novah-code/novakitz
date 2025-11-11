@@ -137,12 +137,11 @@ Return EXACTLY 3 items and no other text.`;
 
     const response = await retryWithExponentialBackoff(async () => {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey!,
           },
           body: JSON.stringify({
             contents: [{
@@ -330,12 +329,11 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
     const [response, keywords] = await Promise.all([
       retryWithExponentialBackoff(async () => {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey!,
           },
           body: JSON.stringify({
             contents: [{
