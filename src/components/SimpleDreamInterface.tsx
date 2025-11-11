@@ -4102,97 +4102,104 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDream(null);
-                    }}
-                    className="dream-detail-close"
-                    style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      background: 'rgba(255, 255, 255, 0.3)',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontSize: '24px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      zIndex: 15
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-                  >
-                    ×
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      shareDream(selectedDream, e);
-                    }}
-                    className="dream-detail-share-btn"
-                    style={{
-                      position: 'absolute',
-                      bottom: '12px',
-                      right: window.innerWidth < 480 ? '70px' : (window.innerWidth < 640 ? '110px' : '130px'),
-                      background: 'rgba(255, 255, 255, 0.3)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: window.innerWidth < 480 ? '6px 10px' : '8px 12px',
-                      fontSize: window.innerWidth < 480 ? '12px' : '14px',
-                      fontWeight: '600',
-                      color: 'white',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      whiteSpace: 'nowrap'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                      <polyline points="16 6 12 2 8 6"></polyline>
-                      <line x1="12" y1="2" x2="12" y2="15"></line>
-                    </svg>
-                    {language === 'ko' ? '공유' : 'Share'}
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedDream(null);
-                      startEditDream(selectedDream);
-                    }}
-                    className="dream-detail-edit-btn"
-                    style={{
-                      position: 'absolute',
-                      bottom: '12px',
-                      right: window.innerWidth < 480 ? '10px' : '12px',
-                      background: 'rgba(255, 255, 255, 0.3)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: window.innerWidth < 480 ? '6px 12px' : '8px 16px',
-                      fontSize: window.innerWidth < 480 ? '12px' : '14px',
-                      fontWeight: '600',
-                      color: 'white',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      fontFamily: 'Georgia, serif',
-                      whiteSpace: 'nowrap'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-                  >
-                    {language === 'ko' ? '수정' : 'Edit'}
-                  </button>
+                  {/* Button container for top-right alignment */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    zIndex: 15
+                  }}>
+                    {/* Share button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        shareDream(selectedDream, e);
+                      }}
+                      className="dream-detail-share-btn"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: window.innerWidth < 480 ? '6px 10px' : '8px 12px',
+                        fontSize: window.innerWidth < 480 ? '12px' : '14px',
+                        fontWeight: '600',
+                        color: 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                        <polyline points="16 6 12 2 8 6"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                      </svg>
+                      {language === 'ko' ? '공유' : 'Share'}
+                    </button>
+
+                    {/* Edit button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDream(null);
+                        startEditDream(selectedDream);
+                      }}
+                      className="dream-detail-edit-btn"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: window.innerWidth < 480 ? '6px 12px' : '8px 16px',
+                        fontSize: window.innerWidth < 480 ? '12px' : '14px',
+                        fontWeight: '600',
+                        color: 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontFamily: 'Georgia, serif',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                    >
+                      {language === 'ko' ? '수정' : 'Edit'}
+                    </button>
+
+                    {/* Close button (X) */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDream(null);
+                      }}
+                      className="dream-detail-close"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.3)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        flexShrink: 0
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                    >
+                      ×
+                    </button>
+                  </div>
                   <div className="dream-detail-title">{selectedDream.title || t.dreamEntry}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
                 </div>
