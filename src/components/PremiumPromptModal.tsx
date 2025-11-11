@@ -39,16 +39,7 @@ export default function PremiumPromptModal({
 
     const checkPremiumAndPrompt = async () => {
       try {
-        console.log('🔍 Checking premium status for user:', user.id);
-
-        // Check if user has already seen the prompt
-        const seenPrompt = localStorage.getItem(`premium_prompt_seen_${user.id}`);
-        console.log('📦 Has seen prompt before:', !!seenPrompt);
-
-        if (seenPrompt) {
-          setHasSeenPrompt(true);
-          return;
-        }
+        console.log('Checking premium status for user:', user.id);
 
         // Check subscription status - simplified query
         const { data: subscription, error } = await supabase
@@ -59,14 +50,14 @@ export default function PremiumPromptModal({
           .maybeSingle();
 
         if (error) {
-          console.warn('⚠️ Error querying subscriptions:', error);
+          console.warn('Error querying subscriptions:', error);
           // On error, assume user is free and show the prompt
           setIsPremium(false);
           setShowModal(true);
           return;
         }
 
-        console.log('📊 Subscription data:', subscription);
+        console.log('Subscription data:', subscription);
 
         if (subscription) {
           // User has an active subscription, check if it's premium
@@ -79,7 +70,7 @@ export default function PremiumPromptModal({
             .single();
 
           const isPremium = planData?.plan_slug === 'premium';
-          console.log('💎 User is premium:', isPremium);
+          console.log('User is premium:', isPremium);
           setIsPremium(isPremium || false);
 
           // Only show prompt to free users
@@ -88,12 +79,12 @@ export default function PremiumPromptModal({
           }
         } else {
           // No active subscription = free user
-          console.log('💳 No active subscription found - user is free');
+          console.log('No active subscription found - user is free');
           setIsPremium(false);
           setShowModal(true);
         }
       } catch (error) {
-        console.error('❌ Error checking premium status:', error);
+        console.error('Error checking premium status:', error);
         // On error, show the prompt to be safe
         setIsPremium(false);
         setShowModal(true);
@@ -104,9 +95,7 @@ export default function PremiumPromptModal({
   }, [user]);
 
   const handleClose = () => {
-    if (user) {
-      localStorage.setItem(`premium_prompt_seen_${user.id}`, 'true');
-    }
+    // Don't save to localStorage - show prompt every time for free users
     setShowModal(false);
     onClose();
   };
@@ -125,7 +114,6 @@ export default function PremiumPromptModal({
 
         {/* Header */}
         <div className="premium-prompt-header">
-          <div className="premium-prompt-icon">✨</div>
           <h2 className="premium-prompt-title">
             {language === 'ko' ? '꿈 일기를 더 풍요롭게' : 'Enhance Your Dream Journal'}
           </h2>
@@ -141,19 +129,15 @@ export default function PremiumPromptModal({
             <h3>{language === 'ko' ? '무료 플랜' : 'Free Plan'}</h3>
             <ul className="plan-features">
               <li>
-                <span className="feature-icon">📝</span>
                 <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
               </li>
               <li>
-                <span className="feature-icon">🤖</span>
                 <span>{language === 'ko' ? '월 5회 AI 분석' : '5 AI interpretations/month'}</span>
               </li>
               <li>
-                <span className="feature-icon">📅</span>
                 <span>{language === 'ko' ? '30일 기록 보관' : '30-day history'}</span>
               </li>
               <li>
-                <span className="feature-icon">🎯</span>
                 <span>{language === 'ko' ? '기본 꿈 분석' : 'Basic dream analysis'}</span>
               </li>
             </ul>
@@ -171,19 +155,15 @@ export default function PremiumPromptModal({
             </div>
             <ul className="plan-features">
               <li>
-                <span className="feature-icon">📝</span>
                 <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
               </li>
               <li className="premium-feature">
-                <span className="feature-icon">🤖</span>
                 <span>{language === 'ko' ? 'AI 분석 무제한' : 'Unlimited AI interpretations'}</span>
               </li>
               <li className="premium-feature">
-                <span className="feature-icon">📅</span>
                 <span>{language === 'ko' ? '전체 기록 보관' : 'Full dream history'}</span>
               </li>
               <li className="premium-feature">
-                <span className="feature-icon">🎯</span>
                 <span>{language === 'ko' ? '고급 분석 및 인사이트' : 'Advanced analysis & insights'}</span>
               </li>
             </ul>
@@ -203,8 +183,8 @@ export default function PremiumPromptModal({
         {/* Info Text */}
         <p className="premium-prompt-info">
           {language === 'ko'
-            ? '✨ 지금 업그레이드하면 무제한 AI 분석과 전체 꿈 기록을 모두 이용할 수 있습니다.'
-            : '✨ Unlock unlimited AI dream interpretations and access your complete dream history.'
+            ? '지금 업그레이드하면 무제한 AI 분석과 전체 꿈 기록을 모두 이용할 수 있습니다.'
+            : 'Unlock unlimited AI dream interpretations and access your complete dream history.'
           }
         </p>
       </div>
