@@ -393,25 +393,43 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
       );
     }
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Server error:', error);
+    console.error('Error details:', {
+      message: errorMessage,
+      hasStatus: error instanceof Error && 'status' in error,
+      status: (error as any)?.status
+    });
 
     // 에러 상태 결정
     let status = 500;
-    let errorMessage = 'Internal server error';
+    let userMessage = 'Internal server error';
 
-    // Handle specific API overload errors
-    if (error instanceof Error && error.message.includes('403')) {
-      status = 403;
-      errorMessage = 'The AI service is currently unavailable. This is a configuration issue that the admin team is working on. Please try again later.';
-    } else if (error instanceof Error && error.message.includes('503')) {
-      status = 503;
-      errorMessage = 'The AI service is currently experiencing high demand. Please try again in a few moments.';
-    } else if (error instanceof Error && error.message.includes('429')) {
-      status = 429;
-      errorMessage = 'Too many requests. Please wait a moment before trying again.';
-    } else if (error instanceof Error && error.message.includes('API request failed')) {
-      status = 502;
-      errorMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
+    // Handle specific API status errors with better detection
+    if (error instanceof Error) {
+      const msg = error.message;
+
+      if (msg.includes('403') || msg.includes('Forbidden')) {
+        status = 403;
+        userMessage = 'API key may be invalid or disabled. Please verify your Gemini API configuration.';
+        console.error('403 Forbidden - Possible API key issue');
+      } else if (msg.includes('401') || msg.includes('Unauthorized')) {
+        status = 401;
+        userMessage = 'Authentication failed. Please check your API credentials.';
+        console.error('401 Unauthorized - API key authentication failed');
+      } else if (msg.includes('503') || msg.includes('Service Unavailable')) {
+        status = 503;
+        userMessage = 'The AI service is experiencing high demand. Please try again in a few moments.';
+      } else if (msg.includes('429') || msg.includes('Too Many Requests')) {
+        status = 429;
+        userMessage = 'Too many requests. Please wait a moment before trying again.';
+      } else if (msg.includes('API request failed') || msg.includes('502')) {
+        status = 502;
+        userMessage = 'The AI service is temporarily unavailable. Please try again shortly.';
+      } else if (msg.includes('400') || msg.includes('Invalid')) {
+        status = 400;
+        userMessage = 'Invalid request. Please try rewording your dream description.';
+      }
     }
 
     // 에러 로깅
@@ -420,13 +438,13 @@ Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wis
       endpoint,
       status,
       responseTime: Date.now() - startTime,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorMessage
     });
 
-    const responseBody: any = { error: errorMessage };
+    const responseBody: any = { error: userMessage };
     if (status === 503) responseBody.retryAfter = 30;
     if (status === 429) responseBody.retryAfter = 60;
-    if (status === 403) responseBody.retryAfter = 300; // 5 minutes
+    if (status === 403 || status === 401) responseBody.retryAfter = 300; // 5 minutes
     if (status === 502) responseBody.retryAfter = 15;
 
     return NextResponse.json(responseBody, { status });
