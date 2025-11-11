@@ -3542,19 +3542,19 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
                   {!isPremium && remainingAIUsage.limit > 0 && (
                     <div style={{marginBottom: '12px'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px'}}>
-                        <label style={{fontSize: '0.85rem', color: '#6b7280', fontWeight: '500'}}>
-                          {language === 'ko' ? 'AI 해석 사용 횟수' : 'AI Interpretations'}
+                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px'}}>
+                        <label style={{fontSize: '0.75rem', color: '#6b7280', fontWeight: '500'}}>
+                          {language === 'ko' ? 'AI 해석' : 'AI'}
                         </label>
-                        <span style={{fontSize: '0.85rem', color: '#7fb069', fontWeight: '600'}}>
+                        <span style={{fontSize: '0.75rem', color: '#7fb069', fontWeight: '600'}}>
                           {remainingAIUsage.remaining}/{remainingAIUsage.limit}
                         </span>
                       </div>
                       <div style={{
                         width: '100%',
-                        height: '6px',
+                        height: '4px',
                         backgroundColor: '#e5e7eb',
-                        borderRadius: '3px',
+                        borderRadius: '2px',
                         overflow: 'hidden'
                       }}>
                         <div style={{
@@ -3562,7 +3562,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           width: `${(remainingAIUsage.remaining / remainingAIUsage.limit) * 100}%`,
                           backgroundColor: remainingAIUsage.remaining > 3 ? '#7fb069' : remainingAIUsage.remaining > 0 ? '#fbbf24' : '#ef4444',
                           transition: 'width 0.3s ease',
-                          borderRadius: '3px'
+                          borderRadius: '2px'
                         }}></div>
                       </div>
                     </div>
@@ -3788,49 +3788,41 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
               </div>
 
-              <div className="dream-history-container" style={{paddingTop: '20px', position: 'relative', minHeight: '600px'}}>
+              <div className="dream-history-container" style={{paddingTop: '20px', position: 'relative'}}>
               {viewMode === 'calendar' ? (
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  gap: '20px'
+                  flexDirection: 'column'
                 }}>
-                  <div style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    minHeight: 0
-                  }}>
-                    <DreamCalendar
-                      dreams={filteredDreams as any}
-                      onDateSelect={(date) => {
-                        // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
-                        const dreamsForDate = filteredDreams.filter(d => {
-                          // Check both date field (from SimpleDreamInterface) and created_at field (from Supabase)
-                          if ('date' in d && typeof (d as any).date === 'string') {
-                            // SimpleDreamInterface DreamEntry with formatted date
-                            const formattedDate = new Date(date).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            });
-                            return (d as any).date === formattedDate;
-                          }
-                          if ('created_at' in d && typeof (d as any).created_at === 'string') {
-                            // Supabase Dream with ISO created_at
-                            return new Date((d as any).created_at).toDateString() === date;
-                          }
-                          return false;
-                        });
-
-                        // Select the first dream and show all dreams from that date
-                        if (dreamsForDate.length > 0) {
-                          setSelectedDream(dreamsForDate[0] as DreamEntry);
+                  <DreamCalendar
+                    dreams={filteredDreams as any}
+                    onDateSelect={(date) => {
+                      // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
+                      const dreamsForDate = filteredDreams.filter(d => {
+                        // Check both date field (from SimpleDreamInterface) and created_at field (from Supabase)
+                        if ('date' in d && typeof (d as any).date === 'string') {
+                          // SimpleDreamInterface DreamEntry with formatted date
+                          const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          });
+                          return (d as any).date === formattedDate;
                         }
-                      }}
-                      selectedDate={null}
-                    />
-                  </div>
+                        if ('created_at' in d && typeof (d as any).created_at === 'string') {
+                          // Supabase Dream with ISO created_at
+                          return new Date((d as any).created_at).toDateString() === date;
+                        }
+                        return false;
+                      });
+
+                      // Select the first dream and show all dreams from that date
+                      if (dreamsForDate.length > 0) {
+                        setSelectedDream(dreamsForDate[0] as DreamEntry);
+                      }
+                    }}
+                    selectedDate={null}
+                  />
                 </div>
               ) : (
               <div className="dream-grid" style={{
@@ -4015,11 +4007,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
               <div style={{
                 position: 'sticky',
-                bottom: 0,
+                top: 0,
                 background: 'white',
-                padding: '20px',
-                borderTop: '1px solid #e5e7eb',
-                textAlign: 'right',
+                padding: '16px 20px',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'flex-end',
                 zIndex: 10
               }}>
                 <button
@@ -4028,6 +4021,25 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     onHistoryClose?.();
                   }}
                   className="journal-close-btn"
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#6b7280',
+                    background: '#f3f4f6',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#e5e7eb';
+                    e.currentTarget.style.color = '#1f2937';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6';
+                    e.currentTarget.style.color = '#6b7280';
+                  }}
                 >
                   Close
                 </button>
