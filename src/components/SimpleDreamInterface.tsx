@@ -2476,7 +2476,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         .dream-detail-close {
           position: absolute;
           top: 12px;
-          right: 12px;
+          left: 12px;
           background: rgba(255, 255, 255, 0.2);
           border: none;
           color: white;
@@ -2489,7 +2489,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           cursor: pointer;
           font-size: 18px;
           transition: all 0.2s ease;
-          z-index: 10;
+          z-index: 11;
         }
 
         .dream-detail-close:hover {
@@ -2518,7 +2518,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             height: 26px;
             font-size: 14px;
             top: 8px;
-            right: 8px;
+            left: 8px;
           }
         }
         
