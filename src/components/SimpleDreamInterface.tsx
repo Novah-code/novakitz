@@ -2478,13 +2478,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         .dream-detail-close {
           position: absolute;
           top: 12px;
-          left: 12px;
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.3);
           border: none;
+          borderRadius: 50%;
           color: white;
           width: 32px;
           height: 32px;
-          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -2520,7 +2519,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             height: 26px;
             font-size: 14px;
             top: 8px;
-            left: 8px;
+            right: 8px;
           }
         }
         
@@ -4118,7 +4117,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
-                  <button className="dream-detail-close" onClick={() => setSelectedDream(null)}>
+                  <button
+                    className="dream-detail-close"
+                    onClick={() => setSelectedDream(null)}
+                    style={{
+                      right: window.innerWidth < 480 ? '110px' : (window.innerWidth < 640 ? '110px' : '135px')
+                    }}
+                  >
                     ×
                   </button>
                   <button
@@ -4130,7 +4135,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     style={{
                       position: 'absolute',
                       top: '12px',
-                      right: window.innerWidth < 480 ? '110px' : (window.innerWidth < 640 ? '100px' : '130px'),
+                      right: window.innerWidth < 480 ? '55px' : (window.innerWidth < 640 ? '50px' : '70px'),
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
@@ -4165,7 +4170,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     style={{
                       position: 'absolute',
                       top: '12px',
-                      right: window.innerWidth < 480 ? '55px' : '70px',
+                      right: window.innerWidth < 480 ? '10px' : '12px',
                       background: 'rgba(255, 255, 255, 0.3)',
                       border: 'none',
                       borderRadius: '8px',
