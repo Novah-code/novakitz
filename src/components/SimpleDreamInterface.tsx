@@ -222,6 +222,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isPremium, setIsPremium] = useState(false);
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 10, remaining: 10, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
+  const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -709,6 +710,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           const dreamWithSupabaseId = { ...newDream, id: data.id };
           const updatedDreams = [dreamWithSupabaseId, ...savedDreams];
           setSavedDreams(updatedDreams);
+          setLastSavedDreamId(data.id);
           console.log('✅ Local state updated. Total dreams:', updatedDreams.length);
 
           // Generate daily intentions after saving dream
@@ -3764,11 +3766,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         userId={user.id}
                         language={language || 'en'}
                         timeOfDay="afternoon"
+                        dreamText={dreamText}
+                        dreamId={lastSavedDreamId}
+                        isPremium={isPremium}
                       />
                       <DailyCheckin
                         userId={user.id}
                         language={language || 'en'}
                         timeOfDay="evening"
+                        dreamText={dreamText}
+                        dreamId={lastSavedDreamId}
+                        isPremium={isPremium}
                       />
                     </div>
 
