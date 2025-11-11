@@ -674,6 +674,89 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </svg>
                 <span>{t.signOut}</span>
               </button>
+
+              {/* Divider */}
+              <div style={{
+                height: '1px',
+                background: 'rgba(127, 176, 105, 0.2)',
+                margin: '1rem 0'
+              }}></div>
+
+              {/* Social Media Links */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                padding: '0 2rem',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                {/* Instagram */}
+                <a
+                  href="https://instagram.com/novakitz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                  title="Instagram"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37"></path>
+                    <circle cx="17.5" cy="6.5" r="1.5"></circle>
+                  </svg>
+                </a>
+
+                {/* Email */}
+                <a
+                  href="mailto:contact@novakitz.shop"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                  title="Email"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
         </>
