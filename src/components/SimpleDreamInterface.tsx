@@ -2346,6 +2346,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         .dream-content {
           padding: 20px;
           text-align: left;
+          background: rgba(127, 176, 105, 0.15);
+          backdrop-filter: blur(10px);
+          border-top: 1px solid rgba(127, 176, 105, 0.3);
         }
 
         .dream-title {
@@ -3540,34 +3543,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
 
-                  {!isPremium && remainingAIUsage.limit > 0 && (
-                    <div style={{marginBottom: '12px'}}>
-                      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px'}}>
-                        <label style={{fontSize: '0.75rem', color: '#6b7280', fontWeight: '500'}}>
-                          {language === 'ko' ? 'AI 해석' : 'AI'}
-                        </label>
-                        <span style={{fontSize: '0.75rem', color: '#7fb069', fontWeight: '600'}}>
-                          {remainingAIUsage.remaining}/{remainingAIUsage.limit}
-                        </span>
-                      </div>
-                      <div style={{
-                        width: '100%',
-                        height: '4px',
-                        backgroundColor: '#e5e7eb',
-                        borderRadius: '2px',
-                        overflow: 'hidden'
-                      }}>
-                        <div style={{
-                          height: '100%',
-                          width: `${(remainingAIUsage.remaining / remainingAIUsage.limit) * 100}%`,
-                          backgroundColor: remainingAIUsage.remaining > 3 ? '#7fb069' : remainingAIUsage.remaining > 0 ? '#fbbf24' : '#ef4444',
-                          transition: 'width 0.3s ease',
-                          borderRadius: '2px'
-                        }}></div>
-                      </div>
-                    </div>
-                  )}
-
                   <textarea
                     className="dream-input"
                     value={dreamText}
@@ -3696,6 +3671,38 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       </div>
                     ) : null}
                   </div>
+
+                  {/* Close Button at Far Right */}
+                  <button
+                    onClick={() => {
+                      setShowHistory(false);
+                      onHistoryClose?.();
+                    }}
+                    className="journal-close-btn"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#6b7280',
+                      background: '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      flexShrink: 0,
+                      marginLeft: '12px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#e5e7eb';
+                      e.currentTarget.style.color = '#1f2937';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f3f4f6';
+                      e.currentTarget.style.color = '#6b7280';
+                    }}
+                  >
+                    Close
+                  </button>
 
                   {/* Search and Filter Controls - FORCED RIGHT SIDE */}
                   <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0}}>
@@ -4003,46 +4010,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
               </div>
               )}
-              </div>
-
-              <div style={{
-                position: 'sticky',
-                top: 0,
-                background: 'white',
-                padding: '16px 20px',
-                borderBottom: '1px solid #e5e7eb',
-                display: 'flex',
-                justifyContent: 'flex-end',
-                zIndex: 10
-              }}>
-                <button
-                  onClick={() => {
-                    setShowHistory(false);
-                    onHistoryClose?.();
-                  }}
-                  className="journal-close-btn"
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#6b7280',
-                    background: '#f3f4f6',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#e5e7eb';
-                    e.currentTarget.style.color = '#1f2937';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f3f4f6';
-                    e.currentTarget.style.color = '#6b7280';
-                  }}
-                >
-                  Close
-                </button>
               </div>
             </div>
           )}

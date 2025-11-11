@@ -191,10 +191,6 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
           <div className="legend-indicator today-indicator"></div>
           <span>Today</span>
         </div>
-        <div className="legend-item">
-          <div className="legend-indicator dream-indicator-sample">💭</div>
-          <span>Has Dreams</span>
-        </div>
       </div>
     </div>
   );
