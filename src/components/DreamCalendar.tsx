@@ -144,7 +144,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
               <div className="day-number">{day}</div>
               {hasDreams && (
                 <div className="dream-badges">
-                  {dreams.map((dream, idx) => {
+                  {dreams.slice(0, 1).map((dream, idx) => {
                     // Check if this is a "no dream" marker
                     const isNoDream = dream.tags?.includes('꿈안꿈') || dream.tags?.includes('no-dream') || dream.title?.includes('꿈 안 꿈') || dream.title?.includes('No Dream');
                     return (
@@ -158,8 +158,8 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                         title={dream.title}
                         style={isNoDream ? {
                           opacity: 0.6,
-                          fontSize: '0.75rem',
-                          padding: '4px 8px'
+                          fontSize: '0.7rem',
+                          padding: '4px 6px'
                         } : {}}
                       >
                         {isNoDream ? '😴 ' : '💭 '}
@@ -167,6 +167,17 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                       </button>
                     );
                   })}
+                  {dreams.length > 1 && (
+                    <div style={{
+                      fontSize: '0.65rem',
+                      color: 'var(--matcha-dark)',
+                      fontWeight: '600',
+                      padding: '2px 4px',
+                      textAlign: 'center'
+                    }}>
+                      +{dreams.length - 1} more
+                    </div>
+                  )}
                 </div>
               )}
             </div>
