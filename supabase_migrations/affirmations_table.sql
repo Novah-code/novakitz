@@ -6,10 +6,10 @@ CREATE TABLE IF NOT EXISTS affirmations (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   dream_id UUID REFERENCES dreams(id) ON DELETE SET NULL,
   affirmation_text TEXT NOT NULL,
-  daily_count INT NOT NULL DEFAULT 1 COMMENT '1=morning, 2=afternoon, 3=evening',
-  check_in_time VARCHAR(20) NOT NULL COMMENT 'morning, afternoon, or evening',
+  daily_count INT NOT NULL DEFAULT 1,
+  check_in_time VARCHAR(20) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  date DATE NOT NULL COMMENT 'Local date in YYYY-MM-DD format',
+  date DATE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
