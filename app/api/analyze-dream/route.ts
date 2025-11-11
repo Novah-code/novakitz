@@ -90,6 +90,11 @@ interface DreamKeyword {
 async function extractDreamKeywords(dreamText: string, language: 'en' | 'ko' = 'en'): Promise<DreamKeyword[]> {
   try {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    console.log('[extractDreamKeywords] API Key check:', {
+      has_GEMINI_API_KEY: !!process.env.GEMINI_API_KEY,
+      has_GOOGLE_GEMINI_API_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
+      apiKey_length: apiKey?.length
+    });
 
     const keywordPrompt = language === 'ko'
       ? `다음 꿈을 분석하여 정확히 3개의 키워드만 추출하세요: 대표 감정 1개 + 중요 상징 2개. JSON 배열 형식으로만 응답하세요.
@@ -195,6 +200,14 @@ export async function POST(request: NextRequest) {
   console.log('=== API Route Called ===');
   const startTime = Date.now();
   const endpoint = '/api/analyze-dream';
+
+  // Check API Key availability
+  const apiKeyStatus = {
+    has_GEMINI_API_KEY: !!process.env.GEMINI_API_KEY,
+    has_GOOGLE_GEMINI_API_KEY: !!process.env.GOOGLE_GEMINI_API_KEY,
+    env_keys: Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('API'))
+  };
+  console.log('[POST] API Key Status:', apiKeyStatus);
 
   try {
     const { dreamText, language = 'en', isPremium = false } = await request.json();
