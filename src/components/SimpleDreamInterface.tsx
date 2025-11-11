@@ -1136,7 +1136,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
 ${userContext}
 
-이 꿈을 바탕으로 오늘의 확언 3개를 생성해주세요.
+이 꿈을 바탕으로 오늘의 확언 ${isPremium ? '3개' : '1개'}를 생성해주세요.
 
 각 확언은:
 1. 꿈의 핵심 메시지를 반영
@@ -1146,14 +1146,14 @@ ${userContext}
 
 다음 형식으로 정확히 응답해주세요:
 
-의도1: [구체적인 확언]
+${isPremium ? `의도1: [구체적인 확언]
 의도2: [구체적인 확언]
-의도3: [구체적인 확언]
+의도3: [구체적인 확언]` : `의도: [구체적인 확언]`}
 
 예시:
-의도1: 오늘 하루 새로운 관점에서 한 가지 문제 살펴보기
+${isPremium ? `의도1: 오늘 하루 새로운 관점에서 한 가지 문제 살펴보기
 의도2: 팀원과 의미 있는 대화 한 번 나누기
-의도3: 저녁에 5분이라도 명상이나 산책으로 자신과 연결되기
+의도3: 저녁에 5분이라도 명상이나 산책으로 자신과 연결되기` : `의도: 오늘 하루 새로운 관점에서 한 가지 문제 살펴보기`}
       ` : `
 You are an expert in Carl Jung's psychology and dream interpretation.
 
@@ -1163,7 +1163,7 @@ Dream Analysis: ${dreamAnalysis}
 
 ${userContext}
 
-Based on this dream, generate 3 daily affirmations for today.
+Based on this dream, generate ${isPremium ? '3' : '1'} daily affirmation(s) for today.
 
 Each affirmation should:
 1. Reflect the core message of the dream
@@ -1173,14 +1173,14 @@ Each affirmation should:
 
 Respond in this exact format:
 
-Intention1: [specific affirmation]
+${isPremium ? `Intention1: [specific affirmation]
 Intention2: [specific affirmation]
-Intention3: [specific affirmation]
+Intention3: [specific affirmation]` : `Intention: [specific affirmation]`}
 
 Example:
-Intention1: Look at one problem from a new perspective today
+${isPremium ? `Intention1: Look at one problem from a new perspective today
 Intention2: Have one meaningful conversation with a colleague
-Intention3: Spend 5 minutes in the evening connecting with yourself through meditation or walking
+Intention3: Spend 5 minutes in the evening connecting with yourself through meditation or walking` : `Intention: Look at one problem from a new perspective today`}
       `;
 
       // Call Gemini API
@@ -1227,13 +1227,16 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
 
         console.log('Parsed intentions count:', intentions.length);
-        return intentions.slice(0, 3); // Get first 3
+        // Get 1 for free users, 3 for premium
+        const maxIntentions = isPremium ? 3 : 1;
+        return intentions.slice(0, maxIntentions);
       };
 
       const intentions = parseIntentions(intentionText);
+      const targetCount = isPremium ? 3 : 1;
 
-      // Ensure we have 3 intentions
-      while (intentions.length < 3) {
+      // Ensure we have the right number of intentions
+      while (intentions.length < targetCount) {
         intentions.push(language === 'ko' ? '오늘 한 가지 작은 좋은 일 하기' : 'Do one small good thing today');
       }
 
