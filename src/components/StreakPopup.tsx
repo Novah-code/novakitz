@@ -67,28 +67,24 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       console.log('Dreams fetched:', dreamsData?.length || 0);
       console.log('Dream data sample:', dreamsData?.slice(0, 2));
 
-      // Get unique dates with dreams - use 'date' field if available, otherwise parse created_at in UTC
+      // Get unique dates with dreams - use created_at for reliable date extraction
       const dreamDates = new Set(
         dreamsData?.map(d => {
-          // Prefer 'date' field which is already in the correct format from dream record
-          if (d.date) {
-            // date field is formatted like "November 29, 2024" or "2025-10-29"
-            // Convert to consistent format for comparison
-            const dateObj = new Date(d.date);
-            return dateObj.toISOString().split('T')[0]; // Get YYYY-MM-DD in UTC
-          }
-          // Fallback to created_at in UTC only
+          // Parse created_at timestamp and get local date (YYYY-MM-DD)
           const dateObj = new Date(d.created_at);
-          return dateObj.toISOString().split('T')[0]; // Get YYYY-MM-DD in UTC
+          const year = dateObj.getFullYear();
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
         }) || []
       );
 
       console.log('Dream dates (unique):', Array.from(dreamDates));
 
-      // Calculate current streak using UTC dates
+      // Calculate current streak using local dates
       let currentStreak = 0;
 
-      // Get today's date in YYYY-MM-DD format (local time, not UTC for user's perspective)
+      // Get today's date in YYYY-MM-DD format (local time)
       const getTodayString = () => {
         const date = new Date();
         return date.getFullYear() + '-' +
@@ -96,43 +92,43 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                String(date.getDate()).padStart(2, '0');
       };
 
-      const getTodayUTC = () => {
-        const date = new Date();
-        return date.toISOString().split('T')[0];
-      };
-
-      const getYesterdayUTC = () => {
+      // Get yesterday's date in YYYY-MM-DD format (local time)
+      const getYesterdayString = () => {
         const date = new Date();
         date.setDate(date.getDate() - 1);
-        return date.toISOString().split('T')[0];
+        return date.getFullYear() + '-' +
+               String(date.getMonth() + 1).padStart(2, '0') + '-' +
+               String(date.getDate()).padStart(2, '0');
       };
 
-      const todayUTC = getTodayUTC();
-      const yesterdayUTC = getYesterdayUTC();
+      const todayString = getTodayString();
+      const yesterdayString = getYesterdayString();
 
-      console.log('Today (UTC):', todayUTC);
-      console.log('Yesterday (UTC):', yesterdayUTC);
-      console.log('Has dream today?:', dreamDates.has(todayUTC));
-      console.log('Has dream yesterday?:', dreamDates.has(yesterdayUTC));
+      console.log('Today:', todayString);
+      console.log('Yesterday:', yesterdayString);
+      console.log('Has dream today?:', dreamDates.has(todayString));
+      console.log('Has dream yesterday?:', dreamDates.has(yesterdayString));
 
-      if (dreamDates.has(todayUTC) || dreamDates.has(yesterdayUTC)) {
+      if (dreamDates.has(todayString) || dreamDates.has(yesterdayString)) {
         currentStreak = 1;
-        const startDateUTC = dreamDates.has(todayUTC) ? todayUTC : yesterdayUTC;
+        const startDate = dreamDates.has(todayString) ? todayString : yesterdayString;
 
-        console.log('Streak started from:', startDateUTC);
+        console.log('Streak started from:', startDate);
 
         // Parse the start date and go backwards
-        const [year, month, day] = startDateUTC.split('-').map(Number);
-        const checkDate = new Date(year, month - 1, day);
+        const [year, month, day] = startDate.split('-').map(Number);
+        let checkDate = new Date(year, month - 1, day);
 
         for (let i = 1; i < 365; i++) { // Check up to 1 year back
           checkDate.setDate(checkDate.getDate() - 1);
-          const checkDateUTC = checkDate.toISOString().split('T')[0];
+          const checkDateString = checkDate.getFullYear() + '-' +
+            String(checkDate.getMonth() + 1).padStart(2, '0') + '-' +
+            String(checkDate.getDate()).padStart(2, '0');
 
-          if (dreamDates.has(checkDateUTC)) {
+          if (dreamDates.has(checkDateString)) {
             currentStreak++;
           } else {
-            console.log('Streak broken at:', checkDateUTC);
+            console.log('Streak broken at:', checkDateString);
             break;
           }
         }
@@ -147,12 +143,14 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         date.setDate(date.getDate() - i);
 
         const dayIndex = date.getDay();
-        const dateUTC = date.toISOString().split('T')[0];
+        const dateString = date.getFullYear() + '-' +
+          String(date.getMonth() + 1).padStart(2, '0') + '-' +
+          String(date.getDate()).padStart(2, '0');
 
         weekDays.push({
           day: t.days[dayIndex],
-          date: dateUTC,
-          completed: dreamDates.has(dateUTC)
+          date: dateString,
+          completed: dreamDates.has(dateString)
         });
       }
 

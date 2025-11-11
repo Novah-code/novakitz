@@ -3455,31 +3455,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             zIndex: 1000,
             alignItems: 'center'
           }}>
-            {/* Language Selector */}
-            <select
-              value={language}
-              onChange={(e) => {
-                const newLang = e.target.value as 'en' | 'ko';
-                localStorage.setItem('preferredLanguage', newLang);
-                // 페이지 새로고침으로 언어 변경 적용
-                window.location.reload();
-              }}
-              style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                color: '#1f2937',
-                border: '1px solid rgba(127, 176, 105, 0.3)',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <option value="en">🌎 English</option>
-              <option value="ko">🇰🇷 한국어</option>
-            </select>
-
             {/* Premium Badge */}
             {isPremium && (
               <div style={{
