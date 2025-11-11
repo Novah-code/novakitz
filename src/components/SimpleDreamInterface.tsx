@@ -307,12 +307,26 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             .eq('status', 'active')
             .maybeSingle();
 
+          console.log('🔍 Premium status check:', {
+            userID: user.id,
+            hasSubscription: !!subscription,
+            subscriptionData: subscription ? {
+              status: subscription.status,
+              plan: subscription.subscription_plans?.plan_slug,
+              ai_limit: subscription.subscription_plans?.ai_interpretations_per_month
+            } : null
+          });
+
           const isPremiumUser = subscription && subscription.subscription_plans?.plan_slug === 'premium';
           setIsPremium(isPremiumUser || false);
+
+          console.log('✅ isPremium set to:', isPremiumUser || false);
 
           // Load AI usage
           const usage = await getRemainingAIInterpretations(user.id);
           setRemainingAIUsage(usage);
+
+          console.log('📊 AI usage loaded:', usage);
         } catch (error) {
           console.error('Error loading premium status:', error);
         }
@@ -980,6 +994,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   const analyzeDreamWithGemini = async (dreamText: string) => {
     console.log('Starting dream analysis for:', dreamText);
+    console.log('🔑 Current isPremium state:', isPremium);
     const startTime = Date.now();
 
     try {
@@ -993,6 +1008,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       const analysisPromise = (async () => {
         console.log('Fetching dream analysis from API...');
+        console.log('📤 Sending isPremium:', isPremium);
         const fetchStart = Date.now();
         const response = await retryApiCall(() =>
           fetch('/api/analyze-dream', {
