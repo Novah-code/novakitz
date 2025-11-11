@@ -132,23 +132,26 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
               </li>
               <li>
-                <span>{language === 'ko' ? '월 5회 AI 분석' : '5 AI interpretations/month'}</span>
+                <span>{language === 'ko' ? '월 10회 AI 해석' : '10 AI interpretations/month'}</span>
               </li>
               <li>
-                <span>{language === 'ko' ? '30일 기록 보관' : '30-day history'}</span>
+                <span>{language === 'ko' ? '짧은 해석 (150-200자)' : 'Brief interpretation (150-200 chars)'}</span>
               </li>
               <li>
-                <span>{language === 'ko' ? '기본 꿈 분석' : 'Basic dream analysis'}</span>
+                <span>{language === 'ko' ? '기본 분석' : 'Basic analysis'}</span>
+              </li>
+              <li>
+                <span>{language === 'ko' ? '무제한 열람' : 'Unlimited viewing'}</span>
               </li>
             </ul>
           </div>
 
-          {/* Premium Plan */}
+          {/* Premium Plan - Monthly */}
           <div className="plan-card premium-plan">
             <div className="plan-badge premium-badge">
               {language === 'ko' ? '프리미엄' : 'Premium'}
             </div>
-            <h3>{language === 'ko' ? '프리미엄 플랜' : 'Premium Plan'}</h3>
+            <h3>{language === 'ko' ? '프리미엄 월간' : 'Premium Monthly'}</h3>
             <div className="plan-price">
               <span className="price">$4.99</span>
               <span className="period">{language === 'ko' ? '/월' : '/month'}</span>
@@ -158,26 +161,90 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
               </li>
               <li className="premium-feature">
-                <span>{language === 'ko' ? 'AI 분석 무제한' : 'Unlimited AI interpretations'}</span>
+                <span>{language === 'ko' ? '무제한 AI 해석' : 'Unlimited AI interpretations'}</span>
               </li>
               <li className="premium-feature">
-                <span>{language === 'ko' ? '전체 기록 보관' : 'Full dream history'}</span>
+                <span>{language === 'ko' ? '자세한 해석 (500자+)' : 'Detailed interpretation (500+ chars)'}</span>
               </li>
               <li className="premium-feature">
-                <span>{language === 'ko' ? '고급 분석 및 인사이트' : 'Advanced analysis & insights'}</span>
+                <span>{language === 'ko' ? '3개 확언' : '3 affirmations'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '구체적 조언' : 'Actionable advice'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '패턴 분석' : 'Pattern analysis'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '월간 리포트' : 'Monthly report'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? 'PDF Export' : 'PDF export'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '무제한 열람' : 'Unlimited viewing'}</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Premium Plan - Yearly */}
+          <div className="plan-card premium-plan premium-yearly">
+            <div className="plan-badge premium-badge">
+              {language === 'ko' ? '프리미엄' : 'Premium'} {language === 'ko' ? '(최저가)' : '(Best Value)'}
+            </div>
+            <h3>{language === 'ko' ? '프리미엄 연간' : 'Premium Yearly'}</h3>
+            <div className="plan-price">
+              <span className="price">$49.99</span>
+              <span className="period">{language === 'ko' ? '/년' : '/year'}</span>
+            </div>
+            <div style={{fontSize: '12px', color: '#7fb069', fontWeight: '600', marginBottom: '12px'}}>
+              {language === 'ko' ? '50% 절감' : '50% Off'}
+            </div>
+            <ul className="plan-features">
+              <li>
+                <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '무제한 AI 해석' : 'Unlimited AI interpretations'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '자세한 해석 (500자+)' : 'Detailed interpretation (500+ chars)'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '3개 확언' : '3 affirmations'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '구체적 조언' : 'Actionable advice'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '패턴 분석' : 'Pattern analysis'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '월간 리포트' : 'Monthly report'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? 'PDF Export' : 'PDF export'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '무제한 열람' : 'Unlimited viewing'}</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* CTA Buttons */}
-        <div className="premium-prompt-actions">
-          <button className="btn-skip" onClick={handleClose}>
+        <div className="premium-prompt-actions" style={{flexDirection: 'column', gap: '8px'}}>
+          <div style={{display: 'flex', gap: '8px'}}>
+            <a href={gumroadUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1}}>
+              {language === 'ko' ? '월간 구독' : 'Monthly ($4.99)'}
+            </a>
+            <a href={gumroadUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1, background: 'linear-gradient(135deg, #7fb069 0%, #5a8449 100%)'}}>
+              {language === 'ko' ? '연간 구독' : 'Yearly ($49.99)'}
+            </a>
+          </div>
+          <button className="btn-skip" onClick={handleClose} style={{width: '100%'}}>
             {language === 'ko' ? '나중에' : 'Maybe Later'}
           </button>
-          <a href={gumroadUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade">
-            {language === 'ko' ? '프리미엄 업그레이드' : 'Upgrade to Premium'}
-          </a>
         </div>
 
         {/* Info Text */}
