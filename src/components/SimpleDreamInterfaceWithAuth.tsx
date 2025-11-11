@@ -50,6 +50,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showStreak, setShowStreak] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   const t = translations[language];
 
@@ -192,6 +193,42 @@ export default function SimpleDreamInterfaceWithAuth() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Check premium status when user changes
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      if (!user) {
+        setIsPremium(false);
+        return;
+      }
+
+      try {
+        const { data: subscription } = await supabase
+          .from('user_subscriptions')
+          .select('plan_id, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (subscription) {
+          const { data: planData } = await supabase
+            .from('subscription_plans')
+            .select('plan_slug')
+            .eq('id', subscription.plan_id)
+            .single();
+
+          setIsPremium(planData?.plan_slug === 'premium');
+        } else {
+          setIsPremium(false);
+        }
+      } catch (error) {
+        console.error('Error checking premium status:', error);
+        setIsPremium(false);
+      }
+    };
+
+    checkPremiumStatus();
+  }, [user]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -547,6 +584,58 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
                 <span>📊 {t.monthlyReport}</span>
+              </button>
+
+              <div style={{
+                height: '1px',
+                background: 'rgba(127, 176, 105, 0.2)',
+                margin: '1rem 2rem'
+              }}></div>
+
+              {/* Subscription Status */}
+              <button
+                onClick={() => {
+                  if (!isPremium) {
+                    window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
+                  }
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: isPremium ? 'rgba(127, 176, 105, 0.1)' : 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: isPremium ? 'default' : 'pointer',
+                  fontSize: '1rem',
+                  color: isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isPremium) {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isPremium) {
+                    e.currentTarget.style.background = 'none';
+                  }
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontWeight: '600' }}>
+                    {isPremium ? '👑 Premium' : '💎 Upgrade to Premium'}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: '400' }}>
+                    {isPremium ? 'You have Premium access' : 'Unlimited AI & More'}
+                  </span>
+                </div>
               </button>
 
               <div style={{
