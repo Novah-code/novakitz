@@ -1259,17 +1259,30 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       // Save to Supabase
       console.log('💾 Saving intentions to Supabase for user:', user.id, 'dream:', dreamId);
       console.log('💾 Intentions to save:', intentions);
+
+      // Build payload dynamically - only include intention_2 and intention_3 if they exist
+      // This handles free users (1 intention) and premium users (3 intentions)
+      const intentionPayload: any = {
+        user_id: user.id,
+        dream_id: dreamId,
+        intention_1: intentions[0],
+        full_intention_text: intentionText,
+        date: new Date().toISOString().split('T')[0]
+      };
+
+      // Only add intention_2 and intention_3 if they exist (premium users)
+      if (intentions[1]) {
+        intentionPayload.intention_2 = intentions[1];
+      }
+      if (intentions[2]) {
+        intentionPayload.intention_3 = intentions[2];
+      }
+
+      console.log('💾 Final intentions payload:', intentionPayload);
+
       const { data: intentionData, error: intentionError } = await supabase
         .from('daily_intentions')
-        .insert([{
-          user_id: user.id,
-          dream_id: dreamId,
-          intention_1: intentions[0] || null,
-          intention_2: intentions[1] || null,
-          intention_3: intentions[2] || null,
-          full_intention_text: intentionText,
-          date: new Date().toISOString().split('T')[0]
-        }])
+        .insert([intentionPayload])
         .select()
         .single();
 
