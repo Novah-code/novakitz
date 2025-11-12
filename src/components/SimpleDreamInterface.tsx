@@ -3730,37 +3730,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     ) : null}
                   </div>
 
-                  {/* Close Button at Far Right */}
-                  <button
-                    onClick={() => {
-                      setShowHistory(false);
-                      onHistoryClose?.();
-                    }}
-                    className="journal-close-btn"
-                    style={{
-                      padding: '6px 12px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#6b7280',
-                      background: '#f3f4f6',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      flexShrink: 0,
-                      marginLeft: '12px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#e5e7eb';
-                      e.currentTarget.style.color = '#1f2937';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f3f4f6';
-                      e.currentTarget.style.color = '#6b7280';
-                    }}
-                  >
-                    Close
-                  </button>
 
                   {/* Search and Filter Controls - FORCED RIGHT SIDE */}
                   <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0}}>
@@ -4447,6 +4416,46 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                 </div>
               )}
+
+              {/* Close Button at Bottom */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '24px',
+                borderTop: '1px solid #e5e7eb',
+                background: 'white',
+                marginTop: 'auto'
+              }}>
+                <button
+                  onClick={() => {
+                    setShowHistory(false);
+                    onHistoryClose?.();
+                  }}
+                  className="journal-close-btn"
+                  style={{
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#ffffff',
+                    background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 100%)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 8px rgba(127, 176, 105, 0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.2)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  {language === 'ko' ? '닫기' : 'Close'}
+                </button>
+              </div>
             </div>
           )}
 
