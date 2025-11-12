@@ -1221,7 +1221,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
         for (const line of lines) {
           // Match both Korean (의도, 의도1, 의도2, 의도3) and English (Intention, Intention1, etc)
-          if (/^[의도]{1,2}\d?:|^Intention\d?:/i.test(line.trim())) {
+          // Pattern: "의도" followed by optional digit, or "Intention" followed by optional digit
+          if (/^의도\d*:|^Intention\d*:/i.test(line.trim())) {
             console.log('Found intention line:', line);
             // Extract content after the colon
             const match = line.match(/:\s*(.+)/);
@@ -1230,6 +1231,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               // Remove markdown brackets if present
               const cleanContent = content.replace(/^\[|\]$/g, '');
               intentions.push(cleanContent);
+              console.log('Added intention:', cleanContent);
             }
           }
         }
