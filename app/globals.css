@@ -3484,7 +3484,10 @@ html {
 
 .calendar-day {
     aspect-ratio: 1;
-    background: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
     padding: 8px 4px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -3498,28 +3501,38 @@ html {
 }
 
 .calendar-day.empty {
-    background: rgba(127, 176, 105, 0.05);
+    background: rgba(127, 176, 105, 0.02);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: default;
 }
 
 .calendar-day:hover:not(.empty) {
-    background: rgba(127, 176, 105, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     transform: scale(1.02);
 }
 
 .calendar-day.today {
-    background: rgba(127, 176, 105, 0.2);
+    background: rgba(127, 176, 105, 0.25);
+    backdrop-filter: blur(10px);
     border: 2px solid var(--matcha-green);
+    box-shadow: 0 0 20px rgba(127, 176, 105, 0.3);
 }
 
 .calendar-day.selected {
-    background: var(--matcha-green);
+    background: rgba(127, 176, 105, 0.4);
+    backdrop-filter: blur(10px);
     color: white;
+    border: 2px solid var(--matcha-green);
+    box-shadow: 0 0 20px rgba(127, 176, 105, 0.4);
 }
 
 .calendar-day.has-dreams {
-    background: rgba(127, 176, 105, 0.15);
-    border: 1px solid var(--matcha-light);
+    background: rgba(127, 176, 105, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(127, 176, 105, 0.3);
 }
 
 .day-number {
