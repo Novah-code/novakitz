@@ -730,21 +730,25 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           console.log('✅ Local state updated. Total dreams:', updatedDreams.length);
 
           // Generate daily intentions after saving dream
-          if (user && data.id) {
+          if (user && data && data.id) {
             console.log('✅ Dream saved with ID:', data.id);
+            console.log('✅ Ready to generate intentions. User:', user.id, 'Dream ID:', data.id);
             // Generate intentions with a small delay to ensure dream is saved
             console.log('⏱️  Scheduling intention generation in 500ms...');
             setTimeout(async () => {
               console.log('🚀 Starting intention generation for dream:', data.id);
+              console.log('🚀 Response to use:', response.substring(0, 100) + '...');
+              console.log('🚀 Dream text:', dreamText.substring(0, 100) + '...');
               const result = await generateDailyIntention(response, dreamText, data.id);
               if (result) {
                 console.log('✅ Intention generation completed successfully');
+                console.log('✅ Result:', result);
               } else {
                 console.warn('⚠️  Intention generation did not return data');
               }
             }, 500);
           } else {
-            console.warn('⚠️  Cannot generate intentions: user=', !!user, 'data.id=', data?.id);
+            console.warn('⚠️  Cannot generate intentions: user=', !!user, 'data=', !!data, 'data.id=', data?.id);
           }
         }
       } catch (error) {
@@ -1254,14 +1258,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       // Save to Supabase
       console.log('💾 Saving intentions to Supabase for user:', user.id, 'dream:', dreamId);
+      console.log('💾 Intentions to save:', intentions);
       const { data: intentionData, error: intentionError } = await supabase
         .from('daily_intentions')
         .insert([{
           user_id: user.id,
           dream_id: dreamId,
-          intention_1: intentions[0],
-          intention_2: intentions[1],
-          intention_3: intentions[2],
+          intention_1: intentions[0] || null,
+          intention_2: intentions[1] || null,
+          intention_3: intentions[2] || null,
           full_intention_text: intentionText,
           date: new Date().toISOString().split('T')[0]
         }])
@@ -1270,12 +1275,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       if (intentionError) {
         console.error('❌ Error saving intentions to Supabase:', intentionError);
-        console.error('Error details:', intentionError.message, intentionError.details);
+        console.error('❌ Error code:', intentionError.code);
+        console.error('❌ Error message:', intentionError.message);
+        console.error('❌ Error details:', intentionError.details);
+        console.error('❌ Full error object:', JSON.stringify(intentionError, null, 2));
         return null;
       }
 
       console.log('✅ Intentions saved successfully to Supabase');
-      console.log('Intention data:', intentionData);
+      console.log('✅ Intention data:', intentionData);
       return intentionData;
     } catch (error) {
       console.error('Error in generateDailyIntention:', error);
