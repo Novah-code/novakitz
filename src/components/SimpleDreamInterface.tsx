@@ -190,6 +190,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
   const [dreamTitle, setDreamTitle] = useState('');
+  const [dreamDate, setDreamDate] = useState<Date>(new Date());
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(initialShowHistory);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
@@ -546,7 +547,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   };
 
   const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = []) => {
-    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords });
+    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords, dreamDate });
 
     // Get user's nickname for display
     let userNickname = '';
@@ -571,6 +572,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
 
     const now = new Date();
+    // Use the selected dream date, not the current time
+    const dreamDateToSave = dreamDate || now;
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
@@ -579,12 +582,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       image: defaultImage || undefined,
       autoTags: autoTags,
       tags: [], // Empty manual tags initially
-      date: now.toLocaleDateString('en-US', {
+      date: dreamDateToSave.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       }),
-      time: now.toLocaleTimeString('en-US', {
+      time: dreamDateToSave.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit'
       }),
@@ -1313,6 +1316,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
+        setDreamDate(new Date()); // Reset dream date to today
         setDreamImage(''); // Reset dream image
         return;
       }
@@ -1333,6 +1337,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           saveDreamWithTags(dreamText, noAnalysisMsg, []);
           setDreamText('');
           setDreamTitle('');
+          setDreamDate(new Date()); // Reset dream date to today
           setDreamImage('');
           return;
         }
@@ -1353,6 +1358,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamDate(new Date()); // Reset dream date to today
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
@@ -1364,6 +1370,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamDate(new Date()); // Reset dream date to today
       setDreamImage(''); // Reset dream image
     } finally {
       setIsLoading(false);
@@ -3619,6 +3626,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Reset form
                       setDreamText('');
                       setDreamTitle('');
+                      setDreamDate(new Date()); // Reset dream date to today
                       setDreamImage('');
 
                       setTimeout(() => {
