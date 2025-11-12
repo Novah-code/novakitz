@@ -1220,16 +1220,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         const intentions = [];
 
         for (const line of lines) {
-          if (line.includes('의도') || line.includes('Intention')) {
+          // Match both Korean (의도, 의도1, 의도2, 의도3) and English (Intention, Intention1, etc)
+          if (/^[의도]{1,2}\d?:|^Intention\d?:/i.test(line.trim())) {
             console.log('Found intention line:', line);
-            const match = line.match(/[^:]*:\s*(.+)/);
+            // Extract content after the colon
+            const match = line.match(/:\s*(.+)/);
             if (match && match[1]) {
-              intentions.push(match[1].trim());
+              const content = match[1].trim();
+              // Remove markdown brackets if present
+              const cleanContent = content.replace(/^\[|\]$/g, '');
+              intentions.push(cleanContent);
             }
           }
         }
 
-        console.log('Parsed intentions count:', intentions.length);
+        console.log('Parsed intentions count:', intentions.length, 'intentions:', intentions);
         // Get 1 for free users, 3 for premium
         const maxIntentions = isPremium ? 3 : 1;
         return intentions.slice(0, maxIntentions);
