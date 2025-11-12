@@ -3569,6 +3569,30 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
 
+                  {!isRecording && (
+                    <div style={{display: 'flex', gap: '8px', marginBottom: '12px'}}>
+                      <input
+                        type="date"
+                        value={dreamDate.toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          const newDate = new Date(e.target.value + 'T00:00:00');
+                          setDreamDate(newDate);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(127, 176, 105, 0.3)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                          color: '#7FB069',
+                          fontFamily: 'Georgia, serif',
+                          fontSize: '14px',
+                          cursor: 'pointer'
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <textarea
                     className="dream-input"
                     value={dreamText}
