@@ -19,26 +19,37 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🎵 Gumroad webhook received');
 
-    const data = await request.json();
-    console.log('📦 Webhook data:', {
-      type: data.type,
-      product_id: data.product?.id,
-      product_name: data.product?.name,
-      license_key: data.license?.key,
-      purchaser_email: data.purchaser?.email
+    // Gumroad sends form-data, not JSON
+    const formData = await request.formData();
+    const data: Record<string, any> = {};
+
+    // Convert FormData to object
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    console.log('📦 Raw webhook data:', data);
+
+    // Parse nested JSON fields
+    const licenseKey = data.license_key;
+    const purchaserEmail = data.purchaser_email;
+    const productId = data.product_id;
+    const productName = data.product_name;
+    const eventType = data.type;
+
+    console.log('📦 Parsed data:', {
+      type: eventType,
+      product_id: productId,
+      product_name: productName,
+      license_key: licenseKey,
+      purchaser_email: purchaserEmail
     });
 
     // Verify this is a license.created event
-    if (data.type !== 'license.created') {
-      console.log('⏭️  Skipping non-license.created event:', data.type);
+    if (eventType !== 'license.created') {
+      console.log('⏭️  Skipping non-license.created event:', eventType);
       return NextResponse.json({ success: true, message: 'Event not processed' });
     }
-
-    // Extract data from webhook
-    const licenseKey = data.license?.key;
-    const purchaserEmail = data.purchaser?.email;
-    const productId = data.product?.id;
-    const productName = data.product?.name;
 
     if (!licenseKey || !purchaserEmail) {
       console.error('❌ Missing required fields:', { licenseKey, purchaserEmail });
