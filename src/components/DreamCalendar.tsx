@@ -168,14 +168,8 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                     );
                   })}
                   {dreams.length > 1 && (
-                    <div style={{
-                      fontSize: '0.65rem',
-                      color: 'var(--matcha-dark)',
-                      fontWeight: '600',
-                      padding: '2px 4px',
-                      textAlign: 'center'
-                    }}>
-                      +{dreams.length - 1} more
+                    <div className="more-dreams">
+                      +{dreams.length - 1}more
                     </div>
                   )}
                 </div>

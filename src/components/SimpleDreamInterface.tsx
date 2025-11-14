@@ -4311,15 +4311,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           )}
 
           {showResponse && (
-            <div className="modal-overlay" onClick={() => {setShowResponse(false); setIsLoading(false);}}>
+            <div className="modal-overlay" onClick={() => !isLoading && setShowResponse(false)}>
               {isLoading ? (
                 <div className="loading-container-transparent" onClick={(e) => e.stopPropagation()}>
                   <div className="loading-analysis">
                     <div style={{
-                      display: 'flex', 
+                      display: 'flex',
                       flexDirection: 'column',
-                      justifyContent: 'center', 
-                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      alignItems: 'center',
                       width: '100%',
                       minHeight: '400px',
                       textAlign: 'center'
@@ -4331,7 +4331,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         aspectRatio: '1197/1669',
                         margin: '0 auto'
                       }}>
-                        <div 
+                        <div
                           style={{
                             backgroundImage: 'url(/matcha-frame1.png?v=8)',
                             backgroundSize: 'contain',
@@ -4343,10 +4343,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           }}
                         />
                       </div>
-                      
+
                       {/* Pulsing Dots Loading Bar */}
                       <PulseDots />
-                      
+
                       {/* Simple Text */}
                       <p style={{
                         fontFamily: 'Georgia, "Times New Roman", Times, serif',
@@ -4363,7 +4363,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                 </div>
               ) : (
-                <div className="modal-content" style={{maxWidth: '600px'}} onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content" style={{maxWidth: '600px', display: 'flex', flexDirection: 'column', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
                   <div className="modal-header">
                     <div className="flex justify-center">
                       <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
@@ -4424,59 +4424,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       }).filter(Boolean)}
                     </div>
                   </div>
-                  <div className="modal-actions">
+                  <div className="modal-actions" style={{padding: '20px 24px', borderTop: '1px solid #e5e7eb', background: '#f9f9f9', display: 'flex', gap: '12px', justifyContent: 'center'}}>
+                    <button
+                      onClick={() => {
+                        setShowResponse(false);
+                      }}
+                      className="btn-secondary"
+                      style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
+                    >
+                      {language === 'ko' ? '닫기' : 'Close'}
+                    </button>
                     <button
                       onClick={() => {
                         setShowResponse(false);
                         setShowHistory(true);
                       }}
                       className="btn-primary"
+                      style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
                     >
-                      Save to Journal
+                      {language === 'ko' ? '저널에 저장' : 'Save to Journal'}
                     </button>
                   </div>
                 </div>
               )}
-
-              {/* Close Button at Bottom */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                padding: '24px',
-                borderTop: '1px solid #e5e7eb',
-                background: 'white',
-                marginTop: 'auto'
-              }}>
-                <button
-                  onClick={() => {
-                    setShowHistory(false);
-                    onHistoryClose?.();
-                  }}
-                  className="journal-close-btn"
-                  style={{
-                    padding: '12px 24px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#ffffff',
-                    background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 100%)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    boxShadow: '0 2px 8px rgba(127, 176, 105, 0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.2)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {language === 'ko' ? '닫기' : 'Close'}
-                </button>
-              </div>
             </div>
           )}
 

@@ -3567,6 +3567,35 @@ html {
     padding: 1px 4px;
 }
 
+.dream-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    align-items: center;
+    overflow: hidden;
+}
+
+.dream-badge {
+    width: 100%;
+    max-width: 100%;
+    padding: 4px 4px;
+    font-size: 0.7rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--matcha-dark);
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.dream-badge:hover {
+    opacity: 0.8;
+}
+
 .calendar-legend {
     display: flex;
     justify-content: center;
@@ -3679,18 +3708,32 @@ html {
     }
     
     .calendar-day {
-        min-height: 60px;
-        padding: 4px 2px;
+        aspect-ratio: auto;
+        min-height: 85px;
+        padding: 6px 4px;
     }
-    
+
     .day-number {
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 700;
     }
-    
+
     .dream-indicator {
-        font-size: 10px;
+        font-size: 11px;
+        line-height: 1.2;
     }
-    
+
+    .more-dreams {
+        font-size: 11px !important;
+        font-weight: 600;
+        margin-top: 2px;
+    }
+
+    .dream-badge {
+        font-size: 0.75rem !important;
+        padding: 3px 2px !important;
+    }
+
     .calendar-legend {
         flex-direction: column;
         gap: 12px;
