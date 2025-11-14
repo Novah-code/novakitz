@@ -1,263 +1,223 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Get Supabase client - service role key needed for this endpoint
-function getSupabaseClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Supabase configuration missing');
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey);
+if (!supabaseUrl || !supabaseServiceKey) {
+  throw new Error('Missing Supabase configuration');
 }
 
-interface GumroadWebhookPayload {
-  type: 'sale' | 'refund' | 'subscription_updated' | 'subscription_expired';
-  license_key: string;
-  product_id: string;
-  user_id?: string; // Custom field we can add in Gumroad
-  custom_fields?: {
-    [key: string]: string;
-  };
-  variant_id?: string;
-  email?: string;
-  full_name?: string;
-  timestamp?: string;
-  cancelled?: boolean;
-}
-
-interface GumroadLicense {
-  id: string;
-  product_id: string;
-  user_id?: string;
-  custom_fields?: {
-    [key: string]: string;
-  };
-  email?: string;
-}
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
- * Verify Gumroad webhook signature
- * Gumroad sends a signature in the request headers for verification
+ * Gumroad Webhook Handler
+ * Receives license.created events and creates/updates user subscriptions
  */
-async function verifyGumroadSignature(
-  payload: string,
-  signature: string
-): Promise<boolean> {
+export async function POST(request: NextRequest) {
   try {
-    // Get the webhook secret from environment variables
-    const webhookSecret = process.env.GUMROAD_WEBHOOK_SECRET;
+    console.log('🎵 Gumroad webhook received');
 
-    if (!webhookSecret) {
-      console.warn('⚠️ GUMROAD_WEBHOOK_SECRET not configured, skipping signature verification');
-      return true; // Allow if secret not configured (development mode)
+    const data = await request.json();
+    console.log('📦 Webhook data:', {
+      type: data.type,
+      product_id: data.product?.id,
+      product_name: data.product?.name,
+      license_key: data.license?.key,
+      purchaser_email: data.purchaser?.email
+    });
+
+    // Verify this is a license.created event
+    if (data.type !== 'license.created') {
+      console.log('⏭️  Skipping non-license.created event:', data.type);
+      return NextResponse.json({ success: true, message: 'Event not processed' });
     }
 
-    // Use crypto to verify HMAC
-    const crypto = require('crypto');
-    const hmac = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(payload)
-      .digest('hex');
+    // Extract data from webhook
+    const licenseKey = data.license?.key;
+    const purchaserEmail = data.purchaser?.email;
+    const productId = data.product?.id;
+    const productName = data.product?.name;
 
-    // Compare signatures
-    const isValid = hmac === signature;
-
-    if (!isValid) {
-      console.error('❌ Invalid Gumroad webhook signature');
+    if (!licenseKey || !purchaserEmail) {
+      console.error('❌ Missing required fields:', { licenseKey, purchaserEmail });
+      return NextResponse.json(
+        { error: 'Missing license key or purchaser email' },
+        { status: 400 }
+      );
     }
 
-    return isValid;
-  } catch (error) {
-    console.error('Error verifying Gumroad signature:', error);
-    return false;
-  }
-}
+    console.log(`🔍 Processing subscription for: ${purchaserEmail}`);
 
-/**
- * Handle sale event - new subscription or upgrade
- */
-async function handleSale(payload: GumroadWebhookPayload): Promise<void> {
-  console.log('Processing Gumroad sale:', payload);
+    // Determine subscription duration based on product
+    let subscriptionDays = 30; // Default to 1 month
 
-  // Get license key from Gumroad API or payload
-  const licenseKey = payload.license_key;
-  if (!licenseKey) {
-    console.error('No license key provided in webhook');
-    return;
-  }
+    // Check if it's the yearly product
+    if (productId === 'novakitz_year' || productName?.toLowerCase().includes('year')) {
+      subscriptionDays = 365;
+      console.log('📅 Detected yearly subscription');
+    } else {
+      console.log('📅 Detected monthly subscription');
+    }
 
-  try {
-    const supabase = getSupabaseClient();
+    // Find or create user by email
+    const { data: existingUser, error: userError } = await supabase.auth.admin.listUsers();
 
-    // Find user by license key or email
+    if (userError) {
+      console.error('❌ Error listing users:', userError);
+      // Try to find user another way
+    }
+
+    // Search for user with this email
     let userId: string | null = null;
 
-    if (payload.custom_fields?.user_id) {
-      userId = payload.custom_fields.user_id;
-    } else if (payload.email) {
-      // Try to find user by email
-      const { data: authUser } = await supabase.auth.admin.listUsers();
-      const user = authUser?.users.find(u => u.email === payload.email);
-      if (user) userId = user.id;
+    if (existingUser) {
+      const user = existingUser.users.find(u => u.email === purchaserEmail);
+      userId = user?.id || null;
     }
 
     if (!userId) {
-      console.warn('Could not find user for Gumroad sale:', payload.email);
-      return;
+      console.log(`⚠️  User not found for email: ${purchaserEmail}`);
+      console.log('📌 User must sign up first before subscription can be activated');
+
+      return NextResponse.json({
+        success: true,
+        message: 'License recorded. User must complete signup to activate subscription.',
+        email: purchaserEmail,
+        licenseKey: licenseKey,
+        status: 'pending_signup'
+      });
     }
 
-    // Get premium plan
-    const { data: premiumPlan } = await supabase
+    console.log(`✅ Found user ID: ${userId}`);
+
+    // Get premium plan ID
+    const { data: premiumPlan, error: planError } = await supabase
       .from('subscription_plans')
       .select('id')
       .eq('plan_slug', 'premium')
       .single();
 
-    if (!premiumPlan) {
-      console.error('Premium plan not found in database');
-      return;
+    if (planError || !premiumPlan) {
+      console.error('❌ Error fetching premium plan:', planError);
+      return NextResponse.json(
+        { error: 'Premium plan not found' },
+        { status: 500 }
+      );
     }
 
-    // Create or update subscription
-    const { error } = await supabase
+    console.log(`✅ Found premium plan ID: ${premiumPlan.id}`);
+
+    // Calculate expiry date
+    const startDate = new Date();
+    const expiryDate = new Date(startDate);
+    expiryDate.setDate(expiryDate.getDate() + subscriptionDays);
+
+    console.log(`📅 Subscription: ${startDate.toISOString()} → ${expiryDate.toISOString()}`);
+
+    // Check if user already has an active subscription
+    const { data: existingSubscription, error: checkError } = await supabase
       .from('user_subscriptions')
-      .upsert([
-        {
+      .select('id, status')
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('❌ Error checking existing subscription:', checkError);
+    }
+
+    if (existingSubscription) {
+      console.log(`🔄 User already has active subscription, updating...`);
+
+      // Update existing subscription
+      const { error: updateError } = await supabase
+        .from('user_subscriptions')
+        .update({
+          plan_id: premiumPlan.id,
+          gumroad_license_key: licenseKey,
+          gumroad_product_id: productId,
+          status: 'active',
+          started_at: startDate.toISOString(),
+          expires_at: expiryDate.toISOString(),
+          renewed_at: startDate.toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingSubscription.id);
+
+      if (updateError) {
+        console.error('❌ Error updating subscription:', updateError);
+        return NextResponse.json(
+          { error: 'Failed to update subscription', details: updateError },
+          { status: 500 }
+        );
+      }
+
+      console.log('✅ Subscription updated successfully');
+      return NextResponse.json({
+        success: true,
+        message: 'Subscription updated',
+        email: purchaserEmail,
+        duration: subscriptionDays === 365 ? 'yearly' : 'monthly',
+        expiresAt: expiryDate.toISOString()
+      });
+    } else {
+      console.log('✨ Creating new subscription...');
+
+      // Create new subscription
+      const { error: insertError } = await supabase
+        .from('user_subscriptions')
+        .insert([{
           user_id: userId,
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: payload.product_id,
+          gumroad_product_id: productId,
           status: 'active',
-          started_at: new Date().toISOString(),
-          // Premium is a one-time purchase, set expiry to 1 year from now
-          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-      ], { onConflict: 'gumroad_license_key' });
+          started_at: startDate.toISOString(),
+          expires_at: expiryDate.toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
 
-    if (error) {
-      console.error('Error creating subscription:', error);
-      throw error;
-    }
-
-    console.log('Subscription created for user:', userId);
-  } catch (error) {
-    console.error('Error handling Gumroad sale:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle refund event - cancel subscription
- */
-async function handleRefund(payload: GumroadWebhookPayload): Promise<void> {
-  console.log('Processing Gumroad refund:', payload);
-
-  try {
-    const supabase = getSupabaseClient();
-
-    const { error } = await supabase
-      .from('user_subscriptions')
-      .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-      })
-      .eq('gumroad_license_key', payload.license_key);
-
-    if (error) {
-      console.error('Error cancelling subscription:', error);
-      throw error;
-    }
-
-    console.log('Subscription cancelled for license:', payload.license_key);
-  } catch (error) {
-    console.error('Error handling Gumroad refund:', error);
-    throw error;
-  }
-}
-
-/**
- * Handle subscription update event
- */
-async function handleSubscriptionUpdate(payload: GumroadWebhookPayload): Promise<void> {
-  console.log('Processing Gumroad subscription update:', payload);
-
-  try {
-    const supabase = getSupabaseClient();
-    const newStatus = payload.cancelled ? 'cancelled' : 'active';
-
-    const { error } = await supabase
-      .from('user_subscriptions')
-      .update({
-        status: newStatus,
-        updated_at: new Date().toISOString(),
-        ...(payload.cancelled && { cancelled_at: new Date().toISOString() }),
-      })
-      .eq('gumroad_license_key', payload.license_key);
-
-    if (error) {
-      console.error('Error updating subscription:', error);
-      throw error;
-    }
-
-    console.log('Subscription updated for license:', payload.license_key);
-  } catch (error) {
-    console.error('Error handling subscription update:', error);
-    throw error;
-  }
-}
-
-/**
- * Main webhook handler
- */
-export async function POST(request: NextRequest) {
-  console.log('Gumroad webhook received');
-
-  try {
-    // Verify webhook signature
-    const signature = request.headers.get('X-Gumroad-Signature');
-    const body = await request.text();
-
-    if (signature) {
-      const isValid = await verifyGumroadSignature(body, signature);
-      if (!isValid) {
-        console.error('Invalid Gumroad signature');
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      if (insertError) {
+        console.error('❌ Error creating subscription:', insertError);
+        return NextResponse.json(
+          { error: 'Failed to create subscription', details: insertError },
+          { status: 500 }
+        );
       }
+
+      console.log('✅ Subscription created successfully');
+      return NextResponse.json({
+        success: true,
+        message: 'Subscription created',
+        email: purchaserEmail,
+        duration: subscriptionDays === 365 ? 'yearly' : 'monthly',
+        expiresAt: expiryDate.toISOString()
+      });
     }
 
-    // Parse payload
-    const payload: GumroadWebhookPayload = JSON.parse(body);
-
-    // Route to appropriate handler
-    switch (payload.type) {
-      case 'sale':
-        await handleSale(payload);
-        break;
-      case 'refund':
-        await handleRefund(payload);
-        break;
-      case 'subscription_updated':
-        await handleSubscriptionUpdate(payload);
-        break;
-      case 'subscription_expired':
-        await handleSubscriptionUpdate({ ...payload, cancelled: true });
-        break;
-      default:
-        console.warn('Unknown webhook type:', payload.type);
-    }
-
-    return NextResponse.json(
-      { success: true, message: 'Webhook processed' },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    console.error('🔥 Webhook processing error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Webhook processing failed',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
+}
+
+// GET endpoint for testing
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    status: 'Gumroad webhook endpoint is active',
+    expectedEvent: 'license.created',
+    products: {
+      monthly: 'https://novakitz.gumroad.com/l/novakitz',
+      yearly: 'https://novakitz.gumroad.com/l/novakitz_year'
+    }
+  });
 }
