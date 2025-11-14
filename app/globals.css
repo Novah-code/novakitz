@@ -3685,11 +3685,11 @@ html {
 /* Responsive Calendar */
 @media (max-width: 768px) {
     .dream-calendar {
-        padding: 16px;
+        padding: 12px 8px;
     }
     
     .calendar-header {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
     
     .calendar-nav-btn {
@@ -3709,8 +3709,9 @@ html {
     
     .calendar-day {
         aspect-ratio: auto;
-        min-height: 85px;
-        padding: 6px 4px;
+        min-height: 70px;
+        max-height: 75px;
+        padding: 4px 2px;
     }
 
     .day-number {
@@ -3719,19 +3720,21 @@ html {
     }
 
     .dream-indicator {
-        font-size: 11px;
-        line-height: 1.2;
+        font-size: 10px;
+        line-height: 1.1;
     }
 
     .more-dreams {
-        font-size: 11px !important;
+        font-size: 10px !important;
         font-weight: 600;
-        margin-top: 2px;
+        margin-top: 1px;
+        padding: 0 2px !important;
     }
 
     .dream-badge {
-        font-size: 0.75rem !important;
-        padding: 3px 2px !important;
+        font-size: 0.65rem !important;
+        padding: 2px 2px !important;
+        line-height: 1;
     }
 
     .calendar-legend {
