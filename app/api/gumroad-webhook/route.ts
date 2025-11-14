@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Initialize Supabase client - lazy initialization to avoid build-time errors
+let supabase: ReturnType<typeof createClient> | null = null;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase configuration');
+function getSupabaseClient() {
+  if (supabase) {
+    return supabase;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase configuration: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+  }
+
+  supabase = createClient(supabaseUrl, supabaseServiceKey);
+  return supabase;
 }
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
  * Gumroad Webhook Handler
@@ -73,7 +82,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Find or create user by email
-    const { data: existingUser, error: userError } = await supabase.auth.admin.listUsers();
+    const sbClient = getSupabaseClient();
+    const { data: existingUser, error: userError } = await sbClient.auth.admin.listUsers();
 
     if (userError) {
       console.error('❌ Error listing users:', userError);
@@ -104,7 +114,7 @@ export async function POST(request: NextRequest) {
     console.log(`✅ Found user ID: ${userId}`);
 
     // Get premium plan ID
-    const { data: premiumPlan, error: planError } = await supabase
+    const { data: premiumPlan, error: planError } = await sbClient
       .from('subscription_plans')
       .select('id')
       .eq('plan_slug', 'premium')
@@ -128,7 +138,7 @@ export async function POST(request: NextRequest) {
     console.log(`📅 Subscription: ${startDate.toISOString()} → ${expiryDate.toISOString()}`);
 
     // Check if user already has an active subscription
-    const { data: existingSubscription, error: checkError } = await supabase
+    const { data: existingSubscription, error: checkError } = await sbClient
       .from('user_subscriptions')
       .select('id, status')
       .eq('user_id', userId)
@@ -143,7 +153,7 @@ export async function POST(request: NextRequest) {
       console.log(`🔄 User already has active subscription, updating...`);
 
       // Update existing subscription
-      const { error: updateError } = await supabase
+      const { error: updateError } = await sbClient
         .from('user_subscriptions')
         .update({
           plan_id: premiumPlan.id,
@@ -177,7 +187,7 @@ export async function POST(request: NextRequest) {
       console.log('✨ Creating new subscription...');
 
       // Create new subscription
-      const { error: insertError } = await supabase
+      const { error: insertError } = await sbClient
         .from('user_subscriptions')
         .insert([{
           user_id: userId,
