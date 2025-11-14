@@ -153,6 +153,7 @@ export async function POST(request: NextRequest) {
       console.log(`🔄 User already has active subscription, updating...`);
 
       // Update existing subscription
+      const subscriptionId = (existingSubscription as any).id;
       const { error: updateError } = await sbClient
         .from('user_subscriptions')
         .update({
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
           renewed_at: startDate.toISOString(),
           updated_at: new Date().toISOString()
         })
-        .eq('id', existingSubscription.id);
+        .eq('id', subscriptionId);
 
       if (updateError) {
         console.error('❌ Error updating subscription:', updateError);
