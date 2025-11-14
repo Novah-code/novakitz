@@ -39,12 +39,15 @@ export async function POST(request: NextRequest) {
 
     console.log('📦 Raw webhook data:', data);
 
-    // Parse nested JSON fields
-    const licenseKey = data.license_key;
-    const purchaserEmail = data.purchaser_email;
+    // Parse webhook fields - Gumroad sends these in form-data
+    const licenseKey = data.license_key || data.sale_id; // Use sale_id as license key if license_key not present
+    const purchaserEmail = data.email || data.purchaser_email;
     const productId = data.product_id;
     const productName = data.product_name;
-    const eventType = data.type;
+    const productPermalink = data.product_permalink;
+    const permalink = data.permalink;
+    const eventType = data.type || (data.sale_id ? 'license.created' : null); // Gumroad purchases are license.created events
+    const isTestEvent = data.test === 'true';
 
     console.log('📦 Parsed data:', {
       type: eventType,
@@ -73,8 +76,8 @@ export async function POST(request: NextRequest) {
     // Determine subscription duration based on product
     let subscriptionDays = 30; // Default to 1 month
 
-    // Check if it's the yearly product
-    if (productId === 'novakitz_year' || productName?.toLowerCase().includes('year')) {
+    // Check if it's the yearly product - check permalink and product name
+    if (permalink === 'novakitz_year' || productName?.toLowerCase().includes('year')) {
       subscriptionDays = 365;
       console.log('📅 Detected yearly subscription');
     } else {
@@ -159,7 +162,7 @@ export async function POST(request: NextRequest) {
         .update({
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: productId,
+          gumroad_product_id: permalink, // Store the product permalink (novakitz or novakitz_year)
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate.toISOString(),
@@ -194,7 +197,7 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: productId,
+          gumroad_product_id: permalink, // Store the product permalink (novakitz or novakitz_year)
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate.toISOString(),
