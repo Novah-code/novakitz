@@ -5,7 +5,7 @@ import { supabase } from './supabase';
  */
 export async function getUserPlan(userId: string) {
   try {
-    // First, try to get active subscription
+    // First, try to get active and non-expired subscription
     const { data: subscription } = await supabase
       .from('user_subscriptions')
       .select(`
@@ -18,6 +18,7 @@ export async function getUserPlan(userId: string) {
       `)
       .eq('user_id', userId)
       .eq('status', 'active')
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
       .maybeSingle();
 
     if (subscription && subscription.subscription_plans) {
