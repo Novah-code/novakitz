@@ -908,12 +908,14 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
 
   const handleAnalyze = async () => {
+    setDreamDate(new Date()); // Reset to today when opening input form for NEW dream
     setShowInput(true);
   };
 
   const startVoiceRecording = () => {
     if (recognitionRef.current) {
       setIsRecording(true);
+      setDreamDate(new Date()); // Reset to today when opening input form for NEW dream
       setShowInput(true);
       recognitionRef.current.start();
     } else {
@@ -1344,7 +1346,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
-        setDreamDate(new Date()); // Reset dream date to today
+        // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
         setDreamImage(''); // Reset dream image
         return;
       }
@@ -1365,7 +1367,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           saveDreamWithTags(dreamText, noAnalysisMsg, []);
           setDreamText('');
           setDreamTitle('');
-          setDreamDate(new Date()); // Reset dream date to today
+          // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
           setDreamImage('');
           return;
         }
@@ -1386,7 +1388,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
-      setDreamDate(new Date()); // Reset dream date to today
+      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
@@ -1398,7 +1400,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
-      setDreamDate(new Date()); // Reset dream date to today
+      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
       setDreamImage(''); // Reset dream image
     } finally {
       setIsLoading(false);
@@ -3678,7 +3680,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Reset form
                       setDreamText('');
                       setDreamTitle('');
-                      setDreamDate(new Date()); // Reset dream date to today
+                      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
                       setDreamImage('');
 
                       setTimeout(() => {
