@@ -58,13 +58,17 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
         `)
         .eq('user_id', user.id)
         .eq('status', 'active')
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .maybeSingle();
 
       if (subscription && subscription.subscription_plans) {
+        // Check if subscription is not expired
+        const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
+
         setSubscription({
-          planSlug: subscription.subscription_plans.plan_slug,
-          planName: subscription.subscription_plans.plan_name,
-          isActive: true,
+          planSlug: isExpired ? 'free' : subscription.subscription_plans.plan_slug,
+          planName: isExpired ? 'Free' : subscription.subscription_plans.plan_name,
+          isActive: !isExpired,
           expiresAt: subscription.expires_at,
           gumroadLicenseKey: subscription.gumroad_license_key
         });

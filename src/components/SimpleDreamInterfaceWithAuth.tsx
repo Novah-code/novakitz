@@ -205,19 +205,27 @@ export default function SimpleDreamInterfaceWithAuth() {
       try {
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('plan_id, status')
+          .select('plan_id, status, expires_at')
           .eq('user_id', user.id)
           .eq('status', 'active')
+          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
           .maybeSingle();
 
         if (subscription) {
-          const { data: planData } = await supabase
-            .from('subscription_plans')
-            .select('plan_slug')
-            .eq('id', subscription.plan_id)
-            .single();
+          // Check if subscription is not expired
+          const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
-          setIsPremium(planData?.plan_slug === 'premium');
+          if (!isExpired) {
+            const { data: planData } = await supabase
+              .from('subscription_plans')
+              .select('plan_slug')
+              .eq('id', subscription.plan_id)
+              .single();
+
+            setIsPremium(planData?.plan_slug === 'premium');
+          } else {
+            setIsPremium(false);
+          }
         } else {
           setIsPremium(false);
         }
@@ -583,7 +591,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span>📊 {t.monthlyReport}</span>
+                <span>{t.monthlyReport}</span>
               </button>
 
               <div style={{
