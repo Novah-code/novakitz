@@ -4050,6 +4050,38 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
               </div>
               )}
+
+              {/* Close Button */}
+              <div style={{
+                padding: '16px 24px',
+                borderTop: '1px solid #e5e7eb',
+                background: 'white',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => setShowHistory(false)}
+                  style={{
+                    padding: '12px 32px',
+                    background: '#f3f4f6',
+                    color: '#6b7280',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#e5e7eb';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f3f4f6';
+                  }}
+                >
+                  {language === 'ko' ? '닫기' : 'Close'}
+                </button>
+              </div>
               </div>
             </div>
           )}
