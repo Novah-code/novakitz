@@ -39,6 +39,7 @@ export default function DailyCheckin({
   const [progressNote, setProgressNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
+  const [showAffirmations, setShowAffirmations] = useState(true);
 
   useEffect(() => {
     if (!userId) return;
@@ -206,7 +207,7 @@ export default function DailyCheckin({
   return (
     <>
       {/* Affirmations Display */}
-      {dreamText && (
+      {dreamText && showAffirmations && (
         <AffirmationsDisplay
           user={{ id: userId } as any}
           checkInTime={timeOfDay}
@@ -214,6 +215,9 @@ export default function DailyCheckin({
           dreamId={dreamId}
           language={language}
           isPremium={isPremium}
+          onClose={() => {
+            setShowAffirmations(false);
+          }}
         />
       )}
 

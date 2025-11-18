@@ -191,18 +191,68 @@ export default function AffirmationsDisplay({
       <div style={{
         display: 'flex',
         gap: '8px',
-        justifyContent: isPremium ? 'space-between' : 'flex-end'
+        justifyContent: 'space-between',
+        alignItems: 'center'
       }}>
-        {isPremium && affirmations.length > 1 && (
-          <>
+        <div style={{
+          display: 'flex',
+          gap: '8px'
+        }}>
+          {isPremium && affirmations.length > 1 && (
+            <>
+              <button
+                onClick={handlePrev}
+                disabled={isLoading}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#6b7280',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  opacity: isLoading ? 0.5 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+              >
+                {language === 'ko' ? '이전' : 'Previous'}
+              </button>
+
+              <button
+                onClick={handleNext}
+                disabled={isLoading || affirmations.length <= 1}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#f3f4f6',
+                  color: '#6b7280',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: (isLoading || affirmations.length <= 1) ? 'not-allowed' : 'pointer',
+                  opacity: (isLoading || affirmations.length <= 1) ? 0.5 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+              >
+                {language === 'ko' ? '다음' : 'Next'}
+              </button>
+            </>
+          )}
+
+          {dreamText && (
             <button
-              onClick={handlePrev}
+              onClick={handleRefresh}
               disabled={isLoading}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#f3f4f6',
-                color: '#6b7280',
-                border: 'none',
+                backgroundColor: 'rgba(127, 176, 105, 0.2)',
+                color: '#7fb069',
+                border: '1px solid rgba(127, 176, 105, 0.3)',
                 borderRadius: '6px',
                 fontSize: '14px',
                 fontWeight: '500',
@@ -210,56 +260,35 @@ export default function AffirmationsDisplay({
                 opacity: isLoading ? 0.5 : 1,
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.3)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.2)')}
+              title={language === 'ko' ? '새로운 확언 생성' : 'Generate new affirmations'}
             >
-              {language === 'ko' ? '이전' : 'Previous'}
+              {isLoading ? '...' : '↻'}
             </button>
+          )}
+        </div>
 
-            <button
-              onClick={handleNext}
-              disabled={isLoading || affirmations.length <= 1}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#f3f4f6',
-                color: '#6b7280',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: (isLoading || affirmations.length <= 1) ? 'not-allowed' : 'pointer',
-                opacity: (isLoading || affirmations.length <= 1) ? 0.5 : 1,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-            >
-              {language === 'ko' ? '다음' : 'Next'}
-            </button>
-          </>
-        )}
-
-        {dreamText && (
+        {onClose && (
           <button
-            onClick={handleRefresh}
-            disabled={isLoading}
+            onClick={onClose}
             style={{
               padding: '8px 16px',
-              backgroundColor: 'rgba(127, 176, 105, 0.2)',
-              color: '#7fb069',
-              border: '1px solid rgba(127, 176, 105, 0.3)',
+              backgroundColor: '#f3f4f6',
+              color: '#6b7280',
+              border: 'none',
               borderRadius: '6px',
               fontSize: '14px',
               fontWeight: '500',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.5 : 1,
-              transition: 'all 0.2s ease'
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              marginLeft: 'auto'
             }}
-            onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.3)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.2)')}
-            title={language === 'ko' ? '새로운 확언 생성' : 'Generate new affirmations'}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+            title={language === 'ko' ? '닫기' : 'Close'}
           >
-            {isLoading ? '...' : '↻'}
+            {language === 'ko' ? '닫기' : 'Close'}
           </button>
         )}
       </div>
