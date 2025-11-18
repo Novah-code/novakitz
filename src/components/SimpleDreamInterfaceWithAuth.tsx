@@ -205,7 +205,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       try {
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('expires_at, subscription_plans:plan_id(plan_slug)')
+          .select('id, status, expires_at, subscription_plans:plan_id(plan_slug)')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
