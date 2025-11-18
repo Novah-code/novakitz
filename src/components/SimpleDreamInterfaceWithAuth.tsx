@@ -205,7 +205,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       try {
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('plan_id, status, expires_at')
+          .select('expires_at, subscription_plans:plan_id(plan_slug)')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
@@ -216,12 +216,7 @@ export default function SimpleDreamInterfaceWithAuth() {
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
           if (!isExpired) {
-            const { data: planData } = await supabase
-              .from('subscription_plans')
-              .select('plan_slug')
-              .eq('id', subscription.plan_id)
-              .single();
-
+            const planData = subscription.subscription_plans as any;
             setIsPremium(planData?.plan_slug === 'premium');
           } else {
             setIsPremium(false);
