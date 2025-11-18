@@ -79,7 +79,7 @@ CREATE INDEX ai_usage_year_month_idx ON public.ai_usage(year_month);
 CREATE INDEX ai_usage_user_month_idx ON public.ai_usage(user_id, year_month);
 
 -- Enable RLS for subscription tables
-ALTER TABLE public.subscription_plans DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.subscription_plans ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view plans" ON public.subscription_plans
     FOR SELECT USING (true);
 
