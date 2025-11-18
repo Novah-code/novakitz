@@ -3640,8 +3640,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <button
                     onClick={async () => {
                       const noDreamMessage = language === 'ko'
-                        ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다. 내일의 꿈을 기대해봅시다! 🌙'
-                        : 'You didn\'t remember a dream today. That\'s okay! Let\'s look forward to tomorrow\'s dreams! 🌙';
+                        ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다. 내일의 꿈을 기대해봅시다!'
+                        : 'You didn\'t remember a dream today. That\'s okay! Let\'s look forward to tomorrow\'s dreams!';
 
                       setIsLoading(true);
                       setShowInput(false);
@@ -3707,7 +3707,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
                     }}
                   >
-                    {language === 'ko' ? '꿈 안 꿈 💤' : 'No dream 💤'}
+                    {language === 'ko' ? '꿈 안 꿈' : 'No dream'}
                   </button>
                   <button
                     onClick={handleSubmitDream}
@@ -3716,34 +3716,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     style={{flex: 1}}
                   >
                     {isLoading ? t.brewing : t.brew}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowInput(false);
-                      setDreamText('');
-                      setDreamTitle('');
-                      setDreamImage('');
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      background: '#f3f4f6',
-                      color: '#6b7280',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#e5e7eb';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f3f4f6';
-                    }}
-                  >
-                    {language === 'ko' ? '닫기' : 'Close'}
                   </button>
                 </div>
               </div>
