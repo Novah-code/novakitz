@@ -215,13 +215,26 @@ export default function SimpleDreamInterfaceWithAuth() {
           // Check if subscription is not expired
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
+          console.log('📋 Subscription details:', {
+            subscription_id: subscription.id,
+            status: subscription.status,
+            expires_at: subscription.expires_at,
+            isExpired,
+            subscription_plans: subscription.subscription_plans,
+            plan_slug: (subscription.subscription_plans as any)?.plan_slug
+          });
+
           if (!isExpired) {
             const planData = subscription.subscription_plans as any;
-            setIsPremium(planData?.plan_slug === 'premium');
+            const isPremiumValue = planData?.plan_slug === 'premium';
+            console.log('✅ Setting isPremium to:', isPremiumValue, 'because plan_slug is:', planData?.plan_slug);
+            setIsPremium(isPremiumValue);
           } else {
+            console.log('⏳ Subscription expired, setting isPremium to false');
             setIsPremium(false);
           }
         } else {
+          console.log('❌ No subscription found');
           setIsPremium(false);
         }
       } catch (error) {
