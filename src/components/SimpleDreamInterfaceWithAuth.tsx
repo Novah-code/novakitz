@@ -417,6 +417,16 @@ export default function SimpleDreamInterfaceWithAuth() {
               }
             `}</style>
 
+            {/* AI Usage Widget - Top of Menu */}
+            {user && (
+              <div style={{
+                padding: '1rem 1rem',
+                borderBottom: '1px solid rgba(127, 176, 105, 0.1)'
+              }}>
+                <AIUsageWidget user={user} />
+              </div>
+            )}
+
             {/* Menu Items */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <button
@@ -882,11 +892,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             </div>
           </div>
         </>
-      )}
-
-      {/* AI Usage Widget - Top Left */}
-      {user && (
-        <AIUsageWidget user={user} />
       )}
 
       <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} />
