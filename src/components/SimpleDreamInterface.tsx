@@ -3717,6 +3717,34 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   >
                     {isLoading ? t.brewing : t.brew}
                   </button>
+                  <button
+                    onClick={() => {
+                      setShowInput(false);
+                      setDreamText('');
+                      setDreamTitle('');
+                      setDreamImage('');
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#f3f4f6',
+                      color: '#6b7280',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#e5e7eb';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#f3f4f6';
+                    }}
+                  >
+                    {language === 'ko' ? '닫기' : 'Close'}
+                  </button>
                 </div>
               </div>
             </div>
