@@ -203,9 +203,26 @@ export default function SimpleDreamInterfaceWithAuth() {
       }
 
       try {
+        // Get premium plan ID first
+        const { data: premiumPlans } = await supabase
+          .from('subscription_plans')
+          .select('id')
+          .eq('plan_slug', 'premium')
+          .maybeSingle();
+
+        const premiumPlanId = premiumPlans?.id;
+        console.log('📋 Premium plan ID:', premiumPlanId);
+
+        if (!premiumPlanId) {
+          console.log('❌ Could not find premium plan');
+          setIsPremium(false);
+          return;
+        }
+
+        // Get user subscription
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('id, status, expires_at, subscription_plans:plan_id(plan_slug)')
+          .select('id, status, plan_id, expires_at')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
@@ -218,16 +235,15 @@ export default function SimpleDreamInterfaceWithAuth() {
           console.log('📋 Subscription details:', {
             subscription_id: subscription.id,
             status: subscription.status,
+            plan_id: subscription.plan_id,
+            premium_plan_id: premiumPlanId,
             expires_at: subscription.expires_at,
-            isExpired,
-            subscription_plans: subscription.subscription_plans,
-            plan_slug: (subscription.subscription_plans as any)?.plan_slug
+            isExpired
           });
 
           if (!isExpired) {
-            const planData = subscription.subscription_plans as any;
-            const isPremiumValue = planData?.plan_slug === 'premium';
-            console.log('✅ Setting isPremium to:', isPremiumValue, 'because plan_slug is:', planData?.plan_slug);
+            const isPremiumValue = subscription.plan_id === premiumPlanId;
+            console.log('✅ Setting isPremium to:', isPremiumValue, 'because plan_id matches premium_plan_id');
             setIsPremium(isPremiumValue);
           } else {
             console.log('⏳ Subscription expired, setting isPremium to false');

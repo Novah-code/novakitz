@@ -59,17 +59,32 @@ export default function PremiumPromptModal({
           }
         }
 
-        // Check subscription status with plan details via JOIN
+        // Get premium plan ID first
+        const { data: premiumPlans } = await supabase
+          .from('subscription_plans')
+          .select('id')
+          .eq('plan_slug', 'premium')
+          .maybeSingle();
+
+        const premiumPlanId = premiumPlans?.id;
+
+        if (!premiumPlanId) {
+          console.warn('Could not find premium plan');
+          setIsPremium(false);
+          setShowModal(true);
+          return;
+        }
+
+        // Check subscription status
         const { data: subscription, error } = await supabase
           .from('user_subscriptions')
-          .select('id, status, subscription_plans:plan_id(plan_slug)')
+          .select('id, status, plan_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .maybeSingle();
 
         if (error) {
           console.warn('Error querying subscriptions:', error);
-          // On error, assume user is free and show the prompt
           setIsPremium(false);
           setShowModal(true);
           return;
@@ -79,8 +94,7 @@ export default function PremiumPromptModal({
 
         if (subscription) {
           // User has an active subscription, check if it's premium
-          const planData = subscription.subscription_plans as any;
-          const isPremium = planData?.plan_slug === 'premium';
+          const isPremium = subscription.plan_id === premiumPlanId;
           console.log('User is premium:', isPremium);
           setIsPremium(isPremium || false);
 
