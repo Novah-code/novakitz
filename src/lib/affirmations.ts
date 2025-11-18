@@ -8,6 +8,7 @@ export interface Affirmation {
   affirmation_text: string;
   daily_count: number;
   check_in_time: 'morning' | 'afternoon' | 'evening';
+  language: 'en' | 'ko';
   created_at: string;
   date: string;
   updated_at: string;
@@ -116,7 +117,8 @@ export async function saveAffirmations(
   userId: string,
   affirmations: string[],
   checkInTime: 'morning' | 'afternoon' | 'evening',
-  dreamId?: string
+  dreamId?: string,
+  language: 'en' | 'ko' = 'en'
 ): Promise<boolean> {
   try {
     // Get current date in YYYY-MM-DD format (local time)
@@ -131,6 +133,7 @@ export async function saveAffirmations(
       affirmation_text: text,
       daily_count: index + 1,
       check_in_time: checkInTime,
+      language: language,
       date: date,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()

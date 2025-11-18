@@ -50,9 +50,30 @@ export default function AffirmationsDisplay({
         const existing = await getAffirmationsByTime(user.id, checkInTime);
 
         if (existing.length > 0) {
-          // Use existing affirmations
-          setAffirmations(existing);
-          setCurrentIndex(0);
+          // Check if existing affirmations are in a different language
+          const existingLanguage = existing[0]?.language || 'en';
+
+          if (existingLanguage !== language && dreamText) {
+            // Language changed - regenerate affirmations in the new language
+            await deleteAffirmationsForTime(user.id, checkInTime);
+
+            const generated = await generateAffirmationsFromDream(
+              user.id,
+              dreamText,
+              language
+            );
+
+            if (generated.length > 0) {
+              await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
+              const saved = await getAffirmationsByTime(user.id, checkInTime);
+              setAffirmations(saved);
+              setCurrentIndex(0);
+            }
+          } else {
+            // Same language - use existing affirmations
+            setAffirmations(existing);
+            setCurrentIndex(0);
+          }
         } else if (dreamText) {
           // Generate new affirmations from dream
           const generated = await generateAffirmationsFromDream(
@@ -62,8 +83,8 @@ export default function AffirmationsDisplay({
           );
 
           if (generated.length > 0) {
-            // Save to database
-            await saveAffirmations(user.id, generated, checkInTime, dreamId);
+            // Save to database with language
+            await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
 
             // Fetch saved affirmations
             const saved = await getAffirmationsByTime(user.id, checkInTime);
@@ -107,7 +128,7 @@ export default function AffirmationsDisplay({
       );
 
       if (generated.length > 0) {
-        await saveAffirmations(user.id, generated, checkInTime, dreamId);
+        await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
         const saved = await getAffirmationsByTime(user.id, checkInTime);
         setAffirmations(saved);
         setCurrentIndex(0);
