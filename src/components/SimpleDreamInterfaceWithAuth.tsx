@@ -402,9 +402,12 @@ export default function SimpleDreamInterfaceWithAuth() {
             backdropFilter: 'blur(20px)',
             boxShadow: '-2px 0 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
-            padding: '80px 0 20px 0',
+            padding: '0',
             fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
-            animation: 'slideInRight 0.3s ease-out'
+            animation: 'slideInRight 0.3s ease-out',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
           }}>
             <style>{`
               @keyframes slideInRight {
@@ -417,18 +420,27 @@ export default function SimpleDreamInterfaceWithAuth() {
               }
             `}</style>
 
-            {/* AI Usage Widget - Top of Menu */}
-            {user && (
-              <div style={{
-                padding: '1rem 1rem',
-                borderBottom: '1px solid rgba(127, 176, 105, 0.1)'
-              }}>
-                <AIUsageWidget user={user} />
-              </div>
-            )}
+            {/* Scrollable Menu Content */}
+            <div style={{
+              flex: 1,
+              overflow: 'y',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* AI Usage Widget - Top of Menu */}
+              {user && (
+                <div style={{
+                  padding: '1rem 1rem',
+                  borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
+                  flexShrink: 0
+                }}>
+                  <AIUsageWidget user={user} />
+                </div>
+              )}
 
-            {/* Menu Items */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Menu Items */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
               <button
                 onClick={() => setMenuOpen(false)}
                 style={{
@@ -889,6 +901,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   </svg>
                 </a>
               </div>
+            </div>
             </div>
           </div>
         </>
