@@ -81,7 +81,7 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
   };
 
   const getStatusText = (): string => {
-    if (usage.isUnlimited) return 'Unlimited';
+    if (usage.isUnlimited) return 'Unlimited AI';
     if (usage.remaining === 0) return 'Limit Reached';
     if (usage.remaining === 1) return 'Last one!';
     return `${usage.remaining} left`;

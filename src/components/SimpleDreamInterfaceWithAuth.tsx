@@ -797,16 +797,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{t.signOut}</span>
               </button>
 
-              {/* AI Usage Widget */}
-              {user && (
-                <div style={{
-                  padding: '1rem 1rem',
-                  margin: '1rem 0'
-                }}>
-                  <AIUsageWidget user={user} />
-                </div>
-              )}
-
               {/* Divider */}
               <div style={{
                 height: '1px',
@@ -892,6 +882,11 @@ export default function SimpleDreamInterfaceWithAuth() {
             </div>
           </div>
         </>
+      )}
+
+      {/* AI Usage Widget - Top Left */}
+      {user && (
+        <AIUsageWidget user={user} />
       )}
 
       <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} />
