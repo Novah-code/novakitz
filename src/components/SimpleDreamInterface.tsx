@@ -1267,7 +1267,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       // Ensure we have the right number of intentions
       while (intentions.length < targetCount) {
-        intentions.push(language === 'ko' ? '오늘 한 가지 작은 좋은 일 하기' : 'Do one small good thing today');
+        if (intentions.length === 0) {
+          // For free users with no API response, provide a fallback intention
+          intentions.push(language === 'ko' ? '오늘 하루 새로운 관점에서 한 가지 살펴보기' : 'Look at one thing from a new perspective today');
+        } else if (intentions.length === 1 && isPremium) {
+          intentions.push(language === 'ko' ? '팀원이나 친구와 의미 있는 대화 나누기' : 'Have a meaningful conversation with someone');
+        } else {
+          intentions.push(language === 'ko' ? '저녁에 5분 명상이나 산책으로 자신과 연결되기' : 'Spend 5 minutes in meditation or walking');
+        }
       }
 
       console.log('✅ Final intentions:', intentions);
