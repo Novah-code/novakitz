@@ -161,6 +161,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                   {dreams.slice(0, 2).map((dream, idx) => {
                     // Check if this is a "no dream" marker
                     const isNoDream = dream.tags?.includes('꿈안꿈') || dream.tags?.includes('no-dream') || dream.title?.includes('꿈 안 꿈') || dream.title?.includes('No Dream');
+                    const dreamTitle = dream.title || 'Untitled Dream';
                     return (
                       <button
                         key={dream.id || idx}
@@ -169,7 +170,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                           e.stopPropagation();
                           onDateSelect(date);
                         }}
-                        title={dream.title}
+                        title={dreamTitle}
                         style={{
                           fontSize: '0.65rem',
                           padding: '3px 6px',
@@ -182,10 +183,11 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                           borderRadius: '4px',
                           cursor: 'pointer',
                           textAlign: 'left',
-                          fontWeight: '500'
+                          fontWeight: '500',
+                          maxWidth: '100%'
                         }}
                       >
-                        {isNoDream ? '😴' : '💭'}
+                        {isNoDream ? '😴 ' : '💭 '}{dreamTitle}
                       </button>
                     );
                   })}
