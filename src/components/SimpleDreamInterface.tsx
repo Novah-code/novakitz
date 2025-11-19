@@ -190,6 +190,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
   const [dreamTitle, setDreamTitle] = useState('');
+  const [dreamDate, setDreamDate] = useState<Date>(new Date());
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(initialShowHistory);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
@@ -588,8 +589,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
 
     const now = new Date();
-    // Use current date automatically (user no longer selects dates)
-    const dreamDateToSave = now;
+    // Use the selected dream date (defaults to today, but can be changed by user)
+    const dreamDateToSave = dreamDate || now;
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
@@ -1367,6 +1368,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
+        setDreamDate(new Date()); // Reset dream date
         setDreamImage(''); // Reset dream image
         return;
       }
@@ -1387,6 +1389,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           saveDreamWithTags(dreamText, noAnalysisMsg, []);
           setDreamText('');
           setDreamTitle('');
+          setDreamDate(new Date());
           setDreamImage('');
           return;
         }
@@ -1407,6 +1410,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamDate(new Date()); // Reset dream date
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
@@ -1418,6 +1422,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
+      setDreamDate(new Date()); // Reset dream date
       setDreamImage(''); // Reset dream image
     } finally {
       setIsLoading(false);
@@ -3560,13 +3565,34 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 </div>
                 <div className="modal-body">
                   {!isRecording && (
-                    <input
-                      type="text"
-                      className="dream-title-input"
-                      value={dreamTitle}
-                      onChange={(e) => setDreamTitle(e.target.value)}
-                      placeholder={t.titlePlaceholder}
-                    />
+                    <>
+                      <input
+                        type="text"
+                        className="dream-title-input"
+                        value={dreamTitle}
+                        onChange={(e) => setDreamTitle(e.target.value)}
+                        placeholder={t.titlePlaceholder}
+                      />
+                      <input
+                        type="date"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          marginTop: '8px',
+                          marginBottom: '8px',
+                          border: '1px solid #ccc',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontFamily: 'inherit',
+                          boxSizing: 'border-box'
+                        }}
+                        value={dreamDate.toISOString().split('T')[0]}
+                        onChange={(e) => {
+                          const selectedDate = new Date(e.target.value);
+                          setDreamDate(selectedDate);
+                        }}
+                      />
+                    </>
                   )}
                   {isRecording && (
                     <div className="recording-indicator" style={{
@@ -3648,6 +3674,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Reset form
                       setDreamText('');
                       setDreamTitle('');
+                      setDreamDate(new Date());
                       setDreamImage('');
 
                       setTimeout(() => {
@@ -3696,7 +3723,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               flexDirection: 'column',
               height: '90vh',
               maxHeight: '90vh',
-              overflowY: 'hidden'
+              overflowY: 'auto'
             }}>
               <div className="dream-history-header" style={{
                 position: 'sticky',
@@ -4161,7 +4188,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           {selectedDream && (
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
+                <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative', paddingTop: '60px'}}>
                   {/* Navigation buttons for multiple dreams on same date */}
                   {dreamsFromSelectedDate.length > 1 && (
                     <div style={{

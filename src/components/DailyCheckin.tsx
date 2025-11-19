@@ -36,7 +36,6 @@ export default function DailyCheckin({
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   const [mood, setMood] = useState(5);
   const [energyLevel, setEnergyLevel] = useState(5);
-  const [progressNote, setProgressNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
   const [showAffirmations, setShowAffirmations] = useState(true);
@@ -85,8 +84,7 @@ export default function DailyCheckin({
         check_date: today,
         time_of_day: timeOfDay,
         mood,
-        energy_level: energyLevel,
-        progress_note: progressNote
+        energy_level: energyLevel
       });
 
       const { data, error } = await supabase
@@ -97,8 +95,7 @@ export default function DailyCheckin({
             check_date: today,
             time_of_day: timeOfDay,
             mood,
-            energy_level: energyLevel,
-            progress_note: progressNote
+            energy_level: energyLevel
           }
         ])
         .select()
@@ -125,7 +122,6 @@ export default function DailyCheckin({
         // Reset form
         setMood(5);
         setEnergyLevel(5);
-        setProgressNote('');
 
         // Update today's checkins
         setTodayCheckins([...todayCheckins, data as CheckinRecord]);
@@ -399,38 +395,6 @@ export default function DailyCheckin({
               </div>
             </div>
 
-            {/* Progress Note */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'rgba(0, 0, 0, 0.7)',
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                {language === 'ko' ? '오늘의 진행 상황 (선택)' : 'Progress Note (Optional)'}
-              </label>
-              <textarea
-                value={progressNote}
-                onChange={(e) => setProgressNote(e.target.value)}
-                placeholder={language === 'ko'
-                  ? '오늘 무엇을 했는지, 어떻게 느꼈는지 간단히 적어주세요'
-                  : 'What did you do? How do you feel?'}
-                style={{
-                  width: '100%',
-                  minHeight: '80px',
-                  padding: '12px',
-                  border: '1px solid rgba(127, 176, 105, 0.2)',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  fontFamily: 'inherit',
-                  resize: 'vertical',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
 
             {/* Buttons */}
             <div style={{
