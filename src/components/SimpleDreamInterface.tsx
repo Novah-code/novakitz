@@ -908,14 +908,14 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
 
   const handleAnalyze = async () => {
-    setDreamDate(new Date()); // Reset to today when opening input form for NEW dream
     setShowInput(true);
+    // Do NOT reset dreamDate here - let user's selected date persist
   };
 
   const startVoiceRecording = () => {
     if (recognitionRef.current) {
       setIsRecording(true);
-      setDreamDate(new Date()); // Reset to today when opening input form for NEW dream
+      // Do NOT reset dreamDate here - let user's selected date persist
       setShowInput(true);
       recognitionRef.current.start();
     } else {
