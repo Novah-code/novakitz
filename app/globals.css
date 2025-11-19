@@ -3396,7 +3396,7 @@ html {
 }
 
 .dream-calendar {
-    padding: 32px;
+    padding: 20px;
     margin-bottom: 24px;
 }
 
@@ -3404,7 +3404,7 @@ html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .calendar-nav-btn {
@@ -3436,7 +3436,7 @@ html {
 }
 
 .calendar-title-header h3 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--matcha-dark);
     margin: 0;
@@ -3467,10 +3467,10 @@ html {
 }
 
 .weekday-header {
-    padding: 12px 8px;
+    padding: 8px 4px;
     text-align: center;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
     color: var(--matcha-dark);
     background: rgba(127, 176, 105, 0.1);
 }
@@ -3488,15 +3488,15 @@ html {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
-    padding: 8px 4px;
+    padding: 6px 3px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    gap: 4px;
-    min-height: 80px;
+    gap: 2px;
+    min-height: 60px;
     position: relative;
 }
 
@@ -3537,7 +3537,7 @@ html {
 
 .day-number {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .calendar-day.selected .day-number {

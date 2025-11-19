@@ -187,7 +187,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                           maxWidth: '100%'
                         }}
                       >
-                        {isNoDream ? '😴 ' : '💭 '}{dreamTitle}
+                        {dreamTitle}
                       </button>
                     );
                   })}
