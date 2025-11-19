@@ -190,10 +190,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
   const [dreamTitle, setDreamTitle] = useState('');
-  const [dreamDate, setDreamDate] = useState<Date>(new Date());
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(initialShowHistory);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
+  const [dreamsFromSelectedDate, setDreamsFromSelectedDate] = useState<DreamEntry[]>([]);
+  const [currentDreamIndex, setCurrentDreamIndex] = useState(0);
 
   // Sync with external history state
   useEffect(() => {
@@ -255,19 +256,34 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
               .maybeSingle();
 
             // Convert Supabase dreams to DreamEntry format
-            const dreams: DreamEntry[] = data.map((dream: any) => ({
-              id: dream.id,
-              text: dream.content.split('\n\n---\n\n')[0] || dream.content,
-              response: dream.content.split('Analysis:\n')[1] || '',
-              title: dream.title,
-              date: dream.date,
-              time: dream.time,
-              timestamp: new Date(dream.created_at).getTime(),
-              tags: dream.tags || [],
-              autoTags: dream.tags || [],
-              image: dream.image || undefined,
-              userName: profileData?.full_name || 'Anonymous'
-            }));
+            const dreams: DreamEntry[] = data.map((dream: any) => {
+              // If dream.date is not set, generate it from created_at
+              let dreamDate = dream.date;
+              if (!dreamDate && dream.created_at) {
+                const dateObj = new Date(dream.created_at);
+                dreamDate = dateObj.toLocaleString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric'
+                });
+              }
+
+              return {
+                id: dream.id,
+                text: dream.content.split('\n\n---\n\n')[0] || dream.content,
+                response: dream.content.split('Analysis:\n')[1] || '',
+                title: dream.title,
+                date: dreamDate,
+                time: dream.time,
+                timestamp: new Date(dream.created_at).getTime(),
+                tags: dream.tags || [],
+                autoTags: dream.tags || [],
+                image: dream.image || undefined,
+                mood: dream.mood || undefined,
+                content: dream.content,
+                userName: profileData?.full_name || 'Anonymous'
+              };
+            });
             setSavedDreams(dreams);
             console.log('Loaded dreams from Supabase:', dreams.length);
           }
@@ -547,7 +563,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   };
 
   const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = []) => {
-    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords, dreamDate });
+    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords });
 
     // Get user's nickname for display
     let userNickname = '';
@@ -572,8 +588,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
 
     const now = new Date();
-    // Use the selected dream date, not the current time
-    const dreamDateToSave = dreamDate || now;
+    // Use current date automatically (user no longer selects dates)
+    const dreamDateToSave = now;
     const newDream: DreamEntry = {
       id: Date.now().toString(),
       text: dreamText,
@@ -909,13 +925,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   const handleAnalyze = async () => {
     setShowInput(true);
-    // Do NOT reset dreamDate here - let user's selected date persist
   };
 
   const startVoiceRecording = () => {
     if (recognitionRef.current) {
       setIsRecording(true);
-      // Do NOT reset dreamDate here - let user's selected date persist
       setShowInput(true);
       recognitionRef.current.start();
     } else {
@@ -1346,7 +1360,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
-        // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
         setDreamImage(''); // Reset dream image
         return;
       }
@@ -1367,7 +1380,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           saveDreamWithTags(dreamText, noAnalysisMsg, []);
           setDreamText('');
           setDreamTitle('');
-          // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
           setDreamImage('');
           return;
         }
@@ -1388,7 +1400,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
-      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
       setDreamImage(''); // Reset dream image
     } catch (error) {
       console.error('Error during dream analysis:', error);
@@ -1400,7 +1411,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
-      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
       setDreamImage(''); // Reset dream image
     } finally {
       setIsLoading(false);
@@ -3502,32 +3512,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         </div>
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
-          {/* Top Right Controls: Premium Badge + Language Selector */}
-          <div style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            display: 'flex',
-            gap: '12px',
-            zIndex: 1000,
-            alignItems: 'center'
-          }}>
-            {/* Premium Badge */}
-            {isPremium && (
-              <div style={{
-                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-                color: '#1f2937',
-                padding: '6px 14px',
-                borderRadius: '20px',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)',
-                whiteSpace: 'nowrap'
-              }}>
-                ✨ Premium
-              </div>
-            )}
-          </div>
 
           {!showInput && !showResponse && !showHistory && (
             <div
@@ -3599,29 +3583,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
 
-                  {!isRecording && (
-                    <div style={{display: 'flex', gap: '8px', marginBottom: '12px'}}>
-                      <input
-                        type="date"
-                        value={dreamDate.toISOString().split('T')[0]}
-                        onChange={(e) => {
-                          const newDate = new Date(e.target.value + 'T00:00:00');
-                          setDreamDate(newDate);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          borderRadius: '8px',
-                          border: '1px solid rgba(127, 176, 105, 0.3)',
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          color: '#7FB069',
-                          fontFamily: 'Georgia, serif',
-                          fontSize: '14px',
-                          cursor: 'pointer'
-                        }}
-                      />
-                    </div>
-                  )}
 
                   <textarea
                     className="dream-input"
@@ -3651,6 +3612,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Save "no dream" marker to Supabase for calendar display
                       if (user) {
                         try {
+                          const now = new Date();
                           await supabase
                             .from('dreams')
                             .insert([{
@@ -3659,18 +3621,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
                               mood: 'peaceful',
                               tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
-                              date: dreamDate.toLocaleDateString('en-US', {
+                              date: now.toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
                               }),
-                              time: dreamDate.toLocaleTimeString('en-US', {
+                              time: now.toLocaleTimeString('en-US', {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               }),
-                              created_at: new Date().toISOString()
+                              created_at: now.toISOString()
                             }]);
-                          console.log('No dream marker saved to calendar with date:', dreamDate);
+                          console.log('No dream marker saved to calendar with date:', now);
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);
                         }
@@ -3679,7 +3641,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Reset form
                       setDreamText('');
                       setDreamTitle('');
-                      // IMPORTANT: Do NOT reset dreamDate - keep the user's selected date
                       setDreamImage('');
 
                       setTimeout(() => {
@@ -3728,7 +3689,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               flexDirection: 'column',
               height: '90vh',
               maxHeight: '90vh',
-              overflowY: 'auto'
+              overflowY: 'hidden'
             }}>
               <div className="dream-history-header" style={{
                 position: 'sticky',
@@ -3834,7 +3795,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
               </div>
 
-              <div className="dream-history-container" style={{paddingTop: '20px', position: 'relative'}}>
+              <div className="dream-history-container" style={{
+                paddingTop: '20px',
+                position: 'relative',
+                flex: 1,
+                overflowY: 'auto',
+                overflowX: 'hidden'
+              }}>
               {viewMode === 'calendar' ? (
                 <div style={{
                   display: 'flex',
@@ -3864,6 +3831,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
                       // Select the first dream and show all dreams from that date
                       if (dreamsForDate.length > 0) {
+                        setDreamsFromSelectedDate(dreamsForDate);
+                        setCurrentDreamIndex(0);
                         setSelectedDream(dreamsForDate[0] as DreamEntry);
                       }
                     }}
@@ -3887,7 +3856,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => setSelectedDream(dream)}>
+                    <div key={dream.id} className="dream-entry" onClick={() => {
+                      setDreamsFromSelectedDate([]);
+                      setCurrentDreamIndex(0);
+                      setSelectedDream(dream);
+                    }}>
                       <div className="dream-image" style={{
                         background: dream.image ? 'none' : gradients[index % gradients.length],
                         backgroundImage: dream.image ? `url(${dream.image})` : 'none',
@@ -3903,18 +3876,35 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             const input = document.createElement('input');
                             input.type = 'file';
                             input.accept = 'image/*';
-                            input.onchange = (event) => {
+                            input.onchange = async (event) => {
                               const file = (event.target as HTMLInputElement).files?.[0];
                               if (file) {
                                 const reader = new FileReader();
-                                reader.onload = (e) => {
+                                reader.onload = async (e) => {
                                   const imageUrl = e.target?.result as string;
                                   // Update the dream with new image
-                                  const updatedDreams = savedDreams.map(d => 
+                                  const updatedDreams = savedDreams.map(d =>
                                     d.id === dream.id ? { ...d, image: imageUrl } : d
                                   );
                                   setSavedDreams(updatedDreams);
                                   localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+
+                                  // Also update in Supabase if user is logged in
+                                  if (user) {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('dreams')
+                                        .update({ image: imageUrl })
+                                        .eq('id', dream.id)
+                                        .eq('user_id', user.id);
+
+                                      if (error) {
+                                        console.error('Error updating dream image in Supabase:', error);
+                                      }
+                                    } catch (error) {
+                                      console.error('Exception updating dream image:', error);
+                                    }
+                                  }
                                 };
                                 reader.readAsDataURL(file);
                               }
@@ -4056,7 +4046,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 borderTop: '1px solid #e5e7eb',
                 background: 'white',
                 display: 'flex',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                flexShrink: 0
               }}>
                 <button
                   onClick={() => setShowHistory(false)}
@@ -4164,6 +4155,75 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative'}}>
+                  {/* Navigation buttons for multiple dreams on same date */}
+                  {dreamsFromSelectedDate.length > 1 && (
+                    <div style={{
+                      position: 'absolute',
+                      left: '12px',
+                      top: '12px',
+                      display: 'flex',
+                      gap: '8px',
+                      alignItems: 'center',
+                      zIndex: 15
+                    }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newIndex = (currentDreamIndex - 1 + dreamsFromSelectedDate.length) % dreamsFromSelectedDate.length;
+                          setCurrentDreamIndex(newIndex);
+                          setSelectedDream(dreamsFromSelectedDate[newIndex]);
+                        }}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.3)',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                      >
+                        ←
+                      </button>
+                      <span style={{color: 'white', fontSize: '12px', fontWeight: '600', minWidth: '40px', textAlign: 'center'}}>
+                        {currentDreamIndex + 1}/{dreamsFromSelectedDate.length}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newIndex = (currentDreamIndex + 1) % dreamsFromSelectedDate.length;
+                          setCurrentDreamIndex(newIndex);
+                          setSelectedDream(dreamsFromSelectedDate[newIndex]);
+                        }}
+                        style={{
+                          background: 'rgba(255, 255, 255, 0.3)',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '6px 10px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: 'white',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+                      >
+                        →
+                      </button>
+                    </div>
+                  )}
+
                   {/* Button container for top-right alignment */}
                   <div style={{
                     position: 'absolute',
@@ -4172,7 +4232,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     display: 'flex',
                     gap: '8px',
                     alignItems: 'center',
-                    zIndex: 15
+                    zIndex: 15,
+                    flexWrap: 'wrap',
+                    justifyContent: 'flex-end',
+                    maxWidth: '90%'
                   }}>
                     {/* Share button */}
                     <button
@@ -4185,26 +4248,26 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
                         borderRadius: '8px',
-                        padding: window.innerWidth < 480 ? '6px 10px' : '8px 12px',
-                        fontSize: window.innerWidth < 480 ? '12px' : '14px',
+                        padding: window.innerWidth < 480 ? '4px 8px' : '8px 12px',
+                        fontSize: window.innerWidth < 480 ? '11px' : '14px',
                         fontWeight: '600',
                         color: 'white',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: window.innerWidth < 480 ? '2px' : '4px',
                         whiteSpace: 'nowrap'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width={window.innerWidth < 480 ? '12' : '14'} height={window.innerWidth < 480 ? '12' : '14'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                         <polyline points="16 6 12 2 8 6"></polyline>
                         <line x1="12" y1="2" x2="12" y2="15"></line>
                       </svg>
-                      {language === 'ko' ? '공유' : 'Share'}
+                      {window.innerWidth < 480 ? '공유' : (language === 'ko' ? '공유' : 'Share')}
                     </button>
 
                     {/* Edit button */}
@@ -4219,8 +4282,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
                         borderRadius: '8px',
-                        padding: window.innerWidth < 480 ? '6px 12px' : '8px 16px',
-                        fontSize: window.innerWidth < 480 ? '12px' : '14px',
+                        padding: window.innerWidth < 480 ? '4px 10px' : '8px 16px',
+                        fontSize: window.innerWidth < 480 ? '11px' : '14px',
                         fontWeight: '600',
                         color: 'white',
                         cursor: 'pointer',
@@ -4245,13 +4308,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
                         borderRadius: '50%',
-                        width: '32px',
-                        height: '32px',
+                        width: window.innerWidth < 480 ? '28px' : '32px',
+                        height: window.innerWidth < 480 ? '28px' : '32px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        fontSize: '24px',
+                        fontSize: window.innerWidth < 480 ? '20px' : '24px',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         flexShrink: 0

@@ -35,9 +35,19 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
   const dreamsByDate = useMemo(() => {
     const grouped: { [key: string]: Dream[] } = {};
     dreams.forEach(dream => {
-      const dreamDate = dream.created_at 
-        ? new Date(dream.created_at).toDateString()
-        : new Date().toDateString();
+      // Use the 'date' field if available (formatted date string from SimpleDreamInterface)
+      // Otherwise fall back to created_at
+      let dreamDate: string;
+      if (dream.date && typeof dream.date === 'string') {
+        // Convert formatted date like "November 19, 2025" to Date object for toDateString()
+        const parsedDate = new Date(dream.date);
+        dreamDate = parsedDate.toDateString();
+      } else if (dream.created_at) {
+        dreamDate = new Date(dream.created_at).toDateString();
+      } else {
+        dreamDate = new Date().toDateString();
+      }
+
       if (!grouped[dreamDate]) {
         grouped[dreamDate] = [];
       }
@@ -140,11 +150,15 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
               key={date}
               className={`calendar-day ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasDreams ? 'has-dreams' : ''}`}
               onClick={() => onDateSelect(date)}
+              style={{
+                position: 'relative',
+                cursor: hasDreams ? 'pointer' : 'default'
+              }}
             >
               <div className="day-number">{day}</div>
               {hasDreams && (
-                <div className="dream-badges">
-                  {dreams.slice(0, 1).map((dream, idx) => {
+                <div className="dream-badges" style={{display: 'flex', flexDirection: 'column', gap: '4px', width: '100%', paddingTop: '4px'}}>
+                  {dreams.slice(0, 2).map((dream, idx) => {
                     // Check if this is a "no dream" marker
                     const isNoDream = dream.tags?.includes('꿈안꿈') || dream.tags?.includes('no-dream') || dream.title?.includes('꿈 안 꿈') || dream.title?.includes('No Dream');
                     return (
@@ -156,20 +170,28 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                           onDateSelect(date);
                         }}
                         title={dream.title}
-                        style={isNoDream ? {
-                          opacity: 0.6,
-                          fontSize: '0.7rem',
-                          padding: '4px 6px'
-                        } : {}}
+                        style={{
+                          fontSize: '0.65rem',
+                          padding: '3px 6px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          backgroundColor: isNoDream ? 'rgba(100, 100, 100, 0.6)' : 'rgba(127, 176, 105, 0.7)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontWeight: '500'
+                        }}
                       >
-                        {isNoDream ? '😴 ' : '💭 '}
-                        {dream.title}
+                        {isNoDream ? '😴' : '💭'}
                       </button>
                     );
                   })}
-                  {dreams.length > 1 && (
-                    <div className="more-dreams">
-                      +{dreams.length - 1}more
+                  {dreams.length > 2 && (
+                    <div className="more-dreams" style={{fontSize: '0.6rem', padding: '2px 4px', color: '#7FB069', textAlign: 'center'}}>
+                      +{dreams.length - 2}
                     </div>
                   )}
                 </div>

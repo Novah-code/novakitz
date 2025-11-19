@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "novakitz - What's brewing in your dreams?",
+  title: "novakitz",
   description: "Discover the hidden messages in your dreams with novakitz - your AI-powered dream interpretation companion with modern design.",
   keywords: "dream interpretation, AI dreams, dream analysis, novakitz, subconscious, personal growth",
   manifest: "/manifest.json",
