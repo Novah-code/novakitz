@@ -3651,7 +3651,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       // Save "no dream" marker to Supabase for calendar display
                       if (user) {
                         try {
-                          const today = new Date().toISOString().split('T')[0];
                           await supabase
                             .from('dreams')
                             .insert([{
@@ -3660,18 +3659,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
                               mood: 'peaceful',
                               tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
-                              date: new Date().toLocaleDateString('en-US', {
+                              date: dreamDate.toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
                               }),
-                              time: new Date().toLocaleTimeString('en-US', {
+                              time: dreamDate.toLocaleTimeString('en-US', {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               }),
                               created_at: new Date().toISOString()
                             }]);
-                          console.log('No dream marker saved to calendar');
+                          console.log('No dream marker saved to calendar with date:', dreamDate);
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);
                         }
