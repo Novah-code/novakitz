@@ -10,6 +10,7 @@ import DreamInsights from './DreamInsights';
 import BadgesDisplay from './BadgesDisplay';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
+import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
 
 // Translations
@@ -56,6 +57,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showBadges, setShowBadges] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [dreams, setDreams] = useState<any[]>([]);
 
   const t = translations[language];
 
@@ -265,6 +267,34 @@ export default function SimpleDreamInterfaceWithAuth() {
     };
 
     checkPremiumStatus();
+  }, [user]);
+
+  // Load dreams for calendar
+  useEffect(() => {
+    const loadDreams = async () => {
+      if (!user) {
+        setDreams([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('dreams')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error loading dreams:', error);
+        } else if (data) {
+          setDreams(data);
+        }
+      } catch (error) {
+        console.error('Exception loading dreams:', error);
+      }
+    };
+
+    loadDreams();
   }, [user]);
 
   const handleSignOut = async () => {
@@ -1049,7 +1079,13 @@ export default function SimpleDreamInterfaceWithAuth() {
             </button>
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>📅 {t.calendar}</h2>
             <div onClick={(e) => e.stopPropagation()}>
-              <SimpleDreamInterface user={user} language={language} initialShowHistory={false} onHistoryClose={() => {}} showCalendarOnly={true} />
+              <DreamCalendar
+                dreams={dreams}
+                onDateSelect={() => {
+                  // Handle date selection if needed
+                }}
+                selectedDate={null}
+              />
             </div>
           </div>
         </div>

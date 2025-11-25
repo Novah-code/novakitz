@@ -19,7 +19,6 @@ interface SimpleDreamInterfaceProps {
   language?: 'en' | 'ko';
   initialShowHistory?: boolean;
   onHistoryClose?: () => void;
-  showCalendarOnly?: boolean;
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -183,7 +182,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, showCalendarOnly = false }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -3913,7 +3912,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 overflowY: 'auto',
                 overflowX: 'hidden'
               }}>
-              {showCalendarOnly || viewMode === 'calendar' ? (
+              {viewMode === 'calendar' ? (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column'
