@@ -225,6 +225,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 10, remaining: 10, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
+  const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
+  const [carouselAffirmations, setCarouselAffirmations] = useState<string[]>([]);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -490,6 +492,28 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       window.removeEventListener('offline', handleOffline);
     };
   }, [user, savedDreams]);
+
+  // Handle keyboard navigation for carousel
+  useEffect(() => {
+    if (viewMode !== 'card') return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      setCarouselDreamIndex(prev => {
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          return Math.max(prev - 1, 0);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          // Will be bounded by the carousel rendering logic
+          return prev + 1;
+        }
+        return prev;
+      });
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [viewMode]);
 
   // Check microphone permission status
   useEffect(() => {
@@ -1617,6 +1641,23 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     ...savedDreams.flatMap(dream => dream.autoTags || []),
     ...savedDreams.flatMap(dream => dream.tags || [])
   ])].sort();
+
+  // Update affirmations when carousel index changes
+  useEffect(() => {
+    if (viewMode === 'card' && filteredDreams.length > 0) {
+      const currentDream = filteredDreams[carouselDreamIndex];
+      if (currentDream && currentDream.response) {
+        // Parse affirmations from the response
+        // The response contains analysis and affirmations
+        const affirmationLines = currentDream.response
+          .split('\n')
+          .filter(line => line.trim().length > 0);
+        setCarouselAffirmations(affirmationLines);
+      } else {
+        setCarouselAffirmations([]);
+      }
+    }
+  }, [carouselDreamIndex, viewMode, filteredDreams]);
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
@@ -3142,7 +3183,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             transform: scale(1.2);
           }
         }
-        
+
+        @keyframes fadeInAffirmations {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeOutAffirmations {
+          0% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+        }
+
         .pulse-dot {
           width: 8px;
           height: 8px;
@@ -3855,6 +3918,47 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   />
                 </div>
               ) : (
+              <>
+                {/* Affirmations Display */}
+                {carouselAffirmations.length > 0 && (
+                  <div
+                    className="affirmations-display"
+                    style={{
+                      marginBottom: '24px',
+                      padding: '20px 24px',
+                      background: 'rgba(196, 230, 195, 0.12)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(127, 176, 105, 0.2)',
+                      opacity: 1,
+                      animation: 'fadeInAffirmations 0.5s ease-in-out',
+                      transition: 'all 0.5s ease-in-out'
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '0.9rem',
+                      color: 'rgba(0, 0, 0, 0.7)',
+                      lineHeight: '1.6',
+                      maxHeight: '120px',
+                      overflowY: 'auto',
+                      paddingRight: '8px'
+                    }}>
+                      {carouselAffirmations.slice(0, 5).map((line, idx) => (
+                        <p
+                          key={idx}
+                          style={{
+                            margin: '0 0 8px 0',
+                            padding: '0'
+                          }}
+                        >
+                          {line}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Carousel Grid */}
               <div className="dreams-grid" style={{
                 paddingBottom: '20px'
               }}>
@@ -4053,6 +4157,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                 )}
               </div>
+              </>
               )}
 
               {/* Close Button */}
