@@ -1149,7 +1149,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                 dreams={dreams}
                 userId={user.id}
                 language={language}
-                isPremium={isPremium}
               />
             </div>
           </div>

@@ -2,24 +2,21 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Dream } from '../lib/supabase';
-import { generateAffirmationsFromDream, saveAffirmations, getAffirmationsByTime, deleteAffirmationsForTime, Affirmation } from '../lib/affirmations';
-import { supabase } from '../lib/supabase';
+import { generateAffirmationsFromDream } from '../lib/affirmations';
 
 interface DreamPlaylistProps {
   dreams: Dream[];
   userId: string;
   language: 'en' | 'ko';
-  isPremium?: boolean;
 }
 
 export default function DreamPlaylist({
   dreams,
   userId,
-  language,
-  isPremium = false
+  language
 }: DreamPlaylistProps) {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
+  const [affirmations, setAffirmations] = useState<string[]>([]);
   const [currentAffirmationIndex, setCurrentAffirmationIndex] = useState(0);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDream, setSelectedDream] = useState<Dream | null>(null);
@@ -46,7 +43,7 @@ export default function DreamPlaylist({
       setIsLoadingAffirmations(true);
       try {
         // Generate affirmations from the active dream
-        const dreamText = activeDream.description || activeDream.title || '';
+        const dreamText = activeDream.content || activeDream.title || '';
 
         if (!dreamText) {
           setAffirmations([]);
@@ -208,7 +205,7 @@ export default function DreamPlaylist({
                     color: '#7FB069',
                     lineHeight: 1.6
                   }}>
-                    {currentAffirmation.text}
+                    {currentAffirmation}
                   </p>
                   <p style={{
                     margin: 0,
@@ -352,7 +349,7 @@ export default function DreamPlaylist({
                 WebkitBoxOrient: 'vertical',
                 lineHeight: 1.4
               }}>
-                {dream.description || 'No description'}
+                {dream.content || 'No content'}
               </p>
 
               {/* Mood Badge */}
@@ -478,16 +475,15 @@ export default function DreamPlaylist({
             </p>
 
             {/* Description */}
-            {selectedDream.description && (
+            {selectedDream.content && (
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{
                   margin: '0 0 12px 0',
-                  fontSize: '1rem',
+                  fontSize: '0.85rem',
                   fontWeight: 600,
                   color: 'rgba(0, 0, 0, 0.8)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  fontSize: '0.85rem'
+                  letterSpacing: '0.5px'
                 }}>
                   {t.description}
                 </h3>
@@ -498,7 +494,7 @@ export default function DreamPlaylist({
                   lineHeight: 1.6,
                   whiteSpace: 'pre-wrap'
                 }}>
-                  {selectedDream.description}
+                  {selectedDream.content}
                 </p>
               </div>
             )}
