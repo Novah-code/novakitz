@@ -19,6 +19,7 @@ interface SimpleDreamInterfaceProps {
   language?: 'en' | 'ko';
   initialShowHistory?: boolean;
   onHistoryClose?: () => void;
+  showCalendarOnly?: boolean;
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -182,7 +183,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, showCalendarOnly = false }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -227,9 +228,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
   const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
   const [carouselAffirmations, setCarouselAffirmations] = useState<string[]>([]);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   // Load saved dreams from Supabase or localStorage
   useEffect(() => {
@@ -514,6 +517,36 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [viewMode]);
+
+  // Handle carousel scroll to update active card
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    const handleScroll = () => {
+      const cards = carousel.querySelectorAll('.dream-entry');
+      if (cards.length === 0) return;
+
+      // Calculate which card is closest to center
+      const carouselCenter = carousel.scrollLeft + carousel.clientWidth / 2;
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const cardCenter = (card as HTMLElement).offsetLeft + (card as HTMLElement).clientWidth / 2;
+        const distance = Math.abs(carouselCenter - cardCenter);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      setActiveCardIndex(closestIndex);
+    };
+
+    carousel.addEventListener('scroll', handleScroll);
+    return () => carousel.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check microphone permission status
   useEffect(() => {
@@ -3880,7 +3913,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 overflowY: 'auto',
                 overflowX: 'hidden'
               }}>
-              {viewMode === 'calendar' ? (
+              {showCalendarOnly || viewMode === 'calendar' ? (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column'
@@ -3959,7 +3992,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 )}
 
                 {/* Carousel Grid */}
-              <div className="dreams-grid" style={{
+              <div className="dreams-grid" ref={carouselRef} style={{
                 paddingBottom: '20px'
               }}>
                 {filteredDreams.slice(0, 9).map((dream, index) => {
@@ -3975,7 +4008,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     'linear-gradient(135deg, #8fd3f4 0%, #84fab0 100%)'
                   ];
                   return (
-                    <div key={dream.id} className="dream-entry" onClick={() => {
+                    <div key={dream.id} className={`dream-entry ${activeCardIndex === index ? 'active' : ''}`} onClick={() => {
                       setDreamsFromSelectedDate([]);
                       setCurrentDreamIndex(0);
                       setSelectedDream(dream);

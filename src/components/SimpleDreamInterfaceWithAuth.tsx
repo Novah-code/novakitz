@@ -18,6 +18,7 @@ const translations = {
     loading: 'Loading...',
     home: 'Home',
     dreamJournal: 'Dream Journal',
+    calendar: 'Calendar',
     history: 'History',
     insights: 'Insights',
     streak: 'Streak',
@@ -30,6 +31,7 @@ const translations = {
     loading: '로딩 중...',
     home: '홈',
     dreamJournal: '드림 저널',
+    calendar: '캘린더',
     history: '기록',
     insights: '인사이트',
     streak: '연속 기록',
@@ -48,6 +50,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
@@ -505,6 +508,42 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
                 <span>{t.dreamJournal}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  console.log('Calendar button clicked!');
+                  setShowCalendar(true);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>{t.calendar}</span>
               </button>
 
               <button
@@ -994,6 +1033,24 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
             </div>
             <MonthlyDreamReport user={user} language={language} />
+          </div>
+        </div>
+      )}
+
+      {/* Calendar Modal */}
+      {showCalendar && user && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '700px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+            <button
+              onClick={() => setShowCalendar(false)}
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              ✕
+            </button>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>📅 {t.calendar}</h2>
+            <div onClick={(e) => e.stopPropagation()}>
+              <SimpleDreamInterface user={user} language={language} initialShowHistory={false} onHistoryClose={() => {}} showCalendarOnly={true} />
+            </div>
           </div>
         </div>
       )}
