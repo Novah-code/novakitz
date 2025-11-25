@@ -3573,25 +3573,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         onChange={(e) => setDreamTitle(e.target.value)}
                         placeholder={t.titlePlaceholder}
                       />
-                      <input
-                        type="date"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          marginTop: '8px',
-                          marginBottom: '8px',
-                          border: '1px solid #ccc',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          fontFamily: 'inherit',
-                          boxSizing: 'border-box'
-                        }}
-                        value={dreamDate.toISOString().split('T')[0]}
-                        onChange={(e) => {
-                          const selectedDate = new Date(e.target.value);
-                          setDreamDate(selectedDate);
-                        }}
-                      />
                     </>
                   )}
                   {isRecording && (
