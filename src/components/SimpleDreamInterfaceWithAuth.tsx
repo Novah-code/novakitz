@@ -11,6 +11,7 @@ import BadgesDisplay from './BadgesDisplay';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
+import DreamPlaylist from './DreamPlaylist';
 import AIUsageWidget from './AIUsageWidget';
 
 // Translations
@@ -19,6 +20,7 @@ const translations = {
     loading: 'Loading...',
     home: 'Home',
     dreamJournal: 'Dream Journal',
+    dreamPlaylist: 'Dream Playlist',
     calendar: 'Calendar',
     history: 'History',
     insights: 'Insights',
@@ -32,6 +34,7 @@ const translations = {
     loading: '로딩 중...',
     home: '홈',
     dreamJournal: '드림 저널',
+    dreamPlaylist: '드림 플레이리스트',
     calendar: '캘린더',
     history: '기록',
     insights: '인사이트',
@@ -52,6 +55,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showPlaylist, setShowPlaylist] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showBadges, setShowBadges] = useState(false);
@@ -578,6 +582,44 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               <button
                 onClick={() => {
+                  console.log('Dream Playlist button clicked!');
+                  setShowPlaylist(true);
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="5" r="2"></circle>
+                  <path d="M11 7v10"></path>
+                  <circle cx="8" cy="14" r="2"></circle>
+                  <circle cx="14" cy="14" r="2"></circle>
+                  <path d="M8 14v6"></path>
+                  <path d="M14 14v6"></path>
+                </svg>
+                <span>{t.dreamPlaylist}</span>
+              </button>
+
+              <button
+                onClick={() => {
                   console.log('Insights button clicked!');
                   setShowInsights(true);
                   setMenuOpen(false);
@@ -1085,6 +1127,29 @@ export default function SimpleDreamInterfaceWithAuth() {
                   // Handle date selection if needed
                 }}
                 selectedDate={null}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dream Playlist Modal */}
+      {showPlaylist && user && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', paddingTop: '40px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '900px', width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+            <button
+              onClick={() => setShowPlaylist(false)}
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              ✕
+            </button>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>🎵 {t.dreamPlaylist}</h2>
+            <div onClick={(e) => e.stopPropagation()}>
+              <DreamPlaylist
+                dreams={dreams}
+                userId={user.id}
+                language={language}
+                isPremium={isPremium}
               />
             </div>
           </div>
