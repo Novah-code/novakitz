@@ -16,6 +16,7 @@ import AIUsageWidget from './AIUsageWidget';
 const translations = {
   en: {
     loading: 'Loading...',
+    home: 'Home',
     dreamJournal: 'Dream Journal',
     history: 'History',
     insights: 'Insights',
@@ -27,6 +28,7 @@ const translations = {
   },
   ko: {
     loading: '로딩 중...',
+    home: '홈',
     dreamJournal: '드림 저널',
     history: '기록',
     insights: '인사이트',
@@ -468,12 +470,12 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span>{t.dreamJournal}</span>
+                <span>{t.home}</span>
               </button>
 
               <button
                 onClick={() => {
-                  console.log('History button clicked!');
+                  console.log('Dream Journal button clicked!');
                   setShowHistory(true);
                   setMenuOpen(false);
                 }}
@@ -502,7 +504,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                   <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
-                <span>{t.history}</span>
+                <span>{t.dreamJournal}</span>
               </button>
 
               <button
