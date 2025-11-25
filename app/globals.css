@@ -2191,21 +2191,40 @@ html {
 }
 
 .dreams-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 16px;
     margin-bottom: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 8px 0;
+    scroll-snap-type: x mandatory;
+    /* Hide scrollbar */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.dreams-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.dream-entry {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    flex-shrink: 0;
 }
 
 @media (max-width: 1024px) {
-    .dreams-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .dream-entry {
+        width: calc(50vw - 16px);
+        min-width: calc(50vw - 16px);
     }
 }
 
 @media (max-width: 640px) {
-    .dreams-grid {
-        grid-template-columns: 1fr;
+    .dream-entry {
+        width: calc(90vw - 16px);
+        min-width: calc(90vw - 16px);
     }
 }
 
