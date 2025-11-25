@@ -3855,7 +3855,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   />
                 </div>
               ) : (
-              <div className="dream-grid" style={{
+              <div className="dreams-grid" style={{
                 paddingBottom: '20px'
               }}>
                 {filteredDreams.slice(0, 9).map((dream, index) => {
