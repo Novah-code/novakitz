@@ -226,7 +226,6 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
   const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
-  const [carouselAffirmations, setCarouselAffirmations] = useState<string[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -1674,22 +1673,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     ...savedDreams.flatMap(dream => dream.tags || [])
   ])].sort();
 
-  // Update affirmations when carousel index changes
-  useEffect(() => {
-    if (viewMode === 'card' && filteredDreams.length > 0) {
-      const currentDream = filteredDreams[carouselDreamIndex];
-      if (currentDream && currentDream.response) {
-        // Parse affirmations from the response
-        // The response contains analysis and affirmations
-        const affirmationLines = currentDream.response
-          .split('\n')
-          .filter(line => line.trim().length > 0);
-        setCarouselAffirmations(affirmationLines);
-      } else {
-        setCarouselAffirmations([]);
-      }
-    }
-  }, [carouselDreamIndex, viewMode, filteredDreams]);
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
@@ -3951,45 +3934,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 </div>
               ) : (
               <>
-                {/* Affirmations Display */}
-                {carouselAffirmations.length > 0 && (
-                  <div
-                    className="affirmations-display"
-                    style={{
-                      marginBottom: '24px',
-                      padding: '20px 24px',
-                      background: 'rgba(196, 230, 195, 0.12)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '16px',
-                      border: '1px solid rgba(127, 176, 105, 0.2)',
-                      opacity: 1,
-                      animation: 'fadeInAffirmations 0.5s ease-in-out',
-                      transition: 'all 0.5s ease-in-out'
-                    }}
-                  >
-                    <div style={{
-                      fontSize: '0.9rem',
-                      color: 'rgba(0, 0, 0, 0.7)',
-                      lineHeight: '1.6',
-                      maxHeight: '120px',
-                      overflowY: 'auto',
-                      paddingRight: '8px'
-                    }}>
-                      {carouselAffirmations.slice(0, 5).map((line, idx) => (
-                        <p
-                          key={idx}
-                          style={{
-                            margin: '0 0 8px 0',
-                            padding: '0'
-                          }}
-                        >
-                          {line}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Carousel Grid */}
               <div className="dreams-grid" ref={carouselRef} style={{
                 paddingBottom: '20px'
