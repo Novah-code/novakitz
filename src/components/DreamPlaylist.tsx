@@ -170,112 +170,101 @@ export default function DreamPlaylist({
   const currentAffirmation = affirmations[currentAffirmationIndex];
 
   return (
-    <div style={{ width: '100%', paddingBottom: '40px' }}>
+    <div style={{ width: '100%' }}>
       {/* Affirmations Section */}
       {affirmations.length > 0 && (
         <div style={{
-          marginBottom: '40px',
-          padding: '24px',
-          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
-          borderRadius: '16px',
-          border: '1px solid rgba(127, 176, 105, 0.2)',
-          backdropFilter: 'blur(10px)'
+          marginBottom: '32px',
+          padding: '20px',
+          background: 'rgba(127, 176, 105, 0.08)',
+          borderRadius: '12px',
+          border: '1px solid rgba(127, 176, 105, 0.2)'
         }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '16px'
-          }}>
-            {/* Affirmation Text */}
-            <div style={{
-              flex: 1,
-              textAlign: 'center'
-            }}>
-              {isLoadingAffirmations ? (
-                <p style={{ color: 'rgba(0, 0, 0, 0.5)', margin: 0 }}>
-                  Loading affirmations...
-                </p>
-              ) : currentAffirmation ? (
-                <>
-                  <p style={{
-                    margin: '0 0 12px 0',
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: '#7FB069',
-                    lineHeight: 1.6
-                  }}>
-                    {currentAffirmation}
-                  </p>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '0.8rem',
-                    color: 'rgba(0, 0, 0, 0.4)'
-                  }}>
-                    {currentAffirmationIndex + 1} / {affirmations.length}
-                  </p>
-                </>
-              ) : (
-                <p style={{ color: 'rgba(0, 0, 0, 0.5)', margin: 0 }}>
-                  {t.noAffirmation}
-                </p>
-              )}
-            </div>
-
-            {/* Navigation Buttons */}
-            {affirmations.length > 1 && (
+          {isLoadingAffirmations ? (
+            <p style={{ color: 'rgba(0, 0, 0, 0.5)', margin: 0, textAlign: 'center' }}>
+              {language === 'ko' ? '확언을 생성 중입니다...' : 'Generating affirmations...'}
+            </p>
+          ) : currentAffirmation ? (
+            <>
+              <p style={{
+                margin: '0 0 16px 0',
+                fontSize: '1rem',
+                fontWeight: 600,
+                color: '#7FB069',
+                lineHeight: 1.5,
+                textAlign: 'center'
+              }}>
+                "{currentAffirmation}"
+              </p>
               <div style={{
                 display: 'flex',
-                gap: '12px',
-                marginTop: '12px'
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '12px'
               }}>
-                <button
-                  onClick={handlePrevAffirmation}
-                  style={{
-                    padding: '8px 16px',
-                    background: 'rgba(127, 176, 105, 0.15)',
-                    color: '#7FB069',
-                    border: '1px solid rgba(127, 176, 105, 0.3)',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontWeight: 500
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.25)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                  }}
-                >
-                  ←
-                </button>
-                <button
-                  onClick={handleNextAffirmation}
-                  style={{
-                    padding: '8px 16px',
-                    background: 'rgba(127, 176, 105, 0.15)',
-                    color: '#7FB069',
-                    border: '1px solid rgba(127, 176, 105, 0.3)',
-                    borderRadius: '8px',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontWeight: 500
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.25)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                  }}
-                >
-                  →
-                </button>
+                {affirmations.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevAffirmation}
+                      style={{
+                        padding: '6px 12px',
+                        background: 'rgba(127, 176, 105, 0.2)',
+                        color: '#7FB069',
+                        border: '1px solid rgba(127, 176, 105, 0.3)',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontWeight: 500
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                      }}
+                    >
+                      ←
+                    </button>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      color: 'rgba(0, 0, 0, 0.4)',
+                      minWidth: '50px',
+                      textAlign: 'center'
+                    }}>
+                      {currentAffirmationIndex + 1} / {affirmations.length}
+                    </span>
+                    <button
+                      onClick={handleNextAffirmation}
+                      style={{
+                        padding: '6px 12px',
+                        background: 'rgba(127, 176, 105, 0.2)',
+                        color: '#7FB069',
+                        border: '1px solid rgba(127, 176, 105, 0.3)',
+                        borderRadius: '6px',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontWeight: 500
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                      }}
+                    >
+                      →
+                    </button>
+                  </>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <p style={{ color: 'rgba(0, 0, 0, 0.5)', margin: 0, textAlign: 'center' }}>
+              {t.noAffirmation}
+            </p>
+          )}
         </div>
       )}
 
@@ -284,7 +273,8 @@ export default function DreamPlaylist({
         ref={carouselRef}
         className="dreams-grid"
         style={{
-          scrollBehavior: 'smooth'
+          scrollBehavior: 'smooth',
+          paddingBottom: '20px'
         }}
       >
         {sortedDreams.map((dream, index) => (
