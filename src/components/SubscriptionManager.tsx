@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { getRemainingAIInterpretations } from '../lib/subscription';
 import { User } from '@supabase/supabase-js';
@@ -34,13 +34,7 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
     process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://novakitz.gumroad.com/l/novakitz'
   );
 
-  useEffect(() => {
-    if (user) {
-      loadSubscriptionData();
-    }
-  }, [user]);
-
-  const loadSubscriptionData = async () => {
+  const loadSubscriptionData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -95,7 +89,13 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadSubscriptionData();
+    }
+  }, [user, loadSubscriptionData]);
 
   const getPlanBadgeColor = (planSlug: string): string => {
     if (planSlug === 'premium') {

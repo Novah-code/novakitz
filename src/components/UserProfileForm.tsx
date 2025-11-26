@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase, UserProfile, UserProfileUpdate } from '../lib/supabase';
+import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 
 interface LocationData {
@@ -324,7 +324,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   // Location data
   const [countryCode, setCountryCode] = useState('US');
   const [countryName, setCountryName] = useState('United States');
-  const [timezone, setTimezone] = useState('');
   const [detectingLocation, setDetectingLocation] = useState(true);
 
   const [loading, setLoading] = useState(false);
@@ -339,7 +338,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
 
         setCountryCode(data.country_code);
         setCountryName(data.country_name);
-        setTimezone(data.timezone);
 
         if (data.country_code === 'KR') {
           setPreferredLanguage('ko');

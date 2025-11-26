@@ -157,7 +157,7 @@ const COUNTRIES = [
   { code: 'MY', name: 'Malaysia' }
 ];
 
-export default function UserProfileForm({ user, profile, onComplete, onCancel }: UserProfileFormProps) {
+export default function UserProfileForm({ user, profile, onComplete }: UserProfileFormProps) {
   const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || 'en');
   const t = translations[preferredLanguage as 'en' | 'ko'];
 

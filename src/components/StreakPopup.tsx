@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -44,11 +44,8 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
   const [loading, setLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
 
-  useEffect(() => {
-    loadStreakData();
-  }, [user.id]);
-
-  const loadStreakData = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadStreakData = useCallback(async () => {
     try {
       console.log('Loading streak data for user:', user.id);
 
@@ -182,7 +179,11 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       });
       setLoading(false);
     }
-  };
+  }, [user.id]);
+
+  useEffect(() => {
+    loadStreakData();
+  }, [user.id, loadStreakData]);
 
   const handleShare = () => {
     if (!streakData) return;

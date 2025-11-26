@@ -293,7 +293,7 @@ export default function UserProfileForm({ user, language, onComplete }: UserProf
         profile_completed: true,
       };
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('user_profiles')
         .upsert(updateData, { onConflict: 'user_id' })
         .select();

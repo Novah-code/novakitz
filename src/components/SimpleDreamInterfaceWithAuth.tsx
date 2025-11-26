@@ -203,7 +203,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [hasProfile]);
 
   // Check premium status when user changes
   useEffect(() => {
