@@ -1133,27 +1133,6 @@ export default function SimpleDreamInterfaceWithAuth() {
         </div>
       )}
 
-      {/* Dream Playlist Modal */}
-      {showPlaylist && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', paddingTop: '40px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '900px', width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
-            <button
-              onClick={() => setShowPlaylist(false)}
-              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              ✕
-            </button>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>🎵 {t.dreamPlaylist}</h2>
-            <div onClick={(e) => e.stopPropagation()}>
-              <DreamPlaylist
-                dreams={dreams}
-                userId={user.id}
-                language={language}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
