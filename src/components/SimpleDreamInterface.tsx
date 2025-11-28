@@ -2542,33 +2542,41 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           background: rgba(0, 0, 0, 0.6);
           z-index: 3000;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
           padding: 20px;
+          overflow-y: auto;
+          overflow-x: hidden;
         }
-        
+
         .dream-detail-modal {
           background: white;
           border-radius: 24px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           width: 100%;
           max-width: 600px;
-          max-height: 90vh;
-          overflow: hidden;
+          margin: auto;
+          max-height: none;
+          overflow: visible;
           animation: modalSlideIn 0.3s ease-out;
+          display: flex;
+          flex-direction: column;
         }
-        
+
         .dream-detail-header {
           padding: 24px;
           border-bottom: 1px solid #f1f5f9;
           background: linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%);
           color: white;
+          flex-shrink: 0;
         }
-        
+
         .dream-detail-body {
           padding: 24px;
-          max-height: 60vh;
+          max-height: none;
           overflow-y: auto;
+          flex: 1;
+          -webkit-overflow-scrolling: touch;
         }
         
         .dream-detail-title {
@@ -2631,8 +2639,24 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           background: rgba(255, 255, 255, 0.3);
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
+          .dream-detail-overlay {
+            align-items: flex-start;
+            padding: 16px;
+          }
+
+          .dream-detail-modal {
+            max-height: none;
+            min-height: auto;
+            margin-top: 20px;
+            margin-bottom: 20px;
+          }
+
           .dream-detail-header {
+            padding: 16px 12px;
+          }
+
+          .dream-detail-body {
             padding: 16px 12px;
           }
 
@@ -2644,7 +2668,19 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
 
         @media (max-width: 480px) {
+          .dream-detail-overlay {
+            padding: 12px;
+          }
+
+          .dream-detail-modal {
+            border-radius: 16px;
+          }
+
           .dream-detail-header {
+            padding: 12px 8px;
+          }
+
+          .dream-detail-body {
             padding: 12px 8px;
           }
 
@@ -2666,33 +2702,41 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           background: rgba(0, 0, 0, 0.6);
           z-index: 3000;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
           padding: 20px;
+          overflow-y: auto;
+          overflow-x: hidden;
         }
-        
+
         .edit-modal-content {
           background: white;
           border-radius: 24px;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           width: 100%;
           max-width: 600px;
-          max-height: 90vh;
-          overflow: hidden;
+          margin: auto;
+          max-height: none;
+          overflow: visible;
           animation: modalSlideIn 0.3s ease-out;
+          display: flex;
+          flex-direction: column;
         }
-        
+
         .edit-modal-header {
           padding: 24px 24px 16px 24px;
           border-bottom: 1px solid #f1f5f9;
           background: #7FB069;
           color: white;
+          flex-shrink: 0;
         }
-        
+
         .edit-modal-body {
           padding: 24px;
-          max-height: 60vh;
+          max-height: none;
           overflow-y: auto;
+          flex: 1;
+          -webkit-overflow-scrolling: touch;
         }
         
         .edit-input {
