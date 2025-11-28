@@ -207,23 +207,7 @@ const translations = {
     interestsDesc: '꿈을 더 잘 이해하는 데 도움이 될 관심사를 선택하세요',
 
     // Step 5
-    typicalBedtime: '평균 취침 시간',
-    typicalWakeTime: '평균 기상 시간',
-    hour: '시',
-    min: '분',
-    am: '오전',
-    pm: '오후',
-    sleepQuality: '수면 질',
-    poor: '나쁨',
-    fair: '보통',
-    good: '좋음',
-    excellent: '매우 좋음',
-
-    // Step 6
     dreamGoalsDesc: '꿈 해석을 통해 무엇을 얻고 싶으신가요?',
-
-    // Step 7
-    additionalNotes: '',
 
     // Buttons
     next: '다음',
