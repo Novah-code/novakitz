@@ -481,7 +481,16 @@ export default function SimpleDreamInterfaceWithAuth() {
               {/* Menu Items */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
               <button
-                onClick={() => setMenuOpen(false)}
+                onClick={() => {
+                  setShowHistory(false);
+                  setShowCalendar(false);
+                  setShowPlaylist(false);
+                  setShowInsights(false);
+                  setShowStreak(false);
+                  setShowBadges(false);
+                  setShowMonthlyReport(false);
+                  setMenuOpen(false);
+                }}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
