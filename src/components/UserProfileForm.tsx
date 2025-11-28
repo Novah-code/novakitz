@@ -748,8 +748,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
               >
                 <option value="">{t.selectOccupation}</option>
-                {OCCUPATION_OPTIONS[preferredLanguage].map(option => (
-                  <option key={option} value={option}>{option}</option>
+                {(OCCUPATION_OPTIONS[preferredLanguage] || OCCUPATION_OPTIONS.en).map((option, idx) => (
+                  <option key={`${option}-${idx}`} value={option}>{option}</option>
                 ))}
               </select>
             </div>
@@ -762,9 +762,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 {t.interestsDesc}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-                {INTEREST_OPTIONS[preferredLanguage].map(interest => (
+                {(INTEREST_OPTIONS[preferredLanguage] || INTEREST_OPTIONS.en).map((interest, idx) => (
                   <button
-                    key={interest}
+                    key={`${interest}-${idx}`}
                     type="button"
                     onClick={() => toggleInterest(interest)}
                     style={{
@@ -793,9 +793,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                 {t.dreamGoalsDesc}
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {DREAM_GOAL_OPTIONS[preferredLanguage].map(goal => (
+                {(DREAM_GOAL_OPTIONS[preferredLanguage] || DREAM_GOAL_OPTIONS.en).map((goal, idx) => (
                   <button
-                    key={goal}
+                    key={`${goal}-${idx}`}
                     type="button"
                     onClick={() => toggleDreamGoal(goal)}
                     style={{
