@@ -136,9 +136,7 @@ const translations = {
     step2Title: 'Your Nickname',
     step3Title: 'Your Occupation',
     step4Title: 'Your Interests',
-    step5Title: 'Sleep Pattern',
-    step6Title: 'Dream Goals',
-    step7Title: 'Additional Notes',
+    step5Title: 'Dream Goals',
 
     // Step 1
     dateOfBirth: 'Date of Birth',
@@ -161,23 +159,7 @@ const translations = {
     interestsDesc: 'Select interests that help us understand your dreams better',
 
     // Step 5
-    typicalBedtime: 'Typical Bedtime',
-    typicalWakeTime: 'Typical Wake Time',
-    hour: 'Hour',
-    min: 'Min',
-    am: 'AM',
-    pm: 'PM',
-    sleepQuality: 'Sleep Quality',
-    poor: 'Poor',
-    fair: 'Fair',
-    good: 'Good',
-    excellent: 'Excellent',
-
-    // Step 6
     dreamGoalsDesc: 'What do you hope to gain from dream interpretation?',
-
-    // Step 7
-    additionalNotes: '',
 
     // Buttons
     next: 'Next',
@@ -202,9 +184,7 @@ const translations = {
     step2Title: '닉네임',
     step3Title: '직업',
     step4Title: '관심사',
-    step5Title: '수면 패턴',
-    step6Title: '꿈 목표',
-    step7Title: '추가 메모',
+    step5Title: '꿈 목표',
 
     // Step 1
     dateOfBirth: '생년월일',
@@ -276,7 +256,7 @@ const monthOptions = [
 
 export default function UserProfileForm({ user, profile, onComplete }: UserProfileFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 5;
 
   // Language state (must be first to use in translations)
   const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
@@ -317,9 +297,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [dreamGoals, setDreamGoals] = useState<string[]>(
     profile?.dream_goals ? profile.dream_goals.split(', ') : []
   );
-  const [bedtime, setBedtime] = useState('');
-  const [waketime, setWaketime] = useState('');
-  const [sleepQuality, setSleepQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('fair');
 
   // Location data
   const [countryCode, setCountryCode] = useState('US');
@@ -470,11 +447,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         occupation: occupation || null,
         interests: interests.length > 0 ? interests : null,
         dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
-        sleep_schedule: (bedtime || waketime || sleepQuality) ? {
-          bedtime: bedtime || null,
-          wake_time: waketime || null,
-          sleep_quality: sleepQuality
-        } : null,
         profile_completed: true
       };
 
@@ -532,7 +504,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const getStepTitle = () => {
     const titles = [
       t.step1Title, t.step2Title, t.step3Title, t.step4Title,
-      t.step5Title, t.step6Title
+      t.step5Title
     ];
     return titles[currentStep - 1];
   };
@@ -814,55 +786,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
             </div>
           )}
 
-          {/* Step 5: Sleep Pattern */}
+          {/* Step 5: Dream Goals */}
           {currentStep === 5 && (
-            <div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                  {t.typicalBedtime}
-                </label>
-                <input
-                  type="text"
-                  value={bedtime}
-                  onChange={(e) => setBedtime(e.target.value)}
-                  placeholder="e.g., 11:00 PM"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                  {t.typicalWakeTime}
-                </label>
-                <input
-                  type="text"
-                  value={waketime}
-                  onChange={(e) => setWaketime(e.target.value)}
-                  placeholder="e.g., 7:00 AM"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', outline: 'none', background: 'rgba(255, 255, 255, 0.8)' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                  {t.sleepQuality}
-                </label>
-                <select
-                  value={sleepQuality}
-                  onChange={(e) => setSleepQuality(e.target.value as any)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                >
-                  <option value="poor">{t.poor}</option>
-                  <option value="fair">{t.fair}</option>
-                  <option value="good">{t.good}</option>
-                  <option value="excellent">{t.excellent}</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Step 6: Dream Goals */}
-          {currentStep === 6 && (
             <div>
               <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
                 {t.dreamGoalsDesc}
