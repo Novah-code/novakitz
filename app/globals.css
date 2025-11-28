@@ -3737,55 +3737,82 @@ html {
 @media (max-width: 768px) {
     .dream-calendar {
         padding: 12px 8px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
-    
+
     .calendar-header {
         margin-bottom: 12px;
+        gap: 8px;
     }
-    
+
     .calendar-nav-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        flex-shrink: 0;
     }
-    
+
+    .calendar-title-header {
+        flex: 1;
+        min-width: 0;
+    }
+
     .calendar-title-header h3 {
-        font-size: 20px;
+        font-size: 16px;
+        margin: 0;
     }
-    
+
+    .today-btn {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 1px;
+        background: rgba(127, 176, 105, 0.1);
+    }
+
     .weekday-header {
-        padding: 8px 4px;
-        font-size: 12px;
+        padding: 6px 2px;
+        font-size: 11px;
+        font-weight: 600;
     }
-    
+
     .calendar-day {
-        aspect-ratio: auto;
-        min-height: 70px;
-        max-height: 75px;
-        padding: 4px 2px;
+        aspect-ratio: 1 / 1.1;
+        min-height: auto;
+        max-height: none;
+        padding: 3px 2px;
+        gap: 1px;
     }
 
     .day-number {
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 700;
+        line-height: 1;
     }
 
-    .dream-indicator {
-        font-size: 10px;
-        line-height: 1.1;
-    }
-
-    .more-dreams {
-        font-size: 10px !important;
-        font-weight: 600;
-        margin-top: 1px;
-        padding: 0 2px !important;
+    .dream-badges {
+        width: 100%;
+        gap: 1px;
     }
 
     .dream-badge {
-        font-size: 0.65rem !important;
-        padding: 2px 2px !important;
+        font-size: 0.6rem !important;
+        padding: 1px 2px !important;
         line-height: 1;
+        white-space: nowrap;
+    }
+
+    .more-dreams {
+        font-size: 9px !important;
+        font-weight: 600;
+        padding: 1px 3px !important;
+        margin: 0 !important;
     }
 
     .calendar-legend {
@@ -3793,8 +3820,8 @@ html {
         gap: 12px;
         align-items: center;
     }
-    
+
     .selected-date-dreams h3 {
-        font-size: 20px;
+        font-size: 18px;
     }
 }
