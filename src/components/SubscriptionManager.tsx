@@ -244,7 +244,7 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
               </p>
               <div className="pricing-notice">
                 <p style={{ fontSize: '0.85rem', color: '#666', margin: '8px 0 0 0' }}>
-                  💡 <strong>Note:</strong> Pricing may increase to $9.99/month in the future. Lock in the current rate by subscribing now.
+                  💡 <strong>Note:</strong> Pricing may increase to $9.99/month in the near future. Lock in the current rate by subscribing now.
                 </p>
               </div>
               <a
