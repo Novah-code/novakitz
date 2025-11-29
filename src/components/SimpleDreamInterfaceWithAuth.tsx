@@ -86,6 +86,8 @@ export default function SimpleDreamInterfaceWithAuth() {
             .eq('user_id', userId)
             .maybeSingle();
 
+          console.log('Profile query result - data:', data, 'error:', error);
+
           // Error code PGRST116 = no matching record (new user, no profile)
           if (error && error.code !== 'PGRST116') {
             console.error('Error checking profile:', error);
@@ -93,9 +95,12 @@ export default function SimpleDreamInterfaceWithAuth() {
             return false;
           }
 
-          if (data && (data.profile_completed === true || data.profile_completed === 'true')) {
-            console.log('Profile completed');
-            return true;
+          if (data) {
+            console.log('Profile data found - profile_completed value:', data.profile_completed, 'type:', typeof data.profile_completed);
+            if (data.profile_completed === true || data.profile_completed === 'true') {
+              console.log('Profile completed - returning true');
+              return true;
+            }
           }
 
           // No data = new user with no profile

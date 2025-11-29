@@ -434,6 +434,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         profile_completed: true
       };
 
+      console.log('Saving profile with updateData:', updateData);
       const { error } = await supabase
         .from('user_profiles')
         .upsert(
@@ -442,6 +443,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         );
 
       if (error) throw error;
+      console.log('Profile saved successfully');
 
       // Save nickname to nicknames table for duplicate checking
       if (fullName) {
