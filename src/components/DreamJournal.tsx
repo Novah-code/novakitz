@@ -258,7 +258,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
         )}
 
         {/* Subscription Manager - Show to authenticated users */}
-        {user && <SubscriptionManager user={user} />}
+        {user && <SubscriptionManager user={user} language={language} />}
 
         {/* Header */}
         <div className="hero-section">

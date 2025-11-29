@@ -6,8 +6,60 @@ import { getRemainingAIInterpretations } from '../lib/subscription';
 import { User } from '@supabase/supabase-js';
 import '../styles/subscription-manager.css';
 
+const translations = {
+  en: {
+    planStatus: 'Plan Status',
+    upgradeToP: 'Upgrade to Premium',
+    perMonth: '/month',
+    unlimitedRecording: 'Unlimited dream recording, but limited AI interpretations',
+    unlimitedBoth: 'Unlimited dream recording and AI interpretations',
+    aiInterpretations: 'AI Interpretations This Month',
+    unlimited: 'Unlimited',
+    reachedLimit: "You've reached your monthly limit. Upgrade to Premium for unlimited interpretations.",
+    freePlanTitle: 'Free Plan Includes:',
+    premiumPlanTitle: 'Premium Plan Includes:',
+    upgradeToPremium: 'Upgrade to Premium',
+    pricingNote: 'Note: Pricing may increase to $9.99/month in the near future. Lock in the current rate by subscribing now.',
+    expires: 'Expires:',
+    never: 'Never',
+    license: 'License:',
+    manageSubscription: 'Manage your subscription on Gumroad',
+    visitGumroad: 'Visit Gumroad',
+    dreamRecording: 'Dream Recording',
+    history: 'History',
+    days30: '30 days',
+    full: 'Full',
+    detailsToggle: 'Details'
+  },
+  ko: {
+    planStatus: '플랜 상태',
+    upgradeToP: '프리미엄 업그레이드',
+    perMonth: '/월',
+    unlimitedRecording: '무제한 꿈 기록, 제한된 AI 해석',
+    unlimitedBoth: '무제한 꿈 기록 및 AI 해석',
+    aiInterpretations: '이 달의 AI 해석',
+    unlimited: '무제한',
+    reachedLimit: '월간 한도에 도달했습니다. 무제한 해석을 위해 프리미엄으로 업그레이드하세요.',
+    freePlanTitle: '무료 플랜 포함:',
+    premiumPlanTitle: '프리미엄 플랜 포함:',
+    upgradeToPremium: '프리미엄 업그레이드',
+    pricingNote: '참고: 가격이 가까운 미래에 $9.99/월로 인상될 수 있습니다. 현재 요금으로 고정하려면 지금 구독하세요.',
+    expires: '만료:',
+    never: '무제한',
+    license: '라이선스:',
+    manageSubscription: 'Gumroad에서 구독 관리',
+    visitGumroad: 'Gumroad 방문',
+    dreamRecording: '꿈 기록',
+    history: '기록',
+    days30: '30일',
+    full: '전체',
+    detailsToggle: '상세'
+  }
+};
+
 interface SubscriptionManagerProps {
   user: User | null;
+  language?: 'en' | 'ko';
 }
 
 interface SubscriptionInfo {
@@ -25,7 +77,7 @@ interface AIUsageInfo {
   isUnlimited: boolean;
 }
 
-export default function SubscriptionManager({ user }: SubscriptionManagerProps) {
+export default function SubscriptionManager({ user, language = 'en' }: SubscriptionManagerProps) {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [aiUsage, setAIUsage] = useState<AIUsageInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,6 +85,7 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
   const [gumroadUrl] = useState(
     process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://novakitz.gumroad.com/l/novakitz'
   );
+  const t = translations[language];
 
   const loadSubscriptionData = useCallback(async () => {
     if (!user) return;
@@ -244,7 +297,7 @@ export default function SubscriptionManager({ user }: SubscriptionManagerProps) 
               </p>
               <div className="pricing-notice">
                 <p style={{ fontSize: '0.85rem', color: '#666', margin: '8px 0 0 0' }}>
-                  <strong>Note:</strong> Pricing may increase to $9.99/month in the near future. Lock in the current rate by subscribing now.
+                  <strong>{language === 'en' ? 'Note:' : '참고:'}</strong> {t.pricingNote}
                 </p>
               </div>
               <a
