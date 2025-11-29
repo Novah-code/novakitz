@@ -2,9 +2,34 @@
 
 이 파일들은 Supabase에 수동으로 적용해야 합니다.
 
-## 최근 추가된 마이그레이션
+## 최근 추가된 마이그레이션 (적용 필수)
 
-### create_affirmations_table.sql
+### 1. create_nicknames_table.sql (CRITICAL)
+
+`nicknames` 테이블을 생성합니다. 사용자 프로필 설정 중 닉네임 중복 검사에 필요한 테이블입니다.
+
+**적용 방법:**
+
+1. Supabase 콘솔 접속 (https://app.supabase.com)
+2. 프로젝트 선택
+3. SQL Editor 클릭
+4. `database/create_nicknames_table.sql`의 전체 내용 복사
+5. SQL 에디터에 붙여넣기
+6. "Run" 실행
+
+**테이블 구조:**
+- `id`: UUID, Primary Key
+- `user_id`: UUID, 사용자 참조 (UNIQUE)
+- `nickname`: TEXT, 사용자 닉네임 (UNIQUE)
+- `created_at`, `updated_at`: TIMESTAMP 타임스탬프
+
+**RLS (Row Level Security):**
+- 사용자는 자신의 닉네임만 조회/생성/수정/삭제 가능
+- 모든 사용자는 닉네임 중복 확인 가능 (프로필 폼에서 필요)
+
+---
+
+### 2. create_affirmations_table.sql
 
 `affirmations` 테이블을 생성합니다. 프로필 설정 완료 후 아침/오후/저녁 확언(affirmations)을 저장하기 위한 테이블입니다.
 
