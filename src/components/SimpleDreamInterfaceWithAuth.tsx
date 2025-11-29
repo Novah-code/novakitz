@@ -70,10 +70,11 @@ export default function SimpleDreamInterfaceWithAuth() {
     console.log('checkUserProfile called for userId:', userId);
     try {
       // Shorter timeout - 5 seconds max
+      // Default to false on timeout (show profile form) for new users
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.warn('Profile query timeout - returning true (assume completed)');
-          resolve(true); // Return true on timeout to avoid showing profile form
+          console.warn('Profile query timeout - returning false (show profile form)');
+          resolve(false); // Return false on timeout to show profile form
         }, 5000);
       });
 
@@ -85,9 +86,11 @@ export default function SimpleDreamInterfaceWithAuth() {
             .eq('user_id', userId)
             .maybeSingle();
 
+          // Error code PGRST116 = no matching record (new user, no profile)
           if (error && error.code !== 'PGRST116') {
             console.error('Error checking profile:', error);
-            return true; // Default to true on error
+            // For other errors, return false to show profile form (safer for new users)
+            return false;
           }
 
           if (data && (data.profile_completed === true || data.profile_completed === 'true')) {
@@ -95,11 +98,14 @@ export default function SimpleDreamInterfaceWithAuth() {
             return true;
           }
 
-          console.log('Profile not completed');
+          // No data = new user with no profile
+          // Or profile not completed
+          console.log('Profile not completed or user is new');
           return false;
         } catch (queryError) {
           console.error('Exception in queryPromise:', queryError);
-          return true; // Default to true on exception
+          // Return false on error to show profile form (safer for new users)
+          return false;
         }
       })();
 
@@ -108,7 +114,8 @@ export default function SimpleDreamInterfaceWithAuth() {
       return result;
     } catch (error) {
       console.error('Error checking profile:', error);
-      return true; // Default to true on error
+      // Return false on error to show profile form (safer for new users)
+      return false;
     }
   };
 
