@@ -97,15 +97,21 @@ export default function SimpleDreamInterfaceWithAuth() {
 
           if (data) {
             console.log('Profile data found - profile_completed value:', data.profile_completed, 'type:', typeof data.profile_completed);
+            console.log('Boolean check: data.profile_completed === true:', data.profile_completed === true);
+            console.log('String check: data.profile_completed === "true":', data.profile_completed === 'true');
             if (data.profile_completed === true || data.profile_completed === 'true') {
               console.log('Profile completed - returning true');
               return true;
+            } else {
+              console.log('Profile data exists but profile_completed is false/null');
             }
+          } else {
+            console.log('No profile data found');
           }
 
           // No data = new user with no profile
           // Or profile not completed
-          console.log('Profile not completed or user is new');
+          console.log('Profile not completed or user is new - returning false');
           return false;
         } catch (queryError) {
           console.error('Exception in queryPromise:', queryError);
