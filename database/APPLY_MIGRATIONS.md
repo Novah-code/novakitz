@@ -56,6 +56,37 @@
 **RLS (Row Level Security):**
 - 사용자는 자신의 확언만 조회/생성/수정/삭제 가능
 
+---
+
+### 3. create_monthly_reports_table.sql
+
+`monthly_reports` 테이블을 생성합니다. 월말에 자동으로 생성되는 월간 꿈 리포트를 저장하기 위한 테이블입니다.
+
+**적용 방법:**
+
+1. Supabase 콘솔 접속 (https://app.supabase.com)
+2. 프로젝트 선택
+3. SQL Editor 클릭
+4. `database/create_monthly_reports_table.sql`의 전체 내용 복사
+5. SQL 에디터에 붙여넣기
+6. "Run" 실행
+
+**테이블 구조:**
+- `id`: UUID, Primary Key
+- `user_id`: UUID, 사용자 참조
+- `month`: TEXT, 월 정보 (예: "December 2025")
+- `year_month`: DATE, 월의 첫날 (정렬/필터링용)
+- `total_dreams`: INTEGER, 그 달에 기록한 꿈의 개수
+- `average_mood`: TEXT, 평균 감정
+- `top_keywords`: JSONB, 자주 나온 키워드 배열
+- `mood_distribution`: JSONB, 감정별 분포
+- `patterns`: JSONB, 반복되는 패턴 배열
+- `status`: TEXT, 리포트 상태 ('draft' | 'published' | 'archived')
+- `created_at`, `published_at`, `updated_at`: TIMESTAMP 타임스탬프
+
+**RLS (Row Level Security):**
+- 사용자는 자신의 리포트만 조회/생성/수정/삭제 가능
+
 ## 기존 마이그레이션
 
 다른 모든 마이그레이션 파일은 이미 자동으로 적용되었습니다:
