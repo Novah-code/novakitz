@@ -4146,10 +4146,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           {dream.userName && dream.userName !== 'Anonymous' && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
                           {dream.date} {dream.time && `at ${dream.time}`}
                         </div>
-                        <div className="dream-meta">
-                          {dream.userName && dream.userName !== 'Anonymous' && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
-                          {dream.date} {dream.time && `at ${dream.time}`}
-                        </div>
 
                         {/* Tags Display */}
                         {(dream.autoTags && dream.autoTags.length > 0) && (
