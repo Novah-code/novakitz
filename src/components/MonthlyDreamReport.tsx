@@ -401,7 +401,7 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
     // Statistics section
     pdf.setFontSize(12);
     pdf.setTextColor(127, 176, 105);
-    pdf.text('📊 STATISTICS', margin, yPosition);
+    pdf.text('STATISTICS', margin, yPosition);
     yPosition += 8;
 
     pdf.setFontSize(10);
@@ -414,7 +414,7 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
     // Top Keywords section
     pdf.setFontSize(12);
     pdf.setTextColor(127, 176, 105);
-    pdf.text('🔤 TOP KEYWORDS', margin, yPosition);
+    pdf.text('TOP KEYWORDS', margin, yPosition);
     yPosition += 8;
 
     pdf.setFontSize(10);
@@ -437,7 +437,7 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
 
     pdf.setFontSize(12);
     pdf.setTextColor(127, 176, 105);
-    pdf.text('😊 MOOD BREAKDOWN', margin, yPosition);
+    pdf.text('MOOD BREAKDOWN', margin, yPosition);
     yPosition += 10;
 
     // Create canvas for pie chart
@@ -494,7 +494,7 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
       pdf.addPage();
       yPosition = 20;
     }
-    pdf.text('🔍 PATTERNS & INSIGHTS', margin, yPosition);
+    pdf.text('PATTERNS & INSIGHTS', margin, yPosition);
     yPosition += 8;
 
     pdf.setFontSize(10);
