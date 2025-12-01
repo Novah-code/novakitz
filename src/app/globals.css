@@ -2628,7 +2628,12 @@ body {
     .nav-links {
         display: none;
     }
-    
+
+    /* Dream Journal Mobile - Reduce padding to prevent scroll separation */
+    .dream-journal {
+        padding: 40px 0 80px;
+    }
+
     /* Hero Responsive */
     .hero-teacup {
         font-size: 60px;
