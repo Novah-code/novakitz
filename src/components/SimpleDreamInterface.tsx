@@ -1007,13 +1007,19 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
-      
+
       // Short click
       if (!hasSeenVoiceGuide) {
         setShowVoiceGuide(true);
         return;
       }
       handleAnalyze();
+    } else if (isRecording) {
+      // User released during active voice recording - stop it
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      setIsRecording(false);
     }
   };
 
@@ -1021,6 +1027,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
+    }
+    // Also cancel any active voice recording if user leaves
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.abort();
+      setIsRecording(false);
     }
   };
 
