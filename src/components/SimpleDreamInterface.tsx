@@ -3835,13 +3835,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <div className="dream-history fade-in" style={{
               display: 'flex',
               flexDirection: 'column',
-              height: '90vh',
-              maxHeight: '90vh',
-              overflowY: 'auto'
+              height: 'calc(100vh - 100px)',
+              maxHeight: 'calc(100vh - 100px)',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000,
+              background: 'white'
             }}>
               <div className="dream-history-header" style={{
-                position: 'sticky',
-                top: 0,
+                flexShrink: 0,
                 background: 'white',
                 zIndex: 10,
                 paddingBottom: '16px',
@@ -3945,6 +3950,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
               <div className="dream-history-container" style={{
                 paddingTop: '20px',
+                paddingLeft: '24px',
+                paddingRight: '24px',
                 position: 'relative',
                 flex: 1,
                 overflowY: 'auto',
@@ -4191,14 +4198,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               </>
               )}
 
-              {/* Close Button */}
+              {/* Close Button - Sticky Footer */}
               <div style={{
                 padding: '16px 24px',
                 borderTop: '1px solid #e5e7eb',
                 background: 'white',
                 display: 'flex',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 100
               }}>
                 <button
                   onClick={() => setShowHistory(false)}
