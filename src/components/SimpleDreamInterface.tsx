@@ -3838,21 +3838,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
           {showHistory && (
             <div className="dream-history fade-in" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: 'calc(100vh - 100px)',
-              maxHeight: 'calc(100vh - 100px)',
               position: 'fixed',
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
               zIndex: 1000,
-              background: 'white'
+              background: 'white',
+              overflowY: 'auto',
+              overflowX: 'hidden'
             }}>
               <div className="dream-history-header" style={{
-                flexShrink: 0,
                 background: 'white',
+                position: 'sticky',
+                top: 0,
                 zIndex: 10,
                 paddingBottom: '16px',
                 borderBottom: '1px solid #e5e7eb'
@@ -3985,10 +3984,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 paddingTop: '20px',
                 paddingLeft: '24px',
                 paddingRight: '24px',
-                position: 'relative',
-                flex: 1,
-                overflowY: 'auto',
-                overflowX: 'hidden'
+                paddingBottom: '40px',
+                position: 'relative'
               }}>
               {viewMode === 'calendar' ? (
                 <div style={{
