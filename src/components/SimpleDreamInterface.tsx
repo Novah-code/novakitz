@@ -227,6 +227,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
   const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [showSearchFilter, setShowSearchFilter] = useState(false);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -3866,10 +3867,38 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     ) : null}
                   </div>
 
+                  {/* Search & Filter Toggle Button */}
+                  <button
+                    onClick={() => setShowSearchFilter(!showSearchFilter)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      background: showSearchFilter ? '#f9fafb' : 'white',
+                      color: '#1f2937',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      flexShrink: 0
+                    }}
+                  >
+                    {showSearchFilter ? 'Hide' : 'Search & Filter'}
+                  </button>
+                </div>
 
-                  {/* Search and Filter Controls - FORCED RIGHT SIDE */}
-                  <div style={{display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0}}>
-                    <div className="search-container">
+                {/* Collapsible Search and Filter Controls */}
+                {showSearchFilter && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    paddingBottom: '16px',
+                    borderBottom: '1px solid #e5e7eb',
+                    marginBottom: '16px'
+                  }}>
+                    <div className="search-container" style={{flex: '1', minWidth: '200px'}}>
                       <input
                         type="text"
                         placeholder={t.searchPlaceholder}
@@ -3878,7 +3907,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         className="search-input"
                       />
                     </div>
-                    <div className="filter-container">
+                    <div className="filter-container" style={{minWidth: '150px'}}>
                       <select
                         value={selectedTag}
                         onChange={(e) => setSelectedTag(e.target.value)}
@@ -3895,7 +3924,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Daily Rituals Section */}
