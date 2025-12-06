@@ -390,7 +390,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                   mood: dream.mood,
                   tags: dream.tags,
                   date: dream.date,
-                  time: dream.time
+                  time: dream.time,
+                  image: dream.image || undefined,
+                  display_name: dream.display_name || null
                 }]);
 
                 // Mark as synced
@@ -640,9 +642,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       }
     }
 
-    // If this is the first dream and no image is selected, use default image
-    const isFirstDream = savedDreams.length === 0;
-    const defaultImage = isFirstDream && !dreamImage ? '/Default-dream.png' : dreamImage;
+    // Use default image if no image is selected
+    const defaultImage = !dreamImage ? '/Default-dream.png' : dreamImage;
 
     const now = new Date();
     // Use the selected dream date (defaults to today, but can be changed by user)
@@ -686,8 +687,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time || '',
+            image: defaultImage || undefined,
+            display_name: userNickname || undefined,
             created_at: now.toISOString()
-          } as any); // Cast to any to handle user_nickname not being in OfflineDream interface
+          } as any); // Cast to any to handle display_name not being in OfflineDream interface
 
           const updatedDreams = [newDream, ...savedDreams];
           setSavedDreams(updatedDreams);
@@ -736,6 +739,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             date: newDream.date,
             time: newDream.time,
             image: defaultImage || undefined,
+            display_name: userNickname || null,
             created_at: now.toISOString()
           }])
           .select()
