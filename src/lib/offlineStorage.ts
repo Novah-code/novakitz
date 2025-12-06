@@ -12,6 +12,8 @@ interface OfflineDream {
   tags: string[];
   date: string;
   time?: string;
+  image?: string;
+  display_name?: string;
   created_at: string;
   synced: boolean;
 }
