@@ -19,7 +19,9 @@ Novakitz provides an AI-powered dream journaling and interpretation platform tha
 ### 3.1 Account Creation
 - You must provide accurate and complete information when creating an account
 - You are responsible for maintaining the confidentiality of your account credentials
-- You must be at least 13 years old to use this Service
+- **Age Requirement**: You must be at least 13 years old (or 14 years old in Korea) to use this Service
+- Users under 14 in Korea need parental/legal guardian consent
+- We do not knowingly collect data from children under the applicable age limit
 - One person or legal entity may maintain no more than one account
 
 ### 3.2 Account Security
@@ -55,6 +57,20 @@ Novakitz provides an AI-powered dream journaling and interpretation platform tha
 - You may cancel your subscription at any time
 - Cancellations take effect at the end of the current billing period
 - No refunds will be provided for partial subscription periods except as required by law
+
+### 5.4 Payment Processor Relationship
+Payments are processed by Gumroad, an independent third-party service.
+
+By subscribing, you also agree to:
+- Gumroad's Terms of Service
+- Gumroad's Privacy Policy
+
+We do not store your payment card information. All payment data is handled securely by Gumroad.
+
+### 5.5 Electronic Financial Transactions (Korea)
+For Korean users, subscription payments are subject to the Electronic Financial Transactions Act (전자금융거래법).
+
+Transaction records are maintained for 5 years as required by Korean law. You have the right to request transaction records at any time.
 
 ## 6. Acceptable Use
 
@@ -96,6 +112,14 @@ You agree NOT to:
 - AI services have usage limits to ensure fair access
 - We reserve the right to limit or throttle excessive usage
 - Service availability may be subject to third-party AI provider limitations
+
+### 9.3 Medical Disclaimer
+The Service is NOT:
+- A substitute for professional mental health care
+- Medical diagnosis or treatment
+- Crisis intervention service
+
+**If you are experiencing a mental health crisis, please contact appropriate emergency services immediately.**
 
 ## 10. Disclaimers
 
@@ -221,7 +245,9 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 ### 3.1 계정 생성
 - 계정 생성 시 정확하고 완전한 정보를 제공해야 합니다
 - 계정 자격 증명의 기밀 유지에 대한 책임이 있습니다
-- 서비스 사용을 위해 최소 만 13세 이상이어야 합니다
+- **연령 요건**: 서비스 사용을 위해 최소 만 13세 이상(한국의 경우 만 14세)이어야 합니다
+- 한국의 만 14세 미만 사용자는 법정대리인의 동의가 필요합니다
+- 해당 연령 미만 아동의 정보는 고의로 수집하지 않습니다
 - 한 사람 또는 법인은 하나의 계정만 유지할 수 있습니다
 
 ### 3.2 계정 보안
@@ -257,6 +283,20 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 - 언제든지 구독을 취소할 수 있습니다
 - 취소는 현재 청구 기간이 끝날 때 적용됩니다
 - 법률에서 요구하는 경우를 제외하고 부분 구독 기간에 대한 환불은 제공되지 않습니다
+
+### 5.4 결제 처리 관계
+결제는 독립적인 제3자 서비스인 Gumroad에서 처리됩니다.
+
+구독 시 다음에도 동의하게 됩니다:
+- Gumroad 이용약관
+- Gumroad 개인정보 처리방침
+
+카드 정보는 저장하지 않습니다. 모든 결제 데이터는 Gumroad에서 안전하게 처리됩니다.
+
+### 5.5 전자금융거래 (한국)
+한국 사용자의 경우 구독 결제는 전자금융거래법의 적용을 받습니다.
+
+한국 법에 따라 거래 기록은 5년간 보관됩니다. 언제든지 거래 기록을 요청할 권리가 있습니다.
 
 ## 6. 허용 가능한 사용
 
@@ -298,6 +338,14 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 - AI 서비스에는 공정한 접근을 보장하기 위한 사용 제한이 있습니다
 - 과도한 사용을 제한하거나 조절할 권리를 보유합니다
 - 서비스 가용성은 제3자 AI 제공업체 제한의 영향을 받을 수 있습니다
+
+### 9.3 의료 면책
+본 서비스는 다음이 아닙니다:
+- 전문 정신 건강 관리의 대체
+- 의학적 진단이나 치료
+- 위기 개입 서비스
+
+**정신 건강 위기를 겪고 있는 경우 즉시 적절한 응급 서비스에 연락하십시오.**
 
 ## 10. 면책조항
 

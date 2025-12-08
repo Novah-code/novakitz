@@ -10,10 +10,18 @@ This Refund Policy explains our policy regarding refunds for Novakitz premium su
 
 ## 1. General Policy
 
-### 1.1 30-Day Money-Back Guarantee
-We offer a **30-day money-back guarantee** for first-time premium subscribers. If you are not satisfied with your premium subscription for any reason, you may request a full refund within 30 days of your initial purchase, **provided that you have not actively used the service**.
+### 1.1 Limited Refund Policy
+Refunds may be granted within 30 days for **technical issues or billing errors only**.
 
-### 1.2 Conditions
+We do NOT offer refunds for:
+- Change of mind after using the service
+- Dissatisfaction with AI interpretations
+- Normal service usage
+
+### 1.2 30-Day Money-Back Guarantee (No-Usage Only)
+We offer a **30-day money-back guarantee** for first-time premium subscribers who have **NOT used the service**. If you have not actively used any premium features, you may request a full refund within 30 days of your initial purchase.
+
+### 1.3 Conditions
 The 30-day money-back guarantee applies when:
 - This is your first premium subscription purchase
 - You request a refund within 30 days of the purchase date
@@ -304,10 +312,18 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 
 ## 1. 일반 정책
 
-### 1.1 30일 환불 보장
-최초 프리미엄 구독자에게 **30일 환불 보장**을 제공합니다. 어떤 이유로든 프리미엄 구독에 만족하지 않는 경우 최초 구매일로부터 30일 이내에 전액 환불을 요청할 수 있습니다. **단, 서비스를 실제로 이용하지 않았을 경우에만 해당됩니다**.
+### 1.1 제한적 환불 정책
+환불은 **기술적 문제나 청구 오류의 경우에만** 30일 이내에 승인될 수 있습니다.
 
-### 1.2 조건
+다음의 경우 환불을 제공하지 않습니다:
+- 서비스 이용 후 마음이 바뀐 경우
+- AI 해석에 대한 불만족
+- 정상적인 서비스 이용
+
+### 1.2 30일 환불 보장 (미이용자만)
+서비스를 **이용하지 않은** 최초 프리미엄 구독자에게 **30일 환불 보장**을 제공합니다. 프리미엄 기능을 실제로 이용하지 않은 경우 최초 구매일로부터 30일 이내에 전액 환불을 요청할 수 있습니다.
+
+### 1.3 조건
 다음의 경우 30일 환불 보장이 적용됩니다:
 - 최초 프리미엄 구독 구매인 경우
 - 구매일로부터 30일 이내에 환불을 요청하는 경우
