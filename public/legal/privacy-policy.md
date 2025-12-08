@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated: December 8, 2024**
+**Last Updated: December 8, 2025**
 
 ## Introduction
 
@@ -185,7 +185,7 @@ We process your data based on:
 - Right to object to automated decision-making
 
 ### 10.3 Data Protection Officer
-For GDPR-related inquiries, contact: privacy@novakitz.com
+For GDPR-related inquiries, contact: contact@novakitz.shop
 
 ## 11. CCPA Rights (California Users)
 
@@ -202,7 +202,7 @@ If you are a California resident, you have rights under the California Consumer 
 See Section 1 for categories of personal information we collect.
 
 ### 11.3 How to Exercise Rights
-Contact us at privacy@novakitz.com with subject "CCPA Request"
+Contact us at contact@novakitz.shop with subject "CCPA Request"
 
 ## 12. Cookie Policy
 
@@ -238,7 +238,7 @@ You can control cookies through:
 You can unsubscribe from promotional emails:
 - Click "Unsubscribe" link in emails
 - Update email preferences in account settings
-- Contact us at support@novakitz.com
+- Contact us at contact@novakitz.shop
 
 ## 14. Changes to This Privacy Policy
 
@@ -259,7 +259,7 @@ Our service may contain links to third-party websites and services. We are not r
 
 If you have questions, concerns, or requests regarding this Privacy Policy:
 
-**Email**: privacy@novakitz.com
+**Email**: contact@novakitz.shop
 **Website**: www.novakitz.shop
 **Response Time**: We aim to respond within 30 days
 
@@ -446,6 +446,6 @@ Novakitz가 합병, 인수 또는 자산 매각에 관여하는 경우 귀하의
 
 본 개인정보 처리방침에 대한 질문, 우려 사항 또는 요청이 있으시면:
 
-**이메일**: privacy@novakitz.com
+**이메일**: contact@novakitz.shop
 **웹사이트**: www.novakitz.shop
 **응답 시간**: 30일 이내에 응답하는 것을 목표로 합니다

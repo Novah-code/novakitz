@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated: December 8, 2024**
+**Last Updated: December 8, 2025**
 
 ## 1. Acceptance of Terms
 
@@ -149,20 +149,24 @@ Upon termination:
 - Your subscription benefits will end
 - Your data may be deleted according to our retention policy
 
-## 15. Dispute Resolution
+## 15. Governing Law and Jurisdiction
 
 ### 15.1 Governing Law
-These Terms are governed by the laws of [Your Jurisdiction], without regard to conflict of law principles.
+These Terms of Service shall be governed by and construed in accordance with the laws of the Republic of Korea, without regard to its conflict of law provisions.
 
-### 15.2 Arbitration
-Any disputes shall be resolved through binding arbitration rather than in court, except where prohibited by law.
+### 15.2 Jurisdiction
+Any disputes arising from or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts of Seoul, Republic of Korea.
 
-### 15.3 Class Action Waiver
-You agree to resolve disputes individually and waive the right to participate in class actions.
+### 15.3 Dispute Resolution
+We encourage users to contact us first to resolve disputes amicably. If informal resolution fails, disputes will be resolved in accordance with Korean law through the Seoul courts.
 
-## 16. Geographic Restrictions
+## 16. Service Provider
 
-The Service is operated from [Your Location]. We make no representation that the Service is appropriate or available for use in all locations. Access from territories where the content is illegal is prohibited.
+### 16.1 Operator
+Novakitz is operated from the Republic of Korea.
+
+### 16.2 Geographic Availability
+We make no representation that the Service is appropriate or available for use in all locations. Access from territories where the content is illegal is prohibited.
 
 ## 17. Children's Privacy
 
@@ -187,7 +191,7 @@ Our failure to enforce any right or provision of these Terms will not be conside
 ## 22. Contact Information
 
 For questions about these Terms, please contact us at:
-- Email: support@novakitz.com
+- Email: contact@novakitz.shop
 - Website: www.novakitz.shop
 
 ## 23. Language
@@ -347,20 +351,24 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 - 구독 혜택이 종료됩니다
 - 당사의 보유 정책에 따라 데이터가 삭제될 수 있습니다
 
-## 15. 분쟁 해결
+## 15. 준거법 및 관할
 
 ### 15.1 준거법
-본 약관은 법률 저촉 원칙을 고려하지 않고 [귀하의 관할권]의 법률에 따라 규율됩니다.
+본 서비스 약관은 법률 저촉 원칙을 고려하지 않고 대한민국 법률에 따라 규율되고 해석됩니다.
 
-### 15.2 중재
-법률에서 금지되지 않는 한 모든 분쟁은 법원이 아닌 구속력 있는 중재를 통해 해결됩니다.
+### 15.2 관할권
+본 약관 또는 서비스와 관련하여 발생하는 모든 분쟁은 대한민국 서울 법원의 전속 관할에 따릅니다.
 
-### 15.3 집단 소송 포기
-개별적으로 분쟁을 해결하고 집단 소송에 참여할 권리를 포기하는 데 동의합니다.
+### 15.3 분쟁 해결
+분쟁을 우호적으로 해결하기 위해 먼저 당사에 연락하실 것을 권장합니다. 비공식적 해결이 실패할 경우 서울 법원을 통해 한국 법률에 따라 분쟁이 해결됩니다.
 
-## 16. 지리적 제한
+## 16. 서비스 제공자
 
-서비스는 [귀하의 위치]에서 운영됩니다. 당사는 서비스가 모든 위치에서 적절하거나 사용 가능하다고 주장하지 않습니다. 콘텐츠가 불법인 지역에서의 접근은 금지됩니다.
+### 16.1 운영자
+Novakitz는 대한민국에서 운영됩니다.
+
+### 16.2 지리적 가용성
+당사는 서비스가 모든 위치에서 적절하거나 사용 가능하다고 주장하지 않습니다. 콘텐츠가 불법인 지역에서의 접근은 금지됩니다.
 
 ## 17. 아동 개인정보 보호
 
@@ -385,7 +393,7 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 ## 22. 연락처 정보
 
 본 약관에 대한 질문이 있으시면 다음으로 연락해 주십시오:
-- 이메일: support@novakitz.com
+- 이메일: contact@novakitz.shop
 - 웹사이트: www.novakitz.shop
 
 ## 23. 언어
