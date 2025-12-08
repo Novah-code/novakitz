@@ -11,21 +11,27 @@ This Refund Policy explains our policy regarding refunds for Novakitz premium su
 ## 1. General Policy
 
 ### 1.1 Limited Refund Policy
-Refunds may be granted within 30 days for **technical issues or billing errors only**.
+Refunds are granted within 30 days for:
+- **Technical issues** that prevented service access
+- **Billing errors** (incorrect charges, double charges)
+- **Minimal testing usage only** (up to 3 dream entries or AI interpretations)
 
 We do NOT offer refunds for:
-- Change of mind after using the service
-- Dissatisfaction with AI interpretations
-- Normal service usage
+- Active service usage (more than 3 dream entries or AI interpretations)
+- Dissatisfaction with AI interpretation quality
+- Change of mind after substantial service use
 
-### 1.2 30-Day Money-Back Guarantee (No-Usage Only)
-We offer a **30-day money-back guarantee** for first-time premium subscribers who have **NOT used the service**. If you have not actively used any premium features, you may request a full refund within 30 days of your initial purchase.
+### 1.2 7-Day Trial Refund
+We offer a **7-day full refund** for first-time premium subscribers with minimal usage:
+- Request within 7 days of purchase
+- Used 3 or fewer dream entries or AI interpretations
+- This allows you to test the service before committing
 
 ### 1.3 Conditions
-The 30-day money-back guarantee applies when:
+The refund guarantee applies when:
 - This is your first premium subscription purchase
-- You request a refund within 30 days of the purchase date
-- **You have not actively used the service** (e.g., created dream entries, generated AI interpretations, or used premium features)
+- You request within the applicable timeframe (7 days for trial, 30 days for technical issues)
+- **You have used the service minimally** (3 or fewer dream entries/interpretations) OR experienced technical issues
 - You have not violated our Terms of Service
 - You have not engaged in fraudulent or abusive behavior
 
@@ -41,12 +47,12 @@ You may be eligible for a refund if:
 
 ### 2.2 NOT Eligible for Refund
 Refunds will NOT be provided for:
-- **Subscriptions where the service has been actively used** (created dreams, generated AI interpretations, used premium features)
-- Renewal subscriptions (only first purchase qualifies for 30-day guarantee)
-- Subscriptions cancelled after 30 days from initial purchase
+- **Substantial service usage** (more than 3 dream entries or AI interpretations)
+- Dissatisfaction with AI interpretation quality after using the service
+- Renewal subscriptions (only first purchase qualifies for 7-day trial)
+- Subscriptions cancelled after the applicable refund period
 - Partial subscription periods (prorated refunds)
-- Change of mind after 30 days
-- Change of mind after actively using the service
+- Change of mind after 7 days or substantial usage
 - Failure to cancel auto-renewal before the next billing cycle
 - Violations of Terms of Service
 - Account termination due to policy violations
@@ -313,21 +319,27 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 ## 1. 일반 정책
 
 ### 1.1 제한적 환불 정책
-환불은 **기술적 문제나 청구 오류의 경우에만** 30일 이내에 승인될 수 있습니다.
+다음의 경우 30일 이내 환불이 승인됩니다:
+- **기술적 문제**로 서비스 접근이 불가능한 경우
+- **청구 오류** (잘못된 청구, 이중 청구)
+- **최소한의 테스트 사용만** (꿈 일기 3개 이하 또는 AI 해석 3회 이하)
 
 다음의 경우 환불을 제공하지 않습니다:
-- 서비스 이용 후 마음이 바뀐 경우
-- AI 해석에 대한 불만족
-- 정상적인 서비스 이용
+- 적극적인 서비스 이용 (꿈 일기 3개 초과 또는 AI 해석 3회 초과)
+- AI 해석 품질에 대한 불만족
+- 실질적인 서비스 이용 후 마음 변경
 
-### 1.2 30일 환불 보장 (미이용자만)
-서비스를 **이용하지 않은** 최초 프리미엄 구독자에게 **30일 환불 보장**을 제공합니다. 프리미엄 기능을 실제로 이용하지 않은 경우 최초 구매일로부터 30일 이내에 전액 환불을 요청할 수 있습니다.
+### 1.2 7일 체험 환불
+최소한의 사용으로 최초 프리미엄 구독자에게 **7일 전액 환불**을 제공합니다:
+- 구매 후 7일 이내 요청
+- 꿈 일기 3개 이하 또는 AI 해석 3회 이하 사용
+- 서비스를 충분히 테스트한 후 결정할 수 있도록 함
 
 ### 1.3 조건
-다음의 경우 30일 환불 보장이 적용됩니다:
+환불 보장은 다음의 경우 적용됩니다:
 - 최초 프리미엄 구독 구매인 경우
-- 구매일로부터 30일 이내에 환불을 요청하는 경우
-- **서비스를 실제로 이용하지 않은 경우** (예: 꿈 일기 작성, AI 해석 생성, 프리미엄 기능 사용 등을 하지 않음)
+- 해당 기간 내 요청 (체험의 경우 7일, 기술적 문제의 경우 30일)
+- **서비스를 최소한으로 사용** (꿈 일기/해석 3회 이하) 또는 기술적 문제 발생
 - 이용약관을 위반하지 않은 경우
 - 사기 또는 남용 행위에 관여하지 않은 경우
 
@@ -343,12 +355,12 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 
 ### 2.2 환불 불가
 다음의 경우 환불이 제공되지 않습니다:
-- **서비스를 실제로 이용한 경우** (꿈 일기 작성, AI 해석 생성, 프리미엄 기능 사용 등)
-- 갱신 구독(30일 보장은 최초 구매에만 적용)
-- 최초 구매로부터 30일 후 취소된 구독
+- **실질적인 서비스 이용** (꿈 일기 3개 초과 또는 AI 해석 3회 초과)
+- 서비스 이용 후 AI 해석 품질에 대한 불만족
+- 갱신 구독(7일 체험은 최초 구매에만 적용)
+- 해당 환불 기간 후 취소된 구독
 - 부분 구독 기간(비례 환불)
-- 30일 후 마음이 바뀐 경우
-- 서비스를 이용한 후 마음이 바뀐 경우
+- 7일 후 또는 실질적 사용 후 마음 변경
 - 다음 청구 주기 전에 자동 갱신을 취소하지 않은 경우
 - 이용약관 위반
 - 정책 위반으로 인한 계정 해지
