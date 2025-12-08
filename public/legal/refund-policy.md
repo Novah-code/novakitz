@@ -6,17 +6,18 @@
 
 This Refund Policy explains our policy regarding refunds for Novakitz premium subscriptions purchased through Gumroad. All refunds are processed through Gumroad's platform and are subject to both our policy and Gumroad's refund terms. Please read this policy carefully before purchasing a subscription.
 
-**Important**: Gumroad reserves the right to issue refunds within 90 days of purchase at their discretion to prevent chargebacks. All refund requests must be processed through Gumroad's system.
+**Important**: All refund requests must be processed through Gumroad's system. While Gumroad technically allows refunds within 90 days, our policy is to honor refund requests within 30 days of purchase.
 
 ## 1. General Policy
 
 ### 1.1 30-Day Money-Back Guarantee
-We offer a **30-day money-back guarantee** for first-time premium subscribers. If you are not satisfied with your premium subscription for any reason, you may request a full refund within 30 days of your initial purchase.
+We offer a **30-day money-back guarantee** for first-time premium subscribers. If you are not satisfied with your premium subscription for any reason, you may request a full refund within 30 days of your initial purchase, **provided that you have not actively used the service**.
 
 ### 1.2 Conditions
 The 30-day money-back guarantee applies when:
 - This is your first premium subscription purchase
 - You request a refund within 30 days of the purchase date
+- **You have not actively used the service** (e.g., created dream entries, generated AI interpretations, or used premium features)
 - You have not violated our Terms of Service
 - You have not engaged in fraudulent or abusive behavior
 
@@ -32,11 +33,12 @@ You may be eligible for a refund if:
 
 ### 2.2 NOT Eligible for Refund
 Refunds will NOT be provided for:
+- **Subscriptions where the service has been actively used** (created dreams, generated AI interpretations, used premium features)
 - Renewal subscriptions (only first purchase qualifies for 30-day guarantee)
 - Subscriptions cancelled after 30 days from initial purchase
 - Partial subscription periods (prorated refunds)
 - Change of mind after 30 days
-- Failure to use the service
+- Change of mind after actively using the service
 - Failure to cancel auto-renewal before the next billing cycle
 - Violations of Terms of Service
 - Account termination due to policy violations
@@ -270,9 +272,9 @@ Our support team operates:
 
 ### 16.2 Good Faith Expectation
 We expect users to:
-- Use the service genuinely before requesting refunds
+- Understand that refunds are only available if the service was not actively used
 - Provide honest feedback about refund reasons
-- Not abuse the refund policy to gain temporary free access
+- Not abuse the refund policy to gain temporary free access to premium features
 
 ## 17. Final Notes
 
@@ -303,12 +305,13 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 ## 1. 일반 정책
 
 ### 1.1 30일 환불 보장
-최초 프리미엄 구독자에게 **30일 환불 보장**을 제공합니다. 어떤 이유로든 프리미엄 구독에 만족하지 않는 경우 최초 구매일로부터 30일 이내에 전액 환불을 요청할 수 있습니다.
+최초 프리미엄 구독자에게 **30일 환불 보장**을 제공합니다. 어떤 이유로든 프리미엄 구독에 만족하지 않는 경우 최초 구매일로부터 30일 이내에 전액 환불을 요청할 수 있습니다. **단, 서비스를 실제로 이용하지 않았을 경우에만 해당됩니다**.
 
 ### 1.2 조건
 다음의 경우 30일 환불 보장이 적용됩니다:
 - 최초 프리미엄 구독 구매인 경우
 - 구매일로부터 30일 이내에 환불을 요청하는 경우
+- **서비스를 실제로 이용하지 않은 경우** (예: 꿈 일기 작성, AI 해석 생성, 프리미엄 기능 사용 등을 하지 않음)
 - 이용약관을 위반하지 않은 경우
 - 사기 또는 남용 행위에 관여하지 않은 경우
 
@@ -324,11 +327,12 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 
 ### 2.2 환불 불가
 다음의 경우 환불이 제공되지 않습니다:
+- **서비스를 실제로 이용한 경우** (꿈 일기 작성, AI 해석 생성, 프리미엄 기능 사용 등)
 - 갱신 구독(30일 보장은 최초 구매에만 적용)
 - 최초 구매로부터 30일 후 취소된 구독
 - 부분 구독 기간(비례 환불)
 - 30일 후 마음이 바뀐 경우
-- 서비스를 사용하지 않은 경우
+- 서비스를 이용한 후 마음이 바뀐 경우
 - 다음 청구 주기 전에 자동 갱신을 취소하지 않은 경우
 - 이용약관 위반
 - 정책 위반으로 인한 계정 해지
