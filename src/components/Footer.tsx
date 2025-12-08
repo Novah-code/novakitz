@@ -28,7 +28,7 @@ export default function Footer() {
                 <h4>Connect</h4>
                 <a href="https://twitter.com/novadream_ai" target="_blank">Twitter</a>
                 <a href="https://instagram.com/novadream.ai" target="_blank">Instagram</a>
-                <a href="mailto:hello@novadream.ai">Contact</a>
+                <a href="mailto:contact@novakitz.shop">Contact</a>
               </div>
             </div>
           </div>
@@ -41,11 +41,12 @@ export default function Footer() {
             
             <div className="footer-legal">
               <p className="footer-bottom">
-                © {new Date().getFullYear()} Nova Dream. All rights reserved.
+                © {new Date().getFullYear()} NovaKits. All rights reserved.
               </p>
               <div className="legal-links">
-                <a href="/privacy">Privacy</a>
-                <a href="/terms">Terms</a>
+                <a href="/legal/terms">Terms of Service</a>
+                <a href="/legal/privacy">Privacy Policy</a>
+                <a href="/legal/refund">Refund Policy</a>
               </div>
             </div>
           </div>
