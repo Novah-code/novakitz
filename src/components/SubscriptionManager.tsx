@@ -269,7 +269,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               <ul>
                 <li>📝 Unlimited dream recording</li>
                 <li>🤖 7 AI interpretations per month</li>
-                <li>📅 30-day dream history</li>
+                <li>📅 Unlimited dream history</li>
                 <li>🎯 Basic dream patterns</li>
               </ul>
             </div>
@@ -359,9 +359,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
         </div>
         <div className="stat">
           <span className="stat-label">History</span>
-          <span className="stat-value">
-            {subscription.planSlug === 'premium' ? 'Full' : '30 days'}
-          </span>
+          <span className="stat-value">Unlimited</span>
         </div>
       </div>
     </div>

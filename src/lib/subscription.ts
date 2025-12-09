@@ -298,8 +298,8 @@ export async function getUserPlanInfo(userId: string): Promise<{
       planSlug: 'free',
       planName: 'Free',
       aiInterpretationsPerMonth: 7,
-      historyDays: 30,
-      isUnlimited: false
+      historyDays: 999999,
+      isUnlimited: true
     };
   }
 }
