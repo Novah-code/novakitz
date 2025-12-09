@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { getRemainingAIInterpretations } from '../lib/subscription';
 import { User } from '@supabase/supabase-js';
+import PaymentMethodModal from './PaymentMethodModal';
 import '../styles/subscription-manager.css';
 
 const translations = {
@@ -82,9 +83,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
   const [aiUsage, setAIUsage] = useState<AIUsageInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
-  const [gumroadUrl] = useState(
-    process.env.NEXT_PUBLIC_GUMROAD_PRODUCT_URL || 'https://novakitz.gumroad.com/l/novakitz'
-  );
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const t = translations[language];
 
   const loadSubscriptionData = useCallback(async () => {
@@ -300,14 +299,13 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                   <strong>{language === 'en' ? 'Note:' : '참고:'}</strong> {t.pricingNote}
                 </p>
               </div>
-              <a
-                href={gumroadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setShowPaymentModal(true)}
                 className="upgrade-button"
+                style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
                 Upgrade to Premium
-              </a>
+              </button>
             </div>
           )}
 
@@ -362,6 +360,20 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
           <span className="stat-value">Unlimited</span>
         </div>
       </div>
+
+      {/* Payment Method Modal */}
+      {showPaymentModal && user && (
+        <PaymentMethodModal
+          onClose={() => {
+            setShowPaymentModal(false);
+            // Refresh subscription data after payment
+            loadSubscriptionData();
+          }}
+          language={language}
+          userId={user.id}
+          userEmail={user.email || ''}
+        />
+      )}
     </div>
   );
 }

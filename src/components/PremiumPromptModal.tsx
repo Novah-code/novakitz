@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
+import PaymentMethodModal from './PaymentMethodModal';
 import '../styles/premium-prompt-modal.css';
 
 interface PremiumPromptModalProps {
@@ -19,6 +20,7 @@ export default function PremiumPromptModal({
   const [isPremium, setIsPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [hasSeenPrompt, setHasSeenPrompt] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Helper function to reset the prompt for testing
   const resetPremiumPrompt = () => {
@@ -28,10 +30,7 @@ export default function PremiumPromptModal({
     }
   };
 
-  const gumroadMonthlyUrl = process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz';
-  const gumroadYearlyUrl = process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz_year';
+  // Removed gumroad URLs - using PaymentMethodModal instead
 
   useEffect(() => {
     if (!user) {
@@ -128,6 +127,20 @@ export default function PremiumPromptModal({
     setShowModal(false);
     onClose();
   };
+
+  if (showPaymentModal && user) {
+    return (
+      <PaymentMethodModal
+        onClose={() => {
+          setShowPaymentModal(false);
+          onClose();
+        }}
+        language={language}
+        userId={user.id}
+        userEmail={user.email || ''}
+      />
+    );
+  }
 
   if (!showModal || isPremium || hasSeenPrompt) {
     return null;
@@ -263,14 +276,16 @@ export default function PremiumPromptModal({
 
         {/* CTA Buttons */}
         <div className="premium-prompt-actions" style={{flexDirection: 'column', gap: '8px'}}>
-          <div style={{display: 'flex', gap: '8px'}}>
-            <a href={gumroadMonthlyUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1}}>
-              {language === 'ko' ? '월간 구독' : 'Monthly ($4.99)'}
-            </a>
-            <a href={gumroadYearlyUrl} target="_blank" rel="noopener noreferrer" className="btn-upgrade" style={{flex: 1, background: 'linear-gradient(135deg, #7fb069 0%, #5a8449 100%)'}}>
-              {language === 'ko' ? '연간 구독' : 'Yearly ($49.99)'}
-            </a>
-          </div>
+          <button
+            onClick={() => {
+              setShowModal(false);
+              setShowPaymentModal(true);
+            }}
+            className="btn-upgrade"
+            style={{width: '100%'}}
+          >
+            {language === 'ko' ? '프리미엄 구독하기' : 'Subscribe to Premium'}
+          </button>
           <button className="btn-skip" onClick={handleClose} style={{width: '100%'}}>
             {language === 'ko' ? '나중에' : 'Maybe Later'}
           </button>
