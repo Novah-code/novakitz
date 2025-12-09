@@ -22,7 +22,6 @@ export default function TossPaymentWidget({
   onError
 }: TossPaymentWidgetProps) {
   const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
-  const paymentMethodsWidgetRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,14 +47,12 @@ export default function TossPaymentWidget({
         const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
         paymentWidgetRef.current = paymentWidget;
 
-        // Render payment methods
-        if (paymentMethodsWidgetRef.current) {
-          await paymentWidget.renderPaymentMethods(
-            paymentMethodsWidgetRef.current,
-            { value: price },
-            { variantKey: 'DEFAULT' }
-          );
-        }
+        // Render payment methods with selector string
+        await paymentWidget.renderPaymentMethods(
+          '#payment-methods',
+          { value: price },
+          { variantKey: 'DEFAULT' }
+        );
 
         setIsLoading(false);
       } catch (err) {
@@ -129,7 +126,7 @@ export default function TossPaymentWidget({
 
       {/* Payment Methods Widget */}
       <div
-        ref={paymentMethodsWidgetRef}
+        id="payment-methods"
         style={{
           minHeight: isLoading ? '200px' : 'auto',
           opacity: isLoading ? 0 : 1,

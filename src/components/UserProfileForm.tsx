@@ -343,9 +343,15 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       }
     }
 
-    // Validate Step 2 (nickname format and uniqueness)
-    if (currentStep === 2 && fullName) {
-      // First validate nickname format
+    // Validate Step 2 (nickname is REQUIRED)
+    if (currentStep === 2) {
+      // Check if nickname is empty
+      if (!fullName || fullName.trim().length === 0) {
+        setError(preferredLanguage === 'ko' ? '닉네임을 입력해주세요' : 'Please enter a nickname');
+        return;
+      }
+
+      // Validate nickname format
       const validation = validateNickname(fullName);
       if (!validation.isValid) {
         setError(validation.error);
@@ -833,7 +839,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
             </button>
           )}
 
-          {currentStep > 1 && currentStep < totalSteps && (
+          {currentStep > 2 && currentStep < totalSteps && (
             <button
               onClick={handleSkip}
               disabled={loading}

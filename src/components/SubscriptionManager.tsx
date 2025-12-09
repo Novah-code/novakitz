@@ -330,7 +330,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                   Manage your subscription on Gumroad
                 </p>
                 <a
-                  href={gumroadUrl}
+                  href="https://novakitz.gumroad.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="manage-button"
