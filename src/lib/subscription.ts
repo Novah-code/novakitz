@@ -33,7 +33,7 @@ export async function getUserPlan(userId: string) {
     // No active subscription - return free plan
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 10,
+      aiInterpretationsPerMonth: 7,
       historyDays: 999999, // Unlimited history for free users now
       isActive: false
     };
@@ -42,7 +42,7 @@ export async function getUserPlan(userId: string) {
     // Default to free plan on error
     return {
       planSlug: 'free',
-      aiInterpretationsPerMonth: 10,
+      aiInterpretationsPerMonth: 7,
       historyDays: 999999,
       isActive: false
     };
@@ -113,8 +113,8 @@ export async function canAnalyzeDream(userId: string): Promise<{
     // Default to allow on error to avoid blocking users
     return {
       allowed: true,
-      remaining: 10,
-      limit: 10
+      remaining: 7,
+      limit: 7
     };
   }
 }
@@ -190,8 +190,8 @@ export async function getRemainingAIInterpretations(userId: string): Promise<{
     console.error('Error getting remaining interpretations:', error);
     return {
       used: 0,
-      limit: 10,
-      remaining: 10,
+      limit: 7,
+      remaining: 7,
       isUnlimited: false
     };
   }
@@ -297,7 +297,7 @@ export async function getUserPlanInfo(userId: string): Promise<{
     return {
       planSlug: 'free',
       planName: 'Free',
-      aiInterpretationsPerMonth: 10,
+      aiInterpretationsPerMonth: 7,
       historyDays: 30,
       isUnlimited: false
     };

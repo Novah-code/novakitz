@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
 -- Insert default plans
 INSERT INTO public.subscription_plans (plan_name, plan_slug, price_cents, ai_interpretations_per_month, history_days, description)
 VALUES
-    ('Free', 'free', NULL, 10, 30, 'Unlimited dream recording, 10 AI interpretations per month, 30-day history'),
+    ('Free', 'free', NULL, 7, 30, 'Unlimited dream recording, 7 AI interpretations per month, 30-day history'),
     ('Premium', 'premium', 499, 999999, 999999, '$4.99/month - Unlimited AI interpretations and full history')
 ON CONFLICT (plan_slug) DO NOTHING;
 
@@ -137,7 +137,7 @@ BEGIN
     -- Default to free plan if no active subscription
     IF NOT FOUND THEN
         RETURN QUERY
-        SELECT 'free'::TEXT, 10::INTEGER, 30::INTEGER;
+        SELECT 'free'::TEXT, 7::INTEGER, 30::INTEGER;
     END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;

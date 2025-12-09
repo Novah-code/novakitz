@@ -161,7 +161,7 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '꿈 기록 무제한' : 'Unlimited dream recording'}</span>
               </li>
               <li>
-                <span>{language === 'ko' ? '월 10회 AI 해석' : '10 AI interpretations/month'}</span>
+                <span>{language === 'ko' ? '월 7회 AI 해석' : '7 AI interpretations/month'}</span>
               </li>
               <li>
                 <span>{language === 'ko' ? '짧은 해석 (150-200자)' : 'Brief interpretation (150-200 chars)'}</span>
