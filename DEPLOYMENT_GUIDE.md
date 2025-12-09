@@ -99,7 +99,7 @@ vercel deploy --prod
 ### 1. Premium Subscription Tiers ✅
 
 **Free User Limits:**
-- 10 AI interpretations per month
+- 7 AI interpretations per month
 - 150-200 word analysis
 - 1 affirmation per check-in time
 - View monthly report only
@@ -278,7 +278,7 @@ Use this checklist to verify all features work correctly:
 - [ ] Report expands/collapses
 
 ### Monthly Usage
-- [ ] Free user: Shows "X/10" after analysis
+- [ ] Free user: Shows "X/7" after analysis
 - [ ] Color changes: green → yellow → red
 - [ ] Resets on new month
 - [ ] Premium user: Unlimited shown

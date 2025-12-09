@@ -268,7 +268,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               <h5>Free Plan Includes:</h5>
               <ul>
                 <li>📝 Unlimited dream recording</li>
-                <li>🤖 10 AI interpretations per month</li>
+                <li>🤖 7 AI interpretations per month</li>
                 <li>📅 30-day dream history</li>
                 <li>🎯 Basic dream patterns</li>
               </ul>

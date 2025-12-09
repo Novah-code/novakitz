@@ -14,7 +14,7 @@ All premium features have been **implemented, integrated, tested, and verified**
 ## What Was Implemented & Tested
 
 ### 1. ✅ Premium Subscription System
-- **Free Plan:** 10 AI analyses/month, 150-200 word limit, 1 affirmation/day
+- **Free Plan:** 7 AI analyses/month, 150-200 word limit, 1 affirmation/day
 - **Premium Plan:** Unlimited analyses, 500+ words, 3 affirmations/day, PDF export
 - **Status:** Fully implemented and tested
 
