@@ -610,7 +610,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               <button
                 onClick={() => {
                   console.log('Dream Playlist button clicked!');
-                  setShowPlaylist(true);
+                  alert(language === 'ko' ? '🎵 준비 중입니다\n\n드림 플레이리스트 기능은 현재 개발 중입니다.\n곧 만나보실 수 있습니다!' : '🎵 Coming Soon\n\nDream Playlist feature is currently under development.\nStay tuned!');
                   setMenuOpen(false);
                 }}
                 style={{
