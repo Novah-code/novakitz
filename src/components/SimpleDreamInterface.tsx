@@ -148,6 +148,10 @@ const translations = {
     card: 'Card',
     list: 'List',
     todaysPractice: "Today's Practice",
+    dreamAnalysis: 'Dream Analysis',
+    dreamSymbols: 'Dream Symbols',
+    innerMessage: 'Inner Message',
+    somethingToReflect: 'Something to Reflect On',
     cancel: 'Cancel',
     save: 'Save',
     dreamTitle: 'Dream title...',
@@ -174,6 +178,10 @@ const translations = {
     card: '카드',
     list: '목록',
     todaysPractice: '오늘의 실천',
+    dreamAnalysis: '꿈 분석',
+    dreamSymbols: '꿈의 상징',
+    innerMessage: '내면의 메시지',
+    somethingToReflect: '성찰할 점',
     cancel: '취소',
     save: '저장',
     dreamTitle: '꿈 제목...',
@@ -4558,7 +4566,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     {selectedDream.text}
                   </div>
                   <div className="dream-detail-response">
-                    <div className="dream-detail-response-title">Dream Analysis</div>
+                    <div className="dream-detail-response-title">{t.dreamAnalysis}</div>
                     <div className="analysis-content">
                       {selectedDream.response.split('\n\n').map((section, index) => {
                         const trimmedSection = section.trim();
@@ -4569,7 +4577,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">Dream Symbols</h4>
+                              <h4 className="section-title">{t.dreamSymbols}</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -4578,7 +4586,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">Inner Message</h4>
+                              <h4 className="section-title">{t.innerMessage}</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -4596,7 +4604,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h4 className="section-title">Something to Reflect On</h4>
+                              <h4 className="section-title">{t.somethingToReflect}</h4>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -4688,7 +4696,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">Dream Symbols</h3>
+                              <h3 className="section-title">{t.dreamSymbols}</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -4697,7 +4705,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">Inner Message</h3>
+                              <h3 className="section-title">{t.innerMessage}</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
@@ -4715,7 +4723,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           if (!content) return null; // Skip if no content
                           return (
                             <div key={index} className="analysis-section">
-                              <h3 className="section-title">Something to Reflect On</h3>
+                              <h3 className="section-title">{t.somethingToReflect}</h3>
                               <p className="section-text">{content}</p>
                             </div>
                           );
