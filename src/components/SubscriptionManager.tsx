@@ -283,6 +283,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                 <li>📅 Full dream history</li>
                 <li>🎯 Advanced dream analysis</li>
                 <li>📊 Detailed insights</li>
+                <li>✨ Daily affirmations from recent dreams</li>
               </ul>
             </div>
           )}

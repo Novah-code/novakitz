@@ -57,7 +57,8 @@ export default function PaymentMethodModal({
         patterns: 'Advanced pattern analysis',
         report: 'Monthly insights report',
         export: 'PDF export',
-        affirmations: 'Daily affirmations'
+        affirmations: 'Daily affirmations',
+        noDreamAffirmations: 'Affirmations from recent dreams on no-dream days'
       },
       paymentMethods: {
         global: 'Credit Card, PayPal via Gumroad',
@@ -79,7 +80,8 @@ export default function PaymentMethodModal({
         patterns: '고급 패턴 분석',
         report: '월간 인사이트 리포트',
         export: 'PDF 내보내기',
-        affirmations: '일일 확언'
+        affirmations: '일일 확언',
+        noDreamAffirmations: '꿈 없는 날 최근 꿈 기반 확언'
       },
       paymentMethods: {
         global: '신용카드, PayPal (Gumroad)',
@@ -154,6 +156,7 @@ export default function PaymentMethodModal({
                 <li>📈 {t.features.report}</li>
                 <li>📄 {t.features.export}</li>
                 <li>💫 {t.features.affirmations}</li>
+                <li>🌙 {t.features.noDreamAffirmations}</li>
               </ul>
 
               {/* Subscribe Button */}
@@ -203,6 +206,7 @@ export default function PaymentMethodModal({
                     <li>📈 {t.features.report}</li>
                     <li>📄 {t.features.export}</li>
                     <li>💫 {t.features.affirmations}</li>
+                    <li>🌙 {t.features.noDreamAffirmations}</li>
                   </ul>
 
                   {/* Subscribe Button */}

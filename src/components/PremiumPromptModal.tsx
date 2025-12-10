@@ -226,6 +226,9 @@ export default function PremiumPromptModal({
               <li className="premium-feature">
                 <span>{language === 'ko' ? '무제한 열람' : 'Unlimited viewing'}</span>
               </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '꿈 없는 날 최근 꿈 기반 확언' : 'Affirmations from recent dreams on no-dream days'}</span>
+              </li>
             </ul>
           </div>
 
@@ -269,6 +272,9 @@ export default function PremiumPromptModal({
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '무제한 열람' : 'Unlimited viewing'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '꿈 없는 날 최근 꿈 기반 확언' : 'Affirmations from recent dreams on no-dream days'}</span>
               </li>
             </ul>
           </div>
