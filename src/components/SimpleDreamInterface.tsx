@@ -1605,12 +1605,36 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
   const [showShareToast, setShowShareToast] = useState(false);
 
-  const shareDream = (dream: DreamEntry, e?: React.MouseEvent) => {
+  const shareDream = async (dream: DreamEntry, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
     }
-    setShareModalDream(dream);
-    setShowShareModal(true);
+
+    const dreamTitle = dream.title || t.dreamEntry;
+    const dreamText = dream.text.length > 200
+      ? dream.text.substring(0, 200) + '...'
+      : dream.text;
+
+    const shareText = language === 'ko'
+      ? `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
+      : `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
+
+    // Try native share API first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: dreamTitle,
+          text: shareText
+        });
+      } catch (err) {
+        // User cancelled or error - just log it
+        console.log('Share cancelled or failed', err);
+      }
+    } else {
+      // Fallback to modal for desktop
+      setShareModalDream(dream);
+      setShowShareModal(true);
+    }
   };
 
   const handleShareOption = (platform: 'link' | 'instagram' | 'native') => {
@@ -4419,10 +4443,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     display: 'flex',
                     gap: '8px',
                     alignItems: 'center',
-                    zIndex: 15,
+                    zIndex: 1000,
                     flexWrap: 'wrap',
                     justifyContent: 'flex-end',
-                    maxWidth: '90%'
+                    maxWidth: window.innerWidth < 480 ? '50%' : '90%'
                   }}>
                     {/* Share button */}
                     <button
@@ -4431,30 +4455,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         shareDream(selectedDream, e);
                       }}
                       className="dream-detail-share-btn"
+                      title={language === 'ko' ? '공유' : 'Share'}
                       style={{
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
-                        borderRadius: '8px',
-                        padding: window.innerWidth < 480 ? '4px 8px' : '8px 12px',
-                        fontSize: window.innerWidth < 480 ? '11px' : '14px',
-                        fontWeight: '600',
+                        borderRadius: '50%',
+                        width: window.innerWidth < 480 ? '32px' : '36px',
+                        height: window.innerWidth < 480 ? '32px' : '36px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         color: 'white',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: window.innerWidth < 480 ? '2px' : '4px',
-                        whiteSpace: 'nowrap'
+                        flexShrink: 0
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                     >
-                      <svg width={window.innerWidth < 480 ? '12' : '14'} height={window.innerWidth < 480 ? '12' : '14'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width={window.innerWidth < 480 ? '16' : '18'} height={window.innerWidth < 480 ? '16' : '18'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                         <polyline points="16 6 12 2 8 6"></polyline>
                         <line x1="12" y1="2" x2="12" y2="15"></line>
                       </svg>
-                      {window.innerWidth < 480 ? '공유' : (language === 'ko' ? '공유' : 'Share')}
                     </button>
 
                     {/* Edit button */}
