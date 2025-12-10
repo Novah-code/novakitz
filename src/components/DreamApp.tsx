@@ -23,10 +23,18 @@ export default function DreamApp() {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Load preferred language from localStorage
+        // Load preferred language from localStorage or detect from browser
         const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
         if (savedLanguage) {
           setLanguage(savedLanguage);
+        } else {
+          // Auto-detect language from browser settings
+          const browserLanguage = navigator.language || navigator.languages?.[0];
+          const isKorean = browserLanguage?.toLowerCase().startsWith('ko');
+          const detectedLanguage = isKorean ? 'ko' : 'en';
+          setLanguage(detectedLanguage);
+          // Save detected language to localStorage
+          localStorage.setItem('preferredLanguage', detectedLanguage);
         }
 
         // Check for auth messages from URL params
