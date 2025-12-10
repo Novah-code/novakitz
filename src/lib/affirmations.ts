@@ -265,3 +265,125 @@ export async function deleteAffirmationsForTime(
     return false;
   }
 }
+
+/**
+ * Generate affirmations based on recent dreams (for "No dream" days)
+ * Premium users only - generates 3 affirmations from last 7 days of dreams
+ */
+export async function generateAffirmationsFromRecentDreams(
+  userId: string,
+  language: 'en' | 'ko' = 'en'
+): Promise<string[]> {
+  try {
+    // Get user's plan - only for premium users
+    const plan = await getUserPlan(userId);
+    if (plan.planSlug !== 'premium') {
+      console.log('Not a premium user, skipping recent dreams affirmations');
+      return [];
+    }
+
+    // Get recent dreams (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const { data: recentDreams, error } = await supabase
+      .from('dreams')
+      .select('text, title, created_at')
+      .eq('user_id', userId)
+      .gte('created_at', sevenDaysAgo.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error || !recentDreams || recentDreams.length === 0) {
+      console.log('No recent dreams found for affirmation generation');
+      return [];
+    }
+
+    // Combine recent dream texts
+    const dreamSummary = recentDreams
+      .map((d, i) => `Dream ${i + 1}: ${d.text.substring(0, 200)}`)
+      .join('\n\n');
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('Gemini API key not available');
+      return [];
+    }
+
+    const prompt = language === 'ko'
+      ? `다음은 사용자의 최근 꿈들입니다. 이 꿈들의 전체적인 패턴과 주제를 분석하여 개인의 성장과 자기 사랑을 위한 정확히 3개의 확언(affirmation)을 생성해주세요.
+
+최근 꿈들:
+${dreamSummary}
+
+요구사항:
+- 각 확언은 한 문장
+- 현재형으로 작성 (예: "나는 할 수 있다" 또는 "나는 충분하다")
+- 여러 꿈의 공통 테마와 심리적 의미를 반영
+- 사용자가 실제로 믿을 수 있고 공감할 수 있는 내용
+- 너무 길지 않게 (15-30단어)
+
+다음 형식으로만 응답하세요:
+1. [첫 번째 확언]
+2. [두 번째 확언]
+3. [세 번째 확언]`
+      : `Here are the user's recent dreams. Analyze the overall patterns and themes to generate exactly 3 affirmations for personal growth and self-love.
+
+Recent dreams:
+${dreamSummary}
+
+Requirements:
+- Each affirmation is one sentence
+- Written in present tense (e.g., "I am capable" or "I am enough")
+- Reflects common themes and psychological meaning across the dreams
+- Something the user can genuinely believe and connect with
+- Concise (15-30 words each)
+
+Respond in this format only:
+1. [First affirmation]
+2. [Second affirmation]
+3. [Third affirmation]`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error:', response.status, errorText);
+      return [];
+    }
+
+    const data = await response.json();
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]) {
+      const text = data.candidates[0].content.parts[0].text;
+
+      // Parse affirmations from response
+      const affirmations = text
+        .split('\n')
+        .filter((line: string) => line.match(/^\d+\./))
+        .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
+        .filter((line: string) => line.length > 0);
+
+      return affirmations.slice(0, 3);
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error generating affirmations from recent dreams:', error);
+    return [];
+  }
+}

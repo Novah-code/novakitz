@@ -3817,6 +3817,24 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               created_at: now.toISOString()
                             }]);
                           console.log('No dream marker saved to calendar with date:', now);
+
+                          // Generate affirmations from recent dreams for premium users
+                          const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
+                          const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
+
+                          if (affirmations.length > 0) {
+                            // Determine check-in time based on current hour
+                            const currentHour = now.getHours();
+                            let checkInTime: 'morning' | 'afternoon' | 'evening' = 'morning';
+                            if (currentHour >= 12 && currentHour < 18) {
+                              checkInTime = 'afternoon';
+                            } else if (currentHour >= 18) {
+                              checkInTime = 'evening';
+                            }
+
+                            await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
+                            console.log(`Generated ${affirmations.length} affirmations from recent dreams`);
+                          }
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);
                         }
