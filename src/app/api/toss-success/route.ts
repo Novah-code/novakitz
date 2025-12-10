@@ -4,6 +4,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+// Validate environment variables
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing required Supabase environment variables');
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const paymentKey = searchParams.get('paymentKey');

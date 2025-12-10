@@ -32,6 +32,7 @@ export default function DreamApp() {
         // Check for auth messages from URL params
         const error = searchParams.get('error');
         const success = searchParams.get('success');
+        const payment = searchParams.get('payment');
 
         if (error) {
           if (error === 'auth_failed') {
@@ -44,6 +45,19 @@ export default function DreamApp() {
         } else if (success === 'logged_in') {
           // 로그인 성공 알림 제거
           // setAuthMessage('성공적으로 로그인되었습니다! 🎉');
+        } else if (payment === 'success') {
+          setAuthMessage(language === 'ko' ? '🎉 결제가 완료되었습니다! 프리미엄 기능을 이용하실 수 있습니다.' : '🎉 Payment successful! You can now enjoy premium features.');
+          // Clear payment param from URL after showing message
+          setTimeout(() => {
+            router.replace('/');
+          }, 3000);
+        } else if (payment === 'failed') {
+          const errorMsg = searchParams.get('error') || (language === 'ko' ? '결제에 실패했습니다.' : 'Payment failed.');
+          setAuthMessage(`❌ ${errorMsg}`);
+          // Clear payment param from URL
+          setTimeout(() => {
+            router.replace('/');
+          }, 3000);
         }
 
         // Get initial session
