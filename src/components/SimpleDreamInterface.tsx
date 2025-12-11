@@ -3797,26 +3797,46 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       if (user) {
                         try {
                           const now = new Date();
-                          await supabase
+                          const todayStart = new Date(now);
+                          todayStart.setHours(0, 0, 0, 0);
+                          const todayEnd = new Date(now);
+                          todayEnd.setHours(23, 59, 59, 999);
+
+                          // Check if there's already a "no dream" entry for today
+                          const { data: existingNoDream } = await supabase
                             .from('dreams')
-                            .insert([{
-                              user_id: user.id,
-                              title: language === 'ko' ? '꿈 안 꿈' : 'No Dream',
-                              content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
-                              mood: 'peaceful',
-                              tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
-                              date: now.toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              }),
-                              time: now.toLocaleTimeString('en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              }),
-                              created_at: now.toISOString()
-                            }]);
-                          console.log('No dream marker saved to calendar with date:', now);
+                            .select('id')
+                            .eq('user_id', user.id)
+                            .contains('tags', [language === 'ko' ? '꿈안꿈' : 'no-dream'])
+                            .gte('created_at', todayStart.toISOString())
+                            .lte('created_at', todayEnd.toISOString())
+                            .limit(1);
+
+                          // Only insert if no "no dream" entry exists for today
+                          if (!existingNoDream || existingNoDream.length === 0) {
+                            await supabase
+                              .from('dreams')
+                              .insert([{
+                                user_id: user.id,
+                                title: language === 'ko' ? '꿈 안 꿈' : 'No Dream',
+                                content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
+                                mood: 'peaceful',
+                                tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
+                                date: now.toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                }),
+                                time: now.toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }),
+                                created_at: now.toISOString()
+                              }]);
+                            console.log('No dream marker saved to calendar with date:', now);
+                          } else {
+                            console.log('No dream entry already exists for today, skipping insert');
+                          }
 
                           // Generate affirmations from recent dreams for premium users
                           const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
@@ -4461,18 +4481,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
 
-                  {/* Button container for top-right alignment */}
+                  {/* Button container for top-left alignment */}
                   <div style={{
                     position: 'absolute',
                     top: '12px',
-                    right: '12px',
+                    left: '12px',
                     display: 'flex',
                     gap: '8px',
                     alignItems: 'center',
                     zIndex: 1000,
                     flexWrap: 'wrap',
-                    justifyContent: 'flex-end',
-                    maxWidth: window.innerWidth < 480 ? '50%' : '90%'
+                    justifyContent: 'flex-start',
+                    maxWidth: window.innerWidth < 480 ? '85%' : '90%'
                   }}>
                     {/* Share button */}
                     <button
