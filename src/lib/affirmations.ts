@@ -66,6 +66,10 @@ Respond in this format only:
 2. [Second affirmation]
 ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
 
+    // Add timeout to Gemini API call
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
@@ -79,9 +83,10 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
               text: prompt
             }]
           }]
-        })
+        }),
+        signal: controller.signal,
       }
-    );
+    ).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -344,6 +349,10 @@ Respond in this format only:
 2. [Second affirmation]
 3. [Third affirmation]`;
 
+    // Add timeout to Gemini API call
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
@@ -357,9 +366,10 @@ Respond in this format only:
               text: prompt
             }]
           }]
-        })
+        }),
+        signal: controller.signal,
       }
-    );
+    ).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
       const errorText = await response.text();

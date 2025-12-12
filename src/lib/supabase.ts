@@ -40,7 +40,9 @@ const customStorage = {
 
       // Also set as cookie for mobile compatibility
       const maxAge = 60 * 60 * 24 * 365; // 1 year
-      document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+      const isProduction = window.location.protocol === 'https:';
+      const secureFlag = isProduction ? '; Secure' : '';
+      document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`;
     } catch (e) {
       console.error('Error writing storage:', e);
     }
