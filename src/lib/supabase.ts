@@ -3,13 +3,74 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
+// Custom storage implementation with fallback to cookies
+const customStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window === 'undefined') return null;
+
+      // Try localStorage first
+      const item = window.localStorage.getItem(key);
+      if (item) return item;
+
+      // Fallback to reading from cookie
+      const cookies = document.cookie.split(';');
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === key) {
+          return decodeURIComponent(value);
+        }
+      }
+      return null;
+    } catch (e) {
+      console.error('Error reading storage:', e);
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      if (typeof window === 'undefined') return;
+
+      // Try localStorage first
+      try {
+        window.localStorage.setItem(key, value);
+      } catch (e) {
+        console.warn('localStorage not available, using cookies');
+      }
+
+      // Also set as cookie for mobile compatibility
+      const maxAge = 60 * 60 * 24 * 365; // 1 year
+      document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+    } catch (e) {
+      console.error('Error writing storage:', e);
+    }
+  },
+  removeItem: (key: string): void => {
+    try {
+      if (typeof window === 'undefined') return;
+
+      // Remove from localStorage
+      try {
+        window.localStorage.removeItem(key);
+      } catch (e) {
+        // Ignore
+      }
+
+      // Remove cookie
+      document.cookie = `${key}=; path=/; max-age=0`;
+    } catch (e) {
+      console.error('Error removing storage:', e);
+    }
+  }
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storage: customStorage,
     storageKey: 'sb-auth-token'
   }
 })
