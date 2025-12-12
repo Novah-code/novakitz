@@ -42,6 +42,8 @@ export default function DreamApp() {
         const success = searchParams.get('success');
         const payment = searchParams.get('payment');
 
+        console.log('URL params:', { error, success, payment, hash: window.location.hash });
+
         if (error) {
           if (error === 'auth_failed') {
             setAuthMessage('로그인에 실패했습니다. 다시 시도해 주세요.');
@@ -69,10 +71,17 @@ export default function DreamApp() {
         }
 
         // Get initial session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('Initial session check:', { hasSession: !!session, userId: session?.user?.id, error: sessionError });
+
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Clear URL hash and params after successful auth
+          if (window.location.hash || window.location.search) {
+            console.log('Clearing URL hash and search params');
+            router.replace('/');
+          }
           await loadUserProfile(session.user.id);
         } else {
           setLoading(false);
@@ -92,15 +101,19 @@ export default function DreamApp() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id);
-      
+
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
+        console.log('User logged in, closing auth modal');
         setShowAuth(false);
-        // 로그인 성공 알림 제거
-        // setAuthMessage('로그인 성공! 🎉');
+        // Clear URL after auth
+        if (window.location.hash || window.location.search) {
+          router.replace('/');
+        }
         await loadUserProfile(session.user.id);
       } else {
+        console.log('User logged out');
         setUserProfile(null);
         setShowProfileForm(false);
         setLoading(false); // 로그아웃 시에만 로딩 false
