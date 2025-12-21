@@ -3840,20 +3840,34 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
                           // Generate affirmations from recent dreams for premium users
                           const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
-                          const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
 
-                          if (affirmations.length > 0) {
-                            // Determine check-in time based on current hour
-                            const currentHour = now.getHours();
-                            let checkInTime: 'morning' | 'afternoon' | 'evening' = 'morning';
-                            if (currentHour >= 12 && currentHour < 18) {
-                              checkInTime = 'afternoon';
-                            } else if (currentHour >= 18) {
-                              checkInTime = 'evening';
+                          // Check if user is premium first to avoid unnecessary API calls
+                          const { getUserPlan } = await import('../lib/subscription');
+                          const userPlan = await getUserPlan(user.id);
+
+                          if (userPlan.planSlug === 'premium') {
+                            const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
+
+                            if (affirmations.length > 0) {
+                              // Determine check-in time based on current hour
+                              const currentHour = now.getHours();
+                              let checkInTime: 'morning' | 'afternoon' | 'evening' = 'morning';
+                              if (currentHour >= 12 && currentHour < 18) {
+                                checkInTime = 'afternoon';
+                              } else if (currentHour >= 18) {
+                                checkInTime = 'evening';
+                              }
+
+                              await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
+                              console.log(`Generated ${affirmations.length} affirmations from recent dreams`);
+
+                              // Update response message to inform user
+                              setDreamResponse(
+                                language === 'ko'
+                                  ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다.\n최근 꿈을 바탕으로 확언을 생성했어요! 🌟'
+                                  : 'You didn\'t remember a dream today. That\'s okay!\nWe created affirmations based on your recent dreams! 🌟'
+                              );
                             }
-
-                            await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
-                            console.log(`Generated ${affirmations.length} affirmations from recent dreams`);
                           }
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);
