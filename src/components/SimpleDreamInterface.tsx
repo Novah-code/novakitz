@@ -207,6 +207,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   // Sync with external history state
   useEffect(() => {
+    console.log('SimpleDreamInterface: initialShowHistory changed to:', initialShowHistory);
     setShowHistory(initialShowHistory);
   }, [initialShowHistory]);
   const [editingDream, setEditingDream] = useState<DreamEntry | null>(null);
@@ -3695,6 +3696,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
 
+          {(() => {
+            console.log('SimpleDreamInterface render:', { showInput, showResponse, showHistory });
+            return null;
+          })()}
           {!showInput && !showResponse && !showHistory && (
             <div
               className="dream-orb flex items-center justify-center fade-in"

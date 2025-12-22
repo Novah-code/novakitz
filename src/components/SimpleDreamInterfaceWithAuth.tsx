@@ -540,6 +540,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               <button
                 onClick={() => {
                   console.log('Dream Journal button clicked!');
+                  console.log('Current showHistory state:', showHistory);
                   // Close all other modals first
                   setShowCalendar(false);
                   setShowPlaylist(false);
@@ -549,6 +550,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   setShowMonthlyReport(false);
                   // Then open history
                   setShowHistory(true);
+                  console.log('Setting showHistory to true');
                   setMenuOpen(false);
                 }}
                 style={{
