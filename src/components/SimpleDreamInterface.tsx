@@ -4326,7 +4326,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 zIndex: 100
               }}>
                 <button
-                  onClick={() => setShowHistory(false)}
+                  onClick={() => {
+                    setShowHistory(false);
+                    onHistoryClose?.();
+                  }}
                   style={{
                     padding: '12px 32px',
                     background: '#f3f4f6',
