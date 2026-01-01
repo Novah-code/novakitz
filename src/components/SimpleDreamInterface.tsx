@@ -148,7 +148,7 @@ const translations = {
     card: 'Card',
     list: 'List',
     todaysPractice: "Today's Practice",
-    dreamAnalysis: 'Dream Analysis',
+    dreamAnalysis: 'Dream Reflection',
     dreamSymbols: 'Dream Symbols',
     innerMessage: 'Inner Message',
     somethingToReflect: 'Something to Reflect On',
@@ -178,7 +178,7 @@ const translations = {
     card: '카드',
     list: '목록',
     todaysPractice: '오늘의 실천',
-    dreamAnalysis: '꿈 분석',
+    dreamAnalysis: '꿈 성찰',
     dreamSymbols: '꿈의 상징',
     innerMessage: '내면의 메시지',
     somethingToReflect: '성찰할 점',
@@ -4503,18 +4503,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
 
-                  {/* Button container for top-left alignment */}
+                  {/* Button container for top-right alignment */}
                   <div style={{
                     position: 'absolute',
                     top: '12px',
-                    left: '12px',
+                    right: '12px',
                     display: 'flex',
                     gap: '8px',
                     alignItems: 'center',
                     zIndex: 1000,
                     flexWrap: 'wrap',
-                    justifyContent: 'flex-start',
-                    maxWidth: window.innerWidth < 480 ? '85%' : '90%'
+                    justifyContent: 'flex-end'
                   }}>
                     {/* Share button */}
                     <button
@@ -4679,6 +4678,44 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       }).filter(Boolean)}
                     </div>
                   </div>
+
+                  {/* Close button at the bottom */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '32px',
+                    paddingBottom: '16px'
+                  }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDream(null);
+                      }}
+                      style={{
+                        background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 100%)',
+                        border: 'none',
+                        borderRadius: '24px',
+                        padding: '12px 32px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: 'white',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
+                        fontFamily: 'Georgia, serif'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
+                      }}
+                    >
+                      {language === 'ko' ? '닫기' : 'Close'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -4741,7 +4778,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <div className="modal-header">
                     <div className="flex justify-center">
                       <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                        Dream Analysis
+                        {t.dreamAnalysis}
                       </h2>
                     </div>
                   </div>
