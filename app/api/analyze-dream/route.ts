@@ -101,7 +101,7 @@ async function extractDreamKeywords(dreamText: string, language: 'en' | 'ko' = '
     }
 
     const keywordPrompt = language === 'ko'
-      ? `다음 꿈을 분석하여 정확히 3개의 키워드만 추출하세요: 대표 감정 1개 + 중요 상징 2개. JSON 배열 형식으로만 응답하세요.
+      ? `다음 꿈에서 정확히 3개의 키워드만 알아차려주세요: 대표 감정 1개 + 중요 상징 2개. JSON 배열 형식으로만 응답하세요.
 
 꿈: "${dreamText}"
 
@@ -122,7 +122,7 @@ JSON 형식 예시:
 ]
 
 정확히 3개만 반환하고 다른 텍스트는 포함하지 마세요.`
-      : `Analyze this dream and extract EXACTLY 3 keywords only: 1 dominant emotion + 2 important symbols. Respond ONLY with a JSON array.
+      : `Notice and extract EXACTLY 3 keywords from this dream: 1 dominant emotion + 2 important symbols. Respond ONLY with a JSON array.
 
 Dream: "${dreamText}"
 
@@ -270,17 +270,17 @@ export async function POST(request: NextRequest) {
     // Create language-specific prompt based on subscription status
     const wordLimit = isPremium ? '500+ words' : '150-200 words';
     const detailLevel = isPremium
-      ? 'Provide comprehensive, in-depth analysis with rich psychological insights.'
-      : 'Keep the interpretation concise and focused on the most important insights.';
+      ? 'Provide comprehensive, in-depth noticing with rich psychological observations.'
+      : 'Keep the noticing concise and focused on the most important observations.';
 
     const analysisPrompt = language === 'ko'
-      ? `당신은 융(Jung) 심리학에 기반을 둔 따뜻하고 사려 깊은 꿈 안내자입니다. 깊은 개념을 일상적인 언어로 풀어서 전달하세요. 진정한 호기심과 공감으로 이 꿈을 분석하세요.
+      ? `당신은 융(Jung) 심리학에 기반을 둔 따뜻하고 사려 깊은 꿈 안내자입니다. 깊은 개념을 일상적인 언어로 풀어서 전달하세요. 진정한 호기심과 공감으로 이 꿈을 함께 알아차려주세요.
 
-사용자가 키워드로만 입력했을 수도 있고 상세 내용으로 입력했을 수도 있습니다. 어떤 형태든 상관없이 분석해주세요.
+사용자가 키워드로만 입력했을 수도 있고 상세 내용으로 입력했을 수도 있습니다. 어떤 형태든 상관없이 함께 바라봐주세요.
 
 꿈: "${dreamText}"
 
-마크다운 형식 없이 자연스럽고 대화하는 듯한 언어로 작성하세요. 분석적이면서도 개인적인 느낌으로 - 마치 차를 마시며 의미 있는 대화를 나누는 것처럼.
+마크다운 형식 없이 자연스럽고 대화하는 듯한 언어로 작성하세요. 관찰하고 알아차리되 개인적인 느낌으로 - 마치 차를 마시며 의미 있는 대화를 나누는 것처럼.
 
 ${detailLevel}
 
@@ -311,14 +311,14 @@ ${isPremium ? `꿈의 상징:
 
 마지막으로: "이것이 당신에게 어떻게 느껴지나요? 당신 자신의 직관이 의미를 완성합니다."
 
-어조: 따뜻하되 과하게 달콤하지 않게. 심리학적으로 통찰력 있되 겸손하게. 당신을 진정으로 이해하는 지혜로운 친구처럼. ${wordLimit}`
-      : `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Analyze this dream with genuine curiosity and compassion.
+어조: 따뜻하되 과하게 달콤하지 않게. 심리학적으로 관찰하되 겸손하게. 당신을 진정으로 이해하는 지혜로운 친구처럼. ${wordLimit}`
+      : `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Notice and observe this dream with genuine curiosity and compassion.
 
-Note: The user may have entered either detailed dream content or just keywords separated by commas. Please analyze whatever they provided.
+Note: The user may have entered either detailed dream content or just keywords separated by commas. Please notice and reflect on whatever they provided.
 
 Dream: "${dreamText}"
 
-Write in natural, conversational language without any markdown formatting. Be analytical yet personal - like you're having a meaningful conversation over tea.
+Write in natural, conversational language without any markdown formatting. Be observant and reflective yet personal - like you're having a meaningful conversation over tea.
 
 ${detailLevel}
 
@@ -350,7 +350,7 @@ Offer one simple suggestion for daily integration.`}
 
 Close with: "How does this feel to you? Your own intuition completes the meaning."
 
-Tone: Warm but not saccharine. Psychologically insightful but humble. Like a wise friend who really sees you. ${wordLimit}`;
+Tone: Warm but not saccharine. Psychologically observant but humble. Like a wise friend who really sees you. ${wordLimit}`;
 
     // Start both API calls in parallel for faster response
     const [response, keywords] = await Promise.all([
