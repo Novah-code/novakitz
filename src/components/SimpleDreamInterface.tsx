@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
+import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
@@ -13,6 +14,7 @@ import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
 import DreamCalendar from './DreamCalendar';
 import PremiumPromptModal from './PremiumPromptModal';
+import DreamBackgroundGallery from './DreamBackgroundGallery';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -214,9 +216,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [dreamImage, setDreamImage] = useState<string>('');
+  const [dreamImage, setDreamImage] = useState<File | null>(null);
+  const [dreamImagePreview, setDreamImagePreview] = useState<string>('');
   const [viewMode, setViewMode] = useState<'card' | 'calendar'>('card');
-  const [editImage, setEditImage] = useState<string>('');
+  const [editImage, setEditImage] = useState<File | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
@@ -231,6 +235,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+
+  // Extract background images from saved dreams
+  const backgroundImages = savedDreams
+    .map(dream => dream.image)
+    .filter(img => img && img !== '/Default-dream.png' && !img.startsWith('data:'))
+    .slice(0, 12); // Limit to 12 images for performance
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 7, remaining: 7, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
@@ -651,18 +661,31 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       }
     }
 
-    // Use default image if no image is selected
-    const defaultImage = !dreamImage ? '/Default-dream.png' : dreamImage;
+    // Upload image to Supabase Storage if present
+    let imageUrl = '/Default-dream.png';
+    const dreamId = Date.now().toString();
+
+    if (dreamImage && user) {
+      try {
+        console.log('Uploading image to Supabase Storage...');
+        imageUrl = await uploadDreamImage(dreamImage, user.id, dreamId);
+        console.log('Image uploaded successfully:', imageUrl);
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+        // Fall back to default image if upload fails
+        imageUrl = '/Default-dream.png';
+      }
+    }
 
     const now = new Date();
     // Use the selected dream date (defaults to today, but can be changed by user)
     const dreamDateToSave = dreamDate || now;
     const newDream: DreamEntry = {
-      id: Date.now().toString(),
+      id: dreamId,
       text: dreamText,
       response: response,
       title: dreamTitle || t.dreamEntry,
-      image: defaultImage || undefined,
+      image: imageUrl || undefined,
       autoTags: autoTags,
       tags: [], // Empty manual tags initially
       date: dreamDateToSave.toLocaleDateString('en-US', {
@@ -696,7 +719,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time || '',
-            image: defaultImage || undefined,
+            image: imageUrl || undefined,
             display_name: userNickname || undefined,
             created_at: now.toISOString()
           } as any); // Cast to any to handle display_name not being in OfflineDream interface
@@ -747,7 +770,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             tags: [...autoTags, ...(newDream.tags || [])],
             date: newDream.date,
             time: newDream.time,
-            image: defaultImage || undefined,
+            image: imageUrl || undefined,
             display_name: userNickname || null,
             created_at: now.toISOString()
           }])
@@ -1449,7 +1472,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
         setDreamDate(new Date()); // Reset dream date
-        setDreamImage(''); // Reset dream image
+        setDreamImage(null); // Reset dream image
+        setDreamImagePreview(''); // Reset preview
         return;
       }
 
@@ -1470,7 +1494,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           setDreamText('');
           setDreamTitle('');
           setDreamDate(new Date());
-          setDreamImage('');
+          setDreamImage(null);
+          setDreamImagePreview('');
           return;
         }
 
@@ -1491,7 +1516,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamDate(new Date()); // Reset dream date
-      setDreamImage(''); // Reset dream image
+      setDreamImage(null); // Reset dream image
+      setDreamImagePreview(''); // Reset preview
     } catch (error) {
       console.error('Error during dream analysis:', error);
 
@@ -1503,29 +1529,34 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamDate(new Date()); // Reset dream date
-      setDreamImage(''); // Reset dream image
+      setDreamImage(null); // Reset dream image
+      setDreamImagePreview(''); // Reset preview
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setDreamImage(file);
+      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        setDreamImage(e.target?.result as string);
+        setDreamImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleEditImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setEditImage(file);
+      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
-        setEditImage(e.target?.result as string);
+        setEditImagePreview(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -1535,37 +1566,76 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     setEditingDream(dream);
     setEditTitle(dream.title || t.dreamEntry);
     setEditText(dream.text);
-    setEditImage(dream.image || '');
+    setEditImage(null);
+    setEditImagePreview(dream.image || '');
     setEditTags(dream.tags || []);
     setEditAutoTags(dream.autoTags || []);
     setNewTag('');
     setSelectedDream(null); // Close detail modal
   };
 
-  const saveEditDream = () => {
+  const saveEditDream = async () => {
     if (!editingDream) return;
-    
-    const updatedDreams = savedDreams.map(dream => 
-      dream.id === editingDream.id 
-        ? { 
-            ...dream, 
-            title: editTitle || t.dreamEntry, 
-            text: editText, 
-            image: editImage || undefined,
+
+    let imageUrl = editImagePreview || editingDream.image;
+
+    // Upload new image if user selected one
+    if (editImage && user) {
+      try {
+        console.log('Uploading new image for dream edit...');
+        imageUrl = await updateDreamImage(editImage, user.id, editingDream.id, editingDream.image);
+        console.log('Image updated successfully:', imageUrl);
+      } catch (error) {
+        console.error('Failed to upload new image:', error);
+        // Keep old image URL on error
+      }
+    }
+
+    const updatedDreams = savedDreams.map(dream =>
+      dream.id === editingDream.id
+        ? {
+            ...dream,
+            title: editTitle || t.dreamEntry,
+            text: editText,
+            image: imageUrl || undefined,
             tags: editTags,
             autoTags: editAutoTags
           }
         : dream
     );
-    
+
     setSavedDreams(updatedDreams);
     localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-    
+
+    // Also update in Supabase if user is logged in
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('dreams')
+          .update({
+            title: editTitle || t.dreamEntry,
+            content: editText,
+            image: imageUrl || undefined,
+            tags: [...editTags, ...editAutoTags],
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingDream.id)
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating dream in Supabase:', error);
+        }
+      } catch (error) {
+        console.error('Exception updating dream:', error);
+      }
+    }
+
     // Reset edit state
     setEditingDream(null);
     setEditTitle('');
     setEditText('');
-    setEditImage('');
+    setEditImage(null);
+    setEditImagePreview('');
     setEditTags([]);
     setEditAutoTags([]);
     setNewTag('');
@@ -1575,7 +1645,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     setEditingDream(null);
     setEditTitle('');
     setEditText('');
-    setEditImage('');
+    setEditImage(null);
+    setEditImagePreview('');
     setEditTags([]);
     setEditAutoTags([]);
     setNewTag('');
@@ -1725,6 +1796,16 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
+      {/* Dream Background Gallery */}
+      {backgroundImages.length > 0 && (
+        <DreamBackgroundGallery
+          images={backgroundImages}
+          opacity={0.12}
+          animationSpeed="slow"
+          noiseIntensity={0.25}
+        />
+      )}
+
       {/* Premium Prompt Modal */}
       <PremiumPromptModal
         user={user || null}
@@ -3883,7 +3964,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setDreamText('');
                       setDreamTitle('');
                       setDreamDate(new Date());
-                      setDreamImage('');
+                      setDreamImage(null);
+                      setDreamImagePreview('');
 
                       setTimeout(() => {
                         setShowResponse(false);
@@ -4154,35 +4236,35 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             input.accept = 'image/*';
                             input.onchange = async (event) => {
                               const file = (event.target as HTMLInputElement).files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = async (e) => {
-                                  const imageUrl = e.target?.result as string;
-                                  // Update the dream with new image
+                              if (file && user) {
+                                try {
+                                  // Upload image to Supabase Storage
+                                  const imageUrl = await updateDreamImage(file, user.id, dream.id, dream.image);
+
+                                  // Update the dream with new image URL
                                   const updatedDreams = savedDreams.map(d =>
                                     d.id === dream.id ? { ...d, image: imageUrl } : d
                                   );
                                   setSavedDreams(updatedDreams);
                                   localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
 
-                                  // Also update in Supabase if user is logged in
-                                  if (user) {
-                                    try {
-                                      const { error } = await supabase
-                                        .from('dreams')
-                                        .update({ image: imageUrl })
-                                        .eq('id', dream.id)
-                                        .eq('user_id', user.id);
+                                  // Update in Supabase
+                                  try {
+                                    const { error } = await supabase
+                                      .from('dreams')
+                                      .update({ image: imageUrl })
+                                      .eq('id', dream.id)
+                                      .eq('user_id', user.id);
 
-                                      if (error) {
-                                        console.error('Error updating dream image in Supabase:', error);
-                                      }
-                                    } catch (error) {
-                                      console.error('Exception updating dream image:', error);
+                                    if (error) {
+                                      console.error('Error updating dream image in Supabase:', error);
                                     }
+                                  } catch (error) {
+                                    console.error('Exception updating dream image:', error);
                                   }
-                                };
-                                reader.readAsDataURL(file);
+                                } catch (error) {
+                                  console.error('Failed to upload image:', error);
+                                }
                               }
                             };
                             input.click();
