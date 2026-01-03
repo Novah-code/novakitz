@@ -247,6 +247,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [showSearchFilter, setShowSearchFilter] = useState(false);
+  const [displayedDreamsCount, setDisplayedDreamsCount] = useState(9);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -562,11 +563,25 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       });
 
       setActiveCardIndex(closestIndex);
+
+      // Infinite scroll: Load more dreams when scrolled near bottom
+      const scrollHeight = carousel.scrollHeight;
+      const scrollTop = carousel.scrollTop;
+      const clientHeight = carousel.clientHeight;
+
+      if (scrollHeight - scrollTop - clientHeight < 300) {
+        setDisplayedDreamsCount(prev => Math.min(prev + 9, filteredDreams.length));
+      }
     };
 
     carousel.addEventListener('scroll', handleScroll);
     return () => carousel.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [filteredDreams.length]);
+
+  // Reset displayed dreams count when search/filter changes
+  useEffect(() => {
+    setDisplayedDreamsCount(9);
+  }, [searchTerm, selectedTag]);
 
   // Check microphone permission status
   useEffect(() => {
@@ -4201,7 +4216,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               <div className="dreams-grid" ref={carouselRef} style={{
                 paddingBottom: '20px'
               }}>
-                {filteredDreams.slice(0, 9).map((dream, index) => {
+                {filteredDreams.slice(0, displayedDreamsCount).map((dream, index) => {
                   const gradients = [
                     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
