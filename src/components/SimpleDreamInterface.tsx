@@ -570,13 +570,13 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       const clientHeight = carousel.clientHeight;
 
       if (scrollHeight - scrollTop - clientHeight < 300) {
-        setDisplayedDreamsCount(prev => Math.min(prev + 9, filteredDreams.length));
+        setDisplayedDreamsCount(prev => prev + 9);
       }
     };
 
     carousel.addEventListener('scroll', handleScroll);
     return () => carousel.removeEventListener('scroll', handleScroll);
-  }, [filteredDreams.length]);
+  }, []);
 
   // Reset displayed dreams count when search/filter changes
   useEffect(() => {
@@ -4216,7 +4216,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               <div className="dreams-grid" ref={carouselRef} style={{
                 paddingBottom: '20px'
               }}>
-                {filteredDreams.slice(0, displayedDreamsCount).map((dream, index) => {
+                {filteredDreams.slice(0, Math.min(displayedDreamsCount, filteredDreams.length)).map((dream, index) => {
                   const gradients = [
                     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
