@@ -237,9 +237,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isPremium, setIsPremium] = useState(false);
 
   // Extract background images from saved dreams
-  const backgroundImages = savedDreams
+  const backgroundImages: string[] = savedDreams
     .map(dream => dream.image)
-    .filter(img => img && img !== '/Default-dream.png' && !img.startsWith('data:'))
+    .filter((img): img is string => !!img && img !== '/Default-dream.png' && !img.startsWith('data:'))
     .slice(0, 12); // Limit to 12 images for performance
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 7, remaining: 7, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
