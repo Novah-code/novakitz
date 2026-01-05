@@ -22,6 +22,8 @@ import PatternInsightNotification from './PatternInsightNotification';
 import { getNewInsights, PatternInsight } from '../lib/dreamPatterns';
 import AffirmationSuggestionCard from './AffirmationSuggestionCard';
 import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
+import DreamTimeline from './DreamTimeline';
+import DreamWeb from './DreamWeb';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -156,6 +158,8 @@ const translations = {
     searchPlaceholder: 'Search dreams...',
     card: 'Card',
     list: 'List',
+    timeline: 'Timeline',
+    web: 'Web',
     todaysPractice: "Today's Practice",
     dreamAnalysis: 'Dream Reflection',
     dreamSymbols: 'Dream Symbols',
@@ -186,6 +190,8 @@ const translations = {
     searchPlaceholder: '꿈 검색...',
     card: '카드',
     list: '목록',
+    timeline: '타임라인',
+    web: '연결망',
     todaysPractice: '오늘의 실천',
     dreamAnalysis: '꿈 성찰',
     dreamSymbols: '꿈의 상징',
@@ -225,7 +231,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<File | null>(null);
   const [dreamImagePreview, setDreamImagePreview] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'card' | 'calendar'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'calendar' | 'timeline' | 'web'>('card');
   const [editImage, setEditImage] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -4207,9 +4213,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         ))}
                       </select>
                     </div>
-                    <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px'}}>
+                    <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px', flexWrap: 'wrap'}}>
                       <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
                       <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
+                      <button onClick={() => {setViewMode('timeline'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'timeline' ? '#ffffff' : 'transparent', color: viewMode === 'timeline' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'timeline' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.timeline}</button>
+                      <button onClick={() => {setViewMode('web'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'web' ? '#ffffff' : 'transparent', color: viewMode === 'web' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'web' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.web}</button>
                     </div>
                   </div>
                 )}
@@ -4309,6 +4317,26 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     selectedDate={null}
                   />
                 </div>
+              ) : viewMode === 'timeline' ? (
+                <DreamTimeline
+                  dreams={filteredDreams}
+                  onDreamClick={(dream) => {
+                    setDreamsFromSelectedDate([]);
+                    setCurrentDreamIndex(0);
+                    setSelectedDream(dream as DreamEntry);
+                  }}
+                  language={language}
+                />
+              ) : viewMode === 'web' ? (
+                <DreamWeb
+                  dreams={filteredDreams}
+                  onDreamClick={(dream) => {
+                    setDreamsFromSelectedDate([]);
+                    setCurrentDreamIndex(0);
+                    setSelectedDream(dream as DreamEntry);
+                  }}
+                  language={language}
+                />
               ) : (
               <>
                 {/* Carousel Grid */}
