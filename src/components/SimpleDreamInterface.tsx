@@ -15,6 +15,8 @@ import DailyCheckin from './DailyCheckin';
 import DreamCalendar from './DreamCalendar';
 import PremiumPromptModal from './PremiumPromptModal';
 import DreamBackgroundGallery from './DreamBackgroundGallery';
+import Toast, { ToastType } from './Toast';
+import ConfirmDialog from './ConfirmDialog';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -248,10 +250,22 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [showSearchFilter, setShowSearchFilter] = useState(false);
   const [displayedDreamsCount, setDisplayedDreamsCount] = useState(9);
+  const [toastMessage, setToastMessage] = useState<{ message: string; type: ToastType } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Toast helper function
+  const showToast = (message: string, type: ToastType) => {
+    setToastMessage({ message, type });
+  };
 
   // Load saved dreams from Supabase or localStorage
   useEffect(() => {
@@ -1679,12 +1693,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
         if (error) {
           console.error('Error deleting from Supabase:', error);
-          // Still remove from local state
+          showToast(language === 'ko' ? '삭제 실패' : 'Delete failed', 'error');
+          return;
         } else {
           console.log('Deleted from Supabase:', dreamId);
         }
       } catch (error) {
         console.error('Exception deleting from Supabase:', error);
+        showToast(language === 'ko' ? '삭제 중 오류 발생' : 'Error deleting dream', 'error');
+        return;
       }
     } else {
       // Delete from localStorage if not logged in
@@ -1696,7 +1713,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
     setSavedDreams(updatedDreams);
     setActiveMenu(null);
+    showToast(language === 'ko' ? '꿈이 삭제되었습니다' : 'Dream deleted', 'success');
   };
+
 
   const [showShareToast, setShowShareToast] = useState(false);
 
@@ -4056,7 +4075,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     ) : null}
                   </div>
 
-                  {/* Search & Filter Toggle Button */}
+                  {/* Search & Filter Button */}
                   <button
                     onClick={() => setShowSearchFilter(!showSearchFilter)}
                     style={{
@@ -4335,7 +4354,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 className="menu-item danger"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteDream(dream.id);
+                                  setConfirmDialog({
+                                    isOpen: true,
+                                    title: language === 'ko' ? '꿈 삭제' : 'Delete Dream',
+                                    message: language === 'ko'
+                                      ? '정말로 이 꿈을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.'
+                                      : 'Are you sure you want to delete this dream? This action cannot be undone.',
+                                    onConfirm: () => deleteDream(dream.id)
+                                  });
                                 }}
                               >
                                 <span className="menu-icon">
@@ -5228,6 +5254,27 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       {/* API Monitoring Dashboard - 개발 환경에서만 표시 */}
       {process.env.NODE_ENV === 'development' && <APIMonitoringDashboard />}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <Toast
+          message={toastMessage.message}
+          type={toastMessage.type}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText={language === 'ko' ? '삭제' : 'Delete'}
+        cancelText={language === 'ko' ? '취소' : 'Cancel'}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
+        isDangerous={true}
+      />
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */

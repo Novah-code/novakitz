@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import AnimatedScore from './AnimatedScore';
 
 interface DreamInsightsProps {
   user: User;
@@ -211,10 +212,19 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
   const t = translations[language];
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DreamStats | null>(null);
+  const [animateCharts, setAnimateCharts] = useState(false);
 
   useEffect(() => {
     loadDreamInsights();
   }, [user.id]);
+
+  // Trigger chart animations after stats are loaded
+  useEffect(() => {
+    if (stats && !loading) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => setAnimateCharts(true), 100);
+    }
+  }, [stats, loading]);
 
   const loadDreamInsights = async () => {
     try {
@@ -608,9 +618,11 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             borderRadius: '16px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.totalDreams}
-            </div>
+            <AnimatedScore
+              value={stats.totalDreams}
+              className="text-4xl font-bold"
+              style={{ color: '#5A8449', fontSize: '2.5rem' }}
+            />
             <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.totalDreams}</div>
           </div>
 
@@ -620,9 +632,11 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             borderRadius: '16px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.currentStreak}
-            </div>
+            <AnimatedScore
+              value={stats.currentStreak}
+              className="text-4xl font-bold"
+              style={{ color: '#5A8449', fontSize: '2.5rem' }}
+            />
             <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.currentStreak}</div>
           </div>
 
@@ -632,9 +646,11 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
             borderRadius: '16px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#5A8449' }}>
-              {stats.longestStreak}
-            </div>
+            <AnimatedScore
+              value={stats.longestStreak}
+              className="text-4xl font-bold"
+              style={{ color: '#5A8449', fontSize: '2.5rem' }}
+            />
             <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestStreak}</div>
           </div>
 
@@ -680,7 +696,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                     fontWeight: 'bold',
                     color: '#5A8449'
                   }}>
-                    {kw.count}x
+                    <AnimatedScore value={kw.count} suffix="x" />
                   </div>
                 </div>
               ))}
@@ -697,7 +713,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                 <div key={idx}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <span style={{ fontWeight: '600' }}>{t[emotion.sentiment as keyof typeof t] as string}</span>
-                    <span style={{ color: '#666' }}>{emotion.percentage}%</span>
+                    <AnimatedScore value={emotion.percentage} suffix="%" style={{ color: '#666' }} />
                   </div>
                   <div style={{
                     height: '12px',
@@ -707,10 +723,10 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                   }}>
                     <div style={{
                       height: '100%',
-                      width: `${emotion.percentage}%`,
+                      width: animateCharts ? `${emotion.percentage}%` : '0%',
                       background: sentimentColors[emotion.sentiment as keyof typeof sentimentColors] || '#ccc',
                       borderRadius: '6px',
-                      transition: 'width 0.5s ease'
+                      transition: 'width 1s ease'
                     }}></div>
                   </div>
                 </div>
@@ -737,7 +753,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    {cat.count}
+                    <AnimatedScore value={cat.count} />
                   </div>
                   <div style={{ opacity: 0.9 }}>{t[cat.category as keyof typeof t] as string}</div>
                 </div>
@@ -800,7 +816,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                         {t[mood.mood as keyof typeof t] as string}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                        {mood.count} ({mood.percentage}%)
+                        <AnimatedScore value={mood.count} /> (<AnimatedScore value={mood.percentage} suffix="%" />)
                       </div>
                     </div>
                   </div>
@@ -831,7 +847,9 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                       marginBottom: '0.5rem'
                     }}>
                       <span style={{ fontWeight: '600' }}>{month.month}</span>
-                      <span style={{ color: '#666' }}>{month.count} {language === 'ko' ? '개' : 'dreams'}</span>
+                      <span style={{ color: '#666' }}>
+                        <AnimatedScore value={month.count} suffix={language === 'ko' ? ' 개' : ' dreams'} />
+                      </span>
                     </div>
                     <div style={{
                       height: '32px',
@@ -842,10 +860,10 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                     }}>
                       <div style={{
                         height: '100%',
-                        width: `${barWidth}%`,
+                        width: animateCharts ? `${barWidth}%` : '0%',
                         background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
                         borderRadius: '8px',
-                        transition: 'width 0.5s ease',
+                        transition: 'width 1s ease',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
@@ -854,7 +872,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                         fontWeight: 'bold',
                         fontSize: '0.9rem'
                       }}>
-                        {month.count > 0 && month.count}
+                        {month.count > 0 && animateCharts && <AnimatedScore value={month.count} />}
                       </div>
                     </div>
                   </div>
