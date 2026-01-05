@@ -20,6 +20,8 @@ import ConfirmDialog from './ConfirmDialog';
 import DreamShareCard from './DreamShareCard';
 import PatternInsightNotification from './PatternInsightNotification';
 import { getNewInsights, PatternInsight } from '../lib/dreamPatterns';
+import AffirmationSuggestionCard from './AffirmationSuggestionCard';
+import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -242,6 +244,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [shareCardDream, setShareCardDream] = useState<DreamEntry | null>(null);
   const [patternInsights, setPatternInsights] = useState<PatternInsight[]>([]);
   const [showPatternNotification, setShowPatternNotification] = useState(false);
+  const [suggestedAffirmations, setSuggestedAffirmations] = useState<string[]>([]);
+  const [showAffirmationSuggestion, setShowAffirmationSuggestion] = useState(false);
+  const [currentDreamForAffirmation, setCurrentDreamForAffirmation] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
@@ -1562,7 +1567,22 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       console.log('Analysis received in handleSubmitDream:', result);
       setDreamResponse(result.analysis);
       console.log('About to save dream with analysis:', { dreamText, result });
-      saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || []); // Save dream with tags and keywords
+      const savedDream = await saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || []); // Save dream with tags and keywords
+
+      // Generate affirmations after successful dream analysis
+      if (user && savedDream) {
+        try {
+          const affirmations = await generateAffirmationsFromDream(user.id, dreamText, language);
+          if (affirmations.length > 0) {
+            setSuggestedAffirmations(affirmations);
+            setCurrentDreamForAffirmation(savedDream);
+            setShowAffirmationSuggestion(true);
+          }
+        } catch (error) {
+          console.error('Error generating affirmations:', error);
+          // Don't block the flow if affirmation generation fails
+        }
+      }
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
@@ -1584,6 +1604,35 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       setDreamImagePreview(''); // Reset preview
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveAffirmations = async (selectedAffirmations: string[]) => {
+    if (!user || !currentDreamForAffirmation) return;
+
+    try {
+      await saveAffirmations(
+        user.id,
+        selectedAffirmations,
+        'morning', // Default to morning, could be enhanced based on time
+        currentDreamForAffirmation.id,
+        language
+      );
+
+      showToast(
+        language === 'ko' ? '확언이 저장되었습니다' : 'Affirmations saved',
+        'success'
+      );
+
+      setShowAffirmationSuggestion(false);
+      setSuggestedAffirmations([]);
+      setCurrentDreamForAffirmation(null);
+    } catch (error) {
+      console.error('Error saving affirmations:', error);
+      showToast(
+        language === 'ko' ? '확언 저장 실패' : 'Failed to save affirmations',
+        'error'
+      );
     }
   };
 
@@ -5326,6 +5375,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           insights={patternInsights}
           onClose={() => setShowPatternNotification(false)}
           language={language}
+        />
+      )}
+
+      {/* Affirmation Suggestion Card */}
+      {showAffirmationSuggestion && suggestedAffirmations.length > 0 && (
+        <AffirmationSuggestionCard
+          affirmations={suggestedAffirmations}
+          dreamTitle={currentDreamForAffirmation?.title}
+          language={language}
+          onSave={handleSaveAffirmations}
+          onClose={() => setShowAffirmationSuggestion(false)}
         />
       )}
     </div>
