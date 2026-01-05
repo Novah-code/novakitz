@@ -17,6 +17,7 @@ import PremiumPromptModal from './PremiumPromptModal';
 import DreamBackgroundGallery from './DreamBackgroundGallery';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
+import DreamShareCard from './DreamShareCard';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -235,6 +236,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
+  const [showShareCard, setShowShareCard] = useState(false);
+  const [shareCardDream, setShareCardDream] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
@@ -1718,6 +1721,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
 
   const [showShareToast, setShowShareToast] = useState(false);
+
+  // Open beautiful share card
+  const openShareCard = (dream: DreamEntry, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    setShareCardDream(dream);
+    setShowShareCard(true);
+  };
 
   const shareDream = async (dream: DreamEntry, e?: React.MouseEvent) => {
     if (e) {
@@ -4323,7 +4335,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 className="menu-item"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  shareDream(dream);
+                                  openShareCard(dream, e);
                                 }}
                               >
                                 <span className="menu-icon">
@@ -4642,7 +4654,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        shareDream(selectedDream, e);
+                        openShareCard(selectedDream, e);
                       }}
                       className="dream-detail-share-btn"
                       title={language === 'ko' ? '공유' : 'Share'}
@@ -5275,6 +5287,19 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         onCancel={() => setConfirmDialog({ ...confirmDialog, isOpen: false })}
         isDangerous={true}
       />
+
+      {/* Dream Share Card */}
+      {showShareCard && shareCardDream && (
+        <DreamShareCard
+          dreamTitle={shareCardDream.title || t.dreamEntry}
+          dreamSummary={shareCardDream.text.substring(0, 150) + (shareCardDream.text.length > 150 ? '...' : '')}
+          mood={deriveMoodFromTags(shareCardDream.autoTags || shareCardDream.tags || [])}
+          keywords={shareCardDream.autoTags || shareCardDream.tags || []}
+          date={shareCardDream.date}
+          language={language}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */
