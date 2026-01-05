@@ -18,6 +18,8 @@ import DreamBackgroundGallery from './DreamBackgroundGallery';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
 import DreamShareCard from './DreamShareCard';
+import PatternInsightNotification from './PatternInsightNotification';
+import { getNewInsights, PatternInsight } from '../lib/dreamPatterns';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -238,6 +240,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
   const [showShareCard, setShowShareCard] = useState(false);
   const [shareCardDream, setShareCardDream] = useState<DreamEntry | null>(null);
+  const [patternInsights, setPatternInsights] = useState<PatternInsight[]>([]);
+  const [showPatternNotification, setShowPatternNotification] = useState(false);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
@@ -269,6 +273,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const showToast = (message: string, type: ToastType) => {
     setToastMessage({ message, type });
   };
+
+  // Detect dream patterns and show insights
+  useEffect(() => {
+    if (savedDreams.length < 3) return; // Need at least 3 dreams
+
+    const insights = getNewInsights(savedDreams, language);
+
+    if (insights.length > 0) {
+      setPatternInsights(insights);
+      // Show notification after a short delay
+      setTimeout(() => {
+        setShowPatternNotification(true);
+      }, 1000);
+    }
+  }, [savedDreams.length, language]); // Check when dream count changes
 
   // Load saved dreams from Supabase or localStorage
   useEffect(() => {
@@ -5298,6 +5317,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           date={shareCardDream.date}
           language={language}
           onClose={() => setShowShareCard(false)}
+        />
+      )}
+
+      {/* Pattern Insight Notification */}
+      {showPatternNotification && patternInsights.length > 0 && (
+        <PatternInsightNotification
+          insights={patternInsights}
+          onClose={() => setShowPatternNotification(false)}
+          language={language}
         />
       )}
     </div>
