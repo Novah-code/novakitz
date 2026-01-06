@@ -81,12 +81,12 @@ export default function PatternInsightNotification({
     <div
       style={{
         position: 'fixed',
-        top: '80px',
-        right: '20px',
+        bottom: '20px',
+        left: '20px',
         zIndex: 9999,
         maxWidth: '400px',
         width: 'calc(100vw - 40px)',
-        animation: 'slideInRight 0.4s ease-out',
+        animation: 'slideInLeft 0.4s ease-out',
         fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
       }}
     >
@@ -194,9 +194,9 @@ export default function PatternInsightNotification({
       </div>
 
       <style jsx>{`
-        @keyframes slideInRight {
+        @keyframes slideInLeft {
           from {
-            transform: translateX(100%);
+            transform: translateX(-100%);
             opacity: 0;
           }
           to {
