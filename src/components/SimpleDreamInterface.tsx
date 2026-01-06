@@ -550,6 +550,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (viewMode !== 'card') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept arrow keys when user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
       setCarouselDreamIndex(prev => {
         if (e.key === 'ArrowLeft') {
           e.preventDefault();
@@ -4427,6 +4433,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 className="menu-item"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setActiveMenu(null);
                                   openShareCard(dream, e);
                                 }}
                               >
@@ -4443,6 +4450,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 className="menu-item"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setActiveMenu(null);
                                   startEditDream(dream);
                                 }}
                               >
@@ -4458,6 +4466,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 className="menu-item danger"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  setActiveMenu(null);
                                   setConfirmDialog({
                                     isOpen: true,
                                     title: language === 'ko' ? '꿈 삭제' : 'Delete Dream',
