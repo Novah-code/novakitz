@@ -24,6 +24,7 @@ interface MonthlyStats {
 interface MonthlyReportProps {
   user: User | null;
   language?: 'en' | 'ko';
+  onClose?: () => void;
 }
 
 const translations = {
@@ -46,6 +47,7 @@ const translations = {
     noData: 'No dreams recorded this month',
     cannotGenerate: 'Reports can only be generated once per month',
     lastGenerated: 'Last generated',
+    close: 'Close',
   },
   ko: {
     monthlyReport: '월간 꿈 리포트',
@@ -66,10 +68,11 @@ const translations = {
     noData: '이번 달 기록된 꿈이 없습니다',
     cannotGenerate: '리포트는 월 1회만 생성 가능합니다',
     lastGenerated: '마지막 생성',
+    close: '닫기',
   },
 };
 
-export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyReportProps) {
+export default function MonthlyDreamReport({ user, language = 'en', onClose }: MonthlyReportProps) {
   const [stats, setStats] = useState<MonthlyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
@@ -203,6 +206,7 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
     const commonWords = [
       // English articles, prepositions, conjunctions
       'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+      'from', 'by', 'as', 'into', 'through', 'about', 'after', 'before', 'during', 'between', 'among',
       'was', 'were', 'is', 'are', 'be', 'been', 'being',
       'have', 'has', 'had', 'do', 'does', 'did',
       'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can',
@@ -211,19 +215,25 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
       'your', 'his', 'her', 'its', 'our', 'their', 'my', 'mine',
       'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most', 'least', 'so', 'too',
       'like', 'perhaps', 'maybe', 'seem', 'seems', 'seemed', 'something', 'anything', 'nothing',
-      'dream', 'dreams', 'dreaming', 'dreamed',
+      // Common verbs that are too generic
+      'feel', 'felt', 'feels', 'see', 'saw', 'seen', 'look', 'looked', 'looks',
+      'get', 'got', 'gotten', 'go', 'went', 'gone', 'come', 'came', 'coming',
+      'make', 'made', 'making', 'take', 'took', 'taken', 'give', 'gave', 'given',
+      'dream', 'dreams', 'dreaming', 'dreamed', 'dreamt',
 
       // Korean particles, conjunctions, adverbs
-      '하다', '이다', '있다', '없다', '되다', '가다', '오다', '주다', '나다',
+      '하다', '이다', '있다', '없다', '되다', '가다', '오다', '주다', '나다', '보다',
       '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로', '부터', '까지',
       '은', '는', '던', '을', '를', '의',
-      '그리고', '또는', '그러나', '하지만', '그래도', '여전히', '이미', '아직',
-      '주로', '대부분', '항상', '계속', '자주', '다시', '또', '오직', '단지',
+      '그리고', '또는', '그러나', '하지만', '그래도', '여전히', '이미', '아직', '또한', '매우', '너무',
+      '주로', '대부분', '항상', '계속', '자주', '다시', '또', '오직', '단지', '조금', '많이',
       '꿈', '꾼', '꾸었다', '꾸다',
       '곧', '이곳', '저곳', '여기', '거기', '저기', '어디', '어느', '어떤', '무엇', '뭐',
       '나', '우리', '그', '그녀', '그들', '자기', '자신',
       '당신', '너', '그대', '봤어', '봤다', '봐요', '봐',
       '더', '더운', '넓은', '길어', '짧아', '높은', '낮은',
+      // Korean common verbs
+      '있는', '하는', '되는', '같은', '많은',
     ];
     return commonWords.includes(word);
   };
@@ -695,12 +705,36 @@ export default function MonthlyDreamReport({ user, language = 'en' }: MonthlyRep
           fontWeight: 'bold',
           cursor: 'pointer',
           transition: 'opacity 0.3s',
+          marginBottom: onClose ? '0.75rem' : '0',
         }}
         onMouseOver={(e) => ((e.target as HTMLButtonElement).style.opacity = '0.9')}
         onMouseOut={(e) => ((e.target as HTMLButtonElement).style.opacity = '1')}
       >
         📥 {t.downloadReport}
       </button>
+
+      {/* Close Button */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          style={{
+            width: '100%',
+            padding: '1rem',
+            background: '#f3f4f6',
+            color: '#374151',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'background 0.3s',
+          }}
+          onMouseOver={(e) => ((e.target as HTMLButtonElement).style.background = '#e5e7eb')}
+          onMouseOut={(e) => ((e.target as HTMLButtonElement).style.background = '#f3f4f6')}
+        >
+          {t.close}
+        </button>
+      )}
     </div>
   );
 }

@@ -416,12 +416,26 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         shortestDream = Math.min(...lengths);
       }
 
-      // Calculate top tags (filter out "no dream" markers)
+      // Calculate top tags (filter out "no dream" markers and stopwords)
+      const stopwords = new Set([
+        // English stopwords
+        'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'about', 'as', 'of', 'the', 'a', 'an',
+        'feel', 'see', 'look', 'get', 'go', 'come', 'make', 'take', 'give', 'have', 'be', 'do',
+        'and', 'or', 'but', 'if', 'then', 'so', 'very', 'too', 'just', 'only', 'now', 'here', 'there',
+        // Korean stopwords
+        '있는', '하는', '되는', '같은', '많은', '있다', '하다', '되다', '보다', '가다', '오다',
+        '그리고', '그러나', '하지만', '그래서', '또는', '또한', '매우', '너무', '조금', '많이'
+      ]);
+
       const tagCounts: { [key: string]: number } = {};
       dreamsData?.forEach((dream) => {
         dream.tags?.forEach((tag: string) => {
-          // Skip "no dream" tags
-          if (tag !== '꿈안꿈' && tag !== 'no-dream' && !tag.toLowerCase().includes('no dream')) {
+          const normalizedTag = tag.toLowerCase().trim();
+          // Skip "no dream" tags and stopwords
+          if (tag !== '꿈안꿈' &&
+              tag !== 'no-dream' &&
+              !normalizedTag.includes('no dream') &&
+              !stopwords.has(normalizedTag)) {
             tagCounts[tag] = (tagCounts[tag] || 0) + 1;
           }
         });

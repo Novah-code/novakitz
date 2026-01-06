@@ -1139,7 +1139,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 ✕
               </button>
             </div>
-            <MonthlyDreamReport user={user} language={language} />
+            <MonthlyDreamReport user={user} language={language} onClose={() => setShowMonthlyReport(false)} />
           </div>
         </div>
       )}
