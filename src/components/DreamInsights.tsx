@@ -418,13 +418,26 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
       // Calculate top tags (filter out "no dream" markers and stopwords)
       const stopwords = new Set([
-        // English stopwords
+        // English stopwords - articles, prepositions, conjunctions
         'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'about', 'as', 'of', 'the', 'a', 'an',
-        'feel', 'see', 'look', 'get', 'go', 'come', 'make', 'take', 'give', 'have', 'be', 'do',
+        'into', 'through', 'after', 'before', 'during', 'between', 'among',
         'and', 'or', 'but', 'if', 'then', 'so', 'very', 'too', 'just', 'only', 'now', 'here', 'there',
-        // Korean stopwords
+        // English common verbs
+        'feel', 'see', 'look', 'get', 'go', 'come', 'make', 'take', 'give', 'have', 'be', 'do',
+        'know', 'think', 'want', 'need', 'keep',
+        // English adverbs and frequency words
+        'often', 'even', 'always', 'never', 'sometimes', 'usually', 'rarely', 'frequently',
+        'still', 'yet', 'already', 'again', 'once', 'twice', 'ever',
+        // English contractions
+        "it's", "i'm", "you're", "he's", "she's", "we're", "they're",
+        "isn't", "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
+        "doesn't", "don't", "didn't", "won't", "wouldn't", "can't", "couldn't", "shouldn't",
+        // English generic nouns
+        'life', 'time', 'thing', 'things', 'way', 'ways', 'day', 'days',
+        // Korean stopwords - particles, conjunctions
         '있는', '하는', '되는', '같은', '많은', '있다', '하다', '되다', '보다', '가다', '오다',
-        '그리고', '그러나', '하지만', '그래서', '또는', '또한', '매우', '너무', '조금', '많이'
+        '그리고', '그러나', '하지만', '그래서', '또는', '또한', '매우', '너무', '조금', '많이',
+        '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로', '부터', '까지', '은', '는'
       ]);
 
       const tagCounts: { [key: string]: number } = {};
