@@ -233,37 +233,78 @@ export default function DreamWeb({
       newNodes.forEach(node => {
         const isSelected = selectedNode === node.id;
         const isHovered = hoveredNode === node.id;
-        const nodeSize = 8 + node.connections * 2;
+        const nodeSize = 10 + node.connections * 2;
 
-        // Node circle
+        // Node circle with gradient
+        const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize);
+        if (isSelected) {
+          gradient.addColorStop(0, '#7FB069');
+          gradient.addColorStop(1, '#5a8248');
+        } else if (isHovered) {
+          gradient.addColorStop(0, '#A8D5A8');
+          gradient.addColorStop(1, '#7FB069');
+        } else {
+          gradient.addColorStop(0, '#F3F4F6');
+          gradient.addColorStop(1, '#D1D5DB');
+        }
+
         ctx.beginPath();
         ctx.arc(node.x, node.y, nodeSize, 0, Math.PI * 2);
-        ctx.fillStyle = isSelected ? '#7FB069' : isHovered ? '#A8D5A8' : '#E5E7EB';
+        ctx.fillStyle = gradient;
         ctx.fill();
-        ctx.strokeStyle = isSelected || isHovered ? '#7FB069' : '#D1D5DB';
+        ctx.strokeStyle = isSelected || isHovered ? '#7FB069' : '#9CA3AF';
         ctx.lineWidth = isSelected ? 3 : 2;
         ctx.stroke();
 
-        // Label
-        if (isSelected || isHovered) {
-          const label = node.dream.title || node.dream.text.substring(0, 30) + '...';
-          ctx.font = '12px S-CoreDream, sans-serif';
-          ctx.fillStyle = '#374151';
-          const metrics = ctx.measureText(label);
+        // Always show short label below node
+        const shortLabel = node.dream.title ?
+          (node.dream.title.length > 15 ? node.dream.title.substring(0, 15) + '...' : node.dream.title) :
+          node.dream.text.substring(0, 15) + '...';
 
-          // Background
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-          ctx.fillRect(
-            node.x - metrics.width / 2 - 6,
-            node.y - nodeSize - 25,
-            metrics.width + 12,
-            20
-          );
+        ctx.font = '11px S-CoreDream, sans-serif';
+        ctx.fillStyle = '#6B7280';
+        ctx.textAlign = 'center';
+        ctx.fillText(shortLabel, node.x, node.y + nodeSize + 15);
 
-          // Text
+        // Detailed tooltip on hover
+        if (isHovered || isSelected) {
+          const title = node.dream.title || language === 'ko' ? '제목 없음' : 'Untitled';
+          const date = node.dream.date;
+          const tags = [...(node.dream.autoTags || []), ...(node.dream.tags || [])].slice(0, 3);
+          const tagsText = tags.length > 0 ? tags.join(', ') : (language === 'ko' ? '태그 없음' : 'No tags');
+
+          // Tooltip background
+          const tooltipWidth = 250;
+          const tooltipHeight = 80;
+          const tooltipX = node.x > width / 2 ? node.x - tooltipWidth - 20 : node.x + 20;
+          const tooltipY = node.y - tooltipHeight / 2;
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+          ctx.strokeStyle = '#7FB069';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 8);
+          ctx.fill();
+          ctx.stroke();
+
+          // Tooltip content
           ctx.fillStyle = '#374151';
-          ctx.textAlign = 'center';
-          ctx.fillText(label, node.x, node.y - nodeSize - 10);
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 13px S-CoreDream, sans-serif';
+          ctx.fillText(title, tooltipX + 12, tooltipY + 20);
+
+          ctx.font = '11px S-CoreDream, sans-serif';
+          ctx.fillStyle = '#6B7280';
+          ctx.fillText(date, tooltipX + 12, tooltipY + 40);
+
+          ctx.fillStyle = '#9CA3AF';
+          ctx.fillText(tagsText, tooltipX + 12, tooltipY + 60);
+
+          // Connection count
+          ctx.fillStyle = '#7FB069';
+          ctx.font = 'bold 11px S-CoreDream, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(`${node.connections} ${language === 'ko' ? '연결' : 'links'}`, tooltipX + tooltipWidth - 12, tooltipY + 60);
         }
       });
 
