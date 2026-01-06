@@ -326,7 +326,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       let calculatedCurrentStreak = 0;
       if (dreamsData && dreamsData.length > 0) {
         const dates = dreamsData.map(d => new Date(d.created_at).toDateString());
-        const uniqueDates = [...new Set(dates)].sort().reverse(); // Most recent first
+        const uniqueDates = [...new Set(dates)].sort((a, b) => new Date(b).getTime() - new Date(a).getTime()); // Most recent first
 
         // Calculate current streak (from today backwards)
         const today = new Date().toDateString();
@@ -336,9 +336,9 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           calculatedCurrentStreak = 1;
           for (let i = 1; i < uniqueDates.length; i++) {
             const currentDate = new Date(uniqueDates[i]);
-            const prevDate = new Date(uniqueDates[i - 1]);
-            const diffDays = Math.round((prevDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
-            if (diffDays === 1) {
+            const prevDate = new Date(uniqueDates[i - 1]); // prevDate is more recent
+            const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
+            if (diffDays === -1) { // -1 because we're going backwards in time
               calculatedCurrentStreak++;
             } else {
               break;
@@ -350,9 +350,9 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         tempStreak = 1;
         for (let i = 1; i < uniqueDates.length; i++) {
           const currentDate = new Date(uniqueDates[i]);
-          const prevDate = new Date(uniqueDates[i - 1]);
-          const diffDays = Math.round((prevDate.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000));
-          if (diffDays === 1) {
+          const prevDate = new Date(uniqueDates[i - 1]); // prevDate is more recent
+          const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
+          if (diffDays === -1) { // -1 because we're going backwards in time
             tempStreak++;
           } else {
             longestStreak = Math.max(longestStreak, tempStreak);

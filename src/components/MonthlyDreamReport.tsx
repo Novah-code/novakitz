@@ -78,6 +78,8 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
   const [isPremium, setIsPremium] = useState(false);
   const [lastReportDate, setLastReportDate] = useState<Date | null>(null);
   const [daysUntilNextReport, setDaysUntilNextReport] = useState(0);
+  const [selectedMonth, setSelectedMonth] = useState(0); // 0 = current, -1 = last month, etc.
+  const [availableMonths, setAvailableMonths] = useState<{value: number, label: string}[]>([]);
   const t = translations[language];
 
   useEffect(() => {
@@ -85,6 +87,46 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
       checkPremiumAndLoadReport();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && isPremium) {
+      loadMonthReport(selectedMonth);
+    }
+  }, [selectedMonth]);
+
+  const loadMonthReport = async (monthOffset: number) => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      const now = new Date();
+      const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+      const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+      const monthEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
+
+      const { data: dreams } = await supabase
+        .from('dreams')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', monthStart.toISOString())
+        .lte('created_at', monthEnd.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (!dreams || dreams.length === 0) {
+        setStats(null);
+        setLoading(false);
+        return;
+      }
+
+      // Generate report
+      const report = generateMonthlyReport(dreams, targetDate);
+      setStats(report);
+    } catch (error) {
+      console.error('Error loading month report:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const checkPremiumAndLoadReport = async () => {
     if (!user) {
@@ -111,39 +153,39 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
         nextDate.setDate(nextDate.getDate() + 30);
         const daysLeft = Math.max(0, Math.ceil((nextDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
         setDaysUntilNextReport(daysLeft);
-
-        if (daysLeft > 0) {
-          setStats(null);
-          setLoading(false);
-          return;
-        }
       }
 
-      // Load this month's dreams
-      const now = new Date();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-      const { data: dreams } = await supabase
+      // Get all dreams to find available months
+      const { data: allDreams } = await supabase
         .from('dreams')
-        .select('*')
+        .select('created_at')
         .eq('user_id', user.id)
-        .gte('created_at', monthStart.toISOString())
-        .lte('created_at', monthEnd.toISOString())
         .order('created_at', { ascending: false });
 
-      if (!dreams || dreams.length === 0) {
-        setStats(null);
-        setLoading(false);
-        return;
+      if (allDreams && allDreams.length > 0) {
+        const months = new Set<string>();
+        const now = new Date();
+        allDreams.forEach(dream => {
+          const dreamDate = new Date(dream.created_at);
+          const monthKey = `${dreamDate.getFullYear()}-${dreamDate.getMonth()}`;
+          months.add(monthKey);
+        });
+
+        const monthOptions = Array.from(months).map(monthKey => {
+          const [year, month] = monthKey.split('-').map(Number);
+          const date = new Date(year, month, 1);
+          const monthsFromNow = (now.getFullYear() - year) * 12 + (now.getMonth() - month);
+          return {
+            value: -monthsFromNow,
+            label: date.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' })
+          };
+        }).sort((a, b) => b.value - a.value);
+
+        setAvailableMonths(monthOptions);
       }
 
-      // Generate report
-      const report = generateMonthlyReport(dreams, now);
-      setStats(report);
-
-      // Save report generation time
-      localStorage.setItem(lastReportKey, new Date().toISOString());
+      // Load selected month's dreams
+      await loadMonthReport(selectedMonth);
     } catch (error) {
       console.error('Error loading monthly report:', error);
     } finally {
@@ -565,9 +607,32 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '2rem', color: 'var(--matcha-dark)' }}>
-        📊 {t.monthlyReport}
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>
+          📊 {t.monthlyReport}
+        </h2>
+        {availableMonths.length > 1 && (
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            style={{
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid #ddd',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: '#374151',
+              cursor: 'pointer'
+            }}
+          >
+            {availableMonths.map(month => (
+              <option key={month.value} value={month.value}>
+                {month.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
 
       {/* Report Header */}
       <div style={{ background: 'linear-gradient(135deg, var(--matcha-green), #7fb069)', color: 'white', padding: '2rem', borderRadius: '12px', marginBottom: '2rem' }}>
