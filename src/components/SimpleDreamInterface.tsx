@@ -1746,11 +1746,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
   };
 
   const deleteDream = async (dreamId: string) => {
+    console.log('=== DELETE DREAM START ===');
     console.log('deleteDream called with id:', dreamId);
+    console.log('User logged in:', !!user);
+    console.log('Current savedDreams count:', savedDreams.length);
 
     // Find the dream to check if it has an image to delete
     const dreamToDelete = savedDreams.find(dream => dream.id === dreamId);
     console.log('Dream to delete:', dreamToDelete);
+
+    if (!dreamToDelete) {
+      console.error('Dream not found in savedDreams!');
+      showToast(language === 'ko' ? '꿈을 찾을 수 없습니다' : 'Dream not found', 'error');
+      return;
+    }
 
     // Delete from Supabase if user is logged in
     if (user) {
@@ -1790,13 +1799,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     // Update local state and localStorage
     const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
     console.log('Updated dreams count:', updatedDreams.length);
+    console.log('Setting savedDreams to:', updatedDreams);
     setSavedDreams(updatedDreams);
 
     // Always update localStorage
     localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+    console.log('localStorage updated');
 
     setActiveMenu(null);
+    setConfirmDialog({ ...confirmDialog, isOpen: false });
     showToast(language === 'ko' ? '꿈이 삭제되었습니다' : 'Dream deleted', 'success');
+    console.log('=== DELETE DREAM END ===');
   };
 
 
