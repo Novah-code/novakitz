@@ -587,20 +587,15 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
     );
   }
 
-  if (daysUntilNextReport > 0) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center', background: '#fff5f0', borderRadius: '12px', color: '#333' }}>
-        <p>⏳ {t.nextReportIn}</p>
-        <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff6b6b', margin: '1rem 0' }}>{daysUntilNextReport} {daysUntilNextReport === 1 ? 'Day' : 'Days'}</p>
-        {lastReportDate && <p style={{ fontSize: '12px', color: '#999' }}>{t.lastGenerated}: {new Date(lastReportDate).toLocaleDateString()}</p>}
-      </div>
-    );
-  }
-
   if (!stats) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
         <p>{t.noData}</p>
+        {daysUntilNextReport > 0 && (
+          <div style={{ marginTop: '1rem', padding: '1rem', background: '#fff5f0', borderRadius: '8px' }}>
+            <p style={{ fontSize: '14px', color: '#666' }}>⏳ {t.nextReportIn}: {daysUntilNextReport} {daysUntilNextReport === 1 ? 'Day' : 'Days'}</p>
+          </div>
+        )}
       </div>
     );
   }

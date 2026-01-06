@@ -4814,38 +4814,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     >
                       {language === 'ko' ? '수정' : 'Edit'}
                     </button>
-
-                    {/* Close button (X) */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedDream(null);
-                      }}
-                      className="dream-detail-close"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.3)',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '30px',
-                        height: '30px',
-                        minWidth: '30px',
-                        minHeight: '30px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontSize: '22px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        flexShrink: 0,
-                        padding: 0,
-                        lineHeight: '1'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
-                      onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-                    >
-                      ×
-                    </button>
                   </div>
                   <div className="dream-detail-title">{selectedDream.title || t.dreamEntry}</div>
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
