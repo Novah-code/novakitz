@@ -19,6 +19,7 @@ interface MonthlyStats {
     newKeywords: string[];
     emotionShift: string;
   };
+  monthlyTrends: { month: string; count: number }[];
 }
 
 interface MonthlyReportProps {
@@ -48,6 +49,9 @@ const translations = {
     cannotGenerate: 'Reports can only be generated once per month',
     lastGenerated: 'Last generated',
     close: 'Close',
+    monthlyTrends: 'Monthly Trends',
+    reportGeneratedOn1st: 'Monthly reports are automatically generated on the 1st of each month',
+    nextReportDate: 'Next report will be available on',
   },
   ko: {
     monthlyReport: '월간 꿈 리포트',
@@ -69,6 +73,9 @@ const translations = {
     cannotGenerate: '리포트는 월 1회만 생성 가능합니다',
     lastGenerated: '마지막 생성',
     close: '닫기',
+    monthlyTrends: '월별 추이',
+    reportGeneratedOn1st: '월간 리포트는 매달 1일에 자동으로 생성됩니다',
+    nextReportDate: '다음 리포트 생성일',
   },
 };
 
@@ -118,8 +125,17 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
         return;
       }
 
-      // Generate report
-      const report = generateMonthlyReport(dreams, targetDate);
+      // Fetch last 6 months of dreams for trends
+      const sixMonthsAgo = new Date(targetDate.getFullYear(), targetDate.getMonth() - 5, 1);
+      const { data: allDreams } = await supabase
+        .from('dreams')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', sixMonthsAgo.toISOString())
+        .lte('created_at', monthEnd.toISOString());
+
+      // Generate report with monthly trends
+      const report = generateMonthlyReport(dreams, targetDate, allDreams || []);
       setStats(report);
     } catch (error) {
       console.error('Error loading month report:', error);
@@ -193,7 +209,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
     }
   };
 
-  const generateMonthlyReport = (dreams: Dream[], now: Date): MonthlyStats => {
+  const generateMonthlyReport = (dreams: Dream[], now: Date, allDreams: {created_at: string}[] = []): MonthlyStats => {
     const monthName = now.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' });
 
     // Mood distribution
@@ -225,6 +241,30 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
     // Pattern detection
     const patterns = detectPatterns(dreams, topKeywords);
 
+    // Calculate monthly trends from allDreams
+    const monthCounts: { [key: string]: number } = {};
+    const monthNames = language === 'ko'
+      ? ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
+      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    allDreams.forEach(dream => {
+      const date = new Date(dream.created_at);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+    });
+
+    const monthlyTrends = Object.entries(monthCounts)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+      .map(([monthKey, count]) => {
+        const [year, month] = monthKey.split('-');
+        const monthName = monthNames[parseInt(month) - 1];
+        return {
+          month: `${monthName} ${year.slice(2)}`,
+          count
+        };
+      });
+
     // Previous month comparison
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -241,6 +281,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
         newKeywords: topKeywords.slice(0, 3).map((k) => k.word),
         emotionShift: 'Exploring new emotional themes',
       },
+      monthlyTrends,
     };
   };
 
@@ -637,6 +678,22 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
         )}
       </div>
 
+      {/* Info Banner about 1st of month */}
+      <div style={{
+        background: '#e8f5e8',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        marginBottom: '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '14px',
+        color: '#5A8449'
+      }}>
+        <span>📅</span>
+        <span>{t.reportGeneratedOn1st}</span>
+      </div>
+
       {/* Report Header */}
       <div style={{ background: 'linear-gradient(135deg, var(--matcha-green), #7fb069)', color: 'white', padding: '2rem', borderRadius: '12px', marginBottom: '2rem' }}>
         <h3 style={{ fontSize: '20px', marginBottom: '1rem' }}>{stats.month}</h3>
@@ -758,6 +815,60 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
           ))}
         </ul>
       </div>
+
+      {/* Monthly Trends */}
+      {stats.monthlyTrends && stats.monthlyTrends.length > 0 && (
+        <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
+            📈 {t.monthlyTrends}
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {stats.monthlyTrends.map((month, idx) => {
+              const maxCount = Math.max(...stats.monthlyTrends.map(m => m.count));
+              const barWidth = maxCount > 0 ? (month.count / maxCount) * 100 : 0;
+
+              return (
+                <div key={idx}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.5rem'
+                  }}>
+                    <span style={{ fontWeight: '600', fontSize: '14px' }}>{month.month}</span>
+                    <span style={{ color: '#666', fontSize: '14px' }}>
+                      {month.count} {language === 'ko' ? '개' : 'dreams'}
+                    </span>
+                  </div>
+                  <div style={{
+                    height: '32px',
+                    background: '#e8f5e8',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${barWidth}%`,
+                      background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                      borderRadius: '8px',
+                      transition: 'width 1s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      paddingRight: '12px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '0.9rem'
+                    }}>
+                      {month.count > 0 && month.count}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Download Button */}
       <button

@@ -33,7 +33,6 @@ interface DreamStats {
   averageDreamsPerWeek: number;
   longestStreak: number;
   moodDistribution: { mood: string; count: number; percentage: number }[];
-  monthlyDistribution: { month: string; count: number }[];
   averageLength: number;
   longestDream: number;
   shortestDream: number;
@@ -64,7 +63,6 @@ const translations = {
     emotionDistribution: 'Emotional Patterns',
     categoryBreakdown: 'Dream Categories',
     moodDistribution: 'Mood Distribution',
-    monthlyTrends: 'Monthly Trends',
     topTags: 'Popular Tags',
     recentPatterns: 'Recent Patterns',
     aiPatternAnalysis: 'AI Pattern Analysis',
@@ -107,7 +105,6 @@ const translations = {
     emotionDistribution: '감정 패턴',
     categoryBreakdown: '꿈 카테고리',
     moodDistribution: '무드 분포',
-    monthlyTrends: '월별 추이',
     topTags: '인기 태그',
     recentPatterns: '최근 패턴',
     aiPatternAnalysis: 'AI 패턴 분석',
@@ -377,30 +374,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         percentage: totalMoods > 0 ? Math.round((count / totalMoods) * 100) : 0
       }));
 
-      // Calculate monthly distribution (last 6 months)
-      const monthCounts: { [key: string]: number } = {};
-      const monthNames = language === 'ko'
-        ? ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
-        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-      dreamsData?.forEach((dream) => {
-        const date = new Date(dream.created_at);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
-      });
-
-      const monthlyDistribution = Object.entries(monthCounts)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .slice(-6) // Last 6 months
-        .map(([monthKey, count]) => {
-          const [year, month] = monthKey.split('-');
-          const monthName = monthNames[parseInt(month) - 1];
-          return {
-            month: `${monthName} ${year.slice(2)}`,
-            count
-          };
-        });
-
       // Calculate average, longest, and shortest dream length
       let averageLength = 0;
       let longestDream = 0;
@@ -490,7 +463,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         averageDreamsPerWeek,
         longestStreak,
         moodDistribution,
-        monthlyDistribution,
         averageLength,
         longestDream,
         shortestDream,
@@ -515,7 +487,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         averageDreamsPerWeek: 0,
         longestStreak: 0,
         moodDistribution: [],
-        monthlyDistribution: [],
         averageLength: 0,
         longestDream: 0,
         shortestDream: 0,
@@ -883,62 +854,6 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Monthly Trends (Bar Chart) */}
-        {stats.monthlyDistribution.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.monthlyTrends}</h2>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}>
-              {stats.monthlyDistribution.map((month, idx) => {
-                const maxCount = Math.max(...stats.monthlyDistribution.map(m => m.count));
-                const barWidth = maxCount > 0 ? (month.count / maxCount) * 100 : 0;
-
-                return (
-                  <div key={idx}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '0.5rem'
-                    }}>
-                      <span style={{ fontWeight: '600' }}>{month.month}</span>
-                      <span style={{ color: '#666' }}>
-                        <AnimatedScore value={month.count} suffix={language === 'ko' ? ' 개' : ' dreams'} />
-                      </span>
-                    </div>
-                    <div style={{
-                      height: '32px',
-                      background: '#e8f5e8',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      position: 'relative'
-                    }}>
-                      <div style={{
-                        height: '100%',
-                        width: animateCharts ? `${barWidth}%` : '0%',
-                        background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                        borderRadius: '8px',
-                        transition: 'width 1s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        paddingRight: '12px',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '0.9rem'
-                      }}>
-                        {month.count > 0 && animateCharts && <AnimatedScore value={month.count} />}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
