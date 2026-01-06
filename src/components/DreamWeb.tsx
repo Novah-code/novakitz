@@ -43,7 +43,12 @@ const translations = {
     clickToExplore: 'Click on dreams to explore',
     strongConnection: 'Strong connection',
     mediumConnection: 'Medium connection',
-    weakConnection: 'Weak connection'
+    weakConnection: 'Weak connection',
+    autoMode: 'Auto Links',
+    manualMode: 'Manual Links',
+    selectFirst: 'Select first dream',
+    selectSecond: 'Select second dream to connect',
+    clickToRemove: 'Click existing connection to remove'
   },
   ko: {
     title: '꿈 연결망',
@@ -54,7 +59,12 @@ const translations = {
     clickToExplore: '꿈을 클릭해서 탐색하세요',
     strongConnection: '강한 연결',
     mediumConnection: '중간 연결',
-    weakConnection: '약한 연결'
+    weakConnection: '약한 연결',
+    autoMode: '자동 연결',
+    manualMode: '수동 연결',
+    selectFirst: '첫 번째 꿈 선택',
+    selectSecond: '연결할 두 번째 꿈 선택',
+    clickToRemove: '기존 연결을 클릭하면 삭제됩니다'
   }
 };
 
@@ -81,6 +91,9 @@ export default function DreamWeb({
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [firstSelectedForLink, setFirstSelectedForLink] = useState<string | null>(null);
+  const [manualEdges, setManualEdges] = useState<Edge[]>([]);
   const animationRef = useRef<number | undefined>(undefined);
   const t = translations[language];
 
@@ -211,20 +224,30 @@ export default function DreamWeb({
       // Render
       ctx.clearRect(0, 0, width, height);
 
+      // Combine auto edges and manual edges
+      const displayEdges = isManualMode ? manualEdges : edges;
+
       // Draw edges
-      edges.forEach(edge => {
+      displayEdges.forEach(edge => {
         const source = newNodes.find(n => n.id === edge.source);
         const target = newNodes.find(n => n.id === edge.target);
         if (!source || !target) return;
 
         const isHighlighted = selectedNode === edge.source || selectedNode === edge.target;
+        const isConnectedToFirstSelected = isManualMode && firstSelectedForLink &&
+          (edge.source === firstSelectedForLink || edge.target === firstSelectedForLink);
 
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         ctx.lineTo(target.x, target.y);
-        ctx.strokeStyle = isHighlighted
-          ? `rgba(127, 176, 105, ${edge.strength})`
-          : `rgba(209, 213, 219, ${edge.strength * 0.5})`;
+
+        if (isConnectedToFirstSelected) {
+          ctx.strokeStyle = `rgba(168, 213, 168, ${edge.strength})`;
+        } else if (isHighlighted) {
+          ctx.strokeStyle = `rgba(127, 176, 105, ${edge.strength})`;
+        } else {
+          ctx.strokeStyle = `rgba(209, 213, 219, ${edge.strength * 0.5})`;
+        }
         ctx.lineWidth = edge.strength * 3;
         ctx.stroke();
       });
@@ -233,11 +256,15 @@ export default function DreamWeb({
       newNodes.forEach(node => {
         const isSelected = selectedNode === node.id;
         const isHovered = hoveredNode === node.id;
+        const isFirstSelected = isManualMode && firstSelectedForLink === node.id;
         const nodeSize = 10 + node.connections * 2;
 
         // Node circle with gradient
         const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize);
-        if (isSelected) {
+        if (isFirstSelected) {
+          gradient.addColorStop(0, '#FCD34D'); // Yellow for first selected
+          gradient.addColorStop(1, '#F59E0B');
+        } else if (isSelected) {
           gradient.addColorStop(0, '#7FB069');
           gradient.addColorStop(1, '#5a8248');
         } else if (isHovered) {
@@ -252,8 +279,8 @@ export default function DreamWeb({
         ctx.arc(node.x, node.y, nodeSize, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
-        ctx.strokeStyle = isSelected || isHovered ? '#7FB069' : '#9CA3AF';
-        ctx.lineWidth = isSelected ? 3 : 2;
+        ctx.strokeStyle = isFirstSelected ? '#F59E0B' : (isSelected || isHovered ? '#7FB069' : '#9CA3AF');
+        ctx.lineWidth = isFirstSelected || isSelected ? 3 : 2;
         ctx.stroke();
 
         // Always show short label below node
@@ -318,7 +345,7 @@ export default function DreamWeb({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [nodes, edges, selectedNode, hoveredNode]);
+  }, [nodes, edges, selectedNode, hoveredNode, isManualMode, firstSelectedForLink, manualEdges, language]);
 
   // Handle canvas click
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -331,19 +358,58 @@ export default function DreamWeb({
 
     // Find clicked node
     const clickedNode = nodes.find(node => {
-      const nodeSize = 8 + node.connections * 2;
+      const nodeSize = 10 + node.connections * 2;
       const dx = node.x - x;
       const dy = node.y - y;
       return Math.sqrt(dx * dx + dy * dy) <= nodeSize;
     });
 
-    if (clickedNode) {
-      setSelectedNode(clickedNode.id);
-      if (onDreamClick) {
-        onDreamClick(clickedNode.dream);
+    if (isManualMode) {
+      // Manual link mode
+      if (clickedNode) {
+        if (!firstSelectedForLink) {
+          // Select first node
+          setFirstSelectedForLink(clickedNode.id);
+        } else if (clickedNode.id === firstSelectedForLink) {
+          // Deselect if clicking same node
+          setFirstSelectedForLink(null);
+        } else {
+          // Create or remove connection
+          const existingEdgeIndex = manualEdges.findIndex(
+            edge =>
+              (edge.source === firstSelectedForLink && edge.target === clickedNode.id) ||
+              (edge.source === clickedNode.id && edge.target === firstSelectedForLink)
+          );
+
+          if (existingEdgeIndex >= 0) {
+            // Remove existing connection
+            setManualEdges(prev => prev.filter((_, i) => i !== existingEdgeIndex));
+          } else {
+            // Add new connection
+            setManualEdges(prev => [
+              ...prev,
+              {
+                source: firstSelectedForLink,
+                target: clickedNode.id,
+                strength: 0.8
+              }
+            ]);
+          }
+          setFirstSelectedForLink(null);
+        }
+      } else {
+        setFirstSelectedForLink(null);
       }
     } else {
-      setSelectedNode(null);
+      // Normal mode
+      if (clickedNode) {
+        setSelectedNode(clickedNode.id);
+        if (onDreamClick) {
+          onDreamClick(clickedNode.dream);
+        }
+      } else {
+        setSelectedNode(null);
+      }
     }
   };
 
@@ -404,7 +470,7 @@ export default function DreamWeb({
       }}
     >
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <h2
           style={{
             fontSize: '1.8rem',
@@ -415,9 +481,68 @@ export default function DreamWeb({
         >
           {t.title}
         </h2>
-        <p style={{ fontSize: '0.95rem', color: '#9ca3af' }}>
+        <p style={{ fontSize: '0.95rem', color: '#9ca3af', marginBottom: '1rem' }}>
           {t.subtitle}
         </p>
+
+        {/* Mode Toggle */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '0.5rem'
+        }}>
+          <button
+            onClick={() => {
+              setIsManualMode(false);
+              setFirstSelectedForLink(null);
+            }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: !isManualMode ? '#7FB069' : '#E5E7EB',
+              color: !isManualMode ? 'white' : '#6B7280',
+              fontWeight: '600',
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {t.autoMode}
+          </button>
+          <button
+            onClick={() => {
+              setIsManualMode(true);
+              setFirstSelectedForLink(null);
+            }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              background: isManualMode ? '#7FB069' : '#E5E7EB',
+              color: isManualMode ? 'white' : '#6B7280',
+              fontWeight: '600',
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {t.manualMode}
+          </button>
+        </div>
+
+        {/* Instruction text */}
+        {isManualMode && (
+          <p style={{
+            fontSize: '0.85rem',
+            color: firstSelectedForLink ? '#7FB069' : '#9ca3af',
+            fontWeight: firstSelectedForLink ? '600' : '400'
+          }}>
+            {firstSelectedForLink ? t.selectSecond : t.selectFirst}
+          </p>
+        )}
       </div>
 
       {/* Canvas */}
