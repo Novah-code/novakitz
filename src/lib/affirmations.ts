@@ -60,17 +60,34 @@ Respond in this format only:
 2. [Second affirmation]
 ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
 
-    // Use /api/analyze-dream endpoint to generate affirmations
-    const response = await fetch('/api/analyze-dream', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        dreamText: '' // Not needed for affirmation generation
-      }),
-    });
+    // Use Gemini API directly for affirmation generation
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('Gemini API key not available for affirmation generation');
+      return [];
+    }
+
+    // Add timeout to Gemini API call
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        }),
+        signal: controller.signal,
+      }
+    ).finally(() => clearTimeout(timeoutId));
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -79,8 +96,8 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
     }
 
     const data = await response.json();
-    if (data.analysis) {
-      const text = data.analysis;
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]) {
+      const text = data.candidates[0].content.parts[0].text;
 
       // Parse affirmations from response
       const affirmations = text

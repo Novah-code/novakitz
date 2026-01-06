@@ -567,16 +567,16 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [viewMode]);
 
-  // Handle carousel scroll to update active card
+  // Handle carousel scroll to update active card and infinite scroll
   useEffect(() => {
     const carousel = carouselRef.current;
-    if (!carousel) return;
+    if (!carousel || !showHistory) return;
 
     const handleScroll = () => {
       const cards = carousel.querySelectorAll('.dream-entry');
       if (cards.length === 0) return;
 
-      // Calculate which card is closest to center
+      // Calculate which card is closest to center (for horizontal scroll)
       const carouselCenter = carousel.scrollLeft + carousel.clientWidth / 2;
       let closestIndex = 0;
       let closestDistance = Infinity;
@@ -592,7 +592,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       setActiveCardIndex(closestIndex);
 
-      // Infinite scroll: Load more dreams when scrolled near bottom
+      // Infinite scroll: Load more dreams when scrolled near bottom (vertical scroll)
       const scrollHeight = carousel.scrollHeight;
       const scrollTop = carousel.scrollTop;
       const clientHeight = carousel.clientHeight;
@@ -604,7 +604,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
     carousel.addEventListener('scroll', handleScroll);
     return () => carousel.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [showHistory]);
 
   // Reset displayed dreams count when search/filter changes
   useEffect(() => {
@@ -1740,9 +1740,22 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
   };
 
   const deleteDream = async (dreamId: string) => {
+    // Find the dream to check if it has an image to delete
+    const dreamToDelete = savedDreams.find(dream => dream.id === dreamId);
+
     // Delete from Supabase if user is logged in
     if (user) {
       try {
+        // Delete the image from storage if it exists
+        if (dreamToDelete?.image) {
+          try {
+            await deleteDreamImage(dreamToDelete.image);
+          } catch (imageError) {
+            console.error('Error deleting dream image:', imageError);
+            // Continue with dream deletion even if image deletion fails
+          }
+        }
+
         const { error } = await supabase
           .from('dreams')
           .delete()
@@ -1761,15 +1774,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         showToast(language === 'ko' ? '삭제 중 오류 발생' : 'Error deleting dream', 'error');
         return;
       }
-    } else {
-      // Delete from localStorage if not logged in
-      const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
+    }
+
+    // Update local state and localStorage
+    const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
+    setSavedDreams(updatedDreams);
+
+    if (!user) {
+      // Update localStorage if not logged in
       localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
     }
 
-    // Update local state
-    const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
-    setSavedDreams(updatedDreams);
     setActiveMenu(null);
     showToast(language === 'ko' ? '꿈이 삭제되었습니다' : 'Dream deleted', 'success');
   };
@@ -4721,10 +4736,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     top: '12px',
                     right: '12px',
                     display: 'flex',
-                    gap: '8px',
+                    gap: '6px',
                     alignItems: 'center',
                     zIndex: 1000,
-                    flexWrap: 'wrap',
+                    flexWrap: 'nowrap',
                     justifyContent: 'flex-end'
                   }}>
                     {/* Share button */}
@@ -4739,20 +4754,23 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
                         borderRadius: '50%',
-                        width: window.innerWidth < 480 ? '32px' : '36px',
-                        height: window.innerWidth < 480 ? '32px' : '36px',
+                        width: '30px',
+                        height: '30px',
+                        minWidth: '30px',
+                        minHeight: '30px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        padding: 0
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                     >
-                      <svg width={window.innerWidth < 480 ? '16' : '18'} height={window.innerWidth < 480 ? '16' : '18'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                         <polyline points="16 6 12 2 8 6"></polyline>
                         <line x1="12" y1="2" x2="12" y2="15"></line>
@@ -4770,15 +4788,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       style={{
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
-                        borderRadius: '8px',
-                        padding: window.innerWidth < 480 ? '4px 10px' : '8px 16px',
-                        fontSize: window.innerWidth < 480 ? '11px' : '14px',
+                        borderRadius: '6px',
+                        padding: '5px 12px',
+                        fontSize: '12px',
                         fontWeight: '600',
                         color: 'white',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         fontFamily: 'Georgia, serif',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        lineHeight: '1.2'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
@@ -4797,16 +4817,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         background: 'rgba(255, 255, 255, 0.3)',
                         border: 'none',
                         borderRadius: '50%',
-                        width: window.innerWidth < 480 ? '28px' : '32px',
-                        height: window.innerWidth < 480 ? '28px' : '32px',
+                        width: '30px',
+                        height: '30px',
+                        minWidth: '30px',
+                        minHeight: '30px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         color: 'white',
-                        fontSize: window.innerWidth < 480 ? '20px' : '24px',
+                        fontSize: '22px',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
-                        flexShrink: 0
+                        flexShrink: 0,
+                        padding: 0,
+                        lineHeight: '1'
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
