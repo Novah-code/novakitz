@@ -7,7 +7,6 @@ import Auth from './Auth';
 import SimpleDreamInterface from './SimpleDreamInterface';
 import UserProfileForm from './UserProfileForm';
 import DreamInsights from './DreamInsights';
-import BadgesDisplay from './BadgesDisplay';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
@@ -1118,7 +1117,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             >
               ×
             </button>
-            <BadgesDisplay user={user} language={language} />
           </div>
         </div>
       )}
