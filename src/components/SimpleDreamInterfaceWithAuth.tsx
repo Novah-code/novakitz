@@ -57,7 +57,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
-  const [showBadges, setShowBadges] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
@@ -504,7 +503,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                   setShowPlaylist(false);
                   setShowInsights(false);
                   setShowStreak(false);
-                  setShowBadges(false);
                   setShowMonthlyReport(false);
                   setMenuOpen(false);
                 }}
@@ -545,7 +543,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                   setShowPlaylist(false);
                   setShowInsights(false);
                   setShowStreak(false);
-                  setShowBadges(false);
                   setShowMonthlyReport(false);
                   // Then open history
                   setShowHistory(true);
@@ -719,40 +716,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
                 </svg>
                 <span>{t.streak}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  console.log('Badges button clicked!');
-                  setShowBadges(true);
-                  setMenuOpen(false);
-                }}
-                style={{
-                  padding: '1rem 2rem',
-                  background: 'none',
-                  border: 'none',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  color: 'var(--matcha-dark)',
-                  transition: 'all 0.2s',
-                  fontFamily: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'none';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="8" r="7"></circle>
-                  <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"></path>
-                </svg>
-                <span>{t.badges}</span>
               </button>
 
               <button
@@ -1063,62 +1026,6 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Dream Insights Modal */}
       {showInsights && user && (
         <DreamInsights user={user} language={language} onClose={() => setShowInsights(false)} />
-      )}
-
-      {/* Badges Modal */}
-      {showBadges && user && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.5)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10000,
-            padding: '20px'
-          }}
-          onClick={() => setShowBadges(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '500px',
-              width: '100%',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              position: 'relative'
-            }}
-          >
-            <button
-              onClick={() => setShowBadges(false)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'rgba(255, 255, 255, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.2rem',
-                color: 'var(--matcha-dark)',
-                zIndex: 1,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-              }}
-            >
-              ×
-            </button>
-          </div>
-        </div>
       )}
 
       {/* Streak Modal */}
