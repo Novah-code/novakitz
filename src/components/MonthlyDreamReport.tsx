@@ -257,10 +257,18 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
       'your', 'his', 'her', 'its', 'our', 'their', 'my', 'mine',
       'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most', 'least', 'so', 'too',
       'like', 'perhaps', 'maybe', 'seem', 'seems', 'seemed', 'something', 'anything', 'nothing',
+      // Common adverbs and frequency words
+      'often', 'even', 'always', 'never', 'sometimes', 'usually', 'rarely', 'frequently',
+      'still', 'yet', 'already', 'again', 'once', 'twice', 'ever',
+      'keep', 'kept', 'keeping', 'there', "it's", "i'm", "you're", "he's", "she's", "we're", "they're",
+      "isn't", "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
+      "doesn't", "don't", "didn't", "won't", "wouldn't", "can't", "couldn't", "shouldn't",
+      'life', 'time', 'thing', 'things', 'way', 'ways', 'day', 'days',
       // Common verbs that are too generic
       'feel', 'felt', 'feels', 'see', 'saw', 'seen', 'look', 'looked', 'looks',
       'get', 'got', 'gotten', 'go', 'went', 'gone', 'come', 'came', 'coming',
       'make', 'made', 'making', 'take', 'took', 'taken', 'give', 'gave', 'given',
+      'know', 'knew', 'known', 'think', 'thought', 'want', 'wanted', 'need', 'needed',
       'dream', 'dreams', 'dreaming', 'dreamed', 'dreamt',
 
       // Korean particles, conjunctions, adverbs

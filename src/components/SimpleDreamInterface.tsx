@@ -1746,8 +1746,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
   };
 
   const deleteDream = async (dreamId: string) => {
+    console.log('deleteDream called with id:', dreamId);
+
     // Find the dream to check if it has an image to delete
     const dreamToDelete = savedDreams.find(dream => dream.id === dreamId);
+    console.log('Dream to delete:', dreamToDelete);
 
     // Delete from Supabase if user is logged in
     if (user) {
@@ -1756,24 +1759,26 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         if (dreamToDelete?.image) {
           try {
             await deleteDreamImage(dreamToDelete.image);
+            console.log('Image deleted');
           } catch (imageError) {
             console.error('Error deleting dream image:', imageError);
             // Continue with dream deletion even if image deletion fails
           }
         }
 
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('dreams')
           .delete()
           .eq('id', dreamId)
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .select();
+
+        console.log('Supabase delete result:', { error, data });
 
         if (error) {
           console.error('Error deleting from Supabase:', error);
           showToast(language === 'ko' ? '삭제 실패' : 'Delete failed', 'error');
           return;
-        } else {
-          console.log('Deleted from Supabase:', dreamId);
         }
       } catch (error) {
         console.error('Exception deleting from Supabase:', error);
@@ -1784,12 +1789,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
     // Update local state and localStorage
     const updatedDreams = savedDreams.filter(dream => dream.id !== dreamId);
+    console.log('Updated dreams count:', updatedDreams.length);
     setSavedDreams(updatedDreams);
 
-    if (!user) {
-      // Update localStorage if not logged in
-      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-    }
+    // Always update localStorage
+    localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
 
     setActiveMenu(null);
     showToast(language === 'ko' ? '꿈이 삭제되었습니다' : 'Dream deleted', 'success');
