@@ -28,12 +28,6 @@ export async function generateAffirmationsFromDream(
     const plan = await getUserPlan(userId);
     const affirmationCount = plan.planSlug === 'premium' ? 3 : 1;
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error('Gemini API key not available');
-      return [];
-    }
-
     const prompt = language === 'ko'
       ? `다음 꿈을 바탕으로 개인의 성장과 자기 사랑을 위한 정확히 ${affirmationCount}개의 확언(affirmation)을 생성해주세요. 각 확언은 현재형으로 긍정적이고 구체적이어야 합니다.
 
@@ -66,37 +60,27 @@ Respond in this format only:
 2. [Second affirmation]
 ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
 
-    // Add timeout to Gemini API call
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }]
-        }),
-        signal: controller.signal,
-      }
-    ).finally(() => clearTimeout(timeoutId));
+    // Use /api/analyze-dream endpoint to generate affirmations
+    const response = await fetch('/api/analyze-dream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        dreamText: '' // Not needed for affirmation generation
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', response.status, errorText);
+      console.error('Affirmation generation API error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]) {
-      const text = data.candidates[0].content.parts[0].text;
+    if (data.analysis) {
+      const text = data.analysis;
 
       // Parse affirmations from response
       const affirmations = text

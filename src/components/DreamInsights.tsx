@@ -40,6 +40,7 @@ interface DreamStats {
   topTags: { tag: string; count: number }[];
   currentStreak: number;
   aiPatternAnalysis: string | null;
+  daysWithoutDreams: number;
 }
 
 const translations = {
@@ -57,6 +58,7 @@ const translations = {
     avgLength: 'Average Length',
     longestDream: 'Longest Dream',
     shortestDream: 'Shortest Dream',
+    daysWithoutDreams: 'Days Without Dreams',
     characters: 'characters',
     topKeywords: 'Most Common Keywords',
     emotionDistribution: 'Emotional Patterns',
@@ -99,6 +101,7 @@ const translations = {
     avgLength: '평균 길이',
     longestDream: '가장 긴 꿈',
     shortestDream: '가장 짧은 꿈',
+    daysWithoutDreams: '꿈 안 꾼 날',
     characters: '자',
     topKeywords: '자주 나타나는 키워드',
     emotionDistribution: '감정 패턴',
@@ -234,7 +237,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       // Fetch dreams with all data for comprehensive analysis (get all dream data first)
       const { data: dreamsData, error: dreamsError } = await supabase
         .from('dreams')
-        .select('id, created_at, content, mood, tags')
+        .select('id, created_at, content, mood, tags, title')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -413,11 +416,14 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         shortestDream = Math.min(...lengths);
       }
 
-      // Calculate top tags
+      // Calculate top tags (filter out "no dream" markers)
       const tagCounts: { [key: string]: number } = {};
       dreamsData?.forEach((dream) => {
         dream.tags?.forEach((tag: string) => {
-          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          // Skip "no dream" tags
+          if (tag !== '꿈안꿈' && tag !== 'no-dream' && !tag.toLowerCase().includes('no dream')) {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+          }
         });
       });
 
@@ -425,6 +431,18 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         .sort(([, a], [, b]) => b - a)
         .slice(0, 10)
         .map(([tag, count]) => ({ tag, count }));
+
+      // Calculate days without dreams (count dreams with "no dream" tags)
+      let daysWithoutDreams = 0;
+      dreamsData?.forEach((dream) => {
+        const isNoDream = dream.tags?.includes('꿈안꿈') ||
+                         dream.tags?.includes('no-dream') ||
+                         dream.title?.includes('꿈 안 꿈') ||
+                         dream.title?.includes('No Dream');
+        if (isNoDream) {
+          daysWithoutDreams++;
+        }
+      });
 
       // AI Pattern Analysis (only if 5+ dreams)
       let aiPatternAnalysis = null;
@@ -451,7 +469,8 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         shortestDream,
         topTags,
         currentStreak: calculatedCurrentStreak,
-        aiPatternAnalysis
+        aiPatternAnalysis,
+        daysWithoutDreams
       };
 
       console.log('Stats calculated successfully:', statsData);
@@ -475,7 +494,8 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         shortestDream: 0,
         topTags: [],
         currentStreak: 0,
-        aiPatternAnalysis: null
+        aiPatternAnalysis: null,
+        daysWithoutDreams: 0
       });
       setLoading(false);
     }
@@ -652,6 +672,20 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
               style={{ color: '#5A8449', fontSize: '2.5rem' }}
             />
             <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestStreak}</div>
+          </div>
+
+          <div style={{
+            background: 'linear-gradient(135deg, #ffe8e0 0%, #f4a261 100%)',
+            padding: '1.5rem',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <AnimatedScore
+              value={stats.daysWithoutDreams}
+              className="text-4xl font-bold"
+              style={{ color: '#8B4513', fontSize: '2.5rem' }}
+            />
+            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.daysWithoutDreams}</div>
           </div>
 
         </div>
