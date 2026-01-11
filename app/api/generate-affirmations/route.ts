@@ -58,6 +58,12 @@ export async function POST(request: NextRequest) {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+      console.log('🔍 [API] Querying dreams:', {
+        userId,
+        sevenDaysAgo: sevenDaysAgo.toISOString(),
+        currentTime: new Date().toISOString()
+      });
+
       const { data: recentDreams, error } = await supabase
         .from('dreams')
         .select('text, title, created_at')
@@ -66,7 +72,19 @@ export async function POST(request: NextRequest) {
         .order('created_at', { ascending: false })
         .limit(5);
 
+      console.log('📊 [API] Dreams query result:', {
+        hasError: !!error,
+        error: error,
+        dreamCount: recentDreams?.length || 0,
+        dreams: recentDreams?.map(d => ({
+          title: d.title,
+          created_at: d.created_at,
+          textLength: d.text?.length
+        }))
+      });
+
       if (error || !recentDreams || recentDreams.length === 0) {
+        console.log('⚠️ [API] No recent dreams found, returning empty array');
         return NextResponse.json({ affirmations: [] });
       }
 
@@ -74,6 +92,8 @@ export async function POST(request: NextRequest) {
       finalDreamText = recentDreams
         .map((d, i) => `Dream ${i + 1}: ${d.text.substring(0, 200)}`)
         .join('\n\n');
+
+      console.log('✅ [API] Combined dream text length:', finalDreamText.length);
     } else if (!dreamText) {
       return NextResponse.json(
         { error: 'dreamText is required when not using recent dreams' },
