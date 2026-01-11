@@ -5,8 +5,17 @@ import { supabase } from './supabase';
  */
 export async function getUserPlan(userId: string) {
   try {
+    console.log('🔍 [SUBSCRIPTION] getUserPlan called:', { userId });
+
     // First, try to get active and non-expired subscription
-    const { data: subscription } = await supabase
+    const currentTime = new Date().toISOString();
+    console.log('🔍 [SUBSCRIPTION] Query parameters:', {
+      userId,
+      currentTime,
+      expiresAtCondition: `expires_at.is.null,expires_at.gt.${currentTime}`
+    });
+
+    const { data: subscription, error: queryError } = await supabase
       .from('user_subscriptions')
       .select(`
         *,
@@ -18,34 +27,47 @@ export async function getUserPlan(userId: string) {
       `)
       .eq('user_id', userId)
       .eq('status', 'active')
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+      .or(`expires_at.is.null,expires_at.gt.${currentTime}`)
       .maybeSingle();
 
+    console.log('🔍 [SUBSCRIPTION] Query result:', {
+      hasData: !!subscription,
+      hasError: !!queryError,
+      error: queryError,
+      subscriptionData: subscription
+    });
+
     if (subscription && subscription.subscription_plans) {
-      return {
+      const result = {
         planSlug: subscription.subscription_plans.plan_slug,
         aiInterpretationsPerMonth: subscription.subscription_plans.ai_interpretations_per_month,
         historyDays: subscription.subscription_plans.history_days,
         isActive: true
       };
+      console.log('✅ [SUBSCRIPTION] Returning premium plan:', result);
+      return result;
     }
 
     // No active subscription - return free plan
-    return {
+    const freePlan = {
       planSlug: 'free',
       aiInterpretationsPerMonth: 7,
       historyDays: 999999, // Unlimited history for free users now
       isActive: false
     };
+    console.log('📭 [SUBSCRIPTION] No active subscription, returning free plan:', freePlan);
+    return freePlan;
   } catch (error) {
-    console.error('Error fetching user plan:', error);
+    console.error('❌ [SUBSCRIPTION] Error fetching user plan:', error);
     // Default to free plan on error
-    return {
+    const freePlan = {
       planSlug: 'free',
       aiInterpretationsPerMonth: 7,
       historyDays: 999999,
       isActive: false
     };
+    console.log('⚠️ [SUBSCRIPTION] Error occurred, returning free plan:', freePlan);
+    return freePlan;
   }
 }
 
