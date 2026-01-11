@@ -675,6 +675,13 @@ html {
     transform: translateY(-2px);
 }
 
+/* Korean button font */
+html[lang="ko"] .btn-primary,
+html[lang="ko"] .btn-secondary,
+html[lang="ko"] button {
+    font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
 /* Success message */
 .success-message {
     padding: 16px 24px;

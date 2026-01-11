@@ -4380,7 +4380,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   color: '#1f2937',
                   margin: '0 0 20px 0'
                 }}>
-                  {language === 'ko' ? '오늘의 확언과 성찰' : 'Daily Affirmations & Reflection'}
+                  {language === 'ko' ? '오늘의 확언' : 'Daily Affirmations & Reflection'}
                 </h3>
 
                 {user && (
@@ -5200,7 +5200,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       className="btn-primary"
                       style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
                     >
-                      {language === 'ko' ? '저널에 저장' : 'Save to Journal'}
+                      {language === 'ko' ? '저장' : 'Save to Journal'}
                     </button>
                   </div>
                 </div>
