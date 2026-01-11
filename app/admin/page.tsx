@@ -10,6 +10,9 @@ interface Subscription {
   plan_id: string;
   gumroad_license_key: string | null;
   gumroad_product_id: string | null;
+  toss_payment_key: string | null;
+  toss_order_id: string | null;
+  payment_method: string;
   status: string;
   started_at: string;
   expires_at: string | null;
@@ -302,6 +305,9 @@ export default function AdminDashboard() {
                     플랜
                   </th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    결제 방법
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                     상태
                   </th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
@@ -311,7 +317,7 @@ export default function AdminDashboard() {
                     만료일
                   </th>
                   <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    라이센스 키
+                    결제 ID
                   </th>
                 </tr>
               </thead>
@@ -323,6 +329,18 @@ export default function AdminDashboard() {
                     </td>
                     <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937' }}>
                       {sub.subscription_plans?.plan_name || 'Unknown'}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: 'white',
+                        background: sub.payment_method === 'toss' ? '#0064FF' : '#FF90E8',
+                      }}>
+                        {sub.payment_method === 'toss' ? '토스' : 'Gumroad'}
+                      </span>
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{
@@ -343,7 +361,10 @@ export default function AdminDashboard() {
                       {sub.expires_at ? formatDate(sub.expires_at) : '평생'}
                     </td>
                     <td style={{ padding: '1rem', fontSize: '12px', color: '#9ca3af', fontFamily: 'monospace' }}>
-                      {sub.gumroad_license_key ? sub.gumroad_license_key.substring(0, 16) + '...' : '-'}
+                      {sub.payment_method === 'toss'
+                        ? (sub.toss_order_id ? sub.toss_order_id.substring(0, 16) + '...' : '-')
+                        : (sub.gumroad_license_key ? sub.gumroad_license_key.substring(0, 16) + '...' : '-')
+                      }
                     </td>
                   </tr>
                 ))}

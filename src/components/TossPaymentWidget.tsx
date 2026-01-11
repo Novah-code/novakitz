@@ -74,8 +74,8 @@ export default function TossPaymentWidget({
 
     try {
       const orderId = uuidv4();
-      const successUrl = `${window.location.origin}/api/toss-success?userId=${userId}&billingCycle=${billingCycle}`;
-      const failUrl = `${window.location.origin}/api/toss-fail`;
+      const successUrl = `${window.location.origin}/payment/success?userId=${userId}`;
+      const failUrl = `${window.location.origin}/payment/fail`;
 
       await paymentWidgetRef.current.requestPayment({
         orderId,
