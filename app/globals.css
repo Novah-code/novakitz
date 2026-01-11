@@ -44,10 +44,14 @@
     font-display: swap;
 }
 
-/* 모든 한국어 텍스트와 분석 내용에 에스코어 드림 적용 */
-:lang(ko), [lang="ko"], html[lang="ko"] *,
-.dream-response, .analysis-content, .dream-text,
-[class*="analysis"], [class*="dream"], [class*="response"] {
+/* 한국어 설정일 때만 에스코어 드림 적용 */
+html[lang="ko"] *,
+html[lang="ko"] .dream-response,
+html[lang="ko"] .analysis-content,
+html[lang="ko"] .dream-text,
+html[lang="ko"] [class*="analysis"],
+html[lang="ko"] [class*="dream"],
+html[lang="ko"] [class*="response"] {
     font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
