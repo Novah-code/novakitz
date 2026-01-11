@@ -46,6 +46,8 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
   const [error, setError] = useState('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [userPlanInfo, setUserPlanInfo] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const DREAMS_PER_PAGE = 9;
 
   // Load dreams from Supabase
   useEffect(() => {
@@ -212,17 +214,52 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
   };
 
   const getFilteredDreams = () => {
-    if (!selectedDate || currentView !== 'history') {
-      return dreams;
+    let filtered = dreams;
+
+    if (selectedDate && currentView === 'history') {
+      filtered = dreams.filter(dream => {
+        const dreamDate = dream.created_at
+          ? new Date(dream.created_at).toDateString()
+          : new Date().toDateString();
+        return dreamDate === selectedDate;
+      });
     }
-    
-    return dreams.filter(dream => {
-      const dreamDate = dream.created_at 
-        ? new Date(dream.created_at).toDateString()
-        : new Date().toDateString();
-      return dreamDate === selectedDate;
-    });
+
+    return filtered;
   };
+
+  const getPaginatedDreams = () => {
+    const filtered = getFilteredDreams();
+    const start = currentPage * DREAMS_PER_PAGE;
+    const end = start + DREAMS_PER_PAGE;
+    return filtered.slice(start, end);
+  };
+
+  const getTotalPages = () => {
+    const filtered = getFilteredDreams();
+    return Math.ceil(filtered.length / DREAMS_PER_PAGE);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < getTotalPages() - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageIndex: number) => {
+    setCurrentPage(pageIndex);
+  };
+
+  // Reset to page 0 when view changes or filter changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [currentView, selectedDate]);
 
   const clearDateFilter = () => {
     setSelectedDate(null);
@@ -425,7 +462,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                 <span className="empty-icon">🌙</span>
                 <h3>No dreams recorded yet</h3>
                 <p>Start by recording your first dream to begin your journey of self-discovery.</p>
-                <button 
+                <button
                   className="btn btn-primary"
                   onClick={() => setCurrentView('new')}
                 >
@@ -433,44 +470,80 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                 </button>
               </div>
             ) : (
-              <div className="dreams-grid">
-                {getFilteredDreams().map((dream) => (
-                  <div key={dream.id} className="dream-card glass glass-hover">
-                    <div className="dream-card-header">
-                      <div className="dream-meta">
-                        <span className="dream-date">{dream.created_at ? formatTimeAgo(dream.created_at) : dream.date}</span>
-                        <span className="dream-time">{dream.time}</span>
+              <>
+                <div className="dreams-grid">
+                  {getPaginatedDreams().map((dream) => (
+                    <div key={dream.id} className="dream-card glass glass-hover">
+                      <div className="dream-card-header">
+                        <div className="dream-meta">
+                          <span className="dream-date">{dream.created_at ? formatTimeAgo(dream.created_at) : dream.date}</span>
+                          <span className="dream-time">{dream.time}</span>
+                        </div>
+                        <div className="dream-actions">
+                          <span className="dream-mood">{moodEmojis[dream.mood as keyof typeof moodEmojis]}</span>
+                          <button
+                            className="delete-btn"
+                            onClick={() => dream.id && deleteDream(dream.id)}
+                            title="Delete dream"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
-                      <div className="dream-actions">
-                        <span className="dream-mood">{moodEmojis[dream.mood as keyof typeof moodEmojis]}</span>
-                        <button 
-                          className="delete-btn"
-                          onClick={() => dream.id && deleteDream(dream.id)}
-                          title="Delete dream"
-                        >
-                          🗑️
-                        </button>
-                      </div>
+
+                      <h3 className="dream-card-title">{dream.title}</h3>
+                      <p className="dream-card-content">
+                        {dream.content.length > 150
+                          ? `${dream.content.substring(0, 150)}...`
+                          : dream.content
+                        }
+                      </p>
+
+                      {dream.tags.length > 0 && (
+                        <div className="dream-tags">
+                          {dream.tags.map((tag, index) => (
+                            <span key={index} className="dream-tag">#{tag}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    
-                    <h3 className="dream-card-title">{dream.title}</h3>
-                    <p className="dream-card-content">
-                      {dream.content.length > 150 
-                        ? `${dream.content.substring(0, 150)}...` 
-                        : dream.content
-                      }
-                    </p>
-                    
-                    {dream.tags.length > 0 && (
-                      <div className="dream-tags">
-                        {dream.tags.map((tag, index) => (
-                          <span key={index} className="dream-tag">#{tag}</span>
-                        ))}
-                      </div>
-                    )}
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {getTotalPages() > 1 && (
+                  <div className="pagination-controls">
+                    <button
+                      className="pagination-arrow"
+                      onClick={goToPrevPage}
+                      disabled={currentPage === 0}
+                      aria-label="Previous page"
+                    >
+                      ‹
+                    </button>
+
+                    <div className="pagination-dots">
+                      {Array.from({ length: getTotalPages() }, (_, i) => (
+                        <button
+                          key={i}
+                          className={`pagination-dot ${currentPage === i ? 'active' : ''}`}
+                          onClick={() => goToPage(i)}
+                          aria-label={`Go to page ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    <button
+                      className="pagination-arrow"
+                      onClick={goToNextPage}
+                      disabled={currentPage === getTotalPages() - 1}
+                      aria-label="Next page"
+                    >
+                      ›
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         )}
