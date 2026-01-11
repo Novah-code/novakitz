@@ -4503,8 +4503,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         <button
                           className="dots-menu-btn"
                           onClick={(e) => {
+                            console.log('Dots menu clicked for dream:', dream.id);
                             e.stopPropagation();
                             setActiveMenu(activeMenu === dream.id ? null : dream.id);
+                            console.log('Active menu set to:', activeMenu === dream.id ? null : dream.id);
                           }}
                         >
                           ⋮
@@ -4546,8 +4548,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               <button
                                 className="menu-item danger"
                                 onClick={(e) => {
+                                  console.log('Delete button clicked for dream:', dream.id);
                                   e.stopPropagation();
                                   setActiveMenu(null);
+                                  console.log('Opening confirm dialog');
                                   setConfirmDialog({
                                     isOpen: true,
                                     title: language === 'ko' ? '꿈 삭제' : 'Delete Dream',
@@ -4556,6 +4560,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                       : 'Are you sure you want to delete this dream? This action cannot be undone.',
                                     onConfirm: () => deleteDream(dream.id)
                                   });
+                                  console.log('Confirm dialog state set');
                                 }}
                               >
                                 <span className="menu-icon">
