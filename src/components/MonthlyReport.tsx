@@ -59,11 +59,11 @@ export default function MonthlyReport({
   });
 
   const moodEmoji: { [key: string]: string } = {
-    peaceful: '😌',
-    happy: '😊',
-    neutral: '😐',
-    anxious: '😟',
-    sad: '😢'
+    peaceful: '',
+    happy: '',
+    neutral: '',
+    anxious: '',
+    sad: ''
   };
 
   const labels = {
@@ -321,7 +321,7 @@ export default function MonthlyReport({
                   gap: '8px'
                 }}>
                   <span style={{ fontSize: '24px' }}>
-                    {moodEmoji[stats.dominantMood] || '😐'}
+                    {moodEmoji[stats.dominantMood] || ''}
                   </span>
                   <span style={{
                     fontSize: '16px',
@@ -401,7 +401,7 @@ export default function MonthlyReport({
                         gap: '8px'
                       }}>
                         <span style={{ fontSize: '16px', minWidth: '20px' }}>
-                          {moodEmoji[trend.mood] || '😐'}
+                          {moodEmoji[trend.mood] || ''}
                         </span>
                         <div style={{
                           flex: 1,
@@ -448,7 +448,7 @@ export default function MonthlyReport({
                     alignItems: 'center',
                     gap: '6px'
                   }}>
-                    ✨ {labels.insights}
+                    {labels.insights}
                   </h4>
                   <p style={{
                     margin: 0,

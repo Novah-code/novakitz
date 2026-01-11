@@ -4,7 +4,7 @@ export default function HeroSection() {
       <div className="container">
         <div className="hero-content glass-strong glass-hover">
           <div className="launch-badge">
-            🚀 Launching on Product Hunt Soon!
+             Launching on Product Hunt Soon!
           </div>
           <span className="hero-emoji">🌙</span>
           <h1 className="hero-title">Turn Your Dreams Into Personal Growth</h1>

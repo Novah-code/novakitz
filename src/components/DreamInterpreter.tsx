@@ -186,7 +186,7 @@ export default function DreamInterpreter() {
                   ) : (
                     <>
                       Interpret My Dream
-                      <span className="btn-icon">🔮</span>
+                      <span className="btn-icon"></span>
                     </>
                   )}
                 </button>
@@ -282,7 +282,7 @@ export default function DreamInterpreter() {
 
             {emailSubmitted && (
               <div className="email-success glass">
-                <h3>🎉 Thank you!</h3>
+                <h3> Thank you!</h3>
                 <p>Check your email for advanced dream interpretation techniques and personalized insights!</p>
               </div>
             )}

@@ -10,14 +10,14 @@ interface DreamCalendarProps {
 }
 
 const moodEmojis = {
-  peaceful: '😌',
+  peaceful: '',
   excited: '😃',
   confused: '😵',
-  scared: '😰',
-  happy: '😊',
-  sad: '😢',
+  scared: '',
+  happy: '',
+  sad: '',
   mysterious: '🤔',
-  surreal: '🌀'
+  surreal: ''
 };
 
 export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: DreamCalendarProps) {

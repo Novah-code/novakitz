@@ -47,11 +47,11 @@ const moodColors = {
 };
 
 const moodEmojis = {
-  peaceful: '🌙',
-  anxious: '😰',
-  joyful: '✨',
-  mysterious: '🔮',
-  neutral: '😌'
+  peaceful: '●',
+  anxious: '●',
+  joyful: '●',
+  mysterious: '●',
+  neutral: '●'
 };
 
 export default function DreamShareCard({
@@ -92,8 +92,8 @@ export default function DreamShareCard({
 
   const handleShare = async () => {
     const shareText = language === 'ko'
-      ? `${dreamTitle}\n\n${dreamSummary}\n\n✨ Novakitz에서 꿈을 기록하세요`
-      : `${dreamTitle}\n\n${dreamSummary}\n\n✨ Track your dreams with Novakitz`;
+      ? `${dreamTitle}\n\n${dreamSummary}\n\nNovakitz에서 꿈을 기록하세요`
+      : `${dreamTitle}\n\n${dreamSummary}\n\nTrack your dreams with Novakitz`;
 
     if (navigator.share) {
       try {

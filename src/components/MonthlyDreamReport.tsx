@@ -653,7 +653,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
     <div style={{ padding: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>
-          📊 {t.monthlyReport}
+          {t.monthlyReport}
         </h2>
         {availableMonths.length > 1 && (
           <select
@@ -712,7 +712,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
       {/* Mood Distribution Chart */}
       <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
-          😊 {t.moodBreakdown}
+           {t.moodBreakdown}
         </h3>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
           {/* Pie Chart */}
@@ -810,7 +810,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {stats.patterns.map((pattern, idx) => (
             <li key={idx} style={{ padding: '0.5rem 0', fontSize: '14px', color: '#555', borderBottom: '1px solid #e0e0e0' }}>
-              ✨ {pattern}
+              {pattern}
             </li>
           ))}
         </ul>
@@ -820,7 +820,7 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
       {stats.monthlyTrends && stats.monthlyTrends.length > 0 && (
         <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
-            📈 {t.monthlyTrends}
+            {t.monthlyTrends}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {stats.monthlyTrends.map((month, idx) => {

@@ -22,14 +22,14 @@ interface DreamPattern {
 }
 
 const moodEmojis = {
-  peaceful: '😌',
+  peaceful: '',
   excited: '😃',
   confused: '😵',
-  scared: '😰',
-  happy: '😊',
-  sad: '😢',
+  scared: '',
+  happy: '',
+  sad: '',
   mysterious: '🤔',
-  surreal: '🌀'
+  surreal: ''
 };
 
 export default function DreamJournal({ user, onSignOut, showGuestMode = false, onShowAuth, language = 'en' }: DreamJournalProps) {
@@ -362,7 +362,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                   className="view-calendar-btn"
                   onClick={() => setCurrentView('calendar')}
                 >
-                  📅 Dream Calendar
+                  Dream Calendar
                 </button>
                 {dreams.length >= 2 && (
                   <button 

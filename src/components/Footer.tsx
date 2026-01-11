@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="footer-content glass">
           <div className="footer-main">
             <div className="footer-brand">
-              <h3 className="footer-logo">🌙 Nova Dream</h3>
+              <h3 className="footer-logo">Nova Dream</h3>
               <p className="footer-tagline">
                 AI-powered dream interpretation that helps you grow
               </p>
@@ -35,7 +35,7 @@ export default function Footer() {
           
           <div className="footer-bottom-section">
             <div className="launch-status">
-              <span className="status-badge">🚀 Launching on Product Hunt Soon</span>
+              <span className="status-badge"> Launching on Product Hunt Soon</span>
               <p>Be part of our launch day success story</p>
             </div>
             

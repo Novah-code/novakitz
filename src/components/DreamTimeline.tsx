@@ -73,11 +73,11 @@ const moodColors = {
 };
 
 const moodEmojis = {
-  peaceful: '🌙',
-  anxious: '😰',
-  joyful: '✨',
-  mysterious: '🔮',
-  neutral: '😌'
+  peaceful: '●',
+  anxious: '●',
+  joyful: '●',
+  mysterious: '●',
+  neutral: '●'
 };
 
 function getRelativeTime(date: string, language: 'en' | 'ko'): string {

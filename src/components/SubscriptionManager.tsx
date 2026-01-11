@@ -268,7 +268,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               <ul>
                 <li>📝 Unlimited dream recording</li>
                 <li>🤖 7 AI interpretations per month</li>
-                <li>📅 Unlimited dream history</li>
+                <li>Unlimited dream history</li>
                 <li>🎯 Basic dream patterns</li>
               </ul>
             </div>
@@ -280,10 +280,10 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               <ul>
                 <li>📝 Unlimited dream recording</li>
                 <li>🤖 Unlimited AI interpretations</li>
-                <li>📅 Full dream history</li>
+                <li>Full dream history</li>
                 <li>🎯 Advanced dream analysis</li>
-                <li>📊 Detailed insights</li>
-                <li>✨ Daily affirmations from recent dreams</li>
+                <li>Detailed insights</li>
+                <li>Daily affirmations from recent dreams</li>
               </ul>
             </div>
           )}

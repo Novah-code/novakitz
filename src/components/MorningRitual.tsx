@@ -268,12 +268,12 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
       }}>
         {language === 'ko' ? (
           <>
-            <strong>💫 오늘의 팁:</strong> 이 의도들은 어제 밤 꿈에서 영감을 받았습니다.
+            <strong>오늘의 팁:</strong> 이 의도들은 어제 밤 꿈에서 영감을 받았습니다.
             작은 것부터 시작하세요. 완벽함보다는 지속성이 중요합니다.
           </>
         ) : (
           <>
-            <strong>💫 Today's Tip:</strong> These intentions were inspired by your last night's dream.
+            <strong>Today's Tip:</strong> These intentions were inspired by your last night's dream.
             Start small. Consistency matters more than perfection.
           </>
         )}

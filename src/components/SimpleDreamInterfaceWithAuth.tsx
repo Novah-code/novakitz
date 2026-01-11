@@ -1038,7 +1038,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>📊 {t.monthlyReport}</h2>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>{t.monthlyReport}</h2>
               <button
                 onClick={() => setShowMonthlyReport(false)}
                 style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}
@@ -1061,7 +1061,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             >
               ✕
             </button>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>📅 {t.calendar}</h2>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>{t.calendar}</h2>
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}

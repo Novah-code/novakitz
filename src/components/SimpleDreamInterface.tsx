@@ -21,7 +21,7 @@ import DreamShareCard from './DreamShareCard';
 import AffirmationSuggestionCard from './AffirmationSuggestionCard';
 import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
 import DreamTimeline from './DreamTimeline';
-import DreamWeb from './DreamWeb';
+import QuickArchetypeQuiz from './QuickArchetypeQuiz';
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -157,7 +157,6 @@ const translations = {
     card: 'Card',
     list: 'List',
     timeline: 'Timeline',
-    web: 'Web',
     todaysPractice: "Today's Practice",
     dreamAnalysis: 'Dream Reflection',
     dreamSymbols: 'Dream Symbols',
@@ -189,7 +188,6 @@ const translations = {
     card: '카드',
     list: '목록',
     timeline: '타임라인',
-    web: '연결망',
     todaysPractice: '오늘의 실천',
     dreamAnalysis: '꿈 성찰',
     dreamSymbols: '꿈의 상징',
@@ -229,7 +227,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [dreamImage, setDreamImage] = useState<File | null>(null);
   const [dreamImagePreview, setDreamImagePreview] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'card' | 'calendar' | 'timeline' | 'web'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'calendar' | 'timeline'>('card');
   const [editImage, setEditImage] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
@@ -265,6 +263,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showSearchFilter, setShowSearchFilter] = useState(false);
   const [displayedDreamsCount, setDisplayedDreamsCount] = useState(9);
   const [toastMessage, setToastMessage] = useState<{ message: string; type: ToastType } | null>(null);
+  const [showQuickArchetypeQuiz, setShowQuickArchetypeQuiz] = useState(false);
+  const [quizDreamText, setQuizDreamText] = useState('');
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -396,7 +396,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           const usage = await getRemainingAIInterpretations(user.id);
           setRemainingAIUsage(usage);
 
-          console.log('📊 AI usage loaded:', usage);
+          console.log('AI usage loaded:', usage);
         } catch (error) {
           console.error('Error loading premium status:', error);
         }
@@ -491,7 +491,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             console.log('Auto-analyzing dream:', dreamToAnalyze.id);
 
             try {
-              const result = await analyzeDreamWithGemini(dreamToAnalyze.text);
+              const result = await analyzeDreamWithGemini(dreamToAnalyze.text, dreamToAnalyze.id, user.id);
               console.log('Auto-analysis completed:', result);
 
               // Update the dream with the new analysis
@@ -689,8 +689,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     saveDreamWithTags(dreamText, response, []);
   };
 
-  const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = []) => {
-    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords });
+  const saveDreamWithTags = async (dreamText: string, response: string, autoTags: string[], keywords: any[] = [], providedDreamId?: string) => {
+    console.log('saveDreamWithTags called with:', { dreamText, response, autoTags, keywords, providedDreamId });
 
     // Get user's nickname for display
     let userNickname = '';
@@ -712,7 +712,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
     // Upload image to Supabase Storage if present
     let imageUrl = '/Default-dream.png';
-    const dreamId = Date.now().toString();
+    const dreamId = providedDreamId || Date.now().toString();
 
     if (dreamImage && user) {
       try {
@@ -781,7 +781,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           if (user && newDream.id) {
             console.log('⏱️  Scheduling intention generation in 500ms (offline mode)...');
             setTimeout(async () => {
-              console.log('🚀 Starting intention generation for offline dream:', newDream.id);
+              console.log(' Starting intention generation for offline dream:', newDream.id);
               const result = await generateDailyIntention(response, dreamText, newDream.id);
               if (result) {
                 console.log('✅ Intention generation completed successfully (offline)');
@@ -894,9 +894,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             // Generate intentions with a small delay to ensure dream is saved
             console.log('⏱️  Scheduling intention generation in 500ms...');
             setTimeout(async () => {
-              console.log('🚀 Starting intention generation for dream:', data.id);
-              console.log('🚀 Response to use:', response.substring(0, 100) + '...');
-              console.log('🚀 Dream text:', dreamText.substring(0, 100) + '...');
+              console.log(' Starting intention generation for dream:', data.id);
+              console.log(' Response to use:', response.substring(0, 100) + '...');
+              console.log(' Dream text:', dreamText.substring(0, 100) + '...');
               const result = await generateDailyIntention(response, dreamText, data.id);
               if (result) {
                 console.log('✅ Intention generation completed successfully');
@@ -932,6 +932,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       }, 2000); // Increased delay to 2 seconds to ensure DB is updated
       // Show streak popup after dream is saved
       setShowStreakPopup(true);
+
+      // Check if this is the first dream and trigger quiz
+      setTimeout(async () => {
+        const { count } = await supabase
+          .from('dreams')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+
+        if (count === 1) {
+          // First dream! Show quick archetype quiz
+          console.log('First dream detected - showing quick archetype quiz');
+          setQuizDreamText(dreamText);
+          setShowQuickArchetypeQuiz(true);
+        }
+      }, 1000);
     }
   };
 
@@ -1069,6 +1084,61 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setShowInput(true);
   };
 
+  const handleQuizComplete = async (result: {
+    primaryArchetype: string;
+    secondaryArchetype: string;
+    archetypeScores: Record<string, number>;
+    confidence: 'low' | 'medium' | 'high';
+  }) => {
+    console.log('Quiz completed with result:', result);
+
+    if (!user) {
+      console.error('No user - cannot save quick profile');
+      return;
+    }
+
+    try {
+      // Call quick-profile API
+      const response = await fetch('/api/quick-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          primaryArchetype: result.primaryArchetype,
+          secondaryArchetype: result.secondaryArchetype,
+          archetypeScores: result.archetypeScores,
+          confidence: result.confidence
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('Quick profile created successfully');
+        setToastMessage({
+          message: language === 'ko'
+            ? '무의식 프로파일이 생성되었습니다! 프로필 페이지에서 확인하세요.'
+            : 'Unconscious profile created! Check your profile page.',
+          type: 'success'
+        });
+
+        // Keep quiz visible for 3 more seconds to see result, then close
+        setTimeout(() => {
+          setShowQuickArchetypeQuiz(false);
+        }, 3000);
+      } else {
+        console.error('Failed to create quick profile:', data.error);
+      }
+    } catch (error) {
+      console.error('Error saving quick profile:', error);
+    }
+  };
+
+  const handleQuizSkip = () => {
+    console.log('User skipped quiz');
+    setShowQuickArchetypeQuiz(false);
+  };
+
   const startVoiceRecording = () => {
     if (recognitionRef.current) {
       setIsRecording(true);
@@ -1168,9 +1238,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     throw lastError || new Error('Maximum retries exceeded');
   };
 
-  const analyzeDreamWithGemini = async (dreamText: string) => {
+  const analyzeDreamWithGemini = async (dreamText: string, dreamId?: string, userId?: string) => {
     console.log('Starting dream analysis for:', dreamText);
     console.log('🔑 Current isPremium state:', isPremium);
+    console.log('Dream ID:', dreamId, 'User ID:', userId);
     const startTime = Date.now();
 
     try {
@@ -1195,7 +1266,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             body: JSON.stringify({
               dreamText: dreamText,
               language: language,
-              isPremium: isPremium
+              isPremium: isPremium,
+              dreamId: dreamId,
+              userId: userId
             })
           }),
           5, // 5 retries
@@ -1551,7 +1624,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         console.log(`AI interpretations remaining: ${canAnalyze.remaining}/${canAnalyze.limit}`);
       }
 
-      const result = await analyzeDreamWithGemini(dreamText);
+      // Generate dreamId before analysis for pattern extraction
+      const tempDreamId = Date.now().toString();
+      const result = await analyzeDreamWithGemini(dreamText, tempDreamId, user?.id);
 
       // Record the AI usage after successful analysis
       if (user) {
@@ -1560,7 +1635,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       console.log('Analysis received in handleSubmitDream:', result);
       setDreamResponse(result.analysis);
       console.log('About to save dream with analysis:', { dreamText, result });
-      const savedDream = await saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || []); // Save dream with tags and keywords
+      const savedDream = await saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || [], tempDreamId); // Save dream with tags, keywords, and ID
 
       // Generate affirmations after successful dream analysis
       if (user && savedDream) {
@@ -1835,8 +1910,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       : dream.text;
 
     const shareText = language === 'ko'
-      ? `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
-      : `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
+      ? `Today's Dream\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
+      : `Today's Dream\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
 
     // Try native share API first (mobile)
     if (navigator.share) {
@@ -1865,8 +1940,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       : shareModalDream.text;
 
     const shareText = language === 'ko'
-      ? `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
-      : `Today's Dream 🌙\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
+      ? `Today's Dream\n\n${dreamTitle}\n\n${dreamText}\n\nNovakitz로 기록했어요\n${window.location.origin}`
+      : `Today's Dream\n\n${dreamTitle}\n\n${dreamText}\n\nRecorded with Novakitz\n${window.location.origin}`;
 
     if (platform === 'link') {
       navigator.clipboard.writeText(shareText).then(() => {
@@ -4089,8 +4164,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               // Update response message to inform user
                               setDreamResponse(
                                 language === 'ko'
-                                  ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다.\n최근 꿈을 바탕으로 확언을 생성했어요! 🌟'
-                                  : 'You didn\'t remember a dream today. That\'s okay!\nWe created affirmations based on your recent dreams! 🌟'
+                                  ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다.\n최근 꿈을 바탕으로 확언을 생성했어요! '
+                                  : 'You didn\'t remember a dream today. That\'s okay!\nWe created affirmations based on your recent dreams! '
                               );
                             }
                           }
@@ -4236,7 +4311,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
                       <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
                       <button onClick={() => {setViewMode('timeline'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'timeline' ? '#ffffff' : 'transparent', color: viewMode === 'timeline' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'timeline' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.timeline}</button>
-                      <button onClick={() => {setViewMode('web'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'web' ? '#ffffff' : 'transparent', color: viewMode === 'web' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'web' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.web}</button>
                     </div>
                   </div>
                 )}
@@ -4338,16 +4412,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 </div>
               ) : viewMode === 'timeline' ? (
                 <DreamTimeline
-                  dreams={filteredDreams}
-                  onDreamClick={(dream) => {
-                    setDreamsFromSelectedDate([]);
-                    setCurrentDreamIndex(0);
-                    setSelectedDream(dream as DreamEntry);
-                  }}
-                  language={language}
-                />
-              ) : viewMode === 'web' ? (
-                <DreamWeb
                   dreams={filteredDreams}
                   onDreamClick={(dream) => {
                     setDreamsFromSelectedDate([]);
@@ -5106,7 +5170,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               <div className="modal-body" style={{padding: '20px', textAlign: 'center', fontFamily: 'Georgia, "Times New Roman", Times, serif'}}>
                 <div style={{marginBottom: '20px', fontSize: '16px', lineHeight: '1.6'}}>
                   <div style={{marginBottom: '15px', padding: '12px', background: '#f0f9f0', borderRadius: '8px', fontSize: '14px', color: '#5a8449'}}>
-                    💡 <strong>{language === 'ko' ? '처음 사용하시나요?' : 'First time?'}</strong> {language === 'ko' ? '브라우저가 마이크 권한을 요청할 거예요. "허용"을 선택하면 음성 입력을 사용할 수 있어요.' : 'Your browser will ask for microphone permission once. Choose "Allow" to enable voice input.'}
+                    <strong>{language === 'ko' ? '처음 사용하시나요?' : 'First time?'}</strong> {language === 'ko' ? '브라우저가 마이크 권한을 요청할 거예요. "허용"을 선택하면 음성 입력을 사용할 수 있어요.' : 'Your browser will ask for microphone permission once. Choose "Allow" to enable voice input.'}
                   </div>
                   <div style={{marginBottom: '15px'}}>
                     <strong>{language === 'ko' ? '짧게 클릭:' : 'Short click:'}</strong> {language === 'ko' ? '텍스트로 입력하기' : 'Type your dream'}
@@ -5406,6 +5470,69 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClose={() => setShowAffirmationSuggestion(false)}
         />
       )}
+
+      {/* Quick Archetype Quiz Modal */}
+      {showQuickArchetypeQuiz && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '2rem',
+          overflow: 'auto',
+        }}>
+          <div style={{
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              marginBottom: '1rem',
+              textAlign: 'center',
+            }}>
+              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>
+                {language === 'ko' ? '당신의 무의식 아키타입을 알아보세요!' : 'Discover Your Unconscious Archetype!'}
+              </h2>
+              <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0' }}>
+                {language === 'ko' ? '7개의 질문으로 30초만에 확인 (무료)' : '7 questions, 30 seconds (Free)'}
+              </p>
+            </div>
+            <QuickArchetypeQuiz
+              dreamText={quizDreamText}
+              language={language}
+              onComplete={handleQuizComplete}
+              onSkip={handleQuizSkip}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Copyright Footer */}
+      <footer style={{
+        textAlign: 'center',
+        padding: '2rem 1rem',
+        marginTop: '4rem',
+        borderTop: '1px solid rgba(127, 176, 105, 0.1)'
+      }}>
+        <p style={{
+          fontFamily: 'Roboto, sans-serif',
+          fontSize: '12px',
+          color: '#9ca3af',
+          margin: 0
+        }}>
+          © 2026 NovaKitz. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */

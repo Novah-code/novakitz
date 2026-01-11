@@ -31,7 +31,7 @@ export default function EmailForm() {
       <div className="container">
         <div className="coming-soon-content glass-strong glass-hover">
           <div className="launch-countdown">
-            <span className="countdown-badge">🚀 Product Hunt Launch</span>
+            <span className="countdown-badge"> Product Hunt Launch</span>
             <h2 className="coming-soon-title">Get Exclusive Early Access</h2>
           </div>
           
@@ -93,7 +93,7 @@ export default function EmailForm() {
           
           {submitted && (
             <div className="success-message show" id="successMessage">
-              🎉 Welcome to the Nova Dream family! 
+               Welcome to the Nova Dream family! 
               <br />
               <small>We'll notify you 24hrs before our Product Hunt launch with your exclusive discount code.</small>
             </div>

@@ -125,7 +125,7 @@ export default function AffirmationSuggestionCard({
           }}
         >
           <div style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-            ✨ {t.title}
+            {t.title}
           </div>
           <div style={{ opacity: 0.9, fontSize: '0.95rem' }}>
             {t.subtitle}

@@ -9,6 +9,48 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'S-CoreDream';
+    font-weight: 400;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-4Regular.woff') format('woff');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'S-CoreDream';
+    font-weight: 500;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-5Medium.woff') format('woff');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'S-CoreDream';
+    font-weight: 600;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-6Bold.woff') format('woff');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'S-CoreDream';
+    font-weight: 700;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-7ExtraBold.woff') format('woff');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'S-CoreDream';
+    font-weight: 800;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-8Heavy.woff') format('woff');
+    font-display: swap;
+}
+
+/* 모든 한국어 텍스트와 분석 내용에 에스코어 드림 적용 */
+:lang(ko), [lang="ko"], html[lang="ko"] *,
+.dream-response, .analysis-content, .dream-text,
+[class*="analysis"], [class*="dream"], [class*="response"] {
+    font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
 :root {
     --matcha-green: #7FB069;
     --matcha-light: #A8D5A8;

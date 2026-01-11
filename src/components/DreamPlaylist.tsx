@@ -352,7 +352,7 @@ export default function DreamPlaylist({
                   fontSize: '0.85rem',
                   color: 'rgba(0, 0, 0, 0.5)'
                 }}>
-                  <span>😊</span>
+                  <span></span>
                   <span>{dream.mood}</span>
                 </div>
               )}
