@@ -24,6 +24,13 @@ export async function generateAffirmationsFromDream(
   language: 'en' | 'ko' = 'en'
 ): Promise<string[]> {
   try {
+    console.log('🚀 [LIB] generateAffirmationsFromDream called:', {
+      userId,
+      dreamTextLength: dreamText?.length,
+      dreamTextPreview: dreamText?.substring(0, 50),
+      language
+    });
+
     // Call server-side API route for affirmation generation
     const response = await fetch('/api/generate-affirmations', {
       method: 'POST',
@@ -37,16 +44,23 @@ export async function generateAffirmationsFromDream(
       })
     });
 
+    console.log('📡 [LIB] API response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Affirmation generation API error:', response.status, errorText);
+      console.error('❌ [LIB] Affirmation generation API error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
-    return data.affirmations || [];
+    console.log('📦 [LIB] API response data:', data);
+
+    const affirmations = data.affirmations || [];
+    console.log('✅ [LIB] Returning affirmations:', affirmations);
+
+    return affirmations;
   } catch (error) {
-    console.error('Error generating affirmations:', error);
+    console.error('❌ [LIB] Error generating affirmations:', error);
     return [];
   }
 }
@@ -216,6 +230,11 @@ export async function generateAffirmationsFromRecentDreams(
   language: 'en' | 'ko' = 'en'
 ): Promise<string[]> {
   try {
+    console.log('🚀 [LIB] generateAffirmationsFromRecentDreams called:', {
+      userId,
+      language
+    });
+
     // Call server-side API route with useRecentDreams flag
     const response = await fetch('/api/generate-affirmations', {
       method: 'POST',
@@ -229,16 +248,23 @@ export async function generateAffirmationsFromRecentDreams(
       })
     });
 
+    console.log('📡 [LIB] Recent dreams API response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Recent dreams affirmation generation error:', response.status, errorText);
+      console.error('❌ [LIB] Recent dreams affirmation generation error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
-    return data.affirmations || [];
+    console.log('📦 [LIB] Recent dreams API response data:', data);
+
+    const affirmations = data.affirmations || [];
+    console.log('✅ [LIB] Returning recent dreams affirmations:', affirmations);
+
+    return affirmations;
   } catch (error) {
-    console.error('Error generating affirmations from recent dreams:', error);
+    console.error('❌ [LIB] Error generating affirmations from recent dreams:', error);
     return [];
   }
 }

@@ -60,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico?v=5" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico?v=5" />

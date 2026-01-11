@@ -1638,18 +1638,44 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       const savedDream = await saveDreamWithTags(dreamText, result.analysis, result.autoTags || [], result.keywords || [], tempDreamId); // Save dream with tags, keywords, and ID
 
       // Generate affirmations after successful dream analysis
+      console.log('🔍 [AFFIRMATION] Generation check:', {
+        hasUser: !!user,
+        hasSavedDream: !!savedDream,
+        userId: user?.id,
+        dreamTextLength: dreamText?.length,
+        language
+      });
+
       if (user && savedDream) {
         try {
+          console.log('📤 [AFFIRMATION] Calling generateAffirmationsFromDream:', {
+            userId: user.id,
+            dreamTextPreview: dreamText.substring(0, 50),
+            language
+          });
+
           const affirmations = await generateAffirmationsFromDream(user.id, dreamText, language);
-          if (affirmations.length > 0) {
+
+          console.log('✅ [AFFIRMATION] Response received:', {
+            affirmationsCount: affirmations?.length || 0,
+            affirmations
+          });
+
+          if (affirmations && affirmations.length > 0) {
+            console.log('🎯 [AFFIRMATION] Setting state to show suggestion modal');
             setSuggestedAffirmations(affirmations);
             setCurrentDreamForAffirmation(savedDream);
             setShowAffirmationSuggestion(true);
+            console.log('✨ [AFFIRMATION] State set successfully');
+          } else {
+            console.warn('⚠️ [AFFIRMATION] No affirmations returned from API');
           }
         } catch (error) {
-          console.error('Error generating affirmations:', error);
+          console.error('❌ [AFFIRMATION] Error generating affirmations:', error);
           // Don't block the flow if affirmation generation fails
         }
+      } else {
+        console.log('⚠️ [AFFIRMATION] Skipping generation - missing user or savedDream');
       }
 
       setDreamText(''); // Reset dream text
@@ -4139,16 +4165,27 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           }
 
                           // Generate affirmations from recent dreams for premium users
+                          console.log('🔍 [NO DREAM AFFIRMATION] Starting premium check');
                           const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
 
                           // Check if user is premium first to avoid unnecessary API calls
                           const { getUserPlan } = await import('../lib/subscription');
                           const userPlan = await getUserPlan(user.id);
+                          console.log('📊 [NO DREAM AFFIRMATION] User plan:', {
+                            userId: user.id,
+                            planSlug: userPlan.planSlug,
+                            isPremium: userPlan.planSlug === 'premium'
+                          });
 
                           if (userPlan.planSlug === 'premium') {
+                            console.log('📤 [NO DREAM AFFIRMATION] Calling generateAffirmationsFromRecentDreams');
                             const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
+                            console.log('✅ [NO DREAM AFFIRMATION] Response received:', {
+                              affirmationsCount: affirmations?.length || 0,
+                              affirmations
+                            });
 
-                            if (affirmations.length > 0) {
+                            if (affirmations && affirmations.length > 0) {
                               // Determine check-in time based on current hour
                               const currentHour = now.getHours();
                               let checkInTime: 'morning' | 'afternoon' | 'evening' = 'morning';
@@ -4158,8 +4195,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                 checkInTime = 'evening';
                               }
 
+                              console.log('💾 [NO DREAM AFFIRMATION] Saving affirmations:', {
+                                checkInTime,
+                                count: affirmations.length
+                              });
                               await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
-                              console.log(`Generated ${affirmations.length} affirmations from recent dreams`);
+                              console.log(`✨ [NO DREAM AFFIRMATION] Generated and saved ${affirmations.length} affirmations from recent dreams`);
 
                               // Update response message to inform user
                               setDreamResponse(
@@ -4167,7 +4208,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                   ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다.\n최근 꿈을 바탕으로 확언을 생성했어요! '
                                   : 'You didn\'t remember a dream today. That\'s okay!\nWe created affirmations based on your recent dreams! '
                               );
+                            } else {
+                              console.warn('⚠️ [NO DREAM AFFIRMATION] No affirmations returned from API');
                             }
+                          } else {
+                            console.log('ℹ️ [NO DREAM AFFIRMATION] User is not premium, skipping affirmation generation');
                           }
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);

@@ -44,6 +44,21 @@
     font-display: swap;
 }
 
+/* 영어 버전: Roboto + Cormorant */
+html[lang="en"] *,
+html[lang="en"] body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+html[lang="en"] .dream-response,
+html[lang="en"] .analysis-content,
+html[lang="en"] .dream-text,
+html[lang="en"] [class*="analysis"],
+html[lang="en"] [class*="dream"],
+html[lang="en"] [class*="response"] {
+    font-family: 'Cormorant', Georgia, serif !important;
+}
+
 /* 한국어 설정일 때만 에스코어 드림 적용 */
 html[lang="ko"] *,
 html[lang="ko"] .dream-response,
