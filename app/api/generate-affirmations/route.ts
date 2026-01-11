@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
     // Get user's plan to determine number of affirmations
     const plan = await getUserPlan(userId);
     affirmationCount = plan.planSlug === 'premium' ? 3 : 1;
+    console.log('🔍 Affirmation generation - User plan:', { userId, planSlug: plan.planSlug, affirmationCount });
 
     // Handle recent dreams mode (Premium only, for no-dream days)
     if (useRecentDreams) {
@@ -133,8 +134,11 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
     }
 
     const data = await response.json();
+    console.log('✅ Gemini API response received');
+
     if (data.candidates && data.candidates[0]?.content?.parts?.[0]) {
       const text = data.candidates[0].content.parts[0].text;
+      console.log('📝 Raw response text:', text.substring(0, 200));
 
       // Parse affirmations from response
       const affirmations = text
@@ -143,10 +147,14 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
         .map((line: string) => line.replace(/^\d+\.\s*/, '').trim())
         .filter((line: string) => line.length > 0);
 
+      console.log('✨ Parsed affirmations:', { count: affirmations.length, affirmations });
+
       return NextResponse.json({
         affirmations: affirmations.slice(0, affirmationCount)
       });
     }
+
+    console.log('⚠️ No valid response from Gemini API');
 
     return NextResponse.json({ affirmations: [] });
 
