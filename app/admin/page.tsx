@@ -43,7 +43,7 @@ export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Admin email - 이 이메일만 대시보드 접근 가능
-  const ADMIN_EMAIL = 'novahcode@gmail.com';
+  const ADMIN_EMAIL = 'jeongnewna@gmail.com';
 
   useEffect(() => {
     checkAuth();
