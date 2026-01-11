@@ -5115,7 +5115,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         fontWeight: '500',
                         textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                       }}>
-                        Whisking up wisdom from your dream...
+                        Whisking up wisdom from your dream
                       </p>
                     </div>
                   </div>
