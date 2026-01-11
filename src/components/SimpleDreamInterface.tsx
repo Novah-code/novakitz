@@ -4630,17 +4630,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               </>
               )}
 
-              {/* Close Button - Sticky Footer */}
+              {/* Close Button - Bottom Footer */}
               <div style={{
                 padding: '16px 24px',
                 borderTop: '1px solid #e5e7eb',
                 background: 'white',
                 display: 'flex',
                 justifyContent: 'center',
-                flexShrink: 0,
-                position: 'sticky',
-                bottom: 0,
-                zIndex: 100
+                flexShrink: 0
               }}>
                 <button
                   onClick={() => {
