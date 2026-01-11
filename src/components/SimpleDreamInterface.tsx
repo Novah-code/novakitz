@@ -5532,7 +5532,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           color: '#9ca3af',
           margin: 0
         }}>
-          © 2026 NovaKitz. All rights reserved.
+          © 2026 Novakitz. All rights reserved.
         </p>
       </footer>
     </div>

@@ -25,34 +25,68 @@ export default function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={onCancel}
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         background: 'rgba(0, 0, 0, 0.5)',
         backdropFilter: 'blur(4px)',
         animation: 'fadeIn 0.2s ease-out'
       }}
     >
       <div
-        className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '448px',
+          width: '100%',
+          margin: '0 16px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           animation: 'scaleIn 0.3s ease-out',
           border: '1px solid rgba(127, 176, 105, 0.2)'
         }}
       >
-        <h3 className="text-2xl font-bold mb-4" style={{ color: '#5A8449' }}>
+        <h3 style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
+          marginBottom: '16px',
+          color: '#5A8449'
+        }}>
           {title}
         </h3>
-        <p className="text-gray-700 mb-8 leading-relaxed">{message}</p>
+        <p style={{
+          color: '#374151',
+          marginBottom: '32px',
+          lineHeight: '1.625'
+        }}>
+          {message}
+        </p>
 
-        <div className="flex gap-3 justify-end">
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          justifyContent: 'flex-end'
+        }}>
           <button
             onClick={onCancel}
-            className="px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105"
             style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontWeight: '500',
+              transition: 'all 0.2s',
               background: '#f3f4f6',
-              color: '#6b7280'
+              color: '#6b7280',
+              border: 'none',
+              cursor: 'pointer'
             }}
           >
             {cancelText}
@@ -62,8 +96,14 @@ export default function ConfirmDialog({
               onConfirm();
               onCancel();
             }}
-            className="px-6 py-3 rounded-xl text-white font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg"
             style={{
+              padding: '12px 24px',
+              borderRadius: '12px',
+              color: 'white',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              border: 'none',
+              cursor: 'pointer',
               background: isDangerous
                 ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
                 : 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
