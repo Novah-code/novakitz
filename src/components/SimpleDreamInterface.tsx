@@ -1640,13 +1640,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       // Generate affirmations after successful dream analysis
       console.log('🔍 [AFFIRMATION] Generation check:', {
         hasUser: !!user,
-        hasSavedDream: !!savedDream,
         userId: user?.id,
         dreamTextLength: dreamText?.length,
         language
       });
 
-      if (user && savedDream) {
+      if (user) {
         try {
           console.log('📤 [AFFIRMATION] Calling generateAffirmationsFromDream:', {
             userId: user.id,
@@ -1664,7 +1663,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           if (affirmations && affirmations.length > 0) {
             console.log('🎯 [AFFIRMATION] Setting state to show suggestion modal');
             setSuggestedAffirmations(affirmations);
-            setCurrentDreamForAffirmation(savedDream);
+            // Create a dream object for the affirmation suggestion
+            const dreamForAffirmation = {
+              id: tempDreamId,
+              title: dreamTitle || 'Dream',
+              text: dreamText,
+              response: result.analysis
+            };
+            setCurrentDreamForAffirmation(dreamForAffirmation as any);
             setShowAffirmationSuggestion(true);
             console.log('✨ [AFFIRMATION] State set successfully');
           } else {
@@ -1675,7 +1681,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           // Don't block the flow if affirmation generation fails
         }
       } else {
-        console.log('⚠️ [AFFIRMATION] Skipping generation - missing user or savedDream');
+        console.log('⚠️ [AFFIRMATION] Skipping generation - missing user');
       }
 
       setDreamText(''); // Reset dream text
