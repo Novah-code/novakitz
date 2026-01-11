@@ -62,7 +62,7 @@ export default function AdminDashboard() {
 
     // Check if user is admin
     if (user.email !== ADMIN_EMAIL) {
-      setError('관리자 권한이 없습니다');
+      setError(`관리자 권한이 없습니다. 현재 로그인: ${user.email}`);
       setLoading(false);
       return;
     }
