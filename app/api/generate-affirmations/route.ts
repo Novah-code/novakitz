@@ -143,11 +143,16 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
       );
     }
 
+    // Use different models based on subscription tier
+    const model = plan.planSlug === 'premium'
+      ? 'gemini-2.0-flash-exp'  // Premium users get latest model
+      : 'gemini-1.5-pro';        // Free users get stable model with better quota
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
