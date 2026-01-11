@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
-import DreamJournal from './DreamJournal';
+import SimpleDreamInterface from './SimpleDreamInterface';
 import UserProfileForm from './UserProfileForm';
 
 export default function DreamApp() {
@@ -314,11 +314,8 @@ export default function DreamApp() {
 
       {/* Main Content */}
       <div className="main-content">
-        <DreamJournal
+        <SimpleDreamInterface
           user={user}
-          onSignOut={handleSignOut}
-          showGuestMode={!user}
-          onShowAuth={() => setShowAuth(true)}
           language={language}
         />
       </div>
