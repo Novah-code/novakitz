@@ -20,6 +20,11 @@ export default function DreamApp() {
   const [showProfileForm, setShowProfileForm] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
 
+  // Update HTML lang attribute when language changes
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   useEffect(() => {
     const initAuth = async () => {
       try {
