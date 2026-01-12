@@ -102,36 +102,20 @@ export async function POST(request: NextRequest) {
     }
 
     const prompt = language === 'ko'
-      ? `다음 꿈을 바탕으로 개인의 성장과 자기 사랑을 위한 정확히 ${affirmationCount}개의 확언(affirmation)을 생성해주세요. 각 확언은 현재형으로 긍정적이고 구체적이어야 합니다.
+      ? `꿈: "${finalDreamText}"
 
-꿈: "${finalDreamText}"
+위 꿈에서 핵심 장면이나 감정을 반영한 확언 ${affirmationCount}개를 만들어주세요. 꿈 내용을 직접 언급하며 현재형으로 작성하세요.
 
-요구사항:
-- 각 확언은 한 문장
-- 현재형으로 작성 (예: "나는 할 수 있다" 또는 "나는 충분하다")
-- 꿈의 내용과 심리적 의미를 반영
-- 사용자가 실제로 믿을 수 있고 공감할 수 있는 내용
-- 너무 길지 않게 (15-30단어)
+형식:
+1. [확언]
+${affirmationCount === 3 ? '2. [확언]\n3. [확언]' : ''}`
+      : `Dream: "${finalDreamText}"
 
-다음 형식으로만 응답하세요:
-1. [첫 번째 확언]
-2. [두 번째 확언]
-${affirmationCount === 3 ? '3. [세 번째 확언]' : ''}`
-      : `Based on the following dream, generate exactly ${affirmationCount} affirmations for personal growth and self-love. Each affirmation should be positive, present-tense, and specific.
+Create ${affirmationCount} affirmation${affirmationCount > 1 ? 's' : ''} that directly reference key scenes or emotions from this dream. Use present tense.
 
-Dream: "${finalDreamText}"
-
-Requirements:
-- Each affirmation is one sentence
-- Written in present tense (e.g., "I am capable" or "I am enough")
-- Reflects the dream's content and psychological meaning
-- Something the user can genuinely believe and connect with
-- Concise (15-30 words each)
-
-Respond in this format only:
-1. [First affirmation]
-2. [Second affirmation]
-${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
+Format:
+1. [affirmation]
+${affirmationCount === 3 ? '2. [affirmation]\n3. [affirmation]' : ''}`;
 
     // Use Gemini API with server-side key
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;

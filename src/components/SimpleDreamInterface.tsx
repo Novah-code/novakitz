@@ -4401,7 +4401,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Morning Ritual */}
                     <div>
-                      <MorningRitual userId={user.id} language={language || 'en'} />
+                      <MorningRitual userId={user.id} language={language || 'en'} isPremium={isPremium} />
                     </div>
 
                     {/* Check-in Options */}

@@ -14,9 +14,10 @@ interface Intention {
 interface MorningRitualProps {
   userId: string;
   language: 'en' | 'ko';
+  isPremium?: boolean;
 }
 
-export default function MorningRitual({ userId, language }: MorningRitualProps) {
+export default function MorningRitual({ userId, language, isPremium = true }: MorningRitualProps) {
   const [intentions, setIntentions] = useState<Intention | null>(null);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState<{ [key: number]: boolean }>({
@@ -107,13 +108,19 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
     );
   }
 
-  const intentionsList = [
-    { num: 1, text: intentions.intention_1 },
-    { num: 2, text: intentions.intention_2 },
-    { num: 3, text: intentions.intention_3 }
-  ];
+  // Show only 1 affirmation for free users, 3 for premium
+  const intentionsList = isPremium
+    ? [
+        { num: 1, text: intentions.intention_1 },
+        { num: 2, text: intentions.intention_2 },
+        { num: 3, text: intentions.intention_3 }
+      ]
+    : [
+        { num: 1, text: intentions.intention_1 }
+      ];
 
-  const completedCount = Object.values(completed).filter(Boolean).length;
+  const totalIntentions = isPremium ? 3 : 1;
+  const completedCount = intentionsList.filter(i => completed[i.num as keyof typeof completed]).length;
 
   return (
     <div style={{
@@ -138,8 +145,8 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
           color: 'rgba(0, 0, 0, 0.5)'
         }}>
           {language === 'ko'
-            ? `${completedCount} / 3개 완료`
-            : `${completedCount} / 3 completed`}
+            ? `${completedCount} / ${totalIntentions}개 완료`
+            : `${completedCount} / ${totalIntentions} completed`}
         </p>
       </div>
 
@@ -154,7 +161,7 @@ export default function MorningRitual({ userId, language }: MorningRitualProps) 
         <div style={{
           height: '100%',
           background: 'linear-gradient(90deg, #7FB069 0%, #8BC34A 100%)',
-          width: `${(completedCount / 3) * 100}%`,
+          width: `${(completedCount / totalIntentions) * 100}%`,
           transition: 'width 0.3s ease'
         }} />
       </div>
