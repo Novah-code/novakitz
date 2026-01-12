@@ -177,6 +177,9 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '월 7회 AI 해석' : '7 AI interpretations/month'}</span>
               </li>
               <li>
+                <span>{language === 'ko' ? '매일 1개 맞춤형 확언' : '1 daily personalized affirmation'}</span>
+              </li>
+              <li>
                 <span>{language === 'ko' ? '짧은 해석 (150-200자)' : 'Brief interpretation (150-200 chars)'}</span>
               </li>
               <li>
@@ -209,13 +212,16 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '자세한 해석 (500자+)' : 'Detailed interpretation (500+ chars)'}</span>
               </li>
               <li className="premium-feature">
-                <span>{language === 'ko' ? '3개 확언' : '3 affirmations'}</span>
+                <span>{language === 'ko' ? '매일 3개 맞춤형 확언' : '3 daily personalized affirmations'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '구체적 조언' : 'Actionable advice'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '패턴 분석' : 'Pattern analysis'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '무의식 프로파일 분석' : 'Unconscious profile analysis'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '월간 리포트' : 'Monthly report'}</span>
@@ -256,13 +262,16 @@ export default function PremiumPromptModal({
                 <span>{language === 'ko' ? '자세한 해석 (500자+)' : 'Detailed interpretation (500+ chars)'}</span>
               </li>
               <li className="premium-feature">
-                <span>{language === 'ko' ? '3개 확언' : '3 affirmations'}</span>
+                <span>{language === 'ko' ? '매일 3개 맞춤형 확언' : '3 daily personalized affirmations'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '구체적 조언' : 'Actionable advice'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '패턴 분석' : 'Pattern analysis'}</span>
+              </li>
+              <li className="premium-feature">
+                <span>{language === 'ko' ? '무의식 프로파일 분석' : 'Unconscious profile analysis'}</span>
               </li>
               <li className="premium-feature">
                 <span>{language === 'ko' ? '월간 리포트' : 'Monthly report'}</span>
