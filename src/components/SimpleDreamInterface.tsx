@@ -676,10 +676,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     img2.src = '/matcha-frame2.png';
   }, []);
 
-  // Reset page when filter changes
+  // Reset page when history modal opens
   useEffect(() => {
-    setCurrentDreamPage(0);
-  }, [searchQuery, selectedTags, selectedDateFilter]);
+    if (showHistory) {
+      setCurrentDreamPage(0);
+    }
+  }, [showHistory]);
 
   // Close menu when clicking outside
   useEffect(() => {
