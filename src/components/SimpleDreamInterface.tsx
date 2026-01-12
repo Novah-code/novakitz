@@ -268,6 +268,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [showSearchFilter, setShowSearchFilter] = useState(false);
   const [displayedDreamsCount, setDisplayedDreamsCount] = useState(9);
+  const [currentDreamPage, setCurrentDreamPage] = useState(0);
+  const DREAMS_PER_PAGE = 9;
   const [toastMessage, setToastMessage] = useState<{ message: string; type: ToastType } | null>(null);
   const [showQuickArchetypeQuiz, setShowQuickArchetypeQuiz] = useState(false);
   const [quizDreamText, setQuizDreamText] = useState('');
@@ -674,6 +676,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     img2.src = '/matcha-frame2.png';
   }, []);
 
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentDreamPage(0);
+  }, [searchQuery, selectedTags, selectedDateFilter]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -4483,7 +4489,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               <div className="dreams-grid" ref={carouselRef} style={{
                 paddingBottom: '20px'
               }}>
-                {filteredDreams.slice(0, Math.min(displayedDreamsCount, filteredDreams.length)).map((dream, index) => {
+                {filteredDreams.slice(currentDreamPage * DREAMS_PER_PAGE, (currentDreamPage + 1) * DREAMS_PER_PAGE).map((dream, index) => {
                   const gradients = [
                     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -4689,6 +4695,40 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                 )}
               </div>
+
+              {/* Pagination Controls */}
+              {filteredDreams.length > DREAMS_PER_PAGE && (
+                <div className="pagination-controls">
+                  <button
+                    className="pagination-arrow"
+                    onClick={() => setCurrentDreamPage(Math.max(0, currentDreamPage - 1))}
+                    disabled={currentDreamPage === 0}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+
+                  <div className="pagination-dots">
+                    {Array.from({ length: Math.ceil(filteredDreams.length / DREAMS_PER_PAGE) }, (_, i) => (
+                      <button
+                        key={i}
+                        className={`pagination-dot ${currentDreamPage === i ? 'active' : ''}`}
+                        onClick={() => setCurrentDreamPage(i)}
+                        aria-label={`Go to page ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    className="pagination-arrow"
+                    onClick={() => setCurrentDreamPage(Math.min(Math.ceil(filteredDreams.length / DREAMS_PER_PAGE) - 1, currentDreamPage + 1))}
+                    disabled={currentDreamPage === Math.ceil(filteredDreams.length / DREAMS_PER_PAGE) - 1}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
               </>
               )}
 
