@@ -149,7 +149,7 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
       : 'gemini-2.5-flash';  // Free users get same model
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
