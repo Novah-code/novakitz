@@ -66,11 +66,8 @@ export default function SharedArchetypeResult() {
   };
 
   const handleTakeTest = () => {
-    // Clear any previous guest data
-    localStorage.removeItem('guest_dream');
-    localStorage.removeItem('guest_quiz_answers');
-    localStorage.removeItem('guest_result_id');
-    router.push('/archetype-test/guest-dream');
+    // Navigate to archetype test landing page
+    router.push('/archetype-test');
   };
 
   if (loading) {
@@ -187,119 +184,158 @@ export default function SharedArchetypeResult() {
                 ? '친구의 무의식 아키타입 결과'
                 : "Your Friend's Unconscious Archetype"}
             </h2>
-            <p style={{
-              fontSize: '14px',
-              color: '#6b7280'
-            }}>
-              {language === 'ko'
-                ? '친구가 자신의 무의식을 당신과 공유했어요'
-                : 'Your friend shared their unconscious profile with you'}
-            </p>
           </div>
 
           {/* Primary Archetype Result */}
           <div style={{
-            background: `linear-gradient(135deg, ${primaryColor}15 0%, ${darkColor}08 100%)`,
-            borderRadius: '24px',
-            padding: '3rem',
+            background: 'white',
+            borderRadius: '32px',
+            padding: '0',
             marginBottom: '2rem',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            border: `2px solid ${primaryColor}30`
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.05)'
           }}>
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <div style={{
-                display: 'inline-block',
-                padding: '8px 16px',
-                background: `${primaryColor}20`,
-                borderRadius: '12px',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: darkColor,
-                marginBottom: '1rem'
-              }}>
-                {language === 'ko' ? '주요 아키타입' : 'Primary Archetype'}
-              </div>
-              <h1 style={{
-                fontSize: '36px',
-                fontWeight: 'bold',
-                color: darkColor,
-                marginBottom: '1rem',
-                fontFamily: "'Cormorant', serif"
-              }}>
-                {getArchetypeName(primaryArchetype, language)}
-              </h1>
-              <p style={{
-                fontSize: '16px',
-                color: '#4b5563',
-                lineHeight: '1.8'
-              }}>
-                {getArchetypeDescription(primaryArchetype, language)}
-              </p>
-            </div>
-
-            {/* Traits */}
+            {/* Header with gradient */}
             <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '1.5rem',
-              marginTop: '2rem'
+              background: `linear-gradient(135deg, ${primaryColor} 0%, ${darkColor} 100%)`,
+              padding: '3rem 2rem',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden'
             }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1f2937',
-                marginBottom: '1rem'
-              }}>
-                {language === 'ko' ? '주요 특성' : 'Key Traits'}
-              </h3>
+              {/* Decorative circles */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '0.75rem'
+                position: 'absolute',
+                top: '-50px',
+                right: '-50px',
+                width: '200px',
+                height: '200px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '50%'
+              }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '-30px',
+                left: '-30px',
+                width: '150px',
+                height: '150px',
+                background: 'rgba(255,255,255,0.08)',
+                borderRadius: '50%'
+              }} />
+
+              <div style={{
+                position: 'relative',
+                zIndex: 1
               }}>
-                {traits.map((trait, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      padding: '10px 14px',
-                      background: `${primaryColor}10`,
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      color: darkColor,
-                      fontWeight: '500'
-                    }}
-                  >
-                    {trait}
-                  </div>
-                ))}
+                <div style={{
+                  display: 'inline-block',
+                  padding: '6px 16px',
+                  background: 'rgba(255,255,255,0.25)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: 'white',
+                  marginBottom: '1.5rem',
+                  letterSpacing: '0.5px'
+                }}>
+                  {language === 'ko' ? '주요 아키타입' : 'PRIMARY ARCHETYPE'}
+                </div>
+                <h1 style={{
+                  fontSize: '48px',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  marginBottom: '1rem',
+                  fontFamily: "'Cormorant', serif",
+                  textShadow: '0 2px 20px rgba(0,0,0,0.2)',
+                  letterSpacing: '1px'
+                }}>
+                  {getArchetypeName(primaryArchetype, language)}
+                </h1>
+                <p style={{
+                  fontSize: '17px',
+                  color: 'rgba(255,255,255,0.95)',
+                  lineHeight: '1.8',
+                  maxWidth: '500px',
+                  margin: '0 auto'
+                }}>
+                  {getArchetypeDescription(primaryArchetype, language)}
+                </p>
               </div>
             </div>
 
-            {/* Secondary Archetype */}
-            {secondaryArchetype && (
-              <div style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                marginTop: '1rem'
-              }}>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#6b7280',
-                  marginBottom: '0.5rem'
+            {/* Content section */}
+            <div style={{ padding: '2.5rem 2rem' }}>
+              {/* Traits */}
+              <div style={{ marginBottom: secondaryArchetype ? '2rem' : '0' }}>
+                <h3 style={{
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  color: '#1f2937',
+                  marginBottom: '1.25rem',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                  fontSize: '13px',
+                  color: '#6b7280'
                 }}>
-                  {language === 'ko' ? '부수 아키타입' : 'Secondary Archetype'}
-                </div>
+                  {language === 'ko' ? '주요 특성' : 'Key Traits'}
+                </h3>
                 <div style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: getArchetypeDarkColor(secondaryArchetype)
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.75rem'
                 }}>
-                  {getArchetypeName(secondaryArchetype, language)}
+                  {traits.map((trait, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: '10px 18px',
+                        background: `linear-gradient(135deg, ${primaryColor}15 0%, ${primaryColor}08 100%)`,
+                        border: `1.5px solid ${primaryColor}30`,
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        color: darkColor,
+                        fontWeight: '600',
+                        transition: 'transform 0.2s ease',
+                        cursor: 'default'
+                      }}
+                    >
+                      {trait}
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
+
+              {/* Secondary Archetype */}
+              {secondaryArchetype && (
+                <div style={{
+                  background: `linear-gradient(135deg, ${primaryColor}08 0%, transparent 100%)`,
+                  borderRadius: '16px',
+                  padding: '1.75rem',
+                  border: `1.5px solid ${primaryColor}20`
+                }}>
+                  <div style={{
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    color: '#6b7280',
+                    marginBottom: '0.75rem',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase'
+                  }}>
+                    {language === 'ko' ? '잘 어울리는 유형' : 'Compatible Type'}
+                  </div>
+                  <div style={{
+                    fontSize: '22px',
+                    fontWeight: '700',
+                    color: getArchetypeDarkColor(secondaryArchetype),
+                    fontFamily: "'Cormorant', serif"
+                  }}>
+                    {getArchetypeName(secondaryArchetype, language)}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* CTA Section */}
@@ -315,23 +351,13 @@ export default function SharedArchetypeResult() {
               fontSize: '28px',
               fontWeight: 'bold',
               color: '#1f2937',
-              marginBottom: '1rem',
+              marginBottom: '2rem',
               fontFamily: "'Cormorant', serif"
             }}>
               {language === 'ko'
                 ? '당신의 무의식 아키타입은 무엇일까요?'
                 : 'What is Your Unconscious Archetype?'}
             </h2>
-            <p style={{
-              fontSize: '16px',
-              color: '#6b7280',
-              lineHeight: '1.6',
-              marginBottom: '2rem'
-            }}>
-              {language === 'ko'
-                ? '친구가 발견한 것처럼, 당신도 자신의 진짜 자아를 발견해보세요. 단 3-5분이면 됩니다.'
-                : 'Like your friend discovered, find your true self. Takes only 3-5 minutes.'}
-            </p>
 
             <button
               onClick={handleTakeTest}
@@ -355,7 +381,7 @@ export default function SharedArchetypeResult() {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              {language === 'ko' ? '무료로 테스트 시작하기' : 'Start Free Test'}
+              {language === 'ko' ? '테스트 시작하기' : 'Start Test'}
             </button>
 
             <div style={{

@@ -151,7 +151,7 @@ export default function QuickArchetypeQuiz({
             marginBottom: '1.5rem',
           }}>
             <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.25rem' }}>
-              {language === 'ko' ? '부 아키타입' : 'Secondary Archetype'}
+              {language === 'ko' ? '잘 어울리는 유형' : 'Compatible Type'}
             </div>
             <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
               {getArchetypeName(result.secondaryArchetype, language)}

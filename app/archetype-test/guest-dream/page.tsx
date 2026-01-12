@@ -1,15 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../../src/lib/supabase';
 import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
 import '../../globals.css';
 
+interface Dream {
+  id: string;
+  content: string;
+  created_at: string;
+}
+
 export default function GuestDreamRecording() {
   const router = useRouter();
-  const [language] = useState<'ko' | 'en'>('ko');
+  const [language, setLanguage] = useState<'ko' | 'en'>('ko');
   const [dreamText, setDreamText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [previousDreams, setPreviousDreams] = useState<Dream[]>([]);
+  const [showPreviousDreams, setShowPreviousDreams] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Load language from localStorage
+    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
+
+    // Check auth and load previous dreams
+    checkAuthAndLoadDreams();
+  }, []);
+
+  const checkAuthAndLoadDreams = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        setIsLoggedIn(true);
+
+        // Load user's previous dreams
+        const { data: dreams, error } = await supabase
+          .from('dreams')
+          .select('id, content, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (!error && dreams) {
+          setPreviousDreams(dreams);
+        }
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to check auth:', err);
+      setLoading(false);
+    }
+  };
+
+  const handleSelectPreviousDream = (dream: Dream) => {
+    setDreamText(dream.content);
+    setShowPreviousDreams(false);
+  };
 
   const handleSubmit = () => {
     if (!dreamText.trim()) {
@@ -17,8 +71,8 @@ export default function GuestDreamRecording() {
       return;
     }
 
-    if (dreamText.length < 20) {
-      alert(language === 'ko' ? '좀 더 자세히 작성해주세요 (최소 20자)' : 'Please write more details (min 20 chars)');
+    if (dreamText.length < 10) {
+      alert(language === 'ko' ? '좀 더 자세히 작성해주세요 (최소 10자)' : 'Please write more details (min 10 chars)');
       return;
     }
 
@@ -45,6 +99,25 @@ export default function GuestDreamRecording() {
     }));
     router.push('/archetype-test/quiz');
   };
+
+  if (loading) {
+    return (
+      <>
+        <ArchetypeTestNav language={language} />
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+        }}>
+          <p style={{ fontSize: '18px', color: '#666' }}>
+            {language === 'ko' ? '로딩 중...' : 'Loading...'}
+          </p>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -131,6 +204,105 @@ export default function GuestDreamRecording() {
             </p>
           </div>
 
+          {/* Previous Dreams Selection (Logged-in users only) */}
+          {isLoggedIn && previousDreams.length > 0 && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <button
+                onClick={() => setShowPreviousDreams(!showPreviousDreams)}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  background: '#f9fafb',
+                  border: '2px dashed #d1d5db',
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#f3f4f6';
+                  e.currentTarget.style.borderColor = '#7FB069';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f9fafb';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                <span>📚</span>
+                <span>
+                  {language === 'ko'
+                    ? `이전에 기록한 꿈에서 선택하기 (${previousDreams.length}개)`
+                    : `Select from previous dreams (${previousDreams.length})`}
+                </span>
+                <span>{showPreviousDreams ? '▲' : '▼'}</span>
+              </button>
+
+              {/* Previous Dreams List */}
+              {showPreviousDreams && (
+                <div style={{
+                  marginTop: '1rem',
+                  background: '#f9fafb',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  maxHeight: '300px',
+                  overflowY: 'auto'
+                }}>
+                  {previousDreams.map((dream) => (
+                    <button
+                      key={dream.id}
+                      onClick={() => handleSelectPreviousDream(dream)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        background: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        marginBottom: '8px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#7FB069';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#e5e7eb';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div style={{
+                        fontSize: '13px',
+                        color: '#9ca3af',
+                        marginBottom: '4px'
+                      }}>
+                        {new Date(dream.created_at).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US')}
+                      </div>
+                      <div style={{
+                        fontSize: '14px',
+                        color: '#1f2937',
+                        lineHeight: '1.5',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {dream.content}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Dream Input */}
           <div style={{ marginBottom: '2rem' }}>
             <textarea
@@ -167,15 +339,15 @@ export default function GuestDreamRecording() {
               color: '#9ca3af'
             }}>
               <span>
-                {dreamText.length < 20
+                {dreamText.length < 10
                   ? language === 'ko'
-                    ? `최소 20자 (현재 ${dreamText.length}자)`
-                    : `Min 20 chars (current ${dreamText.length})`
+                    ? `최소 10자 (현재 ${dreamText.length}자)`
+                    : `Min 10 chars (current ${dreamText.length})`
                   : language === 'ko'
                     ? `${dreamText.length}자`
                     : `${dreamText.length} chars`}
               </span>
-              {dreamText.length >= 20 && (
+              {dreamText.length >= 10 && (
                 <span style={{ color: '#7FB069', fontWeight: '600' }}>✓</span>
               )}
             </div>
@@ -205,7 +377,8 @@ export default function GuestDreamRecording() {
             }}>
               <li>{language === 'ko' ? '장소나 환경을 묘사해보세요' : 'Describe the location or environment'}</li>
               <li>{language === 'ko' ? '등장인물이나 생명체가 있었나요?' : 'Were there any characters or beings?'}</li>
-              <li>{language === 'ko' ? '어떤 감정을 느꼈나요?' : 'What emotions did you feel?'}</li>
+              <li>{language === 'ko' ? '어떤 감정을 느꼈나요? (두려움, 기쁨, 불안 등)' : 'What emotions did you feel? (fear, joy, anxiety, etc.)'}</li>
+              <li>{language === 'ko' ? '꿈에서 무엇을 원했나요? 무엇을 하려고 했나요?' : 'What did you want? What were you trying to do?'}</li>
               <li>{language === 'ko' ? '특별한 사건이나 행동이 있었나요?' : 'Were there any special events or actions?'}</li>
             </ul>
           </div>
@@ -218,20 +391,20 @@ export default function GuestDreamRecording() {
           }}>
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || dreamText.length < 20}
+              disabled={isSubmitting || dreamText.length < 10}
               style={{
                 width: '100%',
                 padding: '16px',
-                background: dreamText.length >= 20
+                background: dreamText.length >= 10
                   ? 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
                   : '#e5e7eb',
-                color: dreamText.length >= 20 ? 'white' : '#9ca3af',
+                color: dreamText.length >= 10 ? 'white' : '#9ca3af',
                 border: 'none',
                 borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: dreamText.length >= 20 ? 'pointer' : 'not-allowed',
-                boxShadow: dreamText.length >= 20 ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none',
+                cursor: dreamText.length >= 10 ? 'pointer' : 'not-allowed',
+                boxShadow: dreamText.length >= 10 ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >

@@ -8,7 +8,7 @@ import '../../globals.css';
 
 export default function ArchetypeQuiz() {
   const router = useRouter();
-  const [language] = useState<'ko' | 'en'>('ko');
+  const [language, setLanguage] = useState<'ko' | 'en'>('ko');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -18,6 +18,12 @@ export default function ArchetypeQuiz() {
     const guestDream = localStorage.getItem('guest_dream');
     if (!guestDream) {
       router.push('/archetype-test');
+    }
+
+    // Load language from localStorage
+    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
     }
 
     // Load any existing answers

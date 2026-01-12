@@ -479,142 +479,192 @@ export default function MonthlyDreamReport({ user, language = 'en', onClose }: M
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    let yPosition = 20;
-    const lineHeight = 7;
-    const margin = 15;
+    let yPosition = 25;
+    const lineHeight = 8;
+    const margin = 20;
     const maxWidth = pageWidth - 2 * margin;
+
+    // Helper function to check if we need a new page
+    const checkNewPage = (requiredSpace: number) => {
+      if (yPosition + requiredSpace > pageHeight - 20) {
+        pdf.addPage();
+        yPosition = 25;
+        return true;
+      }
+      return false;
+    };
 
     // Set default font
     pdf.setFont('Helvetica');
 
-    // Title
-    pdf.setFontSize(20);
-    pdf.setTextColor(127, 176, 105);
-    pdf.text('MONTHLY DREAM REPORT', margin, yPosition);
-    yPosition += 12;
-
-    // Month and stats
+    // Title with background
+    pdf.setFillColor(127, 176, 105);
+    pdf.rect(0, 0, pageWidth, 35, 'F');
+    pdf.setFontSize(24);
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.text('MONTHLY DREAM REPORT', pageWidth / 2, 15, { align: 'center' });
     pdf.setFontSize(14);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(stats.month, margin, yPosition);
-    yPosition += 12;
+    pdf.setFont('Helvetica', 'normal');
+    pdf.text(stats.month, pageWidth / 2, 25, { align: 'center' });
+    yPosition = 45;
 
-    // Statistics section
-    pdf.setFontSize(12);
+    // Statistics section with boxes
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setFontSize(14);
     pdf.setTextColor(127, 176, 105);
     pdf.text('STATISTICS', margin, yPosition);
-    yPosition += 8;
-
-    pdf.setFontSize(10);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(`Total Dreams: ${stats.totalDreams}`, margin, yPosition);
-    yPosition += lineHeight;
-    pdf.text(`Average Mood: ${stats.averageMood}`, margin, yPosition);
     yPosition += 12;
 
-    // Top Keywords section
-    pdf.setFontSize(12);
-    pdf.setTextColor(127, 176, 105);
-    pdf.text('TOP KEYWORDS', margin, yPosition);
-    yPosition += 8;
-
+    // Stats boxes
+    pdf.setFont('Helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(0, 0, 0);
-    stats.topKeywords.forEach((k, i) => {
-      if (yPosition > pageHeight - 20) {
-        pdf.addPage();
-        yPosition = 20;
+
+    // Box 1: Total Dreams
+    pdf.setDrawColor(127, 176, 105);
+    pdf.setFillColor(249, 250, 251);
+    pdf.roundedRect(margin, yPosition, (maxWidth / 2) - 3, 18, 2, 2, 'FD');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Total Dreams', margin + 3, yPosition + 6);
+    pdf.setFontSize(16);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setTextColor(127, 176, 105);
+    pdf.text(stats.totalDreams.toString(), margin + 3, yPosition + 14);
+
+    // Box 2: Average Mood
+    pdf.setFont('Helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.roundedRect(margin + (maxWidth / 2) + 3, yPosition, (maxWidth / 2) - 3, 18, 2, 2, 'FD');
+    pdf.setTextColor(100, 100, 100);
+    pdf.text('Average Mood', margin + (maxWidth / 2) + 6, yPosition + 6);
+    pdf.setFontSize(16);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setTextColor(127, 176, 105);
+    pdf.text(stats.averageMood, margin + (maxWidth / 2) + 6, yPosition + 14);
+
+    yPosition += 28;
+
+    // Top Keywords section
+    checkNewPage(40);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.setTextColor(127, 176, 105);
+    pdf.text('TOP KEYWORDS', margin, yPosition);
+    yPosition += 10;
+
+    // Keywords as pills
+    pdf.setFont('Helvetica', 'normal');
+    pdf.setFontSize(10);
+    let xOffset = margin;
+    let rowHeight = yPosition;
+
+    stats.topKeywords.slice(0, 8).forEach((k, i) => {
+      const text = `${k.word} ×${k.count}`;
+      const textWidth = pdf.getTextWidth(text);
+      const pillWidth = textWidth + 10;
+
+      // Check if we need to wrap to next line
+      if (xOffset + pillWidth > pageWidth - margin) {
+        xOffset = margin;
+        rowHeight += 12;
+        checkNewPage(12);
       }
-      pdf.text(`${i + 1}. ${k.word} (${k.count}x)`, margin, yPosition);
-      yPosition += lineHeight;
+
+      // Draw pill
+      pdf.setFillColor(240, 247, 240);
+      pdf.setDrawColor(127, 176, 105);
+      pdf.roundedRect(xOffset, rowHeight - 5, pillWidth, 8, 2, 2, 'FD');
+      pdf.setTextColor(70, 130, 70);
+      pdf.text(text, xOffset + 5, rowHeight);
+
+      xOffset += pillWidth + 5;
     });
-    yPosition += 5;
 
-    // Mood Breakdown section with chart
-    if (yPosition > pageHeight - 80) {
-      pdf.addPage();
-      yPosition = 20;
-    }
+    yPosition = rowHeight + 15;
 
-    pdf.setFontSize(12);
+    // Mood Breakdown section
+    checkNewPage(80);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setFontSize(14);
     pdf.setTextColor(127, 176, 105);
     pdf.text('MOOD BREAKDOWN', margin, yPosition);
-    yPosition += 10;
+    yPosition += 12;
 
     // Create canvas for pie chart
     const canvas = document.createElement('canvas');
-    canvas.width = 200;
-    canvas.height = 200;
+    canvas.width = 300;
+    canvas.height = 300;
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       // Draw pie chart
-      drawPieChart(ctx, stats.moodDistribution, 100, 100, 80);
+      drawPieChart(ctx, stats.moodDistribution, 150, 150, 120);
 
       // Convert canvas to image and add to PDF
       const chartImage = canvas.toDataURL('image/png');
-      pdf.addImage(chartImage, 'PNG', margin, yPosition, 60, 60);
+      pdf.addImage(chartImage, 'PNG', margin, yPosition, 50, 50);
     }
 
-    // Add legend to the right of the chart
-    const legendX = margin + 70;
-    let legendY = yPosition + 5;
-    pdf.setFontSize(9);
-    pdf.setTextColor(0, 0, 0);
+    // Add legend next to chart
+    const legendX = margin + 60;
+    let legendY = yPosition + 8;
+    pdf.setFontSize(10);
+    pdf.setFont('Helvetica', 'normal');
 
     Object.entries(stats.moodDistribution)
       .sort((a, b) => b[1] - a[1])
       .forEach(([mood, count], index) => {
-        if (legendY > pageHeight - 15) {
-          pdf.addPage();
-          legendY = 20;
-        }
-
         // Color box
-        const colors = ['#7FB069', '#A8D5A8', '#C3E6CB', '#E8F5E9', '#81C784', '#66BB6A', '#4CAF50'];
+        const colors = ['#7FB069', '#A8D5A8', '#C3E6CB', '#81C784', '#66BB6A'];
         const rgb = colors[index % colors.length].replace('#', '');
         const r = parseInt(rgb.substr(0, 2), 16);
         const g = parseInt(rgb.substr(2, 2), 16);
         const b = parseInt(rgb.substr(4, 2), 16);
         pdf.setFillColor(r, g, b);
-        pdf.rect(legendX, legendY - 2, 3, 3, 'F');
+        pdf.setDrawColor(r, g, b);
+        pdf.roundedRect(legendX, legendY - 3, 4, 4, 1, 1, 'FD');
 
         // Text
         pdf.setTextColor(0, 0, 0);
         const percentage = Math.round((count / stats.totalDreams) * 100);
-        pdf.text(`${mood}: ${count} (${percentage}%)`, legendX + 6, legendY);
-        legendY += lineHeight;
+        pdf.text(`${mood}: ${count} (${percentage}%)`, legendX + 8, legendY);
+        legendY += 8;
       });
 
-    yPosition = legendY + 10;
+    yPosition = Math.max(yPosition + 55, legendY + 5);
 
     // Patterns & Insights section
-    pdf.setFontSize(12);
+    checkNewPage(40);
+    pdf.setFont('Helvetica', 'bold');
+    pdf.setFontSize(14);
     pdf.setTextColor(127, 176, 105);
-    if (yPosition > pageHeight - 30) {
-      pdf.addPage();
-      yPosition = 20;
-    }
     pdf.text('PATTERNS & INSIGHTS', margin, yPosition);
-    yPosition += 8;
+    yPosition += 10;
 
-    pdf.setFontSize(10);
-    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('Helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(60, 60, 60);
+
     stats.patterns.forEach((p) => {
-      if (yPosition > pageHeight - 20) {
-        pdf.addPage();
-        yPosition = 20;
-      }
+      checkNewPage(20);
       const splitText = pdf.splitTextToSize(`• ${p}`, maxWidth);
       pdf.text(splitText, margin, yPosition);
-      yPosition += splitText.length * lineHeight;
+      yPosition += splitText.length * 6;
     });
 
     // Footer
     pdf.setFontSize(8);
     pdf.setTextColor(150, 150, 150);
     pdf.text('Generated by Novakitz Dream Journal', margin, pageHeight - 10);
-    pdf.text(new Date().toLocaleDateString(), pageWidth - margin - 40, pageHeight - 10);
+    pdf.text(new Date().toLocaleDateString('en-US', {
+      month: 'numeric',
+      day: 'numeric',
+      year: 'numeric'
+    }), pageWidth - margin - 30, pageHeight - 10);
 
     // Download
     pdf.save(`dream-report-${stats.month.replace(' ', '-')}.pdf`);

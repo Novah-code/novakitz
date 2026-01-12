@@ -218,7 +218,7 @@ export default function SharedProfilePage() {
             </div>
           </div>
 
-          {/* 부 아키타입 */}
+          {/* 잘 어울리는 유형 */}
           {profile.secondary_archetype && (
             <div style={{
               background: '#f9fafb',
@@ -228,7 +228,7 @@ export default function SharedProfilePage() {
               textAlign: 'center',
             }}>
               <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
-                부 아키타입
+                잘 어울리는 유형
               </div>
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '0.5rem' }}>
                 {getArchetypeName(profile.secondary_archetype, language)}

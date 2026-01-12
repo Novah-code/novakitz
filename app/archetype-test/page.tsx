@@ -14,6 +14,11 @@ export default function ArchetypeTestLanding() {
 
   useEffect(() => {
     checkAuth();
+    // Load language from localStorage
+    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
   }, []);
 
   const checkAuth = async () => {
@@ -22,10 +27,18 @@ export default function ArchetypeTestLanding() {
     setLoading(false);
   };
 
+  const handleLanguageChange = (newLang: 'ko' | 'en') => {
+    setLanguage(newLang);
+    localStorage.setItem('test_language', newLang);
+  };
+
   const startGuestTest = () => {
     // Clear any previous guest data
     localStorage.removeItem('guest_dream');
     localStorage.removeItem('guest_quiz_answers');
+    localStorage.removeItem('guest_result_id');
+    // Save language preference
+    localStorage.setItem('test_language', language);
     router.push('/archetype-test/guest-dream');
   };
 
@@ -50,7 +63,7 @@ export default function ArchetypeTestLanding() {
 
   return (
     <>
-      <ArchetypeTestNav language={language} onLanguageChange={setLanguage} />
+      <ArchetypeTestNav language={language} onLanguageChange={handleLanguageChange} />
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
@@ -68,6 +81,55 @@ export default function ArchetypeTestLanding() {
         boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
         textAlign: 'center'
       }}>
+        {/* Language Toggle - Top */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{
+            display: 'inline-flex',
+            background: '#f3f4f6',
+            borderRadius: '12px',
+            padding: '4px'
+          }}>
+            <button
+              onClick={() => handleLanguageChange('ko')}
+              style={{
+                padding: '8px 16px',
+                background: language === 'ko' ? 'white' : 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: language === 'ko' ? '600' : '400',
+                color: language === 'ko' ? '#1f2937' : '#6b7280',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: language === 'ko' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              한국어
+            </button>
+            <button
+              onClick={() => handleLanguageChange('en')}
+              style={{
+                padding: '8px 16px',
+                background: language === 'en' ? 'white' : 'transparent',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: language === 'en' ? '600' : '400',
+                color: language === 'en' ? '#1f2937' : '#6b7280',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: language === 'en' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              }}
+            >
+              English
+            </button>
+          </div>
+        </div>
+
         {/* Header */}
         <div style={{ marginBottom: '2rem' }}>
           <div style={{ fontSize: '60px', marginBottom: '1rem' }}>🌙</div>
@@ -202,28 +264,6 @@ export default function ArchetypeTestLanding() {
             </button>
           </>
         )}
-
-        {/* Language Toggle */}
-        <div style={{
-          marginTop: '2rem',
-          paddingTop: '2rem',
-          borderTop: '1px solid #e5e7eb'
-        }}>
-          <button
-            onClick={() => setLanguage(language === 'ko' ? 'en' : 'ko')}
-            style={{
-              padding: '8px 16px',
-              background: '#f3f4f6',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              color: '#6b7280',
-              cursor: 'pointer'
-            }}
-          >
-            {language === 'ko' ? 'English' : '한국어'}
-          </button>
-        </div>
       </div>
     </div>
     </>

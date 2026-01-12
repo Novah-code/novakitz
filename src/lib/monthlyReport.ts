@@ -86,10 +86,46 @@ export async function getMonthDreamStats(userId: string): Promise<DreamStats> {
     });
     const dominantMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'neutral';
 
-    // Extract keywords from tags
+    // Korean and English stopwords to filter out
+    const stopwords = new Set([
+      // Korean stopwords (조사, 대명사, 접속사 등)
+      '이', '그', '저', '것', '수', '등', '들', '및', '와', '과', '의', '을', '를', '에', '에서',
+      '으로', '로', '이다', '있다', '하다', '되다', '같다', '나', '너', '우리', '저희', '당신',
+      '이것', '그것', '저것', '여기', '거기', '저기', '이러', '그러', '저러', '또', '또한',
+      '그리고', '하지만', '그러나', '그런데', '그래서', '때문', '위해', '대해', '관해',
+      '것이', '있는', '없는', '하는', '되는', '같은', '이런', '그런', '저런', '어떤',
+      '무슨', '어느', '몇', '제', '내', '네', '그녀', '그의', '나의', '너의', '우리의',
+      '것을', '수가', '수를', '것도', '것은', '것이다', '있다', '없다',
+      // English stopwords
+      'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours',
+      'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself',
+      'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which',
+      'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be',
+      'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an',
+      'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by',
+      'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before',
+      'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over',
+      'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why',
+      'how', 'all', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor',
+      'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just',
+      'don', 'should', 'now', "you're", "it's", "he's", "she's", "they're", "i'm", "we're",
+      // Additional meaningless words
+      'feeling', 'suggests', 'call', 'part', 'inner', 'both'
+    ]);
+
+    // Extract keywords from tags and filter stopwords
     const allTags = dreams
       .flatMap(d => d.tags || [])
-      .filter(tag => tag && !tag.includes('꿈') && !tag.includes('no-dream'));
+      .filter(tag => {
+        if (!tag) return false;
+        const lowerTag = tag.toLowerCase().trim();
+        // Filter out: stopwords, "꿈", "no-dream", single characters, numbers only
+        return !stopwords.has(lowerTag) &&
+               !tag.includes('꿈') &&
+               !tag.includes('no-dream') &&
+               lowerTag.length > 1 &&
+               !/^\d+$/.test(lowerTag);
+      });
 
     const keywordCounts: { [key: string]: number } = {};
     allTags.forEach(tag => {
@@ -98,7 +134,7 @@ export async function getMonthDreamStats(userId: string): Promise<DreamStats> {
 
     const topKeywords = Object.entries(keywordCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .slice(0, 8)
       .map(([keyword, count]) => ({ keyword, count }));
 
     // Get emotional trends

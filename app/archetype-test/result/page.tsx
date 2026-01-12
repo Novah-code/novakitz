@@ -16,7 +16,7 @@ import '../../globals.css';
 
 export default function ArchetypeResult() {
   const router = useRouter();
-  const [language] = useState<'ko' | 'en'>('ko');
+  const [language, setLanguage] = useState<'ko' | 'en'>('ko');
   const [result, setResult] = useState<{
     primary: string;
     secondary: string | null;
@@ -27,6 +27,12 @@ export default function ArchetypeResult() {
   const [savedResultId, setSavedResultId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Load language from localStorage
+    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
+
     loadResult();
     checkAuth();
   }, []);
@@ -174,15 +180,15 @@ export default function ArchetypeResult() {
           marginBottom: '2rem',
           animation: 'fadeIn 0.5s ease-in'
         }}>
-          <div style={{ fontSize: '80px', marginBottom: '1rem' }}>🎉</div>
           <h1 style={{
-            fontSize: '32px',
+            fontSize: '36px',
             fontWeight: 'bold',
             color: 'white',
             textShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            fontFamily: "'Cormorant', serif"
+            fontFamily: "'Cormorant', serif",
+            marginBottom: '0.5rem'
           }}>
-            {language === 'ko' ? '당신의 아키타입이 밝혀졌습니다!' : 'Your Archetype Revealed!'}
+            {language === 'ko' ? '당신의 아키타입은?' : 'What is Your Archetype?'}
           </h1>
         </div>
 
@@ -250,7 +256,7 @@ export default function ArchetypeResult() {
             </div>
           </div>
 
-          {/* Secondary Archetype */}
+          {/* Compatible Type */}
           {result.secondary && (
             <div style={{
               background: '#f9fafb',
@@ -264,7 +270,7 @@ export default function ArchetypeResult() {
                 color: '#6b7280',
                 marginBottom: '0.5rem'
               }}>
-                {language === 'ko' ? '당신의 부 아키타입' : 'Your Secondary Archetype'}
+                {language === 'ko' ? '잘 어울리는 유형' : 'Compatible Type'}
               </div>
               <div style={{
                 fontSize: '24px',
@@ -310,6 +316,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '새로운 경험과 자유를 추구합니다' : 'Seeks new experiences and freedom'}</li>
                   <li>{language === 'ko' ? '변화와 모험을 두려워하지 않습니다' : 'Embraces change and adventure'}</li>
                   <li>{language === 'ko' ? '독립적이고 자율적인 삶을 선호합니다' : 'Values independence and autonomy'}</li>
+                  <li>{language === 'ko' ? '정체된 일상을 견디기 어려워합니다' : 'Finds it hard to tolerate stagnant routine'}</li>
+                  <li>{language === 'ko' ? '자기 발견과 성장에 몰두합니다' : 'Focuses on self-discovery and growth'}</li>
                 </>
               )}
               {result.primary === 'sage' && (
@@ -317,6 +325,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '진실과 지혜를 추구합니다' : 'Seeks truth and wisdom'}</li>
                   <li>{language === 'ko' ? '분석적이고 통찰력 있는 사고를 합니다' : 'Thinks analytically and insightfully'}</li>
                   <li>{language === 'ko' ? '지식과 이해를 통해 성장합니다' : 'Grows through knowledge and understanding'}</li>
+                  <li>{language === 'ko' ? '깊이 생각하고 숙고하는 것을 즐깁니다' : 'Enjoys deep thinking and contemplation'}</li>
+                  <li>{language === 'ko' ? '무지와 거짓을 참지 못합니다' : 'Cannot tolerate ignorance and falsehood'}</li>
                 </>
               )}
               {result.primary === 'innocent' && (
@@ -324,6 +334,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '순수함과 낙관성을 유지합니다' : 'Maintains purity and optimism'}</li>
                   <li>{language === 'ko' ? '안정과 안전을 중요하게 여깁니다' : 'Values stability and safety'}</li>
                   <li>{language === 'ko' ? '단순하고 진실된 삶을 추구합니다' : 'Seeks a simple and authentic life'}</li>
+                  <li>{language === 'ko' ? '신뢰와 믿음을 쉽게 줍니다' : 'Gives trust and faith easily'}</li>
+                  <li>{language === 'ko' ? '행복을 찾는 것이 가장 중요합니다' : 'Finding happiness is most important'}</li>
                 </>
               )}
               {result.primary === 'orphan' && (
@@ -331,6 +343,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '현실적이고 실용적인 사고를 합니다' : 'Thinks realistically and practically'}</li>
                   <li>{language === 'ko' ? '공감 능력이 뛰어납니다' : 'Has strong empathy'}</li>
                   <li>{language === 'ko' ? '평등과 정의를 중요하게 여깁니다' : 'Values equality and justice'}</li>
+                  <li>{language === 'ko' ? '연대감과 소속감을 갈망합니다' : 'Craves solidarity and belonging'}</li>
+                  <li>{language === 'ko' ? '진정성 있는 관계를 추구합니다' : 'Seeks authentic relationships'}</li>
                 </>
               )}
               {result.primary === 'warrior' && (
@@ -338,6 +352,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '용기와 결단력이 있습니다' : 'Shows courage and determination'}</li>
                   <li>{language === 'ko' ? '목표 지향적이고 집중력이 강합니다' : 'Goal-oriented with strong focus'}</li>
                   <li>{language === 'ko' ? '도전을 즐기고 극복합니다' : 'Enjoys and overcomes challenges'}</li>
+                  <li>{language === 'ko' ? '규율과 훈련을 중요시합니다' : 'Values discipline and training'}</li>
+                  <li>{language === 'ko' ? '약자를 보호하고자 합니다' : 'Wants to protect the weak'}</li>
                 </>
               )}
               {result.primary === 'caregiver' && (
@@ -345,6 +361,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '타인을 돌보고 보호합니다' : 'Cares for and protects others'}</li>
                   <li>{language === 'ko' ? '이타적이고 희생적입니다' : 'Altruistic and self-sacrificing'}</li>
                   <li>{language === 'ko' ? '따뜻함과 공감을 제공합니다' : 'Provides warmth and empathy'}</li>
+                  <li>{language === 'ko' ? '타인의 고통을 외면하지 못합니다' : 'Cannot ignore others\' suffering'}</li>
+                  <li>{language === 'ko' ? '무조건적인 사랑을 줍니다' : 'Gives unconditional love'}</li>
                 </>
               )}
               {result.primary === 'lover' && (
@@ -352,6 +370,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '열정과 친밀감을 추구합니다' : 'Seeks passion and intimacy'}</li>
                   <li>{language === 'ko' ? '관계와 연결을 중요하게 여깁니다' : 'Values relationships and connections'}</li>
                   <li>{language === 'ko' ? '아름다움과 감각을 즐깁니다' : 'Enjoys beauty and sensuality'}</li>
+                  <li>{language === 'ko' ? '감정 표현이 풍부합니다' : 'Expresses emotions richly'}</li>
+                  <li>{language === 'ko' ? '깊은 유대감을 형성합니다' : 'Forms deep bonds'}</li>
                 </>
               )}
               {result.primary === 'jester' && (
@@ -359,6 +379,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '유머와 즐거움을 추구합니다' : 'Seeks humor and joy'}</li>
                   <li>{language === 'ko' ? '창의적이고 자유로운 표현을 합니다' : 'Expresses creatively and freely'}</li>
                   <li>{language === 'ko' ? '현재를 즐기며 살아갑니다' : 'Lives in and enjoys the present'}</li>
+                  <li>{language === 'ko' ? '분위기를 밝게 만듭니다' : 'Brightens the atmosphere'}</li>
+                  <li>{language === 'ko' ? '진지함보다 재미를 우선합니다' : 'Prioritizes fun over seriousness'}</li>
                 </>
               )}
               {result.primary === 'creator' && (
@@ -366,6 +388,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '창조와 혁신을 추구합니다' : 'Pursues creation and innovation'}</li>
                   <li>{language === 'ko' ? '상상력이 풍부합니다' : 'Has rich imagination'}</li>
                   <li>{language === 'ko' ? '독창적인 결과물을 만듭니다' : 'Creates original outcomes'}</li>
+                  <li>{language === 'ko' ? '완벽주의적 경향이 있습니다' : 'Has perfectionist tendencies'}</li>
+                  <li>{language === 'ko' ? '자기 표현을 중요하게 생각합니다' : 'Values self-expression'}</li>
                 </>
               )}
               {result.primary === 'ruler' && (
@@ -373,6 +397,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '리더십과 통제력이 있습니다' : 'Shows leadership and control'}</li>
                   <li>{language === 'ko' ? '조직과 질서를 중요하게 여깁니다' : 'Values organization and order'}</li>
                   <li>{language === 'ko' ? '책임감이 강합니다' : 'Has strong sense of responsibility'}</li>
+                  <li>{language === 'ko' ? '전략적 사고를 합니다' : 'Thinks strategically'}</li>
+                  <li>{language === 'ko' ? '안정성과 구조를 만듭니다' : 'Creates stability and structure'}</li>
                 </>
               )}
               {result.primary === 'magician' && (
@@ -380,6 +406,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '변화와 변혁을 일으킵니다' : 'Brings change and transformation'}</li>
                   <li>{language === 'ko' ? '비전과 통찰력이 있습니다' : 'Has vision and insight'}</li>
                   <li>{language === 'ko' ? '가능성을 현실로 만듭니다' : 'Turns possibilities into reality'}</li>
+                  <li>{language === 'ko' ? '영적이고 신비로운 경험에 끌립니다' : 'Drawn to spiritual and mysterious experiences'}</li>
+                  <li>{language === 'ko' ? '세상을 다르게 보는 능력이 있습니다' : 'Has ability to see the world differently'}</li>
                 </>
               )}
               {result.primary === 'outlaw' && (
@@ -387,6 +415,8 @@ export default function ArchetypeResult() {
                   <li>{language === 'ko' ? '규칙과 관습에 도전합니다' : 'Challenges rules and conventions'}</li>
                   <li>{language === 'ko' ? '독립적이고 반항적입니다' : 'Independent and rebellious'}</li>
                   <li>{language === 'ko' ? '변화를 위해 싸웁니다' : 'Fights for change'}</li>
+                  <li>{language === 'ko' ? '불의를 참지 못합니다' : 'Cannot tolerate injustice'}</li>
+                  <li>{language === 'ko' ? '자유를 위해 희생할 수 있습니다' : 'Can sacrifice for freedom'}</li>
                 </>
               )}
             </ul>

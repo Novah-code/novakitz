@@ -136,28 +136,28 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 'q5',
     question: {
-      ko: '꿈에서 가장 중요하게 여기는 가치는?',
-      en: 'What value is most important to you in dreams?'
+      ko: '꿈에서 당신이 가장 원했던 것은?',
+      en: 'What did you want most in your dreams?'
     },
     options: [
       {
-        text: { ko: '진실과 지혜', en: 'Truth and wisdom' },
+        text: { ko: '진실을 알고 이해하는 것', en: 'To know and understand the truth' },
         archetypes: { sage: 3, creator: 2, explorer: 1 }
       },
       {
-        text: { ko: '사랑과 관계', en: 'Love and relationships' },
+        text: { ko: '사랑받고 연결되는 것', en: 'To be loved and connected' },
         archetypes: { lover: 3, caregiver: 2, innocent: 1 }
       },
       {
-        text: { ko: '자유와 독립', en: 'Freedom and independence' },
+        text: { ko: '자유롭고 독립적인 것', en: 'To be free and independent' },
         archetypes: { explorer: 3, outlaw: 2, jester: 1 }
       },
       {
-        text: { ko: '힘과 리더십', en: 'Power and leadership' },
+        text: { ko: '영향력과 통제력을 갖는 것', en: 'To have influence and control' },
         archetypes: { ruler: 3, warrior: 2, magician: 1 }
       },
       {
-        text: { ko: '창조와 혁신', en: 'Creation and innovation' },
+        text: { ko: '새로운 것을 만들어내는 것', en: 'To create something new' },
         archetypes: { creator: 3, magician: 2, sage: 1 }
       }
     ]

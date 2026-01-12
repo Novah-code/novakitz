@@ -601,7 +601,7 @@ export default function AdminDashboard() {
                         주요 아키타입
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                        부수 아키타입
+                        어울리는 유형
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                         조회수
