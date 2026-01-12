@@ -145,8 +145,8 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
 
     // Use different models based on subscription tier
     let model = plan.planSlug === 'premium'
-      ? 'gemini-2.0-flash-exp'  // Premium users get latest model
-      : 'gemini-1.5-flash';      // Free users get flash model with better quota
+      ? 'gemini-2.0-flash'  // Premium users get latest model
+      : 'gemini-2.0-flash';  // Free users get same model
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -168,33 +168,6 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
         signal: controller.signal,
       }
     ).finally(() => clearTimeout(timeoutId));
-
-    // If premium model quota exceeded, fall back to flash model
-    if (!response.ok && response.status === 429 && model === 'gemini-2.0-flash-exp') {
-      console.log('⚠️ Premium model quota exceeded, falling back to flash model');
-      model = 'gemini-1.5-flash';
-
-      const fallbackController = new AbortController();
-      const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 15000);
-
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: prompt
-              }]
-            }]
-          }),
-          signal: fallbackController.signal,
-        }
-      ).finally(() => clearTimeout(fallbackTimeoutId));
-    }
 
     if (!response.ok) {
       const errorText = await response.text();
