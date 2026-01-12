@@ -144,14 +144,14 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
     }
 
     // Use different models based on subscription tier
-    let model = plan.planSlug === 'premium'
+    const model = plan.planSlug === 'premium'
       ? 'gemini-2.0-flash'  // Premium users get latest model
       : 'gemini-2.0-flash';  // Free users get same model
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    let response = await fetch(
+    const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
