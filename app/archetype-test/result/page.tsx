@@ -24,6 +24,7 @@ export default function ArchetypeResult() {
   } | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [savedResultId, setSavedResultId] = useState<string | null>(null);
 
   useEffect(() => {
     loadResult();
@@ -35,7 +36,7 @@ export default function ArchetypeResult() {
     setIsLoggedIn(!!user);
   };
 
-  const loadResult = () => {
+  const loadResult = async () => {
     const answersStr = localStorage.getItem('guest_quiz_answers');
     if (!answersStr) {
       router.push('/archetype-test');
@@ -45,11 +46,63 @@ export default function ArchetypeResult() {
     const answers = JSON.parse(answersStr);
     const calculatedResult = calculateArchetypeFromQuiz(answers);
     setResult(calculatedResult);
+
+    // Save result to database for sharing
+    await saveResultToDatabase(calculatedResult, answers);
+  };
+
+  const saveResultToDatabase = async (
+    calculatedResult: {
+      primary: string;
+      secondary: string | null;
+      scores: Record<string, number>;
+    },
+    answers: Record<string, number>
+  ) => {
+    // Check if already saved
+    const savedId = localStorage.getItem('guest_result_id');
+    if (savedId) {
+      setSavedResultId(savedId);
+      return;
+    }
+
+    try {
+      const dreamStr = localStorage.getItem('guest_dream');
+      const dreamData = dreamStr ? JSON.parse(dreamStr) : null;
+
+      const response = await fetch('/api/guest-results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          primary_archetype: calculatedResult.primary,
+          secondary_archetype: calculatedResult.secondary,
+          archetype_scores: calculatedResult.scores,
+          dream_content: dreamData?.content || '',
+          quiz_answers: answers,
+          language: language,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSavedResultId(data.id);
+        localStorage.setItem('guest_result_id', data.id);
+      }
+    } catch (error) {
+      console.error('Error saving result:', error);
+    }
   };
 
   const handleShare = async () => {
     setSharing(true);
-    const shareUrl = `${window.location.origin}/archetype-test`;
+
+    // Use personalized share link if result is saved
+    const shareUrl = savedResultId
+      ? `${window.location.origin}/archetype-test/shared/${savedResultId}`
+      : `${window.location.origin}/archetype-test`;
+
     const shareText = language === 'ko'
       ? `나의 무의식 아키타입은 "${getArchetypeName(result!.primary, language)}"! 당신도 테스트해보세요!`
       : `My unconscious archetype is "${getArchetypeName(result!.primary, language)}"! Take the test too!`;
