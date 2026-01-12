@@ -270,14 +270,12 @@ export default function SharedArchetypeResult() {
               {/* Traits */}
               <div style={{ marginBottom: secondaryArchetype ? '2rem' : '0' }}>
                 <h3 style={{
-                  fontSize: '16px',
+                  fontSize: '13px',
                   fontWeight: '700',
-                  color: '#1f2937',
+                  color: '#6b7280',
                   marginBottom: '1.25rem',
                   letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                  fontSize: '13px',
-                  color: '#6b7280'
+                  textTransform: 'uppercase'
                 }}>
                   {language === 'ko' ? '주요 특성' : 'Key Traits'}
                 </h3>
