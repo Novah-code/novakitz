@@ -18,19 +18,26 @@ export async function POST(request: NextRequest) {
       language
     } = body;
 
-    // Get user's location from IP
+    // Get user's location from IP using ip-api.com (free, 45 req/min)
     let locationData = null;
     try {
       const forwarded = request.headers.get('x-forwarded-for');
       const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip');
 
       if (ip && !ip.includes('127.0.0.1') && !ip.includes('::1')) {
-        const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`, {
-          headers: { 'User-Agent': 'novakitz-dream-app' }
-        });
+        const locationResponse = await fetch(`http://ip-api.com/json/${ip}?fields=status,country,countryCode,city`);
 
         if (locationResponse.ok) {
-          locationData = await locationResponse.json();
+          const data = await locationResponse.json();
+
+          // ip-api.com returns different field names
+          if (data.status === 'success') {
+            locationData = {
+              country_code: data.countryCode,
+              country_name: data.country,
+              city: data.city,
+            };
+          }
         }
       }
     } catch (err) {
