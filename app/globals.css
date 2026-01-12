@@ -675,10 +675,13 @@ html {
     transform: translateY(-2px);
 }
 
-/* Korean button font */
+/* Korean button and input font */
 html[lang="ko"] .btn-primary,
 html[lang="ko"] .btn-secondary,
-html[lang="ko"] button {
+html[lang="ko"] button,
+html[lang="ko"] .dream-title-input,
+html[lang="ko"] input,
+html[lang="ko"] textarea {
     font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 

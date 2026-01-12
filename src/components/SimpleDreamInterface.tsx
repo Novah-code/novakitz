@@ -169,7 +169,7 @@ const translations = {
     typeToAddTags: 'Type to add new tags...'
   },
   ko: {
-    dreamEntry: '꿈 기록',
+    dreamEntry: 'Dream Entry',
     myDream: '나의 꿈',
     titlePlaceholder: '제목',
     listeningVoice: '음성을 듣고 있습니다...',
@@ -221,6 +221,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     console.log('SimpleDreamInterface: initialShowHistory changed to:', initialShowHistory);
     setShowHistory(initialShowHistory);
   }, [initialShowHistory]);
+
+  // Update html lang attribute when language changes
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const [editingDream, setEditingDream] = useState<DreamEntry | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editText, setEditText] = useState('');
@@ -4709,7 +4715,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     fontSize: '1rem',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : undefined
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = '#e5e7eb';
@@ -5049,7 +5056,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         cursor: 'pointer',
                         transition: 'all 0.2s',
                         boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
-                        fontFamily: 'Georgia, serif'
+                        fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : 'Georgia, serif'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'translateY(-2px)';

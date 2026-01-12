@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
       const { data: recentDreams, error } = await supabase
         .from('dreams')
-        .select('text, title, created_at')
+        .select('content, title, created_at')
         .eq('user_id', userId)
         .gte('created_at', sevenDaysAgo.toISOString())
         .order('created_at', { ascending: false })
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         dreams: recentDreams?.map(d => ({
           title: d.title,
           created_at: d.created_at,
-          textLength: d.text?.length
+          contentLength: d.content?.length
         }))
       });
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
       // Combine recent dream texts
       finalDreamText = recentDreams
-        .map((d, i) => `Dream ${i + 1}: ${d.text.substring(0, 200)}`)
+        .map((d, i) => `Dream ${i + 1}: ${d.content.substring(0, 200)}`)
         .join('\n\n');
 
       console.log('✅ [API] Combined dream text length:', finalDreamText.length);
@@ -144,14 +144,14 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
     }
 
     // Use different models based on subscription tier
-    const model = plan.planSlug === 'premium'
+    let model = plan.planSlug === 'premium'
       ? 'gemini-2.0-flash-exp'  // Premium users get latest model
-      : 'gemini-1.5-pro';        // Free users get stable model with better quota
+      : 'gemini-1.5-flash';      // Free users get flash model with better quota
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(
+    let response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
@@ -168,6 +168,33 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
         signal: controller.signal,
       }
     ).finally(() => clearTimeout(timeoutId));
+
+    // If premium model quota exceeded, fall back to flash model
+    if (!response.ok && response.status === 429 && model === 'gemini-2.0-flash-exp') {
+      console.log('⚠️ Premium model quota exceeded, falling back to flash model');
+      model = 'gemini-1.5-flash';
+
+      const fallbackController = new AbortController();
+      const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), 15000);
+
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: prompt
+              }]
+            }]
+          }),
+          signal: fallbackController.signal,
+        }
+      ).finally(() => clearTimeout(fallbackTimeoutId));
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
