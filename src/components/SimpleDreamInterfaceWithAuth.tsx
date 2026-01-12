@@ -27,7 +27,9 @@ const translations = {
     badges: 'Badges',
     monthlyReport: 'Monthly Report',
     language: 'Language',
-    signOut: 'Sign Out'
+    signOut: 'Sign Out',
+    signUp: 'Sign Up',
+    signIn: 'Sign In'
   },
   ko: {
     loading: '로딩 중...',
@@ -41,7 +43,9 @@ const translations = {
     badges: '뱃지',
     monthlyReport: '월간 리포트',
     language: '언어',
-    signOut: '로그아웃'
+    signOut: '로그아웃',
+    signUp: '회원가입',
+    signIn: '로그인'
   }
 };
 
@@ -58,6 +62,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
 

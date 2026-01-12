@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ARCHETYPE_QUIZ_QUESTIONS, getQuizProgress } from '../../../src/lib/archetypeQuiz';
+import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
 import '../../globals.css';
 
 export default function ArchetypeQuiz() {
@@ -72,11 +73,13 @@ export default function ArchetypeQuiz() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: '2rem 1rem'
-    }}>
+    <>
+      <ArchetypeTestNav language={language} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        padding: '2rem 1rem'
+      }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header with Progress */}
         <div style={{
@@ -269,5 +272,6 @@ export default function ArchetypeQuiz() {
         </div>
       </div>
     </div>
+    </>
   );
 }

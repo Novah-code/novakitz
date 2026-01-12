@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../src/lib/supabase';
+import ArchetypeTestNav from '../../src/components/ArchetypeTestNav';
 import '../globals.css';
 
 export default function ArchetypeTestLanding() {
@@ -48,14 +49,16 @@ export default function ArchetypeTestLanding() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: '2rem 1rem',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    }}>
+    <>
+      <ArchetypeTestNav language={language} onLanguageChange={setLanguage} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        padding: '2rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
       <div style={{
         maxWidth: '600px',
         width: '100%',
@@ -223,5 +226,6 @@ export default function ArchetypeTestLanding() {
         </div>
       </div>
     </div>
+    </>
   );
 }

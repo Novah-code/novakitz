@@ -11,6 +11,7 @@ import {
   getArchetypeDarkColor
 } from '../../../src/lib/archetypes';
 import { supabase } from '../../../src/lib/supabase';
+import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
 import '../../globals.css';
 
 export default function ArchetypeResult() {
@@ -76,7 +77,7 @@ export default function ArchetypeResult() {
   };
 
   const handleSignUp = () => {
-    router.push('/?signup=true');
+    router.push('/');
   };
 
   const handleRetake = () => {
@@ -106,11 +107,13 @@ export default function ArchetypeResult() {
     : primaryColor;
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
-      padding: '2rem 1rem'
-    }}>
+    <>
+      <ArchetypeTestNav language={language} />
+      <div style={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
+        padding: '2rem 1rem'
+      }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Celebration Header */}
         <div style={{
@@ -449,5 +452,6 @@ export default function ArchetypeResult() {
         }
       `}</style>
     </div>
+    </>
   );
 }

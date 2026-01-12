@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
 import '../../globals.css';
 
 export default function GuestDreamRecording() {
@@ -46,11 +47,13 @@ export default function GuestDreamRecording() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: '2rem 1rem'
-    }}>
+    <>
+      <ArchetypeTestNav language={language} />
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        padding: '2rem 1rem'
+      }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{
@@ -271,5 +274,6 @@ export default function GuestDreamRecording() {
         </div>
       </div>
     </div>
+    </>
   );
 }
