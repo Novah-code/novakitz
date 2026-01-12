@@ -145,8 +145,8 @@ ${affirmationCount === 3 ? '3. [Third affirmation]' : ''}`;
 
     // Use different models based on subscription tier
     const model = plan.planSlug === 'premium'
-      ? 'gemini-2.0-flash'  // Premium users get latest model
-      : 'gemini-2.0-flash';  // Free users get same model
+      ? 'gemini-2.5-flash'  // Premium users get latest model
+      : 'gemini-2.5-flash';  // Free users get same model
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
