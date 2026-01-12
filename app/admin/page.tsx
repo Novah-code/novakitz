@@ -32,6 +32,23 @@ interface Stats {
   totalRevenue: number;
 }
 
+interface ArchetypeStats {
+  totalResults: number;
+  totalViews: number;
+  averageViews: number;
+  topArchetypes: { archetype: string; count: number }[];
+  topShared: {
+    id: string;
+    primary_archetype: string;
+    secondary_archetype: string | null;
+    view_count: number;
+    created_at: string;
+    language: string;
+  }[];
+  languageCounts: { ko: number; en: number };
+  recentResults: number;
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -41,6 +58,7 @@ export default function AdminDashboard() {
     expiredSubscriptions: 0,
     totalRevenue: 0,
   });
+  const [archetypeStats, setArchetypeStats] = useState<ArchetypeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -72,6 +90,20 @@ export default function AdminDashboard() {
 
     setIsAdmin(true);
     loadDashboardData();
+    loadArchetypeStats();
+  };
+
+  const loadArchetypeStats = async () => {
+    try {
+      const response = await fetch('/api/archetype-stats');
+      const data = await response.json();
+
+      if (!data.error) {
+        setArchetypeStats(data);
+      }
+    } catch (err) {
+      console.error('Failed to load archetype stats:', err);
+    }
   };
 
   const loadDashboardData = async () => {
@@ -278,6 +310,307 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Archetype Test Stats */}
+        {archetypeStats && (
+          <>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              marginBottom: '1.5rem',
+              marginTop: '3rem',
+            }}>
+              🌙 아키타입 테스트 통계
+            </h2>
+
+            {/* Archetype Stats Cards */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '2rem',
+            }}>
+              <div style={{
+                background: 'white',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}>
+                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  총 테스트 완료
+                </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#7FB069' }}>
+                  {archetypeStats.totalResults}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'white',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}>
+                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  총 공유 조회수
+                </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#8BC34A' }}>
+                  {archetypeStats.totalViews}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'white',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}>
+                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  평균 조회수
+                </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#9C27B0' }}>
+                  {archetypeStats.averageViews}
+                </div>
+              </div>
+
+              <div style={{
+                background: 'white',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              }}>
+                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                  최근 7일 테스트
+                </div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#FF9800' }}>
+                  {archetypeStats.recentResults}
+                </div>
+              </div>
+            </div>
+
+            {/* Top Archetypes and Language Distribution */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+              gap: '1.5rem',
+              marginBottom: '2rem',
+            }}>
+              {/* Top 5 Archetypes */}
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                padding: '1.5rem',
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1rem',
+                }}>
+                  🏆 인기 아키타입 TOP 5
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {archetypeStats.topArchetypes.map((item, index) => (
+                    <div
+                      key={item.archetype}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        background: '#f9fafb',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#6b7280',
+                        }}>
+                          #{index + 1}
+                        </span>
+                        <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
+                          {item.archetype}
+                        </span>
+                      </div>
+                      <span style={{
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        color: '#7FB069',
+                      }}>
+                        {item.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Language Distribution */}
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                padding: '1.5rem',
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1rem',
+                }}>
+                  🌐 언어별 분포
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem',
+                    }}>
+                      <span style={{ fontSize: '14px', color: '#6b7280' }}>한국어</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1f2937' }}>
+                        {archetypeStats.languageCounts.ko} ({((archetypeStats.languageCounts.ko / archetypeStats.totalResults) * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div style={{
+                      height: '12px',
+                      background: '#e5e7eb',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${(archetypeStats.languageCounts.ko / archetypeStats.totalResults) * 100}%`,
+                        background: '#7FB069',
+                      }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem',
+                    }}>
+                      <span style={{ fontSize: '14px', color: '#6b7280' }}>English</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1f2937' }}>
+                        {archetypeStats.languageCounts.en} ({((archetypeStats.languageCounts.en / archetypeStats.totalResults) * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div style={{
+                      height: '12px',
+                      background: '#e5e7eb',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${(archetypeStats.languageCounts.en / archetypeStats.totalResults) * 100}%`,
+                        background: '#8BC34A',
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Shared Results Table */}
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              marginBottom: '2rem',
+            }}>
+              <div style={{
+                padding: '1.5rem',
+                borderBottom: '1px solid #e5e7eb',
+              }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                  🔥 가장 많이 본 공유 결과 TOP 10
+                </h3>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        순위
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        주요 아키타입
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        부수 아키타입
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        조회수
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        언어
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        생성일
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        공유 링크
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {archetypeStats.topShared.map((result, index) => (
+                      <tr key={result.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <td style={{ padding: '1rem', fontSize: '14px', fontWeight: 'bold', color: index < 3 ? '#7FB069' : '#6b7280' }}>
+                          #{index + 1}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
+                          {result.primary_archetype}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#6b7280' }}>
+                          {result.secondary_archetype || '-'}
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <span style={{
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '12px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: 'white',
+                            background: result.view_count > 10 ? '#7FB069' : result.view_count > 5 ? '#8BC34A' : '#9ca3af',
+                          }}>
+                            {result.view_count} 회
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#6b7280' }}>
+                          {result.language === 'ko' ? '🇰🇷 한국어' : '🇺🇸 English'}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#6b7280' }}>
+                          {formatDate(result.created_at)}
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <a
+                            href={`/archetype-test/shared/${result.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: '12px',
+                              color: '#7FB069',
+                              textDecoration: 'underline',
+                            }}
+                          >
+                            보기
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Subscriptions Table */}
         <div style={{
           background: 'white',
@@ -386,7 +719,10 @@ export default function AdminDashboard() {
         {/* Refresh Button */}
         <div style={{ marginTop: '2rem', textAlign: 'center' }}>
           <button
-            onClick={loadDashboardData}
+            onClick={() => {
+              loadDashboardData();
+              loadArchetypeStats();
+            }}
             style={{
               padding: '0.75rem 1.5rem',
               background: '#7FB069',
