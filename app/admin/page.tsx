@@ -46,6 +46,7 @@ interface ArchetypeStats {
     language: string;
   }[];
   languageCounts: { ko: number; en: number };
+  topCountries: { country_code: string; country_name: string; count: number }[];
   recentResults: number;
 }
 
@@ -387,7 +388,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Top Archetypes and Language Distribution */}
+            {/* Top Archetypes, Language Distribution, and Country Distribution */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
@@ -511,6 +512,64 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Top 10 Countries */}
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                padding: '1.5rem',
+              }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1rem',
+                }}>
+                  🌍 국가별 분포 TOP 10
+                </h3>
+                {archetypeStats.topCountries.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {archetypeStats.topCountries.map((country, index) => (
+                      <div
+                        key={country.country_code}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '0.75rem',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <span style={{
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            color: '#6b7280',
+                          }}>
+                            #{index + 1}
+                          </span>
+                          <span style={{ fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>
+                            {country.country_name}
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: '16px',
+                          fontWeight: 'bold',
+                          color: '#7FB069',
+                        }}>
+                          {country.count}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '14px', color: '#9ca3af', textAlign: 'center', padding: '2rem' }}>
+                    아직 국가 정보가 없습니다
+                  </p>
+                )}
               </div>
             </div>
 

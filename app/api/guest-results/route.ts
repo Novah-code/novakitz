@@ -18,6 +18,25 @@ export async function POST(request: NextRequest) {
       language
     } = body;
 
+    // Get user's location from IP
+    let locationData = null;
+    try {
+      const forwarded = request.headers.get('x-forwarded-for');
+      const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip');
+
+      if (ip && !ip.includes('127.0.0.1') && !ip.includes('::1')) {
+        const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`, {
+          headers: { 'User-Agent': 'novakitz-dream-app' }
+        });
+
+        if (locationResponse.ok) {
+          locationData = await locationResponse.json();
+        }
+      }
+    } catch (err) {
+      console.log('Failed to get location, continuing without it:', err);
+    }
+
     // Insert guest result
     const { data, error } = await supabase
       .from('guest_archetype_results')
@@ -27,7 +46,10 @@ export async function POST(request: NextRequest) {
         archetype_scores,
         dream_content,
         quiz_answers,
-        language: language || 'ko'
+        language: language || 'ko',
+        country_code: locationData?.country_code || null,
+        country_name: locationData?.country_name || null,
+        city: locationData?.city || null,
       })
       .select()
       .single();

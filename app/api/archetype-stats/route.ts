@@ -56,6 +56,30 @@ export async function GET() {
       en: results?.filter((r) => r.language === 'en').length || 0,
     };
 
+    // Country distribution
+    const countryCounts: Record<string, { count: number; name: string }> = {};
+    results?.forEach((r) => {
+      if (r.country_code) {
+        if (!countryCounts[r.country_code]) {
+          countryCounts[r.country_code] = {
+            count: 0,
+            name: r.country_name || r.country_code,
+          };
+        }
+        countryCounts[r.country_code].count++;
+      }
+    });
+
+    // Sort countries by count and get top 10
+    const topCountries = Object.entries(countryCounts)
+      .sort(([, a], [, b]) => b.count - a.count)
+      .slice(0, 10)
+      .map(([code, data]) => ({
+        country_code: code,
+        country_name: data.name,
+        count: data.count,
+      }));
+
     // Recent 7 days trend
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -70,6 +94,7 @@ export async function GET() {
       topArchetypes,
       topShared,
       languageCounts,
+      topCountries,
       recentResults,
     });
   } catch (error) {
