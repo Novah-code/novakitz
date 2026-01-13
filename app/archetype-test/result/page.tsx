@@ -112,9 +112,14 @@ export default function ArchetypeResult() {
       ? `${window.location.origin}/archetype-test/shared/${savedResultId}`
       : `${window.location.origin}/archetype-test`;
 
+    // Get clean archetype name (remove English part for Korean)
+    const fullName = getArchetypeName(result!.primary, language);
+    const cleanName = language === 'ko' ? fullName.split(' (')[0] : fullName;
+    const tagline = getArchetypeTagline(result!.primary, language);
+
     const shareText = language === 'ko'
-      ? `나의 무의식 아키타입은 "${getArchetypeName(result!.primary, language)}"! 당신도 테스트해보세요!`
-      : `My unconscious archetype is "${getArchetypeName(result!.primary, language)}"! Take the test too!`;
+      ? `나의 무의식 아키타입: ${cleanName}\n${tagline}\n\n당신의 아키타입도 알아보세요 ✨`
+      : `My unconscious archetype: ${cleanName}\n${tagline}\n\nDiscover yours ✨`;
 
     if (navigator.share) {
       try {
