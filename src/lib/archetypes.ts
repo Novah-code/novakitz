@@ -1,8 +1,8 @@
 // 융의 12 아키타입 정의 (NovaKitz 버전)
 export const ARCHETYPES = {
   innocent: {
-    ko: '순수 (The Innocent)',
-    en: 'The Pure Innocent',
+    ko: '순수한 영혼 (The Innocent Soul)',
+    en: 'The Innocent Soul',
     tagline: {
       ko: '순수 · 희망 · 믿음',
       en: 'Purity · Hope · Faith'
@@ -23,7 +23,7 @@ export const ARCHETYPES = {
     darkColor: '#FFB3B3'
   },
   sage: {
-    ko: '예언자 (The Seer)',
+    ko: '지혜로운 예언자 (The Wise Seer)',
     en: 'The Wise Seer',
     tagline: {
       ko: '통찰 · 지혜 · 진실',
@@ -45,7 +45,7 @@ export const ARCHETYPES = {
     darkColor: '#B3DAFF'
   },
   explorer: {
-    ko: '방랑자 (The Wanderer)',
+    ko: '자유로운 방랑자 (The Free Wanderer)',
     en: 'The Free Wanderer',
     tagline: {
       ko: '탐험 · 자유 · 갈망',
@@ -67,8 +67,8 @@ export const ARCHETYPES = {
     darkColor: '#B3FFD9'
   },
   outlaw: {
-    ko: '해커 (The Hacker)',
-    en: 'The Revolutionary Hacker',
+    ko: '반항하는 해커 (The Rebellious Hacker)',
+    en: 'The Rebellious Hacker',
     tagline: {
       ko: '파괴 · 혁신 · 해방',
       en: 'Destruction · Innovation · Liberation'
@@ -89,8 +89,8 @@ export const ARCHETYPES = {
     darkColor: '#FFD9B3'
   },
   magician: {
-    ko: '연금술사 (The Alchemist)',
-    en: 'The Transformative Alchemist',
+    ko: '신비로운 연금술사 (The Mystical Alchemist)',
+    en: 'The Mystical Alchemist',
     tagline: {
       ko: '변형 · 창조 · 각성',
       en: 'Transformation · Creation · Awakening'
@@ -111,7 +111,7 @@ export const ARCHETYPES = {
     darkColor: '#D9B3FF'
   },
   hero: {
-    ko: '전사 (The Warrior)',
+    ko: '용감한 전사 (The Courageous Warrior)',
     en: 'The Courageous Warrior',
     tagline: {
       ko: '용기 · 의지 · 돌파',
@@ -133,7 +133,7 @@ export const ARCHETYPES = {
     darkColor: '#FFB3E5'
   },
   lover: {
-    ko: '연인 (The Lover)',
+    ko: '열정적인 연인 (The Passionate Lover)',
     en: 'The Passionate Lover',
     tagline: {
       ko: '사랑 · 감각 · 열정',
@@ -155,8 +155,8 @@ export const ARCHETYPES = {
     darkColor: '#FFB3D1'
   },
   jester: {
-    ko: '조커 (The Joker)',
-    en: 'The Playful Joker',
+    ko: '매력적인 조커 (The Charming Joker)',
+    en: 'The Charming Joker',
     tagline: {
       ko: '유희 · 아이러니 · 자유',
       en: 'Play · Irony · Freedom'
@@ -177,8 +177,8 @@ export const ARCHETYPES = {
     darkColor: '#FFE8B3'
   },
   everyman: {
-    ko: '동행자 (The Companion)',
-    en: 'The Empathetic Companion',
+    ko: '따뜻한 동행자 (The Warm Companion)',
+    en: 'The Warm Companion',
     tagline: {
       ko: '공감 · 연결 · 인간성',
       en: 'Empathy · Connection · Humanity'
@@ -199,7 +199,7 @@ export const ARCHETYPES = {
     darkColor: '#D9D9D9'
   },
   caregiver: {
-    ko: '수호자 (The Guardian)',
+    ko: '헌신적인 수호자 (The Devoted Guardian)',
     en: 'The Devoted Guardian',
     tagline: {
       ko: '보호 · 치유 · 헌신',
@@ -221,8 +221,8 @@ export const ARCHETYPES = {
     darkColor: '#B3FFE8'
   },
   ruler: {
-    ko: '군주 (The Sovereign)',
-    en: 'The Wise Sovereign',
+    ko: '당당한 군주 (The Confident Sovereign)',
+    en: 'The Confident Sovereign',
     tagline: {
       ko: '질서 · 통제 · 권위',
       en: 'Order · Control · Authority'
@@ -243,8 +243,8 @@ export const ARCHETYPES = {
     darkColor: '#E8B3FF'
   },
   creator: {
-    ko: '설계자 (The Architect)',
-    en: 'The Visionary Architect',
+    ko: '창조적인 설계자 (The Creative Architect)',
+    en: 'The Creative Architect',
     tagline: {
       ko: '상상 · 창조 · 예술',
       en: 'Imagination · Creation · Art'
