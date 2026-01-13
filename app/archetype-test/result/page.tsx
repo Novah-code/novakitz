@@ -9,8 +9,10 @@ import {
   getArchetypeLongDescription,
   getArchetypeTraits,
   getArchetypeColor,
-  getArchetypeDarkColor
+  getArchetypeDarkColor,
+  getArchetypeTagline
 } from '../../../src/lib/archetypes';
+import { getGrowthStage } from '../../../src/lib/archetypeGrowth';
 import { supabase } from '../../../src/lib/supabase';
 import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
 import '../../globals.css';
@@ -221,9 +223,17 @@ export default function ArchetypeResult() {
               fontSize: '36px',
               fontWeight: 'bold',
               color: '#1f2937',
-              marginBottom: '1rem'
+              marginBottom: '0.5rem'
             }}>
               {getArchetypeName(result.primary, language)}
+            </div>
+            <div style={{
+              fontSize: '15px',
+              color: '#7FB069',
+              fontWeight: '600',
+              marginBottom: '1rem'
+            }}>
+              {getArchetypeTagline(result.primary, language)}
             </div>
             <div style={{
               fontSize: '16px',
@@ -251,6 +261,150 @@ export default function ArchetypeResult() {
               {getArchetypeLongDescription(result.primary, language)}
             </div>
           </div>
+
+          {/* Growth System */}
+          {(() => {
+            const growthStage = getGrowthStage(result.primary, language);
+            if (!growthStage) return null;
+
+            return (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.05) 0%, rgba(139, 195, 74, 0.02) 100%)',
+                borderRadius: '16px',
+                padding: '2rem',
+                marginBottom: '2rem',
+                border: '2px solid rgba(127, 176, 105, 0.2)'
+              }}>
+                <h2 style={{
+                  fontSize: '22px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1.5rem',
+                  textAlign: 'center'
+                }}>
+                  {language === 'ko' ? '🌱 성장 시스템' : '🌱 Growth System'}
+                </h2>
+
+                {/* Current Stage */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#7FB069',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {language === 'ko' ? '현재 단계' : 'Current Stage'}
+                  </div>
+                  <div style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: '#1f2937',
+                    marginBottom: '1rem'
+                  }}>
+                    {growthStage.current[language]}
+                  </div>
+                  <div style={{ marginBottom: '0.5rem' }}>
+                    {growthStage.characteristics[language].map((char, idx) => (
+                      <div key={idx} style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        marginBottom: '0.5rem',
+                        paddingLeft: '1rem',
+                        position: 'relative'
+                      }}>
+                        <span style={{
+                          position: 'absolute',
+                          left: '0',
+                          color: '#7FB069'
+                        }}>•</span>
+                        {char}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Growth Quests */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  marginBottom: '1.5rem'
+                }}>
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#7FB069',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {language === 'ko' ? '성장 퀘스트' : 'Growth Quests'}
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#9ca3af',
+                    marginBottom: '1rem'
+                  }}>
+                    {language === 'ko' ? '다음 단계로 나아가기 위한 실천' : 'Actions to move to the next stage'}
+                  </div>
+                  {growthStage.quests[language].map((quest, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      padding: '0.75rem',
+                      background: '#f9fafb',
+                      borderRadius: '8px',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '4px',
+                        border: '2px solid #7FB069',
+                        marginRight: '0.75rem',
+                        flexShrink: 0,
+                        marginTop: '2px'
+                      }} />
+                      <span style={{
+                        fontSize: '14px',
+                        color: '#374151',
+                        lineHeight: '1.5'
+                      }}>
+                        {quest}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Next Stage */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryDarkColor} 100%)`,
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#6b7280',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {language === 'ko' ? '다음 단계' : 'Next Stage'}
+                  </div>
+                  <div style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: '#1f2937'
+                  }}>
+                    {growthStage.next[language]}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Compatible Type */}
           {result.secondary && (

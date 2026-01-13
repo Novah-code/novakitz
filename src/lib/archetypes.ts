@@ -1,11 +1,11 @@
 // 융의 12 아키타입 정의 (NovaKitz 버전)
 export const ARCHETYPES = {
   innocent: {
-    ko: '빛의 아이',
-    en: 'The Child of Light',
+    ko: '순수 (The Innocent)',
+    en: 'The Pure Innocent',
     tagline: {
-      ko: '세상을 순수한 눈으로 바라보는 낙관주의자',
-      en: 'An optimist who sees the world through innocent eyes'
+      ko: '순수 · 희망 · 믿음',
+      en: 'Purity · Hope · Faith'
     },
     description: {
       ko: '순수함과 희망, 믿음을 간직한 채 안전과 행복을 추구합니다.',
@@ -23,11 +23,11 @@ export const ARCHETYPES = {
     darkColor: '#FFB3B3'
   },
   sage: {
-    ko: '예언자',
-    en: 'The Seer',
+    ko: '예언자 (The Seer)',
+    en: 'The Wise Seer',
     tagline: {
-      ko: '지혜로 진실을 찾아내는 통찰의 탐구자',
-      en: 'A seeker of truth who finds wisdom in everything'
+      ko: '통찰 · 지혜 · 진실',
+      en: 'Insight · Wisdom · Truth'
     },
     description: {
       ko: '통찰과 지혜를 통해 진실을 꿰뚫어 봅니다.',
@@ -45,11 +45,11 @@ export const ARCHETYPES = {
     darkColor: '#B3DAFF'
   },
   explorer: {
-    ko: '방랑자',
-    en: 'The Wanderer',
+    ko: '방랑자 (The Wanderer)',
+    en: 'The Free Wanderer',
     tagline: {
-      ko: '자유를 향해 끝없이 걷는 영혼의 모험가',
-      en: 'A soul who endlessly walks toward freedom'
+      ko: '탐험 · 자유 · 갈망',
+      en: 'Exploration · Freedom · Longing'
     },
     description: {
       ko: '탐험과 자유를 갈망하며 끝없이 새로운 길을 찾아 나섭니다.',
@@ -67,11 +67,11 @@ export const ARCHETYPES = {
     darkColor: '#B3FFD9'
   },
   outlaw: {
-    ko: '개척자',
-    en: 'The Pioneer',
+    ko: '해커 (The Hacker)',
+    en: 'The Revolutionary Hacker',
     tagline: {
-      ko: '기존의 룰을 깨고 새로운 세상을 여는 자',
-      en: 'One who breaks the rules and opens new worlds'
+      ko: '파괴 · 혁신 · 해방',
+      en: 'Destruction · Innovation · Liberation'
     },
     description: {
       ko: '기존의 틀을 넘어 혁신을 통해 새로운 길을 개척합니다.',
@@ -89,11 +89,11 @@ export const ARCHETYPES = {
     darkColor: '#FFD9B3'
   },
   magician: {
-    ko: '연금술사',
-    en: 'The Alchemist',
+    ko: '연금술사 (The Alchemist)',
+    en: 'The Transformative Alchemist',
     tagline: {
-      ko: '불가능을 가능으로 바꾸는 변화의 마법사',
-      en: 'A wizard who transforms the impossible into possible'
+      ko: '변형 · 창조 · 각성',
+      en: 'Transformation · Creation · Awakening'
     },
     description: {
       ko: '변형과 창조를 통해 각성의 순간을 만들어냅니다.',
@@ -111,11 +111,11 @@ export const ARCHETYPES = {
     darkColor: '#D9B3FF'
   },
   hero: {
-    ko: '전사',
-    en: 'The Warrior',
+    ko: '전사 (The Warrior)',
+    en: 'The Courageous Warrior',
     tagline: {
-      ko: '두려움을 넘어 승리를 쟁취하는 용기의 화신',
-      en: 'An embodiment of courage who conquers fear'
+      ko: '용기 · 의지 · 돌파',
+      en: 'Courage · Willpower · Breakthrough'
     },
     description: {
       ko: '용기와 의지로 모든 장애물을 돌파해 나갑니다.',
@@ -133,11 +133,11 @@ export const ARCHETYPES = {
     darkColor: '#FFB3E5'
   },
   lover: {
-    ko: '연인',
-    en: 'The Lover',
+    ko: '연인 (The Lover)',
+    en: 'The Passionate Lover',
     tagline: {
-      ko: '열정과 감각으로 삶의 아름다움을 느끼는 자',
-      en: 'One who feels the beauty of life through passion'
+      ko: '사랑 · 감각 · 열정',
+      en: 'Love · Sensuality · Passion'
     },
     description: {
       ko: '사랑과 감각, 열정으로 삶을 온전히 느낍니다.',
@@ -155,11 +155,11 @@ export const ARCHETYPES = {
     darkColor: '#FFB3D1'
   },
   jester: {
-    ko: '역설가',
-    en: 'The Paradox',
+    ko: '조커 (The Joker)',
+    en: 'The Playful Joker',
     tagline: {
-      ko: '진지함 속의 유희, 유희 속의 진실을 아는 자',
-      en: 'One who finds play in seriousness and truth in play'
+      ko: '유희 · 아이러니 · 자유',
+      en: 'Play · Irony · Freedom'
     },
     description: {
       ko: '유희와 역설을 통해 자유로운 삶을 살아갑니다.',
@@ -177,11 +177,11 @@ export const ARCHETYPES = {
     darkColor: '#FFE8B3'
   },
   everyman: {
-    ko: '공감자',
-    en: 'The Empath',
+    ko: '동행자 (The Companion)',
+    en: 'The Empathetic Companion',
     tagline: {
-      ko: '타인의 마음을 느끼고 함께 걷는 연결의 다리',
-      en: 'A bridge who feels others and walks together'
+      ko: '공감 · 연결 · 인간성',
+      en: 'Empathy · Connection · Humanity'
     },
     description: {
       ko: '공감과 연결, 인간성을 중시하며 모두와 함께 걸어갑니다.',
@@ -199,11 +199,11 @@ export const ARCHETYPES = {
     darkColor: '#D9D9D9'
   },
   caregiver: {
-    ko: '수호자',
-    en: 'The Guardian',
+    ko: '수호자 (The Guardian)',
+    en: 'The Devoted Guardian',
     tagline: {
-      ko: '헌신과 사랑으로 세상을 보살피는 보호자',
-      en: 'A protector who cares for the world with devotion'
+      ko: '보호 · 치유 · 헌신',
+      en: 'Protection · Healing · Devotion'
     },
     description: {
       ko: '보호와 치유, 헌신을 통해 타인을 돌봅니다.',
@@ -221,11 +221,11 @@ export const ARCHETYPES = {
     darkColor: '#B3FFE8'
   },
   ruler: {
-    ko: '군주',
-    en: 'The Sovereign',
+    ko: '군주 (The Sovereign)',
+    en: 'The Wise Sovereign',
     tagline: {
-      ko: '질서와 책임으로 세상을 바로 세우는 통치자',
-      en: 'A ruler who builds the world with order and duty'
+      ko: '질서 · 통제 · 권위',
+      en: 'Order · Control · Authority'
     },
     description: {
       ko: '질서와 통제, 권위를 통해 세상을 이끌어갑니다.',
@@ -243,11 +243,11 @@ export const ARCHETYPES = {
     darkColor: '#E8B3FF'
   },
   creator: {
-    ko: '설계자',
-    en: 'The Architect',
+    ko: '설계자 (The Architect)',
+    en: 'The Visionary Architect',
     tagline: {
-      ko: '상상력으로 존재하지 않던 세계를 창조하는 자',
-      en: 'One who creates worlds that never existed before'
+      ko: '상상 · 창조 · 예술',
+      en: 'Imagination · Creation · Art'
     },
     description: {
       ko: '상상과 창조, 예술을 통해 새로운 세계를 설계합니다.',
