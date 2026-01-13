@@ -83,7 +83,7 @@ const translations = {
   },
 };
 
-export default function MonthlyDreamReportEnhanced({ user, language = 'ko', onClose }: MonthlyReportProps) {
+export default function MonthlyDreamReport({ user, language = 'ko', onClose }: MonthlyReportProps) {
   const [stats, setStats] = useState<MonthlyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
@@ -262,13 +262,40 @@ Use a warm tone and avoid over-interpretation.`;
 
     const averageMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced';
 
-    // Keywords
+    // Keywords with common word filtering
+    const isCommonWord = (word: string): boolean => {
+      const commonWords = [
+        // English
+        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+        'from', 'by', 'as', 'into', 'through', 'about', 'after', 'before', 'during',
+        'was', 'were', 'is', 'are', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did',
+        'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can',
+        'that', 'this', 'these', 'those', 'what', 'which', 'who', 'whom',
+        'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+        'your', 'his', 'her', 'its', 'our', 'their', 'my',
+        'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most',
+        'like', 'seem', 'something', 'anything', 'nothing',
+        'feel', 'felt', 'see', 'saw', 'look', 'get', 'got', 'go', 'went', 'come', 'came',
+        'make', 'made', 'take', 'took', 'give', 'gave', 'know', 'knew', 'think', 'thought',
+        'dream', 'dreams', 'dreaming', 'dreamed',
+        // Korean
+        '하다', '이다', '있다', '없다', '되다', '가다', '오다',
+        '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로',
+        '은', '는', '의',
+        '그리고', '또는', '하지만', '매우', '너무',
+        '꿈', '꾼', '꾸었다',
+        '나', '우리', '그', '그녀', '당신',
+      ];
+      return commonWords.includes(word.toLowerCase());
+    };
+
     const keywordCount: { [key: string]: number } = {};
     dreams.forEach((dream) => {
       const title = dream.title?.toLowerCase() || '';
       const content = dream.content?.toLowerCase() || '';
       const text = `${title} ${content}`;
-      const words = text.split(/\s+/).filter((w) => w.length > 3);
+      const words = text.split(/\s+/).filter((w) => w.length > 3 && !isCommonWord(w));
       words.forEach((word) => {
         keywordCount[word] = (keywordCount[word] || 0) + 1;
       });
@@ -293,12 +320,18 @@ Use a warm tone and avoid over-interpretation.`;
 
     if (topKeywords.length > 0) {
       const topKeyword = topKeywords[0];
-      const keywordPercentage = Math.round((topKeyword.count / dreams.length) * 100);
-      if (topKeyword.count > dreams.length * 0.15) {
+      // Calculate how many dreams contain this keyword (not total count / dreams)
+      const dreamsWithKeyword = dreams.filter(d => {
+        const text = `${d.title} ${d.content}`.toLowerCase();
+        return text.includes(topKeyword.word.toLowerCase());
+      }).length;
+      const keywordPercentage = Math.round((dreamsWithKeyword / dreams.length) * 100);
+
+      if (dreamsWithKeyword >= 3 || keywordPercentage >= 30) {
         patterns.push(
           language === 'ko'
-            ? `핵심 주제 반복: "${topKeyword.word}" (${keywordPercentage}%) - 무의식의 중요한 관심사를 나타냅니다`
-            : `Key theme: "${topKeyword.word}" (${keywordPercentage}%) - indicates significant subconscious focus`
+            ? `핵심 주제 반복: "${topKeyword.word}" - ${dreams.length}개 꿈 중 ${dreamsWithKeyword}개에서 나타남 (${keywordPercentage}%)`
+            : `Key theme: "${topKeyword.word}" - appears in ${dreamsWithKeyword} of ${dreams.length} dreams (${keywordPercentage}%)`
         );
       }
     }
@@ -499,33 +532,24 @@ Use a warm tone and avoid over-interpretation.`;
         <span>{t.reportGeneratedOn1st}</span>
       </div>
 
-      {/* Statistics Grid with AnimatedScore */}
+      {/* Header with Month and Total Dreams */}
       <div style={{
-        background: '#f8f9fa',
-        padding: '1.5rem',
+        background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+        padding: '2rem',
         borderRadius: '12px',
         marginBottom: '1.5rem',
+        color: 'white',
         animation: 'slideUp 0.6s ease'
       }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
-          📊 {t.statistics}
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: '#666', marginBottom: '0.5rem' }}>{t.dreams}</div>
-            <AnimatedScore value={stats.totalDreams} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#7FB069' }} />
+        <h3 style={{ fontSize: '20px', marginBottom: '1rem', fontWeight: 'bold' }}>{stats.month}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div>
+            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '0.5rem' }}>{t.dreams}</div>
+            <AnimatedScore value={stats.totalDreams} duration={1500} style={{ fontSize: '48px', fontWeight: 'bold' }} />
           </div>
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: '#666', marginBottom: '0.5rem' }}>{t.totalKeywords}</div>
-            <AnimatedScore value={stats.totalKeywords} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#7FB069' }} />
-          </div>
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: '#666', marginBottom: '0.5rem' }}>{t.avgLength}</div>
-            <AnimatedScore value={stats.averageLength} duration={1500} suffix={` ${t.characters}`} style={{ fontSize: '24px', fontWeight: 'bold', color: '#7FB069' }} />
-          </div>
-          <div style={{ background: 'white', padding: '1rem', borderRadius: '8px', textAlign: 'center' }}>
-            <div style={{ fontSize: '12px', color: '#666', marginBottom: '0.5rem' }}>{t.longestDream}</div>
-            <AnimatedScore value={stats.longestDream} duration={1500} suffix={` ${t.characters}`} style={{ fontSize: '24px', fontWeight: 'bold', color: '#7FB069' }} />
+          <div>
+            <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '0.5rem' }}>{t.averageMood}</div>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', textTransform: 'capitalize' }}>{stats.averageMood}</div>
           </div>
         </div>
       </div>
