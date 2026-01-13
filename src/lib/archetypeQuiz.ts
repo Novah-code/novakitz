@@ -1,5 +1,6 @@
 // Archetype Quiz - Questionnaire-based archetype determination
 // This allows new users to discover their archetype without recording 5 dreams
+// Redesigned with Jungian unconscious principles for general audiences
 
 export interface QuizQuestion {
   id: string;
@@ -17,453 +18,515 @@ export interface QuizQuestion {
 }
 
 export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
-  // Q1: 꿈-감정 (쉬움)
+  // Q1: 꿈-깨어날 때 (무의식 → 의식 전환)
   {
     id: 'q1',
     question: {
-      ko: '꿈에서 가장 자주 느끼는 감정은?',
-      en: 'What emotion do you feel most often in your dreams?'
+      ko: '꿈에서 깨어났을 때, 남아있는 느낌은?',
+      en: 'When you wake from a dream, what feeling remains?'
     },
     options: [
       {
-        text: { ko: '호기심과 탐구욕', en: 'Curiosity and exploration' },
+        text: { ko: '설렘과 궁금증', en: 'Excitement and curiosity' },
         archetypes: { explorer: 3, sage: 2, magician: 1 }
       },
       {
-        text: { ko: '사랑과 연결감', en: 'Love and connection' },
+        text: { ko: '따뜻함과 그리움', en: 'Warmth and longing' },
         archetypes: { lover: 3, caregiver: 2, innocent: 1 }
       },
       {
-        text: { ko: '두려움과 불안', en: 'Fear and anxiety' },
+        text: { ko: '불안과 막연한 두려움', en: 'Anxiety and vague fear' },
         archetypes: { orphan: 3, innocent: 2, caregiver: 1 }
       },
       {
-        text: { ko: '힘과 통제감', en: 'Power and control' },
-        archetypes: { ruler: 3, warrior: 2, magician: 1 }
+        text: { ko: '힘이 솟는 느낌', en: 'Feeling energized' },
+        archetypes: { warrior: 3, ruler: 2, magician: 1 }
       },
       {
-        text: { ko: '자유와 반항심', en: 'Freedom and rebellion' },
+        text: { ko: '해방감과 자유로움', en: 'Liberation and freedom' },
         archetypes: { outlaw: 3, jester: 2, explorer: 1 }
       }
     ]
   },
-  // Q2: 철학-지도 없는 길 (쉬움)
+
+  // Q2: 꿈-반복 상황 (억압된 콤플렉스)
   {
     id: 'q2',
     question: {
-      ko: '지도가 없는 길을 선택할 수 있나요?',
-      en: 'Can you choose a path without a map?'
+      ko: '꿈에서 자주 반복되는 상황이 있다면?',
+      en: 'If there\'s a recurring situation in your dreams?'
     },
     options: [
       {
-        text: { ko: '설레는 도전이다', en: 'An exciting challenge' },
-        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
+        text: { ko: '길을 잃거나 헤매고 있다', en: 'Lost or wandering' },
+        archetypes: { explorer: 3, orphan: 2, sage: 1 }
       },
       {
-        text: { ko: '불안하지만 해볼 수 있다', en: 'Anxious but willing to try' },
-        archetypes: { warrior: 3, creator: 2, magician: 1 }
+        text: { ko: '누군가를 찾거나 기다리고 있다', en: 'Searching for or waiting for someone' },
+        archetypes: { lover: 3, orphan: 2, caregiver: 1 }
       },
       {
-        text: { ko: '먼저 정보를 충분히 모으고 싶다', en: 'Want to gather information first' },
-        archetypes: { sage: 3, ruler: 2, creator: 1 }
-      },
-      {
-        text: { ko: '누군가와 함께라면 괜찮다', en: 'Fine if with someone' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '가능한 피하고 싶다', en: 'Would rather avoid it' },
-        archetypes: { innocent: 3, orphan: 2, caregiver: 1 }
-      }
-    ]
-  },
-  // Q3: 꿈-행동 (쉬움)
-  {
-    id: 'q3',
-    question: {
-      ko: '꿈 속에서 주로 무엇을 하고 있나요?',
-      en: 'What are you usually doing in your dreams?'
-    },
-    options: [
-      {
-        text: { ko: '새로운 장소를 탐험하고 있다', en: 'Exploring new places' },
-        archetypes: { explorer: 3, innocent: 1, sage: 1 }
-      },
-      {
-        text: { ko: '누군가를 돕거나 보살피고 있다', en: 'Helping or caring for someone' },
-        archetypes: { caregiver: 3, innocent: 2, lover: 1 }
-      },
-      {
-        text: { ko: '무언가를 창조하거나 만들고 있다', en: 'Creating or building something' },
+        text: { ko: '무언가를 만들거나 고치고 있다', en: 'Creating or fixing something' },
         archetypes: { creator: 3, magician: 2, sage: 1 }
       },
       {
-        text: { ko: '싸우거나 문제를 해결하고 있다', en: 'Fighting or solving problems' },
-        archetypes: { warrior: 3, ruler: 2, outlaw: 1 }
+        text: { ko: '쫓기거나 싸우고 있다', en: 'Being chased or fighting' },
+        archetypes: { warrior: 3, outlaw: 2, orphan: 1 }
       },
       {
-        text: { ko: '즐기고 웃고 있다', en: 'Having fun and laughing' },
+        text: { ko: '날거나 웃고 있다', en: 'Flying or laughing' },
+        archetypes: { jester: 3, innocent: 2, explorer: 1 }
+      },
+      {
+        text: { ko: '특별히 반복되는 꿈은 없다', en: 'No recurring dreams' },
+        archetypes: { everyman: 3, innocent: 2, ruler: 1 }
+      }
+    ]
+  },
+
+  // Q3: 투사-영화 주인공 (페르소나 vs 진짜 나)
+  {
+    id: 'q3',
+    question: {
+      ko: '영화 속 주인공이 혼자 남겨졌을 때, 이 사람은 무엇을 할까요?',
+      en: 'When a movie protagonist is left alone, what do they do?'
+    },
+    options: [
+      {
+        text: { ko: '새로운 길을 찾아 떠난다', en: 'Set out to find a new path' },
+        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+      },
+      {
+        text: { ko: '혼자 앉아서 울거나 멍하니 있다', en: 'Sit alone, crying or spacing out' },
+        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+      },
+      {
+        text: { ko: '상황을 분석하고 계획을 세운다', en: 'Analyze the situation and make a plan' },
+        archetypes: { sage: 3, ruler: 2, creator: 1 }
+      },
+      {
+        text: { ko: '무언가를 만들거나 변화를 시도한다', en: 'Create something or attempt change' },
+        archetypes: { creator: 3, magician: 2, warrior: 1 }
+      },
+      {
+        text: { ko: '농담하거나 노래를 부른다', en: 'Make jokes or sing' },
         archetypes: { jester: 3, innocent: 2, lover: 1 }
       }
     ]
   },
-  // Q4: 철학-이상적인 하루 (쉬움)
+
+  // Q4: 꿈-장소 (집단 무의식 상징)
   {
     id: 'q4',
     question: {
-      ko: '당신의 이상적인 하루는 어떤 모습인가요?',
-      en: 'What does your ideal day look like?'
-    },
-    options: [
-      {
-        text: { ko: '새로운 것을 배우고 깨닫는 하루', en: 'Learning and discovering new things' },
-        archetypes: { sage: 3, explorer: 2, creator: 1 }
-      },
-      {
-        text: { ko: '사랑하는 사람과 함께하는 하루', en: 'Spending time with loved ones' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '무언가를 만들어내고 완성하는 하루', en: 'Creating and completing something' },
-        archetypes: { creator: 3, magician: 2, warrior: 1 }
-      },
-      {
-        text: { ko: '자유롭게 돌아다니고 탐험하는 하루', en: 'Freely wandering and exploring' },
-        archetypes: { explorer: 3, jester: 2, outlaw: 1 }
-      },
-      {
-        text: { ko: '목표를 달성하고 영향력을 발휘하는 하루', en: 'Achieving goals and making impact' },
-        archetypes: { ruler: 3, warrior: 2, magician: 1 }
-      }
-    ]
-  },
-  // Q5: 꿈-장소 (쉬움)
-  {
-    id: 'q5',
-    question: {
-      ko: '꿈에서 자주 등장하는 장소는?',
+      ko: '꿈에서 가장 자주 등장하는 장소는?',
       en: 'What location appears most often in your dreams?'
     },
     options: [
       {
-        text: { ko: '미지의 광활한 공간 (숲, 우주, 바다)', en: 'Vast unknown spaces (forest, space, ocean)' },
+        text: { ko: '끝없는 숲, 바다, 우주 같은 미지의 공간', en: 'Endless forest, ocean, space - unknown territories' },
         archetypes: { explorer: 3, sage: 2, innocent: 1 }
       },
       {
-        text: { ko: '따뜻한 집이나 안전한 공간', en: 'Warm home or safe space' },
+        text: { ko: '따뜻한 집이나 어릴 적 장소', en: 'Warm home or childhood place' },
         archetypes: { innocent: 3, caregiver: 2, lover: 1 }
       },
       {
-        text: { ko: '화려한 파티나 무대', en: 'Glamorous party or stage' },
-        archetypes: { jester: 3, lover: 2, ruler: 1 }
+        text: { ko: '파티, 무대, 사람들이 많은 곳', en: 'Party, stage, crowded place' },
+        archetypes: { jester: 3, lover: 2, everyman: 1 }
       },
       {
-        text: { ko: '전쟁터나 위험한 장소', en: 'Battlefield or dangerous place' },
-        archetypes: { warrior: 3, outlaw: 2, ruler: 1 }
+        text: { ko: '위험한 곳, 무너지는 건물, 어두운 길', en: 'Dangerous place, crumbling building, dark path' },
+        archetypes: { warrior: 3, outlaw: 2, orphan: 2 }
       },
       {
-        text: { ko: '신비로운 장소나 도서관', en: 'Mysterious place or library' },
+        text: { ko: '신비로운 도서관, 연구실, 비밀의 방', en: 'Mysterious library, lab, secret room' },
         archetypes: { sage: 3, magician: 2, creator: 1 }
+      },
+      {
+        text: { ko: '성, 궁전, 높은 건물 꼭대기', en: 'Castle, palace, top of tall building' },
+        archetypes: { ruler: 3, warrior: 2, creator: 1 }
       }
     ]
   },
-  // Q6: 철학-혼자 vs 함께 (중간)
+
+  // Q5: 일상-위기 순간 (무의식적 방어 기제)
+  {
+    id: 'q5',
+    question: {
+      ko: '예상치 못한 문제가 터졌을 때, 당신의 첫 반응은?',
+      en: 'When an unexpected problem arises, your first reaction is?'
+    },
+    options: [
+      {
+        text: { ko: '일단 그 자리를 피하고 싶다', en: 'Want to escape the situation' },
+        archetypes: { orphan: 3, innocent: 2, explorer: 1 }
+      },
+      {
+        text: { ko: '누군가에게 도움을 요청한다', en: 'Ask someone for help' },
+        archetypes: { lover: 3, caregiver: 2, everyman: 1 }
+      },
+      {
+        text: { ko: '침착하게 상황을 파악한다', en: 'Calmly assess the situation' },
+        archetypes: { sage: 3, ruler: 2, warrior: 1 }
+      },
+      {
+        text: { ko: '즉시 행동해서 해결한다', en: 'Act immediately to solve it' },
+        archetypes: { warrior: 3, ruler: 2, outlaw: 1 }
+      },
+      {
+        text: { ko: '농담으로 분위기를 풀려고 한다', en: 'Try to lighten the mood with humor' },
+        archetypes: { jester: 3, everyman: 2, innocent: 1 }
+      },
+      {
+        text: { ko: '새로운 각도로 문제를 본다', en: 'Look at the problem from a new angle' },
+        archetypes: { creator: 3, magician: 2, sage: 1 }
+      }
+    ]
+  },
+
+  // Q6: 꿈-만나는 사람 (투사된 내면)
   {
     id: 'q6',
     question: {
-      ko: '혼자서 완성하는 세계와, 함께 만들어가는 세계 중 어디에 더 끌리나요?',
-      en: 'Between a world you complete alone and one built together, which attracts you more?'
+      ko: '꿈에서 만나는 사람들은 주로 어떤 존재인가요?',
+      en: 'People you meet in dreams are usually...?'
     },
     options: [
       {
-        text: { ko: '혼자 완성하는 온전한 나만의 세계', en: 'A complete world that\'s entirely mine' },
-        archetypes: { creator: 3, sage: 2, explorer: 1 }
-      },
-      {
-        text: { ko: '함께 만들어가는 불완전하지만 따뜻한 세계', en: 'An imperfect but warm world built together' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '내가 이끄는 함께하는 세계', en: 'A shared world that I lead' },
-        archetypes: { ruler: 3, warrior: 2, magician: 1 }
-      },
-      {
-        text: { ko: '계속 변화하고 재창조되는 세계', en: 'An ever-changing, recreating world' },
-        archetypes: { magician: 3, creator: 2, jester: 1 }
-      },
-      {
-        text: { ko: '정해진 규칙 없이 자유로운 세계', en: 'A free world without set rules' },
-        archetypes: { outlaw: 3, explorer: 2, jester: 1 }
-      }
-    ]
-  },
-  // Q7: 꿈-사람들 (중간)
-  {
-    id: 'q7',
-    question: {
-      ko: '꿈에서 만나는 사람들은 주로?',
-      en: 'People you meet in dreams are usually...'
-    },
-    options: [
-      {
-        text: { ko: '현명한 스승이나 안내자', en: 'Wise teachers or guides' },
-        archetypes: { sage: 3, magician: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '가족이나 친한 친구들', en: 'Family or close friends' },
+        text: { ko: '가족이나 오래된 친구들', en: 'Family or old friends' },
         archetypes: { innocent: 3, caregiver: 2, lover: 1 }
       },
       {
-        text: { ko: '낯선 사람들이나 적', en: 'Strangers or enemies' },
-        archetypes: { warrior: 3, outlaw: 2, explorer: 1 }
+        text: { ko: '낯선 사람들이나 적대적인 존재', en: 'Strangers or hostile beings' },
+        archetypes: { warrior: 3, orphan: 2, outlaw: 1 }
       },
       {
-        text: { ko: '신비롭거나 초자연적 존재', en: 'Mysterious or supernatural beings' },
+        text: { ko: '현명한 스승이나 노인', en: 'Wise teacher or elder' },
+        archetypes: { sage: 3, magician: 2, innocent: 1 }
+      },
+      {
+        text: { ko: '신비한 존재나 동물', en: 'Mysterious beings or animals' },
         archetypes: { magician: 3, sage: 2, creator: 1 }
       },
       {
-        text: { ko: '유명인이나 권력자', en: 'Celebrities or authority figures' },
-        archetypes: { ruler: 3, jester: 2, lover: 1 }
+        text: { ko: '유명인이나 리더', en: 'Celebrities or leaders' },
+        archetypes: { ruler: 3, jester: 2, everyman: 1 }
+      },
+      {
+        text: { ko: '사람이 거의 안 나오고 혼자 있다', en: 'Rarely anyone, mostly alone' },
+        archetypes: { creator: 3, explorer: 2, orphan: 2 }
       }
     ]
   },
-  // Q8: 철학-변화 태도 (중간)
+
+  // Q7: 투사-동화 결말 (귀환 단계)
+  {
+    id: 'q7',
+    question: {
+      ko: '모험을 마치고 돌아온 주인공, 무엇을 가장 하고 싶을까요?',
+      en: 'After returning from an adventure, what does the hero want most?'
+    },
+    options: [
+      {
+        text: { ko: '배운 것을 사람들에게 가르쳐주고 싶다', en: 'Teach what they learned to others' },
+        archetypes: { sage: 3, caregiver: 2, everyman: 1 }
+      },
+      {
+        text: { ko: '사랑하는 사람과 함께 있고 싶다', en: 'Be with loved ones' },
+        archetypes: { lover: 3, innocent: 2, caregiver: 1 }
+      },
+      {
+        text: { ko: '이번엔 더 큰 모험을 떠나고 싶다', en: 'Embark on an even bigger adventure' },
+        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+      },
+      {
+        text: { ko: '자신만의 왕국이나 작품을 만들고 싶다', en: 'Create their own kingdom or work' },
+        archetypes: { creator: 3, ruler: 2, magician: 1 }
+      },
+      {
+        text: { ko: '모두와 함께 축제를 열고 싶다', en: 'Celebrate with everyone' },
+        archetypes: { jester: 3, everyman: 2, lover: 1 }
+      },
+      {
+        text: { ko: '조용히 혼자만의 시간을 갖고 싶다', en: 'Have quiet time alone' },
+        archetypes: { sage: 3, creator: 2, orphan: 1 }
+      }
+    ]
+  },
+
+  // Q8: 일상-혼자 있을 때 (진정한 자기)
   {
     id: 'q8',
     question: {
-      ko: '변화 앞에서 당신은 어떤 태도를 취하나요?',
-      en: 'How do you approach change?'
+      ko: '아무도 보지 않는 혼자만의 시간, 당신은?',
+      en: 'When no one is watching and you\'re alone, you...?'
     },
     options: [
       {
-        text: { ko: '적극적으로 변화를 만들어간다', en: 'Actively create change' },
-        archetypes: { magician: 3, outlaw: 2, warrior: 1 }
+        text: { ko: '무언가를 만들거나 쓰고 있다', en: 'Creating or writing something' },
+        archetypes: { creator: 3, sage: 2, magician: 1 }
       },
       {
-        text: { ko: '변화를 분석하고 이해하려 한다', en: 'Analyze and understand change' },
-        archetypes: { sage: 3, ruler: 2, creator: 1 }
+        text: { ko: '음악을 듣거나 춤추고 있다', en: 'Listening to music or dancing' },
+        archetypes: { jester: 3, lover: 2, innocent: 1 }
       },
       {
-        text: { ko: '변화를 받아들이고 적응한다', en: 'Accept and adapt to change' },
-        archetypes: { explorer: 3, jester: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '변화에 저항하고 안정을 추구한다', en: 'Resist change and seek stability' },
-        archetypes: { innocent: 3, caregiver: 2, ruler: 1 }
-      },
-      {
-        text: { ko: '함께 변화를 겪고 싶어한다', en: 'Want to go through change together' },
-        archetypes: { lover: 3, caregiver: 2, warrior: 1 }
-      }
-    ]
-  },
-  // Q9: 철학-어려운 순간에 필요한 것 (중간, Q4 대체)
-  {
-    id: 'q9',
-    question: {
-      ko: '어려운 순간, 당신에게 가장 필요한 것은?',
-      en: 'In difficult moments, what do you need most?'
-    },
-    options: [
-      {
-        text: { ko: '혼자만의 시간과 고요함', en: 'Time alone and silence' },
-        archetypes: { sage: 3, creator: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '믿을 수 있는 사람의 위로', en: 'Comfort from someone I trust' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '즉시 행동하고 돌파하는 용기', en: 'Courage to act and break through' },
-        archetypes: { warrior: 3, outlaw: 2, ruler: 1 }
-      },
-      {
-        text: { ko: '새로운 관점과 창의적 해결책', en: 'New perspective and creative solutions' },
-        archetypes: { creator: 3, magician: 2, jester: 1 }
-      },
-      {
-        text: { ko: '낯선 곳으로 떠날 자유', en: 'Freedom to escape somewhere new' },
-        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
-      }
-    ]
-  },
-  // Q10: 철학-가치 (어려움)
-  {
-    id: 'q10',
-    question: {
-      ko: '인생에서 가장 중요한 가치는 무엇인가요?',
-      en: 'What is the most important value in life?'
-    },
-    options: [
-      {
-        text: { ko: '진실과 지혜', en: 'Truth and wisdom' },
+        text: { ko: '깊은 생각에 잠겨 있다', en: 'Lost in deep thought' },
         archetypes: { sage: 3, magician: 2, creator: 1 }
       },
       {
-        text: { ko: '사랑과 연결', en: 'Love and connection' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
+        text: { ko: '운동하거나 몸을 움직이고 있다', en: 'Exercising or moving your body' },
+        archetypes: { warrior: 3, explorer: 2, ruler: 1 }
       },
       {
-        text: { ko: '자유와 모험', en: 'Freedom and adventure' },
-        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
+        text: { ko: '불안하거나 공허한 느낌이 든다', en: 'Feeling anxious or empty' },
+        archetypes: { orphan: 3, innocent: 2, lover: 1 }
       },
       {
-        text: { ko: '성취와 영향력', en: 'Achievement and influence' },
-        archetypes: { ruler: 3, warrior: 2, creator: 1 }
-      },
-      {
-        text: { ko: '창조와 표현', en: 'Creation and expression' },
-        archetypes: { creator: 3, magician: 2, jester: 1 }
+        text: { ko: '계획을 세우거나 정리하고 있다', en: 'Making plans or organizing' },
+        archetypes: { ruler: 3, sage: 2, caregiver: 1 }
       }
     ]
   },
-  // Q11: 꿈-악몽 (어려움)
+
+  // Q9: 꿈-어둠 속에서 (뱃속 단계)
   {
-    id: 'q11',
+    id: 'q9',
     question: {
-      ko: '악몽을 꿀 때 주로 등장하는 것은?',
-      en: 'What usually appears in your nightmares?'
+      ko: '꿈에서 완전한 어둠 속에 갇혔다면, 당신은?',
+      en: 'If trapped in complete darkness in a dream, you...?'
     },
     options: [
       {
-        text: { ko: '버림받거나 혼자 있는 상황', en: 'Being abandoned or alone' },
-        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+        text: { ko: '고요히 기다리며 무언가를 느낀다', en: 'Wait quietly and sense something' },
+        archetypes: { sage: 3, innocent: 2, magician: 1 }
+      },
+      {
+        text: { ko: '패닉 상태로 깨거나 소리를 지른다', en: 'Panic and wake up or scream' },
+        archetypes: { orphan: 3, innocent: 2, warrior: 1 }
+      },
+      {
+        text: { ko: '탈출구를 찾으며 계속 움직인다', en: 'Keep moving to find an exit' },
+        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+      },
+      {
+        text: { ko: '어둠 자체와 대화하거나 관찰한다', en: 'Talk to or observe the darkness itself' },
+        archetypes: { magician: 3, sage: 2, creator: 1 }
+      },
+      {
+        text: { ko: '누군가를 부르거나 찾는다', en: 'Call for or search for someone' },
+        archetypes: { lover: 3, caregiver: 2, orphan: 2 }
+      },
+      {
+        text: { ko: '어둠을 즐기거나 빛을 만들어낸다', en: 'Enjoy the darkness or create light' },
+        archetypes: { jester: 3, creator: 2, magician: 1 }
+      }
+    ]
+  },
+
+  // Q10: 일상-거울 앞에서 (자아 인식)
+  {
+    id: 'q10',
+    question: {
+      ko: '거울을 볼 때 드는 생각은?',
+      en: 'What do you think when looking in a mirror?'
+    },
+    options: [
+      {
+        text: { ko: '내가 나답지 않게 보인다', en: 'I don\'t look like myself' },
+        archetypes: { orphan: 3, creator: 2, magician: 1 }
+      },
+      {
+        text: { ko: '더 나아지고 싶다', en: 'Want to improve' },
+        archetypes: { warrior: 3, ruler: 2, creator: 1 }
+      },
+      {
+        text: { ko: '있는 그대로 괜찮다', en: 'I\'m okay as I am' },
+        archetypes: { innocent: 3, everyman: 2, sage: 1 }
+      },
+      {
+        text: { ko: '다른 사람들은 나를 어떻게 볼까?', en: 'How do others see me?' },
+        archetypes: { lover: 3, jester: 2, everyman: 1 }
+      },
+      {
+        text: { ko: '거울 속 내가 낯설다', en: 'The person in the mirror feels strange' },
+        archetypes: { magician: 3, sage: 2, explorer: 1 }
+      },
+      {
+        text: { ko: '별 생각 없다', en: 'No particular thought' },
+        archetypes: { explorer: 3, jester: 2, caregiver: 1 }
+      }
+    ]
+  },
+
+  // Q11: 꿈-악몽 (그림자)
+  {
+    id: 'q11',
+    question: {
+      ko: '악몽을 꿀 때 가장 무서운 것은?',
+      en: 'What\'s most terrifying in nightmares?'
+    },
+    options: [
+      {
+        text: { ko: '버림받거나 혼자 남겨지는 것', en: 'Being abandoned or left alone' },
+        archetypes: { orphan: 3, lover: 2, innocent: 1 }
       },
       {
         text: { ko: '통제할 수 없는 상황', en: 'Situations out of control' },
         archetypes: { ruler: 3, warrior: 2, magician: 1 }
       },
       {
-        text: { ko: '갇히거나 제한받는 상황', en: 'Being trapped or restricted' },
+        text: { ko: '갇히거나 움직일 수 없는 것', en: 'Being trapped or unable to move' },
         archetypes: { explorer: 3, outlaw: 2, jester: 1 }
       },
       {
-        text: { ko: '실패하거나 무능한 모습', en: 'Failure or incompetence' },
-        archetypes: { warrior: 3, creator: 2, sage: 1 }
-      },
-      {
-        text: { ko: '사랑하는 사람을 잃는 것', en: 'Losing loved ones' },
-        archetypes: { caregiver: 3, lover: 2, innocent: 1 }
-      }
-    ]
-  },
-  // Q12: 철학-안전 vs 의미 (어려움)
-  {
-    id: 'q12',
-    question: {
-      ko: '안전한 삶이지만 의미 없는 하루와, 불안하지만 살아있다고 느끼는 하루 중 어느 쪽을 택하겠나요?',
-      en: 'Between a safe but meaningless life and an uncertain but vivid life, which would you choose?'
-    },
-    options: [
-      {
-        text: { ko: '불안해도 살아있다고 느끼는 삶', en: 'Vivid life, even if uncertain' },
-        archetypes: { explorer: 3, warrior: 2, outlaw: 2 }
-      },
-      {
-        text: { ko: '안전이 먼저, 의미는 그 안에서 찾는다', en: 'Safety first, find meaning within' },
-        archetypes: { innocent: 3, caregiver: 2, ruler: 1 }
-      },
-      {
-        text: { ko: '둘 다 필요하다, 균형을 찾고 싶다', en: 'Need both, seeking balance' },
-        archetypes: { sage: 3, magician: 2, lover: 1 }
-      },
-      {
-        text: { ko: '내가 직접 의미를 만들어낼 수 있다', en: 'I can create meaning myself' },
-        archetypes: { creator: 3, magician: 2, ruler: 1 }
-      },
-      {
-        text: { ko: '살아있다는 느낌 자체가 중요하다', en: 'The feeling of being alive matters' },
-        archetypes: { jester: 3, lover: 2, warrior: 1 }
-      }
-    ]
-  },
-  // Q13: 철학-관계 vs 독립 (어려움, Q5 대체)
-  {
-    id: 'q13',
-    question: {
-      ko: '깊은 유대와 의존 관계, 완전한 독립과 고독 중 어느 쪽이 당신의 본성에 가까운가요?',
-      en: 'Between deep bonds with dependence and complete independence with solitude, which is closer to your nature?'
-    },
-    options: [
-      {
-        text: { ko: '깊은 유대, 서로 의존하는 관계가 나를 완성한다', en: 'Deep bonds complete me, interdependence is natural' },
-        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '완전한 독립, 혼자여야 진정한 내가 된다', en: 'Complete independence, I am most authentic alone' },
-        archetypes: { creator: 3, sage: 2, explorer: 1 }
-      },
-      {
-        text: { ko: '독립적이되 사람들과 함께 성장한다', en: 'Independent but growing together with others' },
-        archetypes: { warrior: 3, ruler: 2, magician: 1 }
-      },
-      {
-        text: { ko: '자유롭게 연결되고 쉽게 떠난다', en: 'Connect freely and leave easily' },
-        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
-      },
-      {
-        text: { ko: '둘 다 필요 없다, 나만의 세계를 창조한다', en: 'Need neither, create my own world' },
-        archetypes: { magician: 3, creator: 2, outlaw: 1 }
-      }
-    ]
-  },
-  // Q14: 철학-두려움 (어려움)
-  {
-    id: 'q14',
-    question: {
-      ko: '당신이 가장 두려워하는 것은 무엇인가요?',
-      en: 'What do you fear most?'
-    },
-    options: [
-      {
-        text: { ko: '버림받고 혼자 남겨지는 것', en: 'Being abandoned and left alone' },
-        archetypes: { orphan: 3, lover: 2, innocent: 1 }
-      },
-      {
-        text: { ko: '자유를 잃고 갇히는 것', en: 'Losing freedom and being trapped' },
-        archetypes: { explorer: 3, outlaw: 2, warrior: 1 }
-      },
-      {
-        text: { ko: '무능하고 쓸모없어지는 것', en: 'Becoming incompetent and useless' },
+        text: { ko: '실패하거나 무너지는 것', en: 'Failure or collapse' },
         archetypes: { warrior: 3, creator: 2, ruler: 1 }
       },
       {
-        text: { ko: '진실을 모르고 속는 것', en: 'Not knowing truth and being deceived' },
-        archetypes: { sage: 3, magician: 2, ruler: 1 }
+        text: { ko: '사랑하는 사람이 다치는 것', en: 'Loved ones getting hurt' },
+        archetypes: { caregiver: 3, lover: 2, innocent: 1 }
       },
       {
-        text: { ko: '평범하고 특별하지 않은 삶', en: 'An ordinary, unremarkable life' },
-        archetypes: { jester: 3, creator: 2, outlaw: 1 }
+        text: { ko: '정체를 알 수 없는 무언가', en: 'Something unidentifiable' },
+        archetypes: { sage: 3, magician: 2, orphan: 1 }
       }
     ]
   },
-  // Q15: 철학-세상 바꾸기 (어려움)
+
+  // Q12: 투사-친구의 고민 (대극 통합)
   {
-    id: 'q15',
+    id: 'q12',
     question: {
-      ko: '당신은 세상을 어떻게 바꾸고 싶나요?',
-      en: 'How do you want to change the world?'
+      ko: '친구가 "안전하지만 지루한 삶 vs 불안하지만 의미있는 삶" 중 고민한다면?',
+      en: 'If a friend is torn between "safe but boring life" vs "uncertain but meaningful life"?'
     },
     options: [
       {
-        text: { ko: '지혜와 지식을 나누고 싶다', en: 'Share wisdom and knowledge' },
-        archetypes: { sage: 3, magician: 2, creator: 1 }
+        text: { ko: '당연히 불안해도 의미를 택해야지', en: 'Obviously choose meaning despite uncertainty' },
+        archetypes: { explorer: 3, warrior: 2, outlaw: 2 }
       },
       {
-        text: { ko: '사람들을 돌보고 치유하고 싶다', en: 'Care for and heal people' },
-        archetypes: { caregiver: 3, innocent: 2, lover: 1 }
+        text: { ko: '안전이 먼저야, 그 안에서 의미를 찾으면 돼', en: 'Safety first, find meaning within that' },
+        archetypes: { innocent: 3, caregiver: 2, ruler: 1 }
       },
       {
-        text: { ko: '불의에 맞서고 자유를 지키고 싶다', en: 'Fight injustice and protect freedom' },
-        archetypes: { warrior: 3, outlaw: 2, ruler: 1 }
+        text: { ko: '둘 다 가질 수 있는 방법을 찾아봐', en: 'Find a way to have both' },
+        archetypes: { sage: 3, magician: 2, ruler: 1 }
       },
       {
-        text: { ko: '새로운 것을 창조하고 싶다', en: 'Create something new' },
+        text: { ko: '네가 직접 의미를 만들면 돼', en: 'You can create your own meaning' },
+        archetypes: { creator: 3, magician: 2, warrior: 1 }
+      },
+      {
+        text: { ko: '뭐든 재미있게 살면 되는 거 아냐?', en: 'Just live however it\'s fun?' },
+        archetypes: { jester: 3, everyman: 2, lover: 1 }
+      }
+    ]
+  },
+
+  // Q13: 일상-관계의 거리 (친밀 vs 독립)
+  {
+    id: 'q13',
+    question: {
+      ko: '사람들과의 관계에서 당신은?',
+      en: 'In relationships with others, you...?'
+    },
+    options: [
+      {
+        text: { ko: '깊게 연결되고 서로 의지하고 싶다', en: 'Want deep connection and mutual dependence' },
+        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
+      },
+      {
+        text: { ko: '혼자 있을 때 가장 편하다', en: 'Feel most comfortable alone' },
+        archetypes: { creator: 3, sage: 2, explorer: 1 }
+      },
+      {
+        text: { ko: '독립적이지만 함께 성장하고 싶다', en: 'Independent but want to grow together' },
+        archetypes: { warrior: 3, ruler: 2, magician: 1 }
+      },
+      {
+        text: { ko: '가볍게 만나고 쉽게 떠나고 싶다', en: 'Meet casually and leave easily' },
+        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
+      },
+      {
+        text: { ko: '사람들이 나를 이해 못 할 것 같다', en: 'Feel people won\'t understand me' },
+        archetypes: { orphan: 3, magician: 2, creator: 1 }
+      },
+      {
+        text: { ko: '적당한 거리에서 편안하게 지내고 싶다', en: 'Want to maintain comfortable distance' },
+        archetypes: { everyman: 3, sage: 2, innocent: 1 }
+      }
+    ]
+  },
+
+  // Q14: 일상-실패의 순간 (콤플렉스)
+  {
+    id: 'q14',
+    question: {
+      ko: '중요한 일에 실패했을 때, 가장 먼저 드는 생각은?',
+      en: 'When you fail at something important, your first thought is?'
+    },
+    options: [
+      {
+        text: { ko: '역시 나는 안 되는구나', en: 'I knew I couldn\'t do it' },
+        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+      },
+      {
+        text: { ko: '다시 도전해야지', en: 'I must try again' },
+        archetypes: { warrior: 3, explorer: 2, outlaw: 1 }
+      },
+      {
+        text: { ko: '뭐가 잘못됐는지 분석해야겠다', en: 'Need to analyze what went wrong' },
+        archetypes: { sage: 3, ruler: 2, creator: 1 }
+      },
+      {
+        text: { ko: '다른 방법을 찾아보자', en: 'Let\'s find another way' },
         archetypes: { creator: 3, magician: 2, sage: 1 }
       },
       {
-        text: { ko: '기쁨과 웃음을 전하고 싶다', en: 'Spread joy and laughter' },
-        archetypes: { jester: 3, lover: 2, innocent: 1 }
+        text: { ko: '괜찮아, 다 별거 아니야', en: 'It\'s okay, not a big deal' },
+        archetypes: { jester: 3, everyman: 2, innocent: 1 }
+      },
+      {
+        text: { ko: '누군가에게 위로받고 싶다', en: 'Want comfort from someone' },
+        archetypes: { lover: 3, caregiver: 2, orphan: 2 }
+      }
+    ]
+  },
+
+  // Q15: 일상-인생의 의미 (최종 가치관)
+  {
+    id: 'q15',
+    question: {
+      ko: '인생에서 가장 중요한 것은?',
+      en: 'What matters most in life?'
+    },
+    options: [
+      {
+        text: { ko: '진실을 알고 이해하는 것', en: 'Knowing and understanding truth' },
+        archetypes: { sage: 3, magician: 2, creator: 1 }
+      },
+      {
+        text: { ko: '사랑하고 사랑받는 것', en: 'Loving and being loved' },
+        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
+      },
+      {
+        text: { ko: '자유롭게 살아가는 것', en: 'Living freely' },
+        archetypes: { explorer: 3, outlaw: 2, jester: 1 }
+      },
+      {
+        text: { ko: '무언가를 이루고 남기는 것', en: 'Achieving and leaving something behind' },
+        archetypes: { ruler: 3, warrior: 2, creator: 1 }
+      },
+      {
+        text: { ko: '새로운 것을 만들어내는 것', en: 'Creating something new' },
+        archetypes: { creator: 3, magician: 2, sage: 1 }
+      },
+      {
+        text: { ko: '안전하고 평온한 것', en: 'Safety and peace' },
+        archetypes: { innocent: 3, caregiver: 2, everyman: 1 }
       }
     ]
   }
