@@ -263,6 +263,50 @@ export const ARCHETYPES = {
     },
     color: '#E5FFFF',
     darkColor: '#B3FFFF'
+  },
+  warrior: {
+    ko: '용감한 전사 (The Courageous Warrior)',
+    en: 'The Courageous Warrior',
+    tagline: {
+      ko: '용기 · 의지 · 돌파',
+      en: 'Courage · Willpower · Breakthrough'
+    },
+    description: {
+      ko: '용기와 의지로 모든 장애물을 돌파해 나갑니다.',
+      en: 'Breaks through all obstacles with courage and willpower.'
+    },
+    longDescription: {
+      ko: '당신은 용기와 강한 의지로 어떤 어려움도 극복하는 전사입니다. 도전을 두려워하지 않고, 목표를 향해 끊임없이 전진하며, 역경 속에서도 포기하지 않는 불굴의 정신을 지닙니다. 당신의 무의식은 시련을 성장의 기회로 보며, 승리를 향한 강한 의지를 품고 있습니다.\n\n당신의 강점은 어떤 상황에서도 물러서지 않는 용기입니다. 다른 사람들이 포기할 때 당신은 더 강하게 일어서며, 장애물을 하나씩 극복하면서 목표를 달성합니다. 그러나 때로는 과도한 경쟁심에 빠지거나, 휴식의 필요성을 무시하며, 혼자서 모든 것을 해결하려 할 수 있습니다.\n\n성장을 위해서는 승리만이 전부가 아님을 이해해야 합니다. 때로는 물러서는 것도 용기이며, 다른 사람의 도움을 받는 것도 강함의 표시입니다. 진정한 전사는 자신뿐 아니라 주변 사람들도 함께 승리로 이끄는 리더입니다.',
+      en: 'You are a warrior who overcomes any difficulty with courage and strong will. You don\'t fear challenges, constantly advance toward goals, and possess an indomitable spirit that never gives up even in adversity. Your unconscious sees trials as opportunities for growth and holds a strong will toward victory.\n\nYour strength is the courage to never back down in any situation. When others give up, you stand stronger, achieving goals by overcoming obstacles one by one. However, you may sometimes fall into excessive competitiveness, ignore the need for rest, or try to solve everything alone.\n\nFor growth, you must understand that victory isn\'t everything. Sometimes retreating is also courage, and accepting others\' help is a sign of strength. A true warrior is a leader who leads not only themselves but those around them to victory.'
+    },
+    traits: {
+      ko: ['용기', '의지', '돌파', '승리'],
+      en: ['Brave', 'Willful', 'Breakthrough', 'Victorious']
+    },
+    color: '#FFE5F5',
+    darkColor: '#FFB3E5'
+  },
+  orphan: {
+    ko: '상처받은 고아 (The Wounded Orphan)',
+    en: 'The Wounded Orphan',
+    tagline: {
+      ko: '회복 · 성장 · 독립',
+      en: 'Recovery · Growth · Independence'
+    },
+    description: {
+      ko: '상처와 시련을 딛고 스스로 일어서는 힘을 키웁니다.',
+      en: 'Builds the strength to stand up on their own through wounds and trials.'
+    },
+    longDescription: {
+      ko: '당신은 상실과 배신의 경험을 통해 내면의 힘을 발견한 고아입니다. 혼자서도 살아남는 법을 배우며, 상처를 성장의 발판으로 삼아 더욱 강인하고 독립적인 존재로 거듭납니다. 당신의 무의식은 자립과 생존의 중요성을 깊이 이해하고 있습니다.\n\n당신의 강점은 역경 속에서 길러진 회복력과 독립심입니다. 다른 사람에게 의존하지 않고 스스로의 길을 개척하며, 고통을 통해 더 깊은 공감 능력을 얻었습니다. 그러나 때로는 과도한 불신과 방어적 태도로 인해 타인과의 진정한 연결을 거부하거나, 도움을 받는 것을 약함으로 여길 수 있습니다.\n\n성장을 위해서는 상처가 정체성의 전부가 아님을 깨달아야 합니다. 과거의 고통은 당신을 규정하지 않으며, 누군가를 믿고 의지하는 것은 약함이 아니라 치유의 시작입니다. 진정한 독립은 고립이 아니라, 선택적으로 연결될 수 있는 자유입니다.',
+      en: 'You are an orphan who discovered inner strength through experiences of loss and betrayal. You learn to survive alone and transform your wounds into stepping stones for growth, becoming stronger and more independent. Your unconscious deeply understands the importance of self-reliance and survival.\n\nYour strength is the resilience and independence cultivated in adversity. You forge your own path without depending on others and have gained deeper empathy through pain. However, you may sometimes refuse genuine connection with others due to excessive distrust and defensiveness, or see accepting help as weakness.\n\nFor growth, you must realize that wounds aren\'t your entire identity. Past pain doesn\'t define you, and trusting and relying on someone is not weakness but the beginning of healing. True independence is not isolation, but the freedom to choose connection.'
+    },
+    traits: {
+      ko: ['회복', '독립', '성장', '강인'],
+      en: ['Resilient', 'Independent', 'Growing', 'Strong']
+    },
+    color: '#F0F0F0',
+    darkColor: '#CCCCCC'
   }
 } as const;
 
@@ -281,7 +325,9 @@ export const ARCHETYPE_COMPATIBILITY = {
   everyman: ['caregiver', 'lover', 'sage'],
   caregiver: ['innocent', 'everyman', 'hero'],
   ruler: ['hero', 'magician', 'creator'],
-  creator: ['magician', 'jester', 'ruler']
+  creator: ['magician', 'jester', 'ruler'],
+  warrior: ['ruler', 'caregiver', 'explorer'], // Same as hero
+  orphan: ['caregiver', 'sage', 'innocent']
 } as const;
 
 export function getArchetypeName(key: string, language: 'ko' | 'en' = 'ko'): string {
