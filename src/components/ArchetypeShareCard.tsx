@@ -42,38 +42,68 @@ export default function ArchetypeShareCard({
   };
 
   const shareImage = async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current) {
+      console.log('No card ref available');
+      return;
+    }
 
     try {
+      console.log('Starting image generation...');
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: null,
         scale: 2,
         logging: false,
       });
 
+      console.log('Canvas generated, creating blob...');
       canvas.toBlob(async (blob) => {
-        if (!blob) return;
+        if (!blob) {
+          console.error('Failed to create blob');
+          return;
+        }
 
+        console.log('Blob created, size:', blob.size);
         const file = new File([blob], 'archetype.png', { type: 'image/png' });
 
-        if (navigator.share && navigator.canShare({ files: [file] })) {
+        // Check if Web Share API is available and supports file sharing
+        if (navigator.share) {
           try {
-            await navigator.share({
-              files: [file],
-              title: language === 'ko' ? '나의 무의식 아키타입' : 'My Unconscious Archetype',
-              text: language === 'ko'
-                ? `${archetypeName}\n${tagline}`
-                : `${archetypeName}\n${tagline}`
-            });
+            // Check if file sharing is supported
+            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+            console.log('Can share files:', canShareFiles);
+
+            if (canShareFiles) {
+              await navigator.share({
+                files: [file],
+                title: language === 'ko' ? '나의 무의식 아키타입' : 'My Unconscious Archetype',
+                text: language === 'ko'
+                  ? `${archetypeName}\n${tagline}`
+                  : `${archetypeName}\n${tagline}`
+              });
+              console.log('Share successful');
+            } else {
+              // Fallback to download if file sharing not supported
+              console.log('File sharing not supported, downloading instead');
+              await downloadImage();
+            }
           } catch (err) {
-            console.log('Share cancelled', err);
+            console.log('Share cancelled or failed:', err);
+            // Only download if user didn't cancel
+            if (err instanceof Error && err.name !== 'AbortError') {
+              await downloadImage();
+            }
           }
         } else {
+          // No Web Share API, download instead
+          console.log('Web Share API not available, downloading instead');
           await downloadImage();
         }
       });
     } catch (error) {
       console.error('Error sharing:', error);
+      alert(language === 'ko'
+        ? '이미지 생성 중 오류가 발생했습니다. 다시 시도해주세요.'
+        : 'Error generating image. Please try again.');
     }
   };
 
