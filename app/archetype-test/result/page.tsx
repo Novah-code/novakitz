@@ -446,6 +446,61 @@ export default function ArchetypeResult() {
             </div>
           )}
 
+          {/* Premium Upselling */}
+          <div style={{
+            background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+            borderRadius: '16px',
+            padding: '2rem',
+            marginBottom: '2rem',
+            textAlign: 'center',
+            border: '2px solid #fed7aa'
+          }}>
+            <div style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#9a3412',
+              marginBottom: '1rem'
+            }}>
+              💎 {language === 'ko' ? '더 깊은 성장을 위해' : 'For Deeper Growth'}
+            </div>
+            <p style={{
+              fontSize: '15px',
+              color: '#7c2d12',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6'
+            }}>
+              {language === 'ko'
+                ? `당신의 유형인 ${getArchetypeName(result.primary, language)}에게 가장 필요한 어퍼메이션을 매일 아침 꿈에 맞춰 보내드립니다.`
+                : `We'll send daily affirmations tailored to your ${getArchetypeName(result.primary, language)} archetype, matched with your dreams.`
+              }
+            </p>
+            <button
+              onClick={() => window.location.href = '/pricing'}
+              style={{
+                padding: '14px 28px',
+                background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '15px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
+              }}
+            >
+              {language === 'ko' ? 'Novakitz Premium 알아보기' : 'Learn About Novakitz Premium'}
+            </button>
+          </div>
+
           {/* CTA Section */}
           {!isLoggedIn && (
             <div style={{

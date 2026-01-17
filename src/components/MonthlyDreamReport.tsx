@@ -56,6 +56,8 @@ const translations = {
     aiPatternAnalysis: 'AI Pattern Analysis',
     aiAnalyzing: 'Analyzing your dream patterns...',
     statistics: 'Dream Statistics',
+    upgradeToPremium: 'View Full Analysis with Premium',
+    teaserMessage: 'Unlock deeper insights into your dream patterns with Premium',
   },
   ko: {
     monthlyReport: '월간 꿈 리포트',
@@ -80,6 +82,8 @@ const translations = {
     aiPatternAnalysis: 'AI 패턴 분석',
     aiAnalyzing: '꿈 패턴을 분석하는 중...',
     statistics: '꿈 통계',
+    upgradeToPremium: '프리미엄으로 전체 분석 보기',
+    teaserMessage: '프리미엄으로 더 깊은 꿈 패턴 인사이트를 확인하세요',
   },
 };
 
@@ -507,13 +511,7 @@ Use a warm tone and avoid over-interpretation.`;
     );
   }
 
-  if (!isPremium) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center', background: '#f0f9ff', borderRadius: '12px', color: '#333' }}>
-        <p>💎 {t.premiumOnly}</p>
-      </div>
-    );
-  }
+  // Free users see teaser with blur - removed blocking return
 
   if (!stats) {
     return (
@@ -524,7 +522,7 @@ Use a warm tone and avoid over-interpretation.`;
   }
 
   return (
-    <div style={{ padding: '2rem', animation: 'fadeIn 0.5s ease' }}>
+    <div style={{ padding: '2rem', animation: 'fadeIn 0.5s ease', position: 'relative' }}>
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -550,6 +548,11 @@ Use a warm tone and avoid over-interpretation.`;
         .content-transitioning {
           opacity: 0.3;
           transform: scale(0.98);
+        }
+        .blur-overlay {
+          filter: blur(8px);
+          pointer-events: none;
+          user-select: none;
         }
       `}</style>
 
@@ -598,7 +601,7 @@ Use a warm tone and avoid over-interpretation.`;
           <span>{t.reportGeneratedOn1st}</span>
         </div>
 
-        {/* Header with Month and Total Dreams */}
+        {/* Header with Month and Total Dreams - Always visible */}
       <div style={{
         background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
         padding: '2rem',
@@ -619,6 +622,53 @@ Use a warm tone and avoid over-interpretation.`;
           </div>
         </div>
       </div>
+
+      {/* Teaser Message for Free Users */}
+      {!isPremium && stats.topKeywords.length > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+          padding: '1.5rem',
+          borderRadius: '12px',
+          marginBottom: '1.5rem',
+          border: '2px solid #fed7aa',
+        }}>
+          <p style={{ fontSize: '15px', color: '#9a3412', lineHeight: '1.6', marginBottom: '1rem' }}>
+            {language === 'ko'
+              ? `이번 달 당신은 '${stats.topKeywords[0].word}' 관련 꿈을 ${stats.topKeywords[0].count}번 꾸었습니다. 이것이 의미하는 심리 상태는...`
+              : `This month you had ${stats.topKeywords[0].count} dreams about '${stats.topKeywords[0].word}'. What this reveals about your psychological state is...`
+            }
+          </p>
+          <button
+            onClick={() => window.location.href = '/pricing'}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '15px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
+            }}
+          >
+            💎 {t.upgradeToPremium}
+          </button>
+        </div>
+      )}
+
+      {/* Blurred Content for Free Users */}
+      <div className={!isPremium ? 'blur-overlay' : ''}>
 
       {/* AI Pattern Analysis */}
       {(aiAnalysis || aiLoading) && (
@@ -799,27 +849,32 @@ Use a warm tone and avoid over-interpretation.`;
         </div>
       )}
 
-      {/* Download Button */}
-      <button
-        onClick={downloadPDF}
-        style={{
-          width: '100%',
-          padding: '1rem',
-          background: 'var(--matcha-green)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          transition: 'opacity 0.3s',
-          marginBottom: onClose ? '0.75rem' : '0',
-        }}
-        onMouseOver={(e) => ((e.target as HTMLButtonElement).style.opacity = '0.9')}
-        onMouseOut={(e) => ((e.target as HTMLButtonElement).style.opacity = '1')}
-      >
-        📥 {t.downloadReport}
-      </button>
+      </div>
+      {/* End of Blurred Content */}
+
+      {/* Download Button - Only for Premium */}
+      {isPremium && (
+        <button
+          onClick={downloadPDF}
+          style={{
+            width: '100%',
+            padding: '1rem',
+            background: 'var(--matcha-green)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'opacity 0.3s',
+            marginBottom: onClose ? '0.75rem' : '0',
+          }}
+          onMouseOver={(e) => ((e.target as HTMLButtonElement).style.opacity = '0.9')}
+          onMouseOut={(e) => ((e.target as HTMLButtonElement).style.opacity = '1')}
+        >
+          📥 {t.downloadReport}
+        </button>
+      )}
       </div>
 
       {/* Close Button */}
