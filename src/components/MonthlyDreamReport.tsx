@@ -91,6 +91,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
   const [availableMonths, setAvailableMonths] = useState<{value: number, label: string}[]>([]);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const t = translations[language];
 
   useEffect(() => {
@@ -101,9 +102,17 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
 
   useEffect(() => {
     if (user && isPremium) {
-      loadMonthReport(selectedMonth);
+      handleMonthChange();
     }
   }, [selectedMonth]);
+
+  const handleMonthChange = async () => {
+    setIsTransitioning(true);
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await loadMonthReport(selectedMonth);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    setIsTransitioning(false);
+  };
 
   const loadMonthReport = async (monthOffset: number) => {
     if (!user) return;
@@ -487,6 +496,23 @@ Use a warm tone and avoid over-interpretation.`;
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes expandBar {
+          from { width: 0; }
+        }
+        @keyframes expandHeight {
+          from { height: 0; opacity: 0; }
+        }
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0.3; }
+        }
+        .content-transition {
+          transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .content-transitioning {
+          opacity: 0.3;
+          transform: scale(0.98);
+        }
       `}</style>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -516,23 +542,25 @@ Use a warm tone and avoid over-interpretation.`;
         )}
       </div>
 
-      {/* Info Banner */}
-      <div style={{
-        background: '#e8f5e8',
-        padding: '12px 16px',
-        borderRadius: '8px',
-        marginBottom: '1.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        fontSize: '14px',
-        color: '#5A8449'
-      }}>
-        <span>📅</span>
-        <span>{t.reportGeneratedOn1st}</span>
-      </div>
+      {/* Content Wrapper with Transition */}
+      <div className={`content-transition ${isTransitioning ? 'content-transitioning' : ''}`}>
+        {/* Info Banner */}
+        <div style={{
+          background: '#e8f5e8',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px',
+          color: '#5A8449'
+        }}>
+          <span>📅</span>
+          <span>{t.reportGeneratedOn1st}</span>
+        </div>
 
-      {/* Header with Month and Total Dreams */}
+        {/* Header with Month and Total Dreams */}
       <div style={{
         background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
         padding: '2rem',
@@ -577,8 +605,37 @@ Use a warm tone and avoid over-interpretation.`;
         </div>
       )}
 
+      {/* Statistics Cards Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', padding: '1.25rem', borderRadius: '12px', border: '2px solid #bae6fd', animation: 'slideUp 0.9s ease' }}>
+          <div style={{ fontSize: '12px', color: '#0369a1', marginBottom: '0.5rem', fontWeight: '600' }}>{t.totalKeywords}</div>
+          <AnimatedScore value={stats.totalKeywords} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#0284c7' }} />
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', padding: '1.25rem', borderRadius: '12px', border: '2px solid #bbf7d0', animation: 'slideUp 1s ease' }}>
+          <div style={{ fontSize: '12px', color: '#15803d', marginBottom: '0.5rem', fontWeight: '600' }}>{t.avgLength}</div>
+          <div>
+            <AnimatedScore value={stats.averageLength} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#16a34a', display: 'inline' }} />
+            <span style={{ fontSize: '14px', color: '#15803d', marginLeft: '4px' }}>{t.characters}</span>
+          </div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', padding: '1.25rem', borderRadius: '12px', border: '2px solid #fcd34d', animation: 'slideUp 1.1s ease' }}>
+          <div style={{ fontSize: '12px', color: '#92400e', marginBottom: '0.5rem', fontWeight: '600' }}>{t.longestDream}</div>
+          <div>
+            <AnimatedScore value={stats.longestDream} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#b45309', display: 'inline' }} />
+            <span style={{ fontSize: '14px', color: '#92400e', marginLeft: '4px' }}>{t.characters}</span>
+          </div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)', padding: '1.25rem', borderRadius: '12px', border: '2px solid #f9a8d4', animation: 'slideUp 1.2s ease' }}>
+          <div style={{ fontSize: '12px', color: '#831843', marginBottom: '0.5rem', fontWeight: '600' }}>{t.shortestDream}</div>
+          <div>
+            <AnimatedScore value={stats.shortestDream} duration={1500} style={{ fontSize: '32px', fontWeight: 'bold', color: '#be185d', display: 'inline' }} />
+            <span style={{ fontSize: '14px', color: '#831843', marginLeft: '4px' }}>{t.characters}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Top Keywords */}
-      <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1s ease' }}>
+      <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1.3s ease' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
           🔤 {t.topKeywords}
         </h3>
@@ -600,6 +657,55 @@ Use a warm tone and avoid over-interpretation.`;
         </div>
       </div>
 
+      {/* Mood Distribution */}
+      <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1.1s ease' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
+          💭 {t.moodBreakdown}
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {Object.entries(stats.moodDistribution)
+            .sort((a, b) => b[1] - a[1])
+            .map(([mood, count], idx) => {
+              const percentage = (count / stats.totalDreams) * 100;
+              const moodColors: { [key: string]: string } = {
+                happy: '#7FB069',
+                peaceful: '#8BC34A',
+                anxious: '#FF9800',
+                sad: '#7986CB',
+                excited: '#FFB74D',
+                confused: '#9575CD',
+                angry: '#E57373',
+                fearful: '#F06292',
+                balanced: '#4DB6AC'
+              };
+              const color = moodColors[mood] || '#9E9E9E';
+
+              return (
+                <div key={mood} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ minWidth: '80px', fontSize: '13px', color: '#555', textTransform: 'capitalize' }}>
+                    {mood}
+                  </div>
+                  <div style={{ flex: 1, background: '#e0e0e0', height: '24px', borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
+                    <div
+                      style={{
+                        width: `${percentage}%`,
+                        height: '100%',
+                        background: color,
+                        borderRadius: '12px',
+                        transition: 'width 1.2s ease-out',
+                        animation: `expandBar 1.2s ease-out ${idx * 0.1}s both`
+                      }}
+                    />
+                  </div>
+                  <div style={{ minWidth: '60px', fontSize: '13px', fontWeight: 'bold', color }}>
+                    <AnimatedScore value={count} duration={1200 + idx * 100} style={{ display: 'inline' }} /> ({Math.round(percentage)}%)
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+
       {/* Patterns */}
       <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1.2s ease' }}>
         <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
@@ -613,6 +719,47 @@ Use a warm tone and avoid over-interpretation.`;
           ))}
         </ul>
       </div>
+
+      {/* Monthly Trends Chart */}
+      {stats.monthlyTrends.length > 1 && (
+        <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1.3s ease' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
+            📊 {t.monthlyTrends}
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem', height: '180px', paddingTop: '1rem' }}>
+            {stats.monthlyTrends.map((trend, idx) => {
+              const maxCount = Math.max(...stats.monthlyTrends.map(t => t.count));
+              const heightPercentage = maxCount > 0 ? (trend.count / maxCount) * 100 : 0;
+              const isCurrentMonth = idx === stats.monthlyTrends.length - 1;
+
+              return (
+                <div key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 'bold', color: isCurrentMonth ? 'var(--matcha-green)' : '#666', minHeight: '20px' }}>
+                    <AnimatedScore value={trend.count} duration={1500 + idx * 100} style={{ display: 'inline' }} />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '50px',
+                      height: `${heightPercentage}%`,
+                      background: isCurrentMonth
+                        ? 'linear-gradient(180deg, #7FB069 0%, #8BC34A 100%)'
+                        : 'linear-gradient(180deg, #D1E7DD 0%, #C3DED4 100%)',
+                      borderRadius: '8px 8px 0 0',
+                      position: 'relative',
+                      animation: `expandHeight 1.2s ease-out ${idx * 0.1}s both`,
+                      boxShadow: isCurrentMonth ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none'
+                    }}
+                  />
+                  <div style={{ fontSize: '11px', color: '#666', textAlign: 'center', lineHeight: '1.2' }}>
+                    {trend.month}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Download Button */}
       <button
@@ -635,6 +782,7 @@ Use a warm tone and avoid over-interpretation.`;
       >
         📥 {t.downloadReport}
       </button>
+      </div>
 
       {/* Close Button */}
       {onClose && (

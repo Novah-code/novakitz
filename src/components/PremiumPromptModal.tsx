@@ -142,6 +142,10 @@ export default function PremiumPromptModal({
     );
   }
 
+  // DISABLED: Premium popup removed - users can upgrade from settings/profile
+  return null;
+
+  /* Original popup code - disabled to prevent interruptions
   if (!showModal || isPremium || hasSeenPrompt) {
     return null;
   }
@@ -316,4 +320,5 @@ export default function PremiumPromptModal({
       </div>
     </div>
   );
+  */
 }

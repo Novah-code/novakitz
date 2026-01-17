@@ -18,8 +18,9 @@ import DreamBackgroundGallery from './DreamBackgroundGallery';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
 import DreamShareCard from './DreamShareCard';
-import AffirmationSuggestionCard from './AffirmationSuggestionCard';
-import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
+// REMOVED: Affirmation popup disabled - using AffirmationsDisplay only
+// import AffirmationSuggestionCard from './AffirmationSuggestionCard';
+// import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
 import DreamTimeline from './DreamTimeline';
 import QuickArchetypeQuiz from './QuickArchetypeQuiz';
 
@@ -250,9 +251,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [shareModalDream, setShareModalDream] = useState<DreamEntry | null>(null);
   const [showShareCard, setShowShareCard] = useState(false);
   const [shareCardDream, setShareCardDream] = useState<DreamEntry | null>(null);
-  const [suggestedAffirmations, setSuggestedAffirmations] = useState<string[]>([]);
-  const [showAffirmationSuggestion, setShowAffirmationSuggestion] = useState(false);
-  const [currentDreamForAffirmation, setCurrentDreamForAffirmation] = useState<DreamEntry | null>(null);
+  // REMOVED: Affirmation popup state - using AffirmationsDisplay only
+  // const [suggestedAffirmations, setSuggestedAffirmations] = useState<string[]>([]);
+  // const [showAffirmationSuggestion, setShowAffirmationSuggestion] = useState(false);
+  // const [currentDreamForAffirmation, setCurrentDreamForAffirmation] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
@@ -1659,44 +1661,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         language
       });
 
-      if (user) {
-        try {
-          console.log('📤 [AFFIRMATION] Calling generateAffirmationsFromDream:', {
-            userId: user.id,
-            dreamTextPreview: dreamText.substring(0, 50),
-            language
-          });
-
-          const affirmations = await generateAffirmationsFromDream(user.id, dreamText, language);
-
-          console.log('✅ [AFFIRMATION] Response received:', {
-            affirmationsCount: affirmations?.length || 0,
-            affirmations
-          });
-
-          if (affirmations && affirmations.length > 0) {
-            console.log('🎯 [AFFIRMATION] Setting state to show suggestion modal');
-            setSuggestedAffirmations(affirmations);
-            // Create a dream object for the affirmation suggestion
-            const dreamForAffirmation = {
-              id: tempDreamId,
-              title: dreamTitle || 'Dream',
-              text: dreamText,
-              response: result.analysis
-            };
-            setCurrentDreamForAffirmation(dreamForAffirmation as any);
-            setShowAffirmationSuggestion(true);
-            console.log('✨ [AFFIRMATION] State set successfully');
-          } else {
-            console.warn('⚠️ [AFFIRMATION] No affirmations returned from API');
-          }
-        } catch (error) {
-          console.error('❌ [AFFIRMATION] Error generating affirmations:', error);
-          // Don't block the flow if affirmation generation fails
-        }
-      } else {
-        console.log('⚠️ [AFFIRMATION] Skipping generation - missing user');
-      }
+      // REMOVED: Affirmation generation moved to AffirmationsDisplay component
+      // Affirmations will be automatically generated and shown in the Today's Affirmation section
+      console.log('✨ [AFFIRMATION] Dream saved - affirmations will be generated in Today\'s Affirmation section');
 
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
@@ -1721,34 +1688,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     }
   };
 
-  const handleSaveAffirmations = async (selectedAffirmations: string[]) => {
-    if (!user || !currentDreamForAffirmation) return;
-
-    try {
-      await saveAffirmations(
-        user.id,
-        selectedAffirmations,
-        'morning', // Default to morning, could be enhanced based on time
-        currentDreamForAffirmation.id,
-        language
-      );
-
-      showToast(
-        language === 'ko' ? '확언이 저장되었습니다' : 'Affirmations saved',
-        'success'
-      );
-
-      setShowAffirmationSuggestion(false);
-      setSuggestedAffirmations([]);
-      setCurrentDreamForAffirmation(null);
-    } catch (error) {
-      console.error('Error saving affirmations:', error);
-      showToast(
-        language === 'ko' ? '확언 저장 실패' : 'Failed to save affirmations',
-        'error'
-      );
-    }
-  };
+  // REMOVED: Affirmation saving moved to AffirmationsDisplay component
+  // const handleSaveAffirmations = async (selectedAffirmations: string[]) => { ... };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -5562,8 +5503,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         />
       )}
 
-      {/* Affirmation Suggestion Card */}
-      {showAffirmationSuggestion && suggestedAffirmations.length > 0 && (
+      {/* Affirmation Suggestion Card - DISABLED: Now shown only in Today's Affirmation section */}
+      {/* {showAffirmationSuggestion && suggestedAffirmations.length > 0 && (
         <AffirmationSuggestionCard
           affirmations={suggestedAffirmations}
           dreamTitle={currentDreamForAffirmation?.title}
@@ -5571,7 +5512,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onSave={handleSaveAffirmations}
           onClose={() => setShowAffirmationSuggestion(false)}
         />
-      )}
+      )} */}
 
       {/* Quick Archetype Quiz Modal */}
       {showQuickArchetypeQuiz && (
