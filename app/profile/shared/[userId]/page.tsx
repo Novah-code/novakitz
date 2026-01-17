@@ -195,26 +195,15 @@ export default function SharedProfilePage() {
               {getArchetypeDescription(profile.primary_archetype, language)}
             </div>
             <div style={{
-              display: 'flex',
-              gap: '0.5rem',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
+              padding: '1rem',
+              background: 'rgba(255, 255, 255, 0.5)',
+              borderRadius: '12px',
+              fontSize: '14px',
+              color: '#4b5563',
+              lineHeight: '1.8',
+              textAlign: 'center',
             }}>
-              {getArchetypeTraits(profile.primary_archetype, language).map((trait, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    padding: '6px 12px',
-                    background: 'white',
-                    borderRadius: '12px',
-                    fontSize: '13px',
-                    color: '#4b5563',
-                    fontWeight: '500',
-                  }}
-                >
-                  {trait}
-                </span>
-              ))}
+              {getArchetypeTraits(profile.primary_archetype, language)}
             </div>
           </div>
 
