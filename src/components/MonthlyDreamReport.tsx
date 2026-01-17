@@ -271,30 +271,57 @@ Use a warm tone and avoid over-interpretation.`;
 
     const averageMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced';
 
-    // Keywords with common word filtering
+    // Keywords with enhanced common word filtering
     const isCommonWord = (word: string): boolean => {
       const commonWords = [
-        // English
+        // English - Basic
         'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
         'from', 'by', 'as', 'into', 'through', 'about', 'after', 'before', 'during',
-        'was', 'were', 'is', 'are', 'be', 'been', 'being',
-        'have', 'has', 'had', 'do', 'does', 'did',
+        // English - Verbs
+        'was', 'were', 'is', 'are', 'be', 'been', 'being', 'am',
+        'have', 'has', 'had', 'do', 'does', 'did', 'done',
         'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can',
-        'that', 'this', 'these', 'those', 'what', 'which', 'who', 'whom',
+        // English - Pronouns
+        'that', 'this', 'these', 'those', 'what', 'which', 'who', 'whom', 'whose', 'where', 'when', 'why', 'how',
         'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
-        'your', 'his', 'her', 'its', 'our', 'their', 'my',
-        'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most',
-        'like', 'seem', 'something', 'anything', 'nothing',
-        'feel', 'felt', 'see', 'saw', 'look', 'get', 'got', 'go', 'went', 'come', 'came',
-        'make', 'made', 'take', 'took', 'give', 'gave', 'know', 'knew', 'think', 'thought',
-        'dream', 'dreams', 'dreaming', 'dreamed',
-        // Korean
-        '하다', '이다', '있다', '없다', '되다', '가다', '오다',
-        '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로',
-        '은', '는', '의',
-        '그리고', '또는', '하지만', '매우', '너무',
-        '꿈', '꾼', '꾸었다',
-        '나', '우리', '그', '그녀', '당신',
+        'your', 'his', 'her', 'its', 'our', 'their', 'my', 'mine', 'yours', 'hers', 'ours', 'theirs',
+        // English - Common adjectives/adverbs
+        'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most', 'much', 'many', 'some', 'any', 'all',
+        'also', 'even', 'still', 'yet', 'already', 'again', 'always', 'never', 'often', 'sometimes',
+        'here', 'there', 'now', 'then', 'today', 'tomorrow', 'yesterday',
+        // English - Dream-related analysis words (AI interpretation artifacts)
+        'dream', 'dreams', 'dreaming', 'dreamed', 'dreamt',
+        'perhaps', 'maybe', 'possibly', 'likely', 'probably', 'seems', 'appear', 'appears',
+        'feel', 'feels', 'felt', 'feeling', 'feelings',
+        'suggest', 'suggests', 'suggested', 'suggesting', 'suggestion',
+        'indicate', 'indicates', 'indicating',
+        'reflect', 'reflects', 'reflected', 'reflecting', 'reflection',
+        'represent', 'represents', 'represented', 'representing',
+        'symbolize', 'symbolizes', 'symbolic', 'symbol', 'symbols',
+        'mean', 'means', 'meant', 'meaning',
+        'part', 'parts', 'aspect', 'aspects',
+        'inner', 'outer', 'deep', 'deeper', 'deepest',
+        'life', 'lives', 'living', 'lived',
+        'self', 'yourself', 'myself', 'itself', 'themselves',
+        'thing', 'things', 'something', 'anything', 'nothing', 'everything',
+        'time', 'times',
+        // English - Common verbs
+        'like', 'seem', 'find', 'found', 'try', 'tried', 'want', 'wanted', 'need', 'needed',
+        'see', 'saw', 'seen', 'look', 'looked', 'looking', 'watch', 'watched',
+        'get', 'got', 'getting', 'go', 'went', 'gone', 'going', 'come', 'came', 'coming',
+        'make', 'made', 'making', 'take', 'took', 'taken', 'taking',
+        'give', 'gave', 'given', 'giving',
+        'know', 'knew', 'known', 'knowing', 'think', 'thought', 'thinking',
+        'say', 'said', 'saying', 'tell', 'told', 'telling',
+        // Korean - Particles
+        '하다', '이다', '있다', '없다', '되다', '가다', '오다', '보다', '주다',
+        '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로', '의', '도', '만', '부터', '까지',
+        '은', '는', '이', '가',
+        // Korean - Common words
+        '그리고', '또는', '하지만', '매우', '너무', '정말', '아주', '정말로',
+        '꿈', '꾼', '꾸었다', '꾸는',
+        '나', '우리', '그', '그녀', '당신', '저', '제',
+        '것', '수', '때', '곳', '중',
       ];
       return commonWords.includes(word.toLowerCase());
     };
@@ -302,11 +329,22 @@ Use a warm tone and avoid over-interpretation.`;
     const keywordCount: { [key: string]: number } = {};
     dreams.forEach((dream) => {
       const title = dream.title?.toLowerCase() || '';
-      const content = dream.content?.toLowerCase() || '';
-      const text = `${title} ${content}`;
-      const words = text.split(/\s+/).filter((w) => w.length > 3 && !isCommonWord(w));
+      // Only use the actual dream content, not the AI analysis
+      const dreamContent = dream.content?.split('\n\n---\n\n')[0]?.toLowerCase() || '';
+      const text = `${title} ${dreamContent}`;
+
+      // Split by whitespace and punctuation, filter out common words and short words
+      const words = text
+        .split(/[\s.,!?;:()\[\]{}"']+/)
+        .filter((w) => w.length > 3 && !isCommonWord(w))
+        .filter((w) => !/^\d+$/.test(w)); // Remove pure numbers
+
       words.forEach((word) => {
-        keywordCount[word] = (keywordCount[word] || 0) + 1;
+        // Clean up punctuation at start/end
+        const cleanWord = word.replace(/^[^\w]+|[^\w]+$/g, '');
+        if (cleanWord.length > 3 && !isCommonWord(cleanWord)) {
+          keywordCount[cleanWord] = (keywordCount[cleanWord] || 0) + 1;
+        }
       });
     });
 
