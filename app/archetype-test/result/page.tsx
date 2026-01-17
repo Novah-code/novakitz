@@ -15,6 +15,7 @@ import {
 import { getGrowthStage } from '../../../src/lib/archetypeGrowth';
 import { supabase } from '../../../src/lib/supabase';
 import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
+import ArchetypeShareCard from '../../../src/components/ArchetypeShareCard';
 import '../../globals.css';
 
 export default function ArchetypeResult() {
@@ -28,6 +29,7 @@ export default function ArchetypeResult() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [savedResultId, setSavedResultId] = useState<string | null>(null);
+  const [showShareCard, setShowShareCard] = useState(false);
 
   useEffect(() => {
     // Load language from localStorage
@@ -499,8 +501,7 @@ export default function ArchetypeResult() {
           marginBottom: '2rem'
         }}>
           <button
-            onClick={handleShare}
-            disabled={sharing}
+            onClick={() => setShowShareCard(true)}
             style={{
               padding: '16px',
               background: 'white',
@@ -510,12 +511,28 @@ export default function ArchetypeResult() {
               fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
             }}
           >
-            📤 {sharing
-              ? (language === 'ko' ? '공유 중...' : 'Sharing...')
-              : (language === 'ko' ? '친구에게 공유하기' : 'Share with Friends')}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }}>
+              <path
+                d="M15 13V15C15 15.5304 14.7893 16.0391 14.4142 16.4142C14.0391 16.7893 13.5304 17 13 17H5C4.46957 17 3.96086 16.7893 3.58579 16.4142C3.21071 16.0391 3 15.5304 3 15V13M13 9L9 5M9 5L5 9M9 5V13"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {language === 'ko' ? '이미지로 공유하기' : 'Share as Image'}
           </button>
           <button
             onClick={handleRetake}
@@ -555,6 +572,18 @@ export default function ArchetypeResult() {
         }
       `}</style>
     </div>
+
+      {/* Share Card Modal */}
+      {showShareCard && (
+        <ArchetypeShareCard
+          archetypeName={getArchetypeName(result.primary, language)}
+          tagline={getArchetypeTagline(result.primary, language)}
+          primaryColor={primaryColor}
+          darkColor={primaryDarkColor}
+          language={language}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </>
   );
 }
