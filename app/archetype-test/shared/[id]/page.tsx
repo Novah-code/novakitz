@@ -280,28 +280,16 @@ export default function SharedArchetypeResult() {
                   {language === 'ko' ? '주요 특성' : 'Key Traits'}
                 </h3>
                 <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem'
+                  padding: '1.5rem',
+                  background: `linear-gradient(135deg, ${primaryColor}08 0%, ${primaryColor}05 100%)`,
+                  border: `1.5px solid ${primaryColor}20`,
+                  borderRadius: '16px',
+                  fontSize: '15px',
+                  lineHeight: '1.8',
+                  color: '#374151',
+                  fontWeight: '500'
                 }}>
-                  {traits.map((trait, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: '10px 18px',
-                        background: `linear-gradient(135deg, ${primaryColor}15 0%, ${primaryColor}08 100%)`,
-                        border: `1.5px solid ${primaryColor}30`,
-                        borderRadius: '12px',
-                        fontSize: '14px',
-                        color: darkColor,
-                        fontWeight: '600',
-                        transition: 'transform 0.2s ease',
-                        cursor: 'default'
-                      }}
-                    >
-                      {trait}
-                    </div>
-                  ))}
+                  {traits}
                 </div>
               </div>
 
