@@ -759,7 +759,7 @@ Use a warm tone and avoid over-interpretation.`;
       </div>
 
       {/* Monthly Trends Chart */}
-      {stats.monthlyTrends.length > 1 && (
+      {stats.monthlyTrends.length > 0 && (
         <div style={{ background: '#f8f9fa', padding: '1.5rem', borderRadius: '12px', marginBottom: '1.5rem', animation: 'slideUp 1.3s ease' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--matcha-dark)' }}>
             📊 {t.monthlyTrends}
