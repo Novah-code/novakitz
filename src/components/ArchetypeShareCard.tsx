@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef } from 'react';
-import html2canvas from 'html2canvas';
 
 interface ArchetypeShareCardProps {
   archetypeName: string;
@@ -10,6 +9,7 @@ interface ArchetypeShareCardProps {
   darkColor: string;
   language: 'ko' | 'en';
   onClose: () => void;
+  resultId?: string;
 }
 
 export default function ArchetypeShareCard({
@@ -18,97 +18,94 @@ export default function ArchetypeShareCard({
   primaryColor,
   darkColor,
   language,
-  onClose
+  onClose,
+  resultId
 }: ArchetypeShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const downloadImage = async () => {
-    if (!cardRef.current) return;
-
-    try {
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-        logging: false,
-      });
-
-      const link = document.createElement('a');
-      link.download = `novakitz-archetype-${Date.now()}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-    } catch (error) {
-      console.error('Error generating image:', error);
-    }
-  };
-
-  const shareImage = async () => {
-    if (!cardRef.current) {
-      console.log('No card ref available');
-      return;
-    }
-
-    try {
-      console.log('Starting image generation...');
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: null,
-        scale: 2,
-        logging: false,
-      });
-
-      console.log('Canvas generated, creating blob...');
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          console.error('Failed to create blob');
-          return;
-        }
-
-        console.log('Blob created, size:', blob.size);
-        const file = new File([blob], 'archetype.png', { type: 'image/png' });
-
-        // Check if Web Share API is available and supports file sharing
-        if (navigator.share) {
-          try {
-            // Check if file sharing is supported
-            const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
-            console.log('Can share files:', canShareFiles);
-
-            if (canShareFiles) {
-              await navigator.share({
-                files: [file],
-                title: language === 'ko' ? '나의 무의식 아키타입' : 'My Unconscious Archetype',
-                text: language === 'ko'
-                  ? `${archetypeName}\n${tagline}`
-                  : `${archetypeName}\n${tagline}`
-              });
-              console.log('Share successful');
-            } else {
-              // Fallback to download if file sharing not supported
-              console.log('File sharing not supported, downloading instead');
-              await downloadImage();
-            }
-          } catch (err) {
-            console.log('Share cancelled or failed:', err);
-            // Only download if user didn't cancel
-            if (err instanceof Error && err.name !== 'AbortError') {
-              await downloadImage();
-            }
-          }
-        } else {
-          // No Web Share API, download instead
-          console.log('Web Share API not available, downloading instead');
-          await downloadImage();
-        }
-      });
-    } catch (error) {
-      console.error('Error sharing:', error);
-      alert(language === 'ko'
-        ? '이미지 생성 중 오류가 발생했습니다. 다시 시도해주세요.'
-        : 'Error generating image. Please try again.');
-    }
-  };
-
   // Clean archetype name (remove English part for Korean)
   const cleanName = language === 'ko' ? archetypeName.split(' (')[0] : archetypeName;
+
+  // Generate share URL
+  const shareUrl = resultId
+    ? `${window.location.origin}/shared/archetype/${resultId}`
+    : window.location.href;
+
+  const shareText = language === 'ko'
+    ? `${cleanName}\n${tagline}\n\n나의 무의식 아키타입을 발견했어요!`
+    : `${cleanName}\n${tagline}\n\nI discovered my unconscious archetype!`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n\n${shareUrl}`);
+      alert(language === 'ko' ? '링크가 복사되었습니다!' : 'Link copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alert(language === 'ko' ? '복사 실패. 다시 시도해주세요.' : 'Failed to copy. Please try again.');
+    }
+  };
+
+  const shareToSocial = (platform: 'instagram' | 'tiktok' | 'kakao' | 'twitter') => {
+    const encodedText = encodeURIComponent(shareText);
+    const encodedUrl = encodeURIComponent(shareUrl);
+
+    switch (platform) {
+      case 'instagram':
+        // Instagram doesn't support direct sharing via URL, so we copy to clipboard
+        copyToClipboard();
+        alert(language === 'ko'
+          ? '링크가 복사되었습니다! 인스타그램 앱을 열어서 붙여넣기 해주세요.'
+          : 'Link copied! Please open Instagram app and paste it.');
+        break;
+
+      case 'tiktok':
+        // TikTok doesn't support direct web sharing, copy to clipboard
+        copyToClipboard();
+        alert(language === 'ko'
+          ? '링크가 복사되었습니다! 틱톡 앱을 열어서 붙여넣기 해주세요.'
+          : 'Link copied! Please open TikTok app and paste it.');
+        break;
+
+      case 'kakao':
+        // KakaoTalk sharing
+        if (typeof window !== 'undefined' && (window as any).Kakao) {
+          (window as any).Kakao.Share.sendDefault({
+            objectType: 'feed',
+            content: {
+              title: cleanName,
+              description: tagline,
+              imageUrl: `${window.location.origin}/og-image.png`,
+              link: {
+                mobileWebUrl: shareUrl,
+                webUrl: shareUrl,
+              },
+            },
+            buttons: [
+              {
+                title: language === 'ko' ? '결과 보기' : 'View Result',
+                link: {
+                  mobileWebUrl: shareUrl,
+                  webUrl: shareUrl,
+                },
+              },
+            ],
+          });
+        } else {
+          // Fallback to web share or copy
+          copyToClipboard();
+        }
+        break;
+
+      case 'twitter':
+        // Twitter/X sharing
+        window.open(
+          `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+          '_blank',
+          'width=550,height=420'
+        );
+        break;
+    }
+  };
 
   return (
     <div
@@ -130,7 +127,7 @@ export default function ArchetypeShareCard({
       }}
       onClick={onClose}
     >
-      {/* Share Card */}
+      {/* Preview Card */}
       <div
         ref={cardRef}
         style={{
@@ -141,6 +138,7 @@ export default function ArchetypeShareCard({
           padding: '3rem 2.5rem',
           position: 'relative',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          marginBottom: '2rem',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -267,25 +265,135 @@ export default function ArchetypeShareCard({
         </div>
       </div>
 
-      {/* Action Buttons */}
+      {/* Share Buttons */}
       <div
         style={{
-          marginTop: '2rem',
           display: 'flex',
+          flexDirection: 'column',
           gap: '1rem',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
+          width: '100%',
+          maxWidth: '400px',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1rem'
+        }}>
+          <button
+            onClick={() => shareToSocial('instagram')}
+            style={{
+              padding: '1rem',
+              background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            }}
+          >
+            Instagram
+          </button>
+
+          <button
+            onClick={() => shareToSocial('tiktok')}
+            style={{
+              padding: '1rem',
+              background: '#000000',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            }}
+          >
+            TikTok
+          </button>
+
+          <button
+            onClick={() => shareToSocial('kakao')}
+            style={{
+              padding: '1rem',
+              background: '#FEE500',
+              color: '#000000',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            }}
+          >
+            {language === 'ko' ? '카카오톡' : 'KakaoTalk'}
+          </button>
+
+          <button
+            onClick={() => shareToSocial('twitter')}
+            style={{
+              padding: '1rem',
+              background: '#1DA1F2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            }}
+          >
+            Twitter
+          </button>
+        </div>
+
         <button
-          onClick={shareImage}
+          onClick={copyToClipboard}
           style={{
             padding: '1rem 2rem',
             background: 'white',
             color: primaryColor,
             border: 'none',
-            borderRadius: '16px',
+            borderRadius: '12px',
             fontSize: '15px',
             fontWeight: '600',
             cursor: 'pointer',
@@ -293,6 +401,7 @@ export default function ArchetypeShareCard({
             transition: 'all 0.2s',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '0.5rem',
           }}
           onMouseEnter={(e) => {
@@ -306,51 +415,14 @@ export default function ArchetypeShareCard({
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path
-              d="M15 13V15C15 15.5304 14.7893 16.0391 14.4142 16.4142C14.0391 16.7893 13.5304 17 13 17H5C4.46957 17 3.96086 16.7893 3.58579 16.4142C3.21071 16.0391 3 15.5304 3 15V13M13 9L9 5M9 5L5 9M9 5V13"
+              d="M13.5 3H16.5C16.7652 3 17.0196 3.10536 17.2071 3.29289C17.3946 3.48043 17.5 3.73478 17.5 4V16C17.5 16.2652 17.3946 16.5196 17.2071 16.7071C17.0196 16.8946 16.7652 17 16.5 17H13.5M10 14L14 10M14 10L10 6M14 10H2.5"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-          {language === 'ko' ? '공유하기' : 'Share'}
-        </button>
-
-        <button
-          onClick={downloadImage}
-          style={{
-            padding: '1rem 2rem',
-            background: 'rgba(255, 255, 255, 0.2)',
-            color: 'white',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '16px',
-            fontSize: '15px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M10 13V5M10 13L7 10M10 13L13 10M4 17H16C16.5304 17 17.0391 16.7893 17.4142 16.4142C17.7893 16.0391 18 15.5304 18 15V5C18 4.46957 17.7893 3.96086 17.4142 3.58579C17.0391 3.21071 16.5304 3 16 3H4C3.46957 3 2.96086 3.21071 2.58579 3.58579C2.21071 3.96086 2 4.46957 2 5V15C2 15.5304 2.21071 16.0391 2.58579 16.4142C2.96086 16.7893 3.46957 17 4 17Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {language === 'ko' ? '다운로드' : 'Download'}
+          {language === 'ko' ? '링크 복사' : 'Copy Link'}
         </button>
 
         <button
@@ -360,7 +432,7 @@ export default function ArchetypeShareCard({
             background: 'transparent',
             color: 'white',
             border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '16px',
+            borderRadius: '12px',
             fontSize: '15px',
             fontWeight: '600',
             cursor: 'pointer',
@@ -376,13 +448,6 @@ export default function ArchetypeShareCard({
           {language === 'ko' ? '닫기' : 'Close'}
         </button>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
     </div>
   );
 }

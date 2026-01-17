@@ -120,26 +120,15 @@ export default function QuickArchetypeQuiz({
           </div>
 
           <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
+            padding: '1rem',
+            background: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: '12px',
+            fontSize: '14px',
+            color: '#4b5563',
+            lineHeight: '1.8',
+            textAlign: 'center',
           }}>
-            {getArchetypeTraits(result.primaryArchetype, language).map((trait, idx) => (
-              <span
-                key={idx}
-                style={{
-                  padding: '6px 12px',
-                  background: primaryColor,
-                  borderRadius: '12px',
-                  fontSize: '13px',
-                  color: '#1f2937',
-                  fontWeight: '500',
-                }}
-              >
-                {trait}
-              </span>
-            ))}
+            {getArchetypeTraits(result.primaryArchetype, language)}
           </div>
         </div>
 

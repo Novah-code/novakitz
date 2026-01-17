@@ -36,7 +36,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '불안과 막연한 두려움', en: 'Anxiety and vague fear' },
-        archetypes: { orphan: 3, innocent: 2, caregiver: 1 }
+        archetypes: { innocent: 3, caregiver: 2, lover: 1 }
       },
       {
         text: { ko: '힘이 솟는 느낌', en: 'Feeling energized' },
@@ -59,11 +59,11 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '길을 잃거나 헤매고 있다', en: 'Lost or wandering' },
-        archetypes: { explorer: 3, orphan: 2, sage: 1 }
+        archetypes: { explorer: 3, innocent: 2, sage: 1 }
       },
       {
         text: { ko: '누군가를 찾거나 기다리고 있다', en: 'Searching for or waiting for someone' },
-        archetypes: { lover: 3, orphan: 2, caregiver: 1 }
+        archetypes: { lover: 3, innocent: 2, caregiver: 1 }
       },
       {
         text: { ko: '무언가를 만들거나 고치고 있다', en: 'Creating or fixing something' },
@@ -71,7 +71,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '쫓기거나 싸우고 있다', en: 'Being chased or fighting' },
-        archetypes: { warrior: 3, outlaw: 2, orphan: 1 }
+        archetypes: { warrior: 3, outlaw: 2, innocent: 1 }
       },
       {
         text: { ko: '날거나 웃고 있다', en: 'Flying or laughing' },
@@ -98,7 +98,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '혼자 앉아서 울거나 멍하니 있다', en: 'Sit alone, crying or spacing out' },
-        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+        archetypes: { innocent: 3, lover: 2, caregiver: 1 }
       },
       {
         text: { ko: '상황을 분석하고 계획을 세운다', en: 'Analyze the situation and make a plan' },
@@ -137,7 +137,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '위험한 곳, 무너지는 건물, 어두운 길', en: 'Dangerous place, crumbling building, dark path' },
-        archetypes: { warrior: 3, outlaw: 2, orphan: 2 }
+        archetypes: { warrior: 3, outlaw: 2, explorer: 1 }
       },
       {
         text: { ko: '신비로운 도서관, 연구실, 비밀의 방', en: 'Mysterious library, lab, secret room' },
@@ -160,7 +160,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '일단 그 자리를 피하고 싶다', en: 'Want to escape the situation' },
-        archetypes: { orphan: 3, innocent: 2, explorer: 1 }
+        archetypes: { innocent: 3, caregiver: 2, explorer: 1 }
       },
       {
         text: { ko: '누군가에게 도움을 요청한다', en: 'Ask someone for help' },
@@ -199,7 +199,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '낯선 사람들이나 적대적인 존재', en: 'Strangers or hostile beings' },
-        archetypes: { warrior: 3, orphan: 2, outlaw: 1 }
+        archetypes: { warrior: 3, outlaw: 2, innocent: 1 }
       },
       {
         text: { ko: '현명한 스승이나 노인', en: 'Wise teacher or elder' },
@@ -215,7 +215,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '사람이 거의 안 나오고 혼자 있다', en: 'Rarely anyone, mostly alone' },
-        archetypes: { creator: 3, explorer: 2, orphan: 2 }
+        archetypes: { creator: 3, explorer: 2, sage: 1 }
       }
     ]
   },
@@ -250,7 +250,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '조용히 혼자만의 시간을 갖고 싶다', en: 'Have quiet time alone' },
-        archetypes: { sage: 3, creator: 2, orphan: 1 }
+        archetypes: { sage: 3, creator: 2, innocent: 1 }
       }
     ]
   },
@@ -281,7 +281,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '불안하거나 공허한 느낌이 든다', en: 'Feeling anxious or empty' },
-        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+        archetypes: { innocent: 3, lover: 2, caregiver: 1 }
       },
       {
         text: { ko: '계획을 세우거나 정리하고 있다', en: 'Making plans or organizing' },
@@ -304,7 +304,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '패닉 상태로 깨거나 소리를 지른다', en: 'Panic and wake up or scream' },
-        archetypes: { orphan: 3, innocent: 2, warrior: 1 }
+        archetypes: { innocent: 3, caregiver: 2, warrior: 1 }
       },
       {
         text: { ko: '탈출구를 찾으며 계속 움직인다', en: 'Keep moving to find an exit' },
@@ -316,7 +316,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '누군가를 부르거나 찾는다', en: 'Call for or search for someone' },
-        archetypes: { lover: 3, caregiver: 2, orphan: 2 }
+        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
       },
       {
         text: { ko: '어둠을 즐기거나 빛을 만들어낸다', en: 'Enjoy the darkness or create light' },
@@ -335,7 +335,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '내가 나답지 않게 보인다', en: 'I don\'t look like myself' },
-        archetypes: { orphan: 3, creator: 2, magician: 1 }
+        archetypes: { innocent: 3, creator: 2, magician: 1 }
       },
       {
         text: { ko: '더 나아지고 싶다', en: 'Want to improve' },
@@ -370,7 +370,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '버림받거나 혼자 남겨지는 것', en: 'Being abandoned or left alone' },
-        archetypes: { orphan: 3, lover: 2, innocent: 1 }
+        archetypes: { innocent: 3, lover: 2, caregiver: 1 }
       },
       {
         text: { ko: '통제할 수 없는 상황', en: 'Situations out of control' },
@@ -390,7 +390,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '정체를 알 수 없는 무언가', en: 'Something unidentifiable' },
-        archetypes: { sage: 3, magician: 2, orphan: 1 }
+        archetypes: { sage: 3, magician: 2, innocent: 1 }
       }
     ]
   },
@@ -452,7 +452,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '사람들이 나를 이해 못 할 것 같다', en: 'Feel people won\'t understand me' },
-        archetypes: { orphan: 3, magician: 2, creator: 1 }
+        archetypes: { innocent: 3, magician: 2, creator: 1 }
       },
       {
         text: { ko: '적당한 거리에서 편안하게 지내고 싶다', en: 'Want to maintain comfortable distance' },
@@ -471,7 +471,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '역시 나는 안 되는구나', en: 'I knew I couldn\'t do it' },
-        archetypes: { orphan: 3, innocent: 2, lover: 1 }
+        archetypes: { innocent: 3, lover: 2, caregiver: 1 }
       },
       {
         text: { ko: '다시 도전해야지', en: 'I must try again' },
@@ -491,7 +491,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '누군가에게 위로받고 싶다', en: 'Want comfort from someone' },
-        archetypes: { lover: 3, caregiver: 2, orphan: 2 }
+        archetypes: { lover: 3, caregiver: 2, innocent: 1 }
       }
     ]
   },
