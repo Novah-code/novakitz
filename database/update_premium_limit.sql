@@ -4,8 +4,7 @@
 UPDATE public.subscription_plans
 SET
     ai_interpretations_per_month = 200,
-    description = '$4.99/month - 200 AI interpretations per month and full history',
-    updated_at = NOW()
+    description = '$4.99/month - 200 AI interpretations per month and full history'
 WHERE plan_slug = 'premium';
 
 -- Verify the update
