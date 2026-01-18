@@ -15,10 +15,5 @@
       ]
     }
   ],
-  "crons": [
-    {
-      "path": "/api/email/send-all",
-      "schedule": "0 * * * *"
-    }
-  ]
+  "crons": []
 }
