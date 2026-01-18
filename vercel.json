@@ -14,5 +14,19 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/email/send-daily-affirmation",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/email/send-weekly-teaser",
+      "schedule": "0 18 * * 0"
+    },
+    {
+      "path": "/api/email/send-retention-nudge",
+      "schedule": "0 10 * * *"
+    }
   ]
 }

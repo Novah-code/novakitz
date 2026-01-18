@@ -45,25 +45,52 @@ export default function ArchetypeShareCard({
     }
   };
 
-  const shareToSocial = (platform: 'instagram' | 'tiktok' | 'kakao' | 'twitter') => {
+  const shareToSocial = async (platform: 'instagram' | 'tiktok' | 'kakao' | 'twitter') => {
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
 
+    // Check if on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     switch (platform) {
       case 'instagram':
-        // Instagram doesn't support direct sharing via URL, so we copy to clipboard
-        copyToClipboard();
-        alert(language === 'ko'
-          ? '링크가 복사되었습니다! 인스타그램 앱을 열어서 붙여넣기 해주세요.'
-          : 'Link copied! Please open Instagram app and paste it.');
+        // Try to use Web Share API first (works on mobile)
+        if (isMobile && navigator.share) {
+          try {
+            await navigator.share({
+              title: cleanName,
+              text: shareText,
+              url: shareUrl
+            });
+          } catch (err) {
+            if ((err as Error).name !== 'AbortError') {
+              copyToClipboard();
+            }
+          }
+        } else {
+          // Desktop: just copy to clipboard
+          copyToClipboard();
+        }
         break;
 
       case 'tiktok':
-        // TikTok doesn't support direct web sharing, copy to clipboard
-        copyToClipboard();
-        alert(language === 'ko'
-          ? '링크가 복사되었습니다! 틱톡 앱을 열어서 붙여넣기 해주세요.'
-          : 'Link copied! Please open TikTok app and paste it.');
+        // Try to use Web Share API first (works on mobile)
+        if (isMobile && navigator.share) {
+          try {
+            await navigator.share({
+              title: cleanName,
+              text: shareText,
+              url: shareUrl
+            });
+          } catch (err) {
+            if ((err as Error).name !== 'AbortError') {
+              copyToClipboard();
+            }
+          }
+        } else {
+          // Desktop: just copy to clipboard
+          copyToClipboard();
+        }
         break;
 
       case 'kakao':
@@ -92,7 +119,21 @@ export default function ArchetypeShareCard({
           });
         } else {
           // Fallback to web share or copy
-          copyToClipboard();
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: cleanName,
+                text: shareText,
+                url: shareUrl
+              });
+            } catch (err) {
+              if ((err as Error).name !== 'AbortError') {
+                copyToClipboard();
+              }
+            }
+          } else {
+            copyToClipboard();
+          }
         }
         break;
 
@@ -142,6 +183,18 @@ export default function ArchetypeShareCard({
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Dark overlay for better text readability */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.25)',
+          borderRadius: '32px',
+          pointerEvents: 'none'
+        }} />
+
         {/* Decorative Elements */}
         <svg
           style={{
@@ -178,28 +231,29 @@ export default function ArchetypeShareCard({
         </svg>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem', position: 'relative', zIndex: 1 }}>
           <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-            <circle cx="25" cy="25" r="23" stroke="white" strokeWidth="2" opacity="0.6" />
+            <circle cx="25" cy="25" r="23" stroke="white" strokeWidth="2" opacity="0.9" />
             <path
               d="M25 12 C25 12, 35 20, 35 28 C35 33, 31 37, 25 37 C19 37, 15 33, 15 28 C15 20, 25 12, 25 12 Z"
               fill="white"
-              opacity="0.9"
+              opacity="1"
             />
-            <circle cx="25" cy="26" r="4" fill="rgba(0,0,0,0.2)" />
+            <circle cx="25" cy="26" r="4" fill="rgba(0,0,0,0.3)" />
           </svg>
         </div>
 
         {/* Content */}
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem', position: 'relative', zIndex: 1 }}>
           <div
             style={{
               fontSize: '14px',
-              fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.8)',
+              fontWeight: '600',
+              color: 'white',
               marginBottom: '1rem',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
             {language === 'ko' ? 'My Archetype' : 'My Archetype'}
@@ -212,7 +266,7 @@ export default function ArchetypeShareCard({
               color: 'white',
               marginBottom: '1rem',
               lineHeight: '1.2',
-              textShadow: '0 2px 12px rgba(0, 0, 0, 0.2)',
+              textShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
             }}
           >
             {cleanName}
@@ -222,9 +276,10 @@ export default function ArchetypeShareCard({
             style={{
               fontSize: '16px',
               fontWeight: '500',
-              color: 'rgba(255, 255, 255, 0.95)',
+              color: 'white',
               marginBottom: '2rem',
               lineHeight: '1.5',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
             {tagline}
@@ -235,20 +290,21 @@ export default function ArchetypeShareCard({
             style={{
               width: '60px',
               height: '3px',
-              background: 'rgba(255, 255, 255, 0.4)',
+              background: 'rgba(255, 255, 255, 0.8)',
               margin: '0 auto',
             }}
           />
         </div>
 
         {/* Footer */}
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <div
             style={{
               fontSize: '13px',
               fontWeight: '600',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'white',
               marginBottom: '0.5rem',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
             NovaKitz
@@ -256,8 +312,9 @@ export default function ArchetypeShareCard({
           <div
             style={{
               fontSize: '12px',
-              fontWeight: '400',
-              color: 'rgba(255, 255, 255, 0.6)',
+              fontWeight: '500',
+              color: 'rgba(255, 255, 255, 0.95)',
+              textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
             {language === 'ko' ? '무의식 아키타입 테스트' : 'Unconscious Archetype Test'}

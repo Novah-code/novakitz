@@ -114,20 +114,23 @@ export async function canAnalyzeDream(userId: string): Promise<{
     const limit = plan.aiInterpretationsPerMonth;
     const remaining = Math.max(0, limit - currentUsage);
 
-    if (limit === 999999 || currentUsage < limit) {
-      // Premium user or free user hasn't hit limit
+    if (currentUsage < limit) {
+      // User hasn't hit limit
       return {
         allowed: true,
-        remaining: remaining === 999999 ? -1 : remaining, // -1 means unlimited
-        limit: limit === 999999 ? -1 : limit
+        remaining: remaining,
+        limit: limit
       };
     } else {
       // Hit the limit
+      const isPremium = plan.planSlug === 'premium';
       return {
         allowed: false,
         remaining: 0,
         limit: limit,
-        message: `You've reached your monthly AI interpretation limit (${limit}/month). Upgrade to Premium for unlimited interpretations.`
+        message: isPremium
+          ? `You've reached your monthly AI interpretation limit (${limit}/month). The limit resets next month.`
+          : `You've reached your monthly AI interpretation limit (${limit}/month). Upgrade to Premium for 200 interpretations per month.`
       };
     }
   } catch (error) {
@@ -192,15 +195,6 @@ export async function getRemainingAIInterpretations(userId: string): Promise<{
   try {
     const plan = await getUserPlan(userId);
     const used = await getCurrentMonthAIUsage(userId);
-
-    if (plan.aiInterpretationsPerMonth === 999999) {
-      return {
-        used: 0,
-        limit: -1,
-        remaining: -1,
-        isUnlimited: true
-      };
-    }
 
     return {
       used,

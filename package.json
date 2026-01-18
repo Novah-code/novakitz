@@ -11,6 +11,7 @@
     "prebuild": "bash scripts/security-check.sh"
   },
   "dependencies": {
+    "@react-email/components": "^1.0.4",
     "@supabase/supabase-js": "^2.54.0",
     "@tosspayments/payment-widget-sdk": "^0.12.1",
     "chart.js": "^4.5.1",
@@ -21,6 +22,8 @@
     "nodemailer": "^7.0.6",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "react-email": "^5.2.5",
+    "resend": "^6.7.0",
     "three": "^0.170.0",
     "uuid": "^13.0.0"
   },
