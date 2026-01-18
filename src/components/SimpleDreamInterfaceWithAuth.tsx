@@ -26,6 +26,7 @@ const translations = {
     streak: 'Streak',
     badges: 'Badges',
     monthlyReport: 'Monthly Report',
+    pricing: 'Pricing',
     language: 'Language',
     signOut: 'Sign Out',
     signUp: 'Sign Up',
@@ -42,6 +43,7 @@ const translations = {
     streak: '연속 기록',
     badges: '뱃지',
     monthlyReport: '월간 리포트',
+    pricing: '요금제',
     language: '언어',
     signOut: '로그아웃',
     signUp: '회원가입',
@@ -757,6 +759,39 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
                 <span>{t.monthlyReport}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  console.log('Pricing button clicked!');
+                  window.location.href = '/pricing';
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                <span>{t.pricing}</span>
               </button>
 
               <button
