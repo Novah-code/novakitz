@@ -1,0 +1,168 @@
+.unsubscribe-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.unsubscribe-container {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.back-link {
+  background: none;
+  border: none;
+  color: var(--matcha-green);
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #6fa85e;
+}
+
+.unsubscribe-container h1 {
+  font-size: 2rem;
+  color: var(--matcha-dark);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.preferences-list {
+  margin-bottom: 2rem;
+}
+
+.preference-item {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preference-item:hover {
+  border-color: var(--matcha-green);
+  background: rgba(127, 176, 105, 0.05);
+}
+
+.preference-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.preference-info input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+  accent-color: var(--matcha-green);
+}
+
+.preference-info h3 {
+  font-size: 1.125rem;
+  color: var(--matcha-dark);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.preference-info p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.save-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--matcha-green);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 1rem;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #6fa85e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(127, 176, 105, 0.3);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.unsubscribe-all-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: white;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.unsubscribe-all-button:hover:not(:disabled) {
+  background: #dc3545;
+  color: white;
+}
+
+.unsubscribe-all-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .unsubscribe-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .unsubscribe-container h1 {
+    font-size: 1.5rem;
+  }
+}
