@@ -16,6 +16,6 @@ WHERE timezone IS NULL;
 CREATE INDEX IF NOT EXISTS idx_user_profiles_timezone ON public.user_profiles(timezone);
 
 -- Verify the change
-SELECT id, name, preferred_language, timezone, email_notifications
+SELECT id, timezone, email_notifications
 FROM public.user_profiles
 LIMIT 5;

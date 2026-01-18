@@ -13,6 +13,6 @@ SET email_notifications = true
 WHERE email_notifications IS NULL;
 
 -- Verify the change
-SELECT id, name, preferred_language, email_notifications
+SELECT id, email_notifications
 FROM public.user_profiles
 LIMIT 5;
