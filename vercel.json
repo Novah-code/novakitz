@@ -18,15 +18,15 @@
   "crons": [
     {
       "path": "/api/email/send-daily-affirmation",
-      "schedule": "0 7 * * *"
+      "schedule": "0 22 * * *"
     },
     {
       "path": "/api/email/send-weekly-teaser",
-      "schedule": "0 18 * * 0"
+      "schedule": "0 9 * * 0"
     },
     {
       "path": "/api/email/send-retention-nudge",
-      "schedule": "0 10 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
