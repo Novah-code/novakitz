@@ -40,7 +40,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '힘이 솟는 느낌', en: 'Feeling energized' },
-        archetypes: { warrior: 3, ruler: 2, magician: 1 }
+        archetypes: { hero: 3, ruler: 2, magician: 1 }
       },
       {
         text: { ko: '해방감과 자유로움', en: 'Liberation and freedom' },
@@ -71,7 +71,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '쫓기거나 싸우고 있다', en: 'Being chased or fighting' },
-        archetypes: { warrior: 3, outlaw: 2, innocent: 1 }
+        archetypes: { hero: 3, outlaw: 2, innocent: 1 }
       },
       {
         text: { ko: '날거나 웃고 있다', en: 'Flying or laughing' },
@@ -94,7 +94,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '새로운 길을 찾아 떠난다', en: 'Set out to find a new path' },
-        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+        archetypes: { explorer: 3, hero: 2, outlaw: 1 }
       },
       {
         text: { ko: '혼자 앉아서 울거나 멍하니 있다', en: 'Sit alone, crying or spacing out' },
@@ -106,7 +106,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '무언가를 만들거나 변화를 시도한다', en: 'Create something or attempt change' },
-        archetypes: { creator: 3, magician: 2, warrior: 1 }
+        archetypes: { creator: 3, magician: 2, hero: 1 }
       },
       {
         text: { ko: '농담하거나 노래를 부른다', en: 'Make jokes or sing' },
@@ -137,7 +137,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '위험한 곳, 무너지는 건물, 어두운 길', en: 'Dangerous place, crumbling building, dark path' },
-        archetypes: { warrior: 3, outlaw: 2, explorer: 1 }
+        archetypes: { hero: 3, outlaw: 2, explorer: 1 }
       },
       {
         text: { ko: '신비로운 도서관, 연구실, 비밀의 방', en: 'Mysterious library, lab, secret room' },
@@ -145,7 +145,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '성, 궁전, 높은 건물 꼭대기', en: 'Castle, palace, top of tall building' },
-        archetypes: { ruler: 3, warrior: 2, creator: 1 }
+        archetypes: { ruler: 3, hero: 2, creator: 1 }
       }
     ]
   },
@@ -168,11 +168,11 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '침착하게 상황을 파악한다', en: 'Calmly assess the situation' },
-        archetypes: { sage: 3, ruler: 2, warrior: 1 }
+        archetypes: { sage: 3, ruler: 2, hero: 1 }
       },
       {
         text: { ko: '즉시 행동해서 해결한다', en: 'Act immediately to solve it' },
-        archetypes: { warrior: 3, ruler: 2, outlaw: 1 }
+        archetypes: { hero: 3, ruler: 2, outlaw: 1 }
       },
       {
         text: { ko: '농담으로 분위기를 풀려고 한다', en: 'Try to lighten the mood with humor' },
@@ -199,7 +199,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '낯선 사람들이나 적대적인 존재', en: 'Strangers or hostile beings' },
-        archetypes: { warrior: 3, outlaw: 2, innocent: 1 }
+        archetypes: { hero: 3, outlaw: 2, innocent: 1 }
       },
       {
         text: { ko: '현명한 스승이나 노인', en: 'Wise teacher or elder' },
@@ -238,7 +238,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '이번엔 더 큰 모험을 떠나고 싶다', en: 'Embark on an even bigger adventure' },
-        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+        archetypes: { explorer: 3, hero: 2, outlaw: 1 }
       },
       {
         text: { ko: '자신만의 왕국이나 작품을 만들고 싶다', en: 'Create their own kingdom or work' },
@@ -277,7 +277,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '운동하거나 몸을 움직이고 있다', en: 'Exercising or moving your body' },
-        archetypes: { warrior: 3, explorer: 2, ruler: 1 }
+        archetypes: { hero: 3, explorer: 2, ruler: 1 }
       },
       {
         text: { ko: '불안하거나 공허한 느낌이 든다', en: 'Feeling anxious or empty' },
@@ -304,11 +304,11 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '패닉 상태로 깨거나 소리를 지른다', en: 'Panic and wake up or scream' },
-        archetypes: { innocent: 3, caregiver: 2, warrior: 1 }
+        archetypes: { innocent: 3, caregiver: 2, hero: 1 }
       },
       {
         text: { ko: '탈출구를 찾으며 계속 움직인다', en: 'Keep moving to find an exit' },
-        archetypes: { explorer: 3, warrior: 2, outlaw: 1 }
+        archetypes: { explorer: 3, hero: 2, outlaw: 1 }
       },
       {
         text: { ko: '어둠 자체와 대화하거나 관찰한다', en: 'Talk to or observe the darkness itself' },
@@ -339,7 +339,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '더 나아지고 싶다', en: 'Want to improve' },
-        archetypes: { warrior: 3, ruler: 2, creator: 1 }
+        archetypes: { hero: 3, ruler: 2, creator: 1 }
       },
       {
         text: { ko: '있는 그대로 괜찮다', en: 'I\'m okay as I am' },
@@ -374,7 +374,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '통제할 수 없는 상황', en: 'Situations out of control' },
-        archetypes: { ruler: 3, warrior: 2, magician: 1 }
+        archetypes: { ruler: 3, hero: 2, magician: 1 }
       },
       {
         text: { ko: '갇히거나 움직일 수 없는 것', en: 'Being trapped or unable to move' },
@@ -382,7 +382,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '실패하거나 무너지는 것', en: 'Failure or collapse' },
-        archetypes: { warrior: 3, creator: 2, ruler: 1 }
+        archetypes: { hero: 3, creator: 2, ruler: 1 }
       },
       {
         text: { ko: '사랑하는 사람이 다치는 것', en: 'Loved ones getting hurt' },
@@ -405,7 +405,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
     options: [
       {
         text: { ko: '당연히 불안해도 의미를 택해야지', en: 'Obviously choose meaning despite uncertainty' },
-        archetypes: { explorer: 3, warrior: 2, outlaw: 2 }
+        archetypes: { explorer: 3, hero: 2, outlaw: 2 }
       },
       {
         text: { ko: '안전이 먼저야, 그 안에서 의미를 찾으면 돼', en: 'Safety first, find meaning within that' },
@@ -417,7 +417,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '네가 직접 의미를 만들면 돼', en: 'You can create your own meaning' },
-        archetypes: { creator: 3, magician: 2, warrior: 1 }
+        archetypes: { creator: 3, magician: 2, hero: 1 }
       },
       {
         text: { ko: '뭐든 재미있게 살면 되는 거 아냐?', en: 'Just live however it\'s fun?' },
@@ -444,7 +444,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '독립적이지만 함께 성장하고 싶다', en: 'Independent but want to grow together' },
-        archetypes: { warrior: 3, ruler: 2, magician: 1 }
+        archetypes: { hero: 3, ruler: 2, magician: 1 }
       },
       {
         text: { ko: '가볍게 만나고 쉽게 떠나고 싶다', en: 'Meet casually and leave easily' },
@@ -475,7 +475,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '다시 도전해야지', en: 'I must try again' },
-        archetypes: { warrior: 3, explorer: 2, outlaw: 1 }
+        archetypes: { hero: 3, explorer: 2, outlaw: 1 }
       },
       {
         text: { ko: '뭐가 잘못됐는지 분석해야겠다', en: 'Need to analyze what went wrong' },
@@ -518,7 +518,7 @@ export const ARCHETYPE_QUIZ_QUESTIONS: QuizQuestion[] = [
       },
       {
         text: { ko: '무언가를 이루고 남기는 것', en: 'Achieving and leaving something behind' },
-        archetypes: { ruler: 3, warrior: 2, creator: 1 }
+        archetypes: { ruler: 3, hero: 2, creator: 1 }
       },
       {
         text: { ko: '새로운 것을 만들어내는 것', en: 'Creating something new' },
