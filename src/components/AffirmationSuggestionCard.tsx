@@ -47,11 +47,12 @@ export default function AffirmationSuggestionCard({
   const t = translations[language];
 
   const toggleSelection = (index: number) => {
-    if (selectedIndices.includes(index)) {
-      setSelectedIndices(selectedIndices.filter(i => i !== index));
-    } else {
-      setSelectedIndices([...selectedIndices, index]);
-    }
+    // Using functional setState for stable callbacks
+    setSelectedIndices(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
   };
 
   const selectAll = () => {

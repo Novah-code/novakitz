@@ -1956,16 +1956,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
   const addNewTag = () => {
     if (newTag.trim() && !editTags.includes(newTag.trim().toLowerCase())) {
-      setEditTags([...editTags, newTag.trim().toLowerCase()]);
+      // Using functional setState for stable callbacks
+      setEditTags(prev => [...prev, newTag.trim().toLowerCase()]);
       setNewTag('');
     }
   };
 
   const removeTag = (tagToRemove: string, isAutoTag: boolean = false) => {
     if (isAutoTag) {
-      setEditAutoTags(editAutoTags.filter(tag => tag !== tagToRemove));
+      // Using functional setState for stable callbacks
+      setEditAutoTags(prev => prev.filter(tag => tag !== tagToRemove));
     } else {
-      setEditTags(editTags.filter(tag => tag !== tagToRemove));
+      setEditTags(prev => prev.filter(tag => tag !== tagToRemove));
     }
   };
 

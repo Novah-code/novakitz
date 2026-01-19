@@ -123,8 +123,8 @@ export default function DailyCheckin({
         setMood(5);
         setEnergyLevel(5);
 
-        // Update today's checkins
-        setTodayCheckins([...todayCheckins, data as CheckinRecord]);
+        // Update today's checkins - using functional setState
+        setTodayCheckins(prev => [...prev, data as CheckinRecord]);
 
         // Call callback if provided
         if (onCheckInComplete) {

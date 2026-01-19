@@ -123,8 +123,8 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
 
       if (error) throw error;
 
-      // Add new dream to local state
-      setDreams([data, ...dreams]);
+      // Add new dream to local state - using functional setState
+      setDreams(prev => [data, ...prev]);
 
       // Reset form
       setNewDream({
@@ -195,7 +195,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
         count: data.count,
         entries: data.entries
       }))
-      .sort((a, b) => b.count - a.count)
+      .toSorted((a, b) => b.count - a.count)
       .slice(0, 10); // Top 10 patterns
   };
 

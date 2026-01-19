@@ -23,9 +23,9 @@ export default function DreamPlaylist({
   const [isLoadingAffirmations, setIsLoadingAffirmations] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Sort dreams by date (newest first)
+  // Sort dreams by date (newest first) - using toSorted for immutability
   const sortedDreams = useMemo(() => {
-    return [...dreams].sort((a, b) => {
+    return dreams.toSorted((a, b) => {
       const dateA = new Date(a.created_at || 0).getTime();
       const dateB = new Date(b.created_at || 0).getTime();
       return dateB - dateA;

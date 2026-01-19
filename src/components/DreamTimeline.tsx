@@ -102,8 +102,8 @@ export default function DreamTimeline({
   const [selectedDream, setSelectedDream] = useState<string | null>(null);
   const t = translations[language];
 
-  // Sort dreams by date (newest first)
-  const sortedDreams = [...dreams].sort((a, b) =>
+  // Sort dreams by date (newest first) - using toSorted for immutability
+  const sortedDreams = dreams.toSorted((a, b) =>
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
