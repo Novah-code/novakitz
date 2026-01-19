@@ -81,7 +81,7 @@ export default function UnsubscribePage() {
       weeklyReports: 'Weekly Dream Reports',
       weeklyReportsDesc: 'Insights and patterns from your dream journal every Monday',
       retentionNudges: 'Gentle Reminders',
-      retentionNudgesDesc: 'Occasional check-ins if you haven\'t journaled in a while',
+      retentionNudgesDesc: "Occasional check-ins if you haven't journaled in a while",
       saveButton: 'Save Preferences',
       saving: 'Saving...',
       successMessage: 'Preferences saved successfully! Redirecting...',
