@@ -269,6 +269,32 @@ export default function ArchetypeResult() {
             </div>
           </div>
 
+          {/* Traits */}
+          <div style={{
+            background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryDarkColor} 100%)`,
+            borderRadius: '16px',
+            padding: '2rem',
+            marginBottom: '2rem'
+          }}>
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              marginBottom: '1rem',
+              textAlign: 'center'
+            }}>
+              {language === 'ko' ? '💫 당신의 특징' : '💫 Your Traits'}
+            </h3>
+            <div style={{
+              fontSize: '15px',
+              color: '#374151',
+              lineHeight: '1.8',
+              whiteSpace: 'pre-wrap'
+            }}>
+              {getArchetypeTraits(result.primary, language)}
+            </div>
+          </div>
+
           {/* Growth System */}
           {(() => {
             const growthStage = getGrowthStage(result.primary, language);
@@ -587,7 +613,7 @@ export default function ArchetypeResult() {
                 strokeLinejoin="round"
               />
             </svg>
-            {language === 'ko' ? '이미지로 공유하기' : 'Share as Image'}
+            {language === 'ko' ? '공유하기' : 'Share'}
           </button>
           <button
             onClick={handleRetake}

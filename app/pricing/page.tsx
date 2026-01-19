@@ -18,13 +18,8 @@ export default function PricingPage() {
   };
 
   const handleGetStarted = () => {
-    if (isLoggedIn) {
-      // Already logged in, go to journal
-      router.push('/journal');
-    } else {
-      // Not logged in, go to signup
-      router.push('/');
-    }
+    // Go to main page (dream journal interface)
+    router.push('/');
   };
 
   const handleUpgradeClick = (plan: 'lifetime' | 'premium') => {

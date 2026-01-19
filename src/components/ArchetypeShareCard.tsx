@@ -45,109 +45,6 @@ export default function ArchetypeShareCard({
     }
   };
 
-  const shareToSocial = async (platform: 'instagram' | 'tiktok' | 'kakao' | 'twitter') => {
-    const encodedText = encodeURIComponent(shareText);
-    const encodedUrl = encodeURIComponent(shareUrl);
-
-    // Check if on mobile
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    switch (platform) {
-      case 'instagram':
-        // Try to use Web Share API first (works on mobile)
-        if (isMobile && navigator.share) {
-          try {
-            await navigator.share({
-              title: cleanName,
-              text: shareText,
-              url: shareUrl
-            });
-          } catch (err) {
-            if ((err as Error).name !== 'AbortError') {
-              copyToClipboard();
-            }
-          }
-        } else {
-          // Desktop: just copy to clipboard
-          copyToClipboard();
-        }
-        break;
-
-      case 'tiktok':
-        // Try to use Web Share API first (works on mobile)
-        if (isMobile && navigator.share) {
-          try {
-            await navigator.share({
-              title: cleanName,
-              text: shareText,
-              url: shareUrl
-            });
-          } catch (err) {
-            if ((err as Error).name !== 'AbortError') {
-              copyToClipboard();
-            }
-          }
-        } else {
-          // Desktop: just copy to clipboard
-          copyToClipboard();
-        }
-        break;
-
-      case 'kakao':
-        // KakaoTalk sharing
-        if (typeof window !== 'undefined' && (window as any).Kakao) {
-          (window as any).Kakao.Share.sendDefault({
-            objectType: 'feed',
-            content: {
-              title: cleanName,
-              description: tagline,
-              imageUrl: `${window.location.origin}/og-image.png`,
-              link: {
-                mobileWebUrl: shareUrl,
-                webUrl: shareUrl,
-              },
-            },
-            buttons: [
-              {
-                title: language === 'ko' ? '결과 보기' : 'View Result',
-                link: {
-                  mobileWebUrl: shareUrl,
-                  webUrl: shareUrl,
-                },
-              },
-            ],
-          });
-        } else {
-          // Fallback to web share or copy
-          if (navigator.share) {
-            try {
-              await navigator.share({
-                title: cleanName,
-                text: shareText,
-                url: shareUrl
-              });
-            } catch (err) {
-              if ((err as Error).name !== 'AbortError') {
-                copyToClipboard();
-              }
-            }
-          } else {
-            copyToClipboard();
-          }
-        }
-        break;
-
-      case 'twitter':
-        // Twitter/X sharing
-        window.open(
-          `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
-          '_blank',
-          'width=550,height=420'
-        );
-        break;
-    }
-  };
-
   return (
     <div
       style={{
@@ -333,115 +230,61 @@ export default function ArchetypeShareCard({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '1rem'
-        }}>
-          <button
-            onClick={() => shareToSocial('instagram')}
-            style={{
-              padding: '1rem',
-              background: 'linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            }}
-          >
-            Instagram
-          </button>
-
-          <button
-            onClick={() => shareToSocial('tiktok')}
-            style={{
-              padding: '1rem',
-              background: '#000000',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            }}
-          >
-            TikTok
-          </button>
-
-          <button
-            onClick={() => shareToSocial('kakao')}
-            style={{
-              padding: '1rem',
-              background: '#FEE500',
-              color: '#000000',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            }}
-          >
-            {language === 'ko' ? '카카오톡' : 'KakaoTalk'}
-          </button>
-
-          <button
-            onClick={() => shareToSocial('twitter')}
-            style={{
-              padding: '1rem',
-              background: '#1DA1F2',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            }}
-          >
-            Twitter
-          </button>
-        </div>
+        <button
+          onClick={async () => {
+            // Use Web Share API if available, otherwise copy to clipboard
+            if (navigator.share) {
+              try {
+                await navigator.share({
+                  title: cleanName,
+                  text: shareText,
+                  url: shareUrl
+                });
+              } catch (err) {
+                if ((err as Error).name !== 'AbortError') {
+                  copyToClipboard();
+                }
+              }
+            } else {
+              copyToClipboard();
+            }
+          }}
+          style={{
+            padding: '1rem 2rem',
+            background: `linear-gradient(135deg, ${primaryColor} 0%, ${darkColor} 100%)`,
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+            transition: 'all 0.2s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M15 13V15C15 15.5304 14.7893 16.0391 14.4142 16.4142C14.0391 16.7893 13.5304 17 13 17H5C4.46957 17 3.96086 16.7893 3.58579 16.4142C3.21071 16.0391 3 15.5304 3 15V13M13 9L9 5M9 5L5 9M9 5V13"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {language === 'ko' ? '공유하기' : 'Share'}
+        </button>
 
         <button
           onClick={copyToClipboard}
