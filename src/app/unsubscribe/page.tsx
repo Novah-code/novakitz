@@ -74,34 +74,34 @@ export default function UnsubscribePage() {
 
   const translations = {
     en: {
-      title: 'Email Preferences',
-      subtitle: 'Choose which emails you'd like to receive',
-      dailyAffirmations: 'Daily Affirmations',
-      dailyAffirmationsDesc: 'Personalized affirmations based on your archetype every morning',
-      weeklyReports: 'Weekly Dream Reports',
-      weeklyReportsDesc: 'Insights and patterns from your dream journal every Monday',
-      retentionNudges: 'Gentle Reminders',
+      title: "Email Preferences",
+      subtitle: "Choose which emails you'd like to receive",
+      dailyAffirmations: "Daily Affirmations",
+      dailyAffirmationsDesc: "Personalized affirmations based on your archetype every morning",
+      weeklyReports: "Weekly Dream Reports",
+      weeklyReportsDesc: "Insights and patterns from your dream journal every Monday",
+      retentionNudges: "Gentle Reminders",
       retentionNudgesDesc: "Occasional check-ins if you haven't journaled in a while",
-      saveButton: 'Save Preferences',
-      saving: 'Saving...',
-      successMessage: 'Preferences saved successfully! Redirecting...',
-      unsubscribeAll: 'Unsubscribe from all emails',
-      backToApp: 'Back to NovaKitz'
+      saveButton: "Save Preferences",
+      saving: "Saving...",
+      successMessage: "Preferences saved successfully! Redirecting...",
+      unsubscribeAll: "Unsubscribe from all emails",
+      backToApp: "Back to NovaKitz"
     },
     ko: {
-      title: '이메일 설정',
-      subtitle: '받고 싶은 이메일을 선택하세요',
-      dailyAffirmations: '일일 확언',
-      dailyAffirmationsDesc: '매일 아침 아키타입 기반 맞춤 확언 메시지',
-      weeklyReports: '주간 꿈 리포트',
-      weeklyReportsDesc: '매주 월요일 꿈 일기 인사이트 및 패턴 분석',
-      retentionNudges: '부드러운 알림',
-      retentionNudgesDesc: '일정 기간 기록하지 않으면 보내는 체크인 메시지',
-      saveButton: '설정 저장',
-      saving: '저장 중...',
-      successMessage: '설정이 저장되었습니다! 리다이렉팅 중...',
-      unsubscribeAll: '모든 이메일 수신 거부',
-      backToApp: 'NovaKitz로 돌아가기'
+      title: "이메일 설정",
+      subtitle: "받고 싶은 이메일을 선택하세요",
+      dailyAffirmations: "일일 확언",
+      dailyAffirmationsDesc: "매일 아침 아키타입 기반 맞춤 확언 메시지",
+      weeklyReports: "주간 꿈 리포트",
+      weeklyReportsDesc: "매주 월요일 꿈 일기 인사이트 및 패턴 분석",
+      retentionNudges: "부드러운 알림",
+      retentionNudgesDesc: "일정 기간 기록하지 않으면 보내는 체크인 메시지",
+      saveButton: "설정 저장",
+      saving: "저장 중...",
+      successMessage: "설정이 저장되었습니다! 리다이렉팅 중...",
+      unsubscribeAll: "모든 이메일 수신 거부",
+      backToApp: "NovaKitz로 돌아가기"
     }
   };
 
