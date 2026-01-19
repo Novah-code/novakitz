@@ -164,6 +164,7 @@ export default function ArchetypeShareCard({
               marginBottom: '1rem',
               lineHeight: '1.2',
               textShadow: '0 2px 12px rgba(0, 0, 0, 0.4)',
+              fontFamily: '"S-Core Dream", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             }}
           >
             {cleanName}
