@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { supabase } from '@/lib/supabase';
 import { DailyAffirmationEmail } from '@/emails/DailyAffirmationEmail';
+import { generateDynamicSubject } from '@/lib/emailUtils';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -141,11 +142,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all users who have email notifications enabled
+    // Get all users who have daily affirmation emails enabled
     const { data: users, error: usersError } = await supabase
       .from('users')
       .select('id, name, email, preferred_language, archetype_result')
-      .eq('email_notifications', true)
+      .eq('email_daily_affirmations', true)
       .not('email', 'is', null);
 
     if (usersError) {
@@ -208,11 +209,19 @@ export async function POST(request: Request) {
         const archetypeAffirmations = affirmations[language][archetype as keyof typeof affirmations.ko] || affirmations[language].everyman;
         const randomAffirmation = archetypeAffirmations[Math.floor(Math.random() * archetypeAffirmations.length)];
 
+        // Generate dynamic subject line to avoid spam filters
+        const dayOfWeek = new Date().toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { weekday: 'long' });
+        const dynamicSubject = generateDynamicSubject('daily-affirmation', language, {
+          userName: user.name,
+          dayOfWeek,
+          keyword: dreamKeyword
+        });
+
         // Send email using Resend
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || 'NovaKitz <noreply@novakitz.com>',
           to: user.email,
-          subject: language === 'ko' ? `🌙 ${user.name}님, 오늘의 확언이 도착했습니다` : `🌙 ${user.name}, Your Daily Affirmation`,
+          subject: dynamicSubject,
           react: DailyAffirmationEmail({
             userName: user.name,
             archetype,

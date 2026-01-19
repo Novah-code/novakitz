@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { supabase } from '@/lib/supabase';
 import { WeeklyReportTeaserEmail } from '@/emails/WeeklyReportTeaserEmail';
 import { getUserPlan } from '@/lib/subscription';
+import { generateDynamicSubject } from '@/lib/emailUtils';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,11 +15,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all users who have email notifications enabled
+    // Get all users who have weekly report emails enabled
     const { data: users, error: usersError } = await supabase
       .from('users')
       .select('id, name, email, preferred_language')
-      .eq('email_notifications', true)
+      .eq('email_weekly_reports', true)
       .not('email', 'is', null);
 
     if (usersError) {
@@ -110,13 +111,17 @@ export async function POST(request: Request) {
           continue;
         }
 
+        // Generate dynamic subject line to avoid spam filters
+        const dynamicSubject = generateDynamicSubject('weekly-report', language, {
+          userName: user.name,
+          keyword: topKeyword
+        });
+
         // Send email using Resend
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || 'NovaKitz <noreply@novakitz.com>',
           to: user.email,
-          subject: language === 'ko'
-            ? `📊 ${user.name}님의 주간 꿈 패턴 분석이 완료되었습니다`
-            : `📊 ${user.name}'s Weekly Dream Analysis is Ready`,
+          subject: dynamicSubject,
           react: WeeklyReportTeaserEmail({
             userName: user.name,
             dreamCount,
