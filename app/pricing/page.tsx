@@ -7,9 +7,15 @@ import { supabase } from '@/lib/supabase';
 export default function PricingPage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ko'>('en');
 
   useEffect(() => {
     checkAuth();
+    // Get language preference
+    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
   }, []);
 
   const checkAuth = async () => {
@@ -22,12 +28,52 @@ export default function PricingPage() {
     router.push('/');
   };
 
-  const handleUpgradeClick = (plan: 'lifetime' | 'premium') => {
+  const handleUpgradeClick = (plan: 'lifetime' | 'premium' | 'yearly') => {
     if (plan === 'lifetime') {
       window.open(process.env.NEXT_PUBLIC_GUMROAD_LIFETIME_URL || 'https://novakitz.gumroad.com/l/novakitz-lifetime', '_blank');
+    } else if (plan === 'yearly') {
+      window.open(process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL || 'https://novakitz.gumroad.com/l/novakitz_year', '_blank');
     } else {
       window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
     }
+  };
+
+  const t = {
+    title: language === 'ko' ? 'NovaKitz 요금제' : 'NovaKitz Pricing',
+    subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
+    free: 'Free',
+    freeDesc: language === 'ko' ? '무료로 시작하기' : 'Start for free',
+    freeForever: language === 'ko' ? '영원히 무료' : 'Free forever',
+    freeFeatures: language === 'ko'
+      ? ['월 7회 AI 꿈 해석', '무제한 꿈 기록', '융 아키타입 테스트', '기본 통계 및 패턴 분석']
+      : ['7 AI dream interpretations/month', 'Unlimited dream recording', 'Jung archetype test', 'Basic stats & pattern analysis'],
+    premium: 'Premium',
+    premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
+    perMonth: language === 'ko' ? '매월 결제' : 'per month',
+    premiumFeatures: language === 'ko'
+      ? ['월 200회 AI 꿈 해석 (하루 6~7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '융 아키타입 심화 분석', '모든 미래 기능 무료 업데이트']
+      : ['200 AI interpretations/month (~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'Advanced archetype analysis', 'All future updates free'],
+    yearly: language === 'ko' ? '연간' : 'Yearly',
+    yearlyDesc: language === 'ko' ? '연간 구독' : 'Annual subscription',
+    perYear: language === 'ko' ? '연간 결제' : 'per year',
+    yearlyDiscount: language === 'ko' ? '17% 할인' : '17% Off',
+    yearlyFeatures: language === 'ko'
+      ? ['Premium의 모든 기능', '월 200회 AI 꿈 해석', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '모든 미래 기능 무료 업데이트']
+      : ['All Premium features', '200 AI interpretations/month', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'All future updates free'],
+    lifetime: 'Lifetime',
+    lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
+    lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
+    lifetimeFeatures: language === 'ko'
+      ? ['✨ Premium의 모든 기능', '💎 평생 무제한 AI 해석 (월 200회)', '🎁 모든 미래 기능 평생 무료', '🚀 Product Hunt 론칭 특가', '⏰ 200명 한정 (마감 임박)', '💰 평생 $4.99/월 절약']
+      : ['✨ All Premium features', '💎 Lifetime AI interpretations (200/month)', '🎁 All future features free forever', '🚀 Product Hunt launch special', '⏰ Limited to 200 spots', '💰 Save $4.99/month forever'],
+    goToJournal: language === 'ko' ? '저널로 이동' : 'Go to Journal',
+    startFree: language === 'ko' ? '무료로 시작하기' : 'Start Free',
+    startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
+    startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
+    buyLifetime: language === 'ko' ? '🎯 평생 이용권 구매하기' : '🎯 Buy Lifetime Access',
+    noRefund: language === 'ko' ? '환불 불가 • 즉시 라이선스 발급' : 'No refunds • Instant license',
+    faq: language === 'ko' ? '자주 묻는 질문' : 'FAQ',
+    stillThinking: language === 'ko' ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first',
   };
 
   return (
@@ -49,14 +95,14 @@ export default function PricingPage() {
             marginBottom: '1rem',
             fontFamily: "'Cormorant', serif"
           }}>
-            NovaKitz 요금제
+            {t.title}
           </h1>
           <p style={{
             fontSize: '18px',
             color: '#6b7280',
             lineHeight: '1.6'
           }}>
-            당신의 무의식을 탐험하고 꿈을 기록하세요
+            {t.subtitle}
           </p>
         </div>
 
@@ -81,14 +127,14 @@ export default function PricingPage() {
               color: '#1f2937',
               marginBottom: '0.5rem'
             }}>
-              Free
+              {t.free}
             </div>
             <div style={{
               fontSize: '14px',
               color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              무료로 시작하기
+              {t.freeDesc}
             </div>
             <div style={{
               fontSize: '48px',
@@ -105,17 +151,12 @@ export default function PricingPage() {
               paddingBottom: '2rem',
               borderBottom: '1px solid #e5e7eb'
             }}>
-              영원히 무료
+              {t.freeForever}
             </div>
 
             {/* Features */}
             <div style={{ marginBottom: '2rem' }}>
-              {[
-                '월 7회 AI 꿈 해석',
-                '무제한 꿈 기록',
-                '융 아키타입 테스트',
-                '기본 통계 및 패턴 분석'
-              ].map((feature, idx) => (
+              {t.freeFeatures.map((feature, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -152,7 +193,7 @@ export default function PricingPage() {
                 e.currentTarget.style.background = '#f3f4f6';
               }}
             >
-              {isLoggedIn ? '저널로 이동' : '무료로 시작하기'}
+              {isLoggedIn ? t.goToJournal : t.startFree}
             </button>
           </div>
 
@@ -161,41 +202,24 @@ export default function PricingPage() {
             background: 'white',
             borderRadius: '24px',
             padding: '2.5rem',
-            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2)',
-            border: '3px solid #7FB069',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            border: '2px solid #e5e7eb',
             position: 'relative'
           }}>
-            {/* Popular Badge */}
-            <div style={{
-              position: 'absolute',
-              top: '-12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-              color: 'white',
-              padding: '6px 20px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: '700',
-              letterSpacing: '0.5px'
-            }}>
-              POPULAR
-            </div>
-
             <div style={{
               fontSize: '24px',
               fontWeight: 'bold',
               color: '#1f2937',
               marginBottom: '0.5rem'
             }}>
-              Premium
+              {t.premium}
             </div>
             <div style={{
               fontSize: '14px',
               color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              매월 구독
+              {t.premiumDesc}
             </div>
             <div style={{
               fontSize: '48px',
@@ -212,19 +236,12 @@ export default function PricingPage() {
               paddingBottom: '2rem',
               borderBottom: '1px solid #e5e7eb'
             }}>
-              매월 결제
+              {t.perMonth}
             </div>
 
             {/* Features */}
             <div style={{ marginBottom: '2rem' }}>
-              {[
-                '월 200회 AI 꿈 해석 (하루 6~7회)',
-                '무제한 꿈 기록 및 전체 히스토리',
-                '매일 아침 맞춤 확언 이메일',
-                '주간 꿈 패턴 리포트',
-                '융 아키타입 심화 분석',
-                '모든 미래 기능 무료 업데이트'
-              ].map((feature, idx) => (
+              {t.premiumFeatures.map((feature, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -265,7 +282,140 @@ export default function PricingPage() {
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 176, 105, 0.3)';
               }}
             >
-              Premium 시작하기
+              {t.startPremium}
+            </button>
+          </div>
+
+          {/* Yearly Plan */}
+          <div style={{
+            background: 'white',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2)',
+            border: '3px solid #7FB069',
+            position: 'relative'
+          }}>
+            {/* Popular Badge */}
+            <div style={{
+              position: 'absolute',
+              top: '-12px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+              color: 'white',
+              padding: '6px 20px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: '700',
+              letterSpacing: '0.5px'
+            }}>
+              POPULAR
+            </div>
+
+            <div style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              marginBottom: '0.5rem'
+            }}>
+              {t.yearly}
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#6b7280',
+              marginBottom: '1.5rem'
+            }}>
+              {t.yearlyDesc}
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '0.5rem'
+            }}>
+              <div style={{
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#9ca3af',
+                textDecoration: 'line-through'
+              }}>
+                $59.88
+              </div>
+              <div style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#7FB069'
+              }}>
+                $49.99
+              </div>
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              color: '#6b7280',
+              marginBottom: '2rem',
+              paddingBottom: '2rem',
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              {t.perYear}
+              <span style={{
+                background: '#dcfce7',
+                color: '#166534',
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}>
+                {t.yearlyDiscount}
+              </span>
+            </div>
+
+            {/* Features */}
+            <div style={{ marginBottom: '2rem' }}>
+              {t.yearlyFeatures.map((feature, idx) => (
+                <div key={idx} style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  marginBottom: '1rem',
+                  fontSize: '15px',
+                  color: '#374151',
+                  fontWeight: idx === 0 ? '600' : 'normal'
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ marginRight: '12px', marginTop: '2px', flexShrink: 0 }}>
+                    <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="#7FB069" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {feature}
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => handleUpgradeClick('yearly')}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(127, 176, 105, 0.3)',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 176, 105, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 176, 105, 0.3)';
+              }}
+            >
+              {t.startYearly}
             </button>
           </div>
 
@@ -301,14 +451,14 @@ export default function PricingPage() {
               color: '#1f2937',
               marginBottom: '0.5rem'
             }}>
-              Lifetime
+              {t.lifetime}
             </div>
             <div style={{
               fontSize: '14px',
               color: '#6b7280',
               marginBottom: '1.5rem'
             }}>
-              평생 이용권
+              {t.lifetimeDesc}
             </div>
             <div style={{
               display: 'flex',
@@ -340,19 +490,12 @@ export default function PricingPage() {
               paddingBottom: '2rem',
               borderBottom: '1px solid #bfdbfe'
             }}>
-              단 한 번 결제로 평생 사용 • 35% 할인
+              {t.lifetimeDiscount}
             </div>
 
             {/* Features */}
             <div style={{ marginBottom: '2rem' }}>
-              {[
-                '✨ Premium의 모든 기능',
-                '💎 평생 무제한 AI 해석 (월 200회)',
-                '🎁 모든 미래 기능 평생 무료',
-                '🚀 Product Hunt 론칭 특가',
-                '⏰ 200명 한정 (마감 임박)',
-                '💰 평생 $4.99/월 절약'
-              ].map((feature, idx) => (
+              {t.lifetimeFeatures.map((feature, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   alignItems: 'flex-start',
@@ -393,7 +536,7 @@ export default function PricingPage() {
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 64, 175, 0.3)';
               }}
             >
-              🎯 평생 이용권 구매하기
+              {t.buyLifetime}
             </button>
 
             <div style={{
@@ -402,7 +545,7 @@ export default function PricingPage() {
               color: '#6b7280',
               textAlign: 'center'
             }}>
-              환불 불가 • 즉시 라이선스 발급
+              {t.noRefund}
             </div>
           </div>
         </div>
@@ -422,11 +565,11 @@ export default function PricingPage() {
             marginBottom: '2rem',
             textAlign: 'center'
           }}>
-            자주 묻는 질문
+            {t.faq}
           </h2>
 
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            {[
+            {(language === 'ko' ? [
               {
                 q: '월 200회 AI 해석이면 충분한가요?',
                 a: '네! 하루 평균 6~7회 해석이 가능해서 매일 여러 개의 꿈을 기록하고 분석받기에 충분합니다. 대부분의 사용자는 하루 1~2개의 꿈을 기록합니다.'
@@ -447,7 +590,28 @@ export default function PricingPage() {
                 q: '결제는 어떻게 하나요?',
                 a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.'
               }
-            ].map((faq, idx) => (
+            ] : [
+              {
+                q: 'Is 200 AI interpretations per month enough?',
+                a: 'Yes! That allows about 6-7 interpretations per day, which is plenty for recording and analyzing multiple dreams daily. Most users record 1-2 dreams per day.'
+              },
+              {
+                q: 'Is the Lifetime plan really forever?',
+                a: 'Yes, with a single payment you can use Premium features for as long as NovaKitz exists. All future feature updates are included for free.'
+              },
+              {
+                q: 'Can I get a refund?',
+                a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure NovaKitz works for you.'
+              },
+              {
+                q: 'Can I cancel the Premium monthly subscription anytime?',
+                a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.'
+              },
+              {
+                q: 'How do I pay?',
+                a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.'
+              }
+            ]).map((faq, idx) => (
               <div key={idx} style={{
                 marginBottom: '2rem',
                 paddingBottom: '2rem',
@@ -483,7 +647,7 @@ export default function PricingPage() {
             color: '#6b7280',
             marginBottom: '1rem'
           }}>
-            아직 고민 중이신가요? 먼저 무료로 시작해보세요
+            {t.stillThinking}
           </p>
           <button
             onClick={handleGetStarted}
@@ -507,7 +671,7 @@ export default function PricingPage() {
               e.currentTarget.style.color = '#7FB069';
             }}
           >
-            무료로 시작하기
+            {t.startFree}
           </button>
         </div>
       </div>
