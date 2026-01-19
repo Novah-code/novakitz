@@ -2,26 +2,18 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 export default function PricingPage() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
 
   useEffect(() => {
-    checkAuth();
     // Get language preference
     const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
     if (savedLanguage) {
       setLanguage(savedLanguage);
     }
   }, []);
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setIsLoggedIn(!!user);
-  };
 
   const handleGetStarted = () => {
     // Go to main page (dream journal interface)
@@ -41,12 +33,6 @@ export default function PricingPage() {
   const t = {
     title: language === 'ko' ? 'NovaKitz 요금제' : 'NovaKitz Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
-    free: 'Free',
-    freeDesc: language === 'ko' ? '무료로 시작하기' : 'Start for free',
-    freeForever: language === 'ko' ? '영원히 무료' : 'Free forever',
-    freeFeatures: language === 'ko'
-      ? ['월 7회 AI 꿈 해석', '무제한 꿈 기록', '융 아키타입 테스트', '기본 통계 및 패턴 분석']
-      : ['7 AI dream interpretations/month', 'Unlimited dream recording', 'Jung archetype test', 'Basic stats & pattern analysis'],
     premium: 'Premium',
     premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
     perMonth: language === 'ko' ? '매월 결제' : 'per month',
@@ -66,14 +52,13 @@ export default function PricingPage() {
     lifetimeFeatures: language === 'ko'
       ? ['✨ Premium의 모든 기능', '💎 평생 무제한 AI 해석 (월 200회)', '🎁 모든 미래 기능 평생 무료', '🚀 Product Hunt 론칭 특가', '⏰ 200명 한정 (마감 임박)', '💰 평생 $4.99/월 절약']
       : ['✨ All Premium features', '💎 Lifetime AI interpretations (200/month)', '🎁 All future features free forever', '🚀 Product Hunt launch special', '⏰ Limited to 200 spots', '💰 Save $4.99/month forever'],
-    goToJournal: language === 'ko' ? '저널로 이동' : 'Go to Journal',
-    startFree: language === 'ko' ? '무료로 시작하기' : 'Start Free',
     startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
     buyLifetime: language === 'ko' ? '🎯 평생 이용권 구매하기' : '🎯 Buy Lifetime Access',
     noRefund: language === 'ko' ? '환불 불가 • 즉시 라이선스 발급' : 'No refunds • Instant license',
     faq: language === 'ko' ? '자주 묻는 질문' : 'FAQ',
     stillThinking: language === 'ko' ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first',
+    tryFree: language === 'ko' ? '무료로 시작하기' : 'Try Free First',
   };
 
   return (
@@ -106,97 +91,15 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Pricing Cards */}
+        {/* Pricing Cards - 3 plans only */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '2rem',
-          marginBottom: '3rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.5rem',
+          marginBottom: '3rem',
+          maxWidth: '1000px',
+          margin: '0 auto 3rem auto'
         }}>
-          {/* Free Plan */}
-          <div style={{
-            background: 'white',
-            borderRadius: '24px',
-            padding: '2.5rem',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            border: '2px solid #e5e7eb'
-          }}>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '0.5rem'
-            }}>
-              {t.free}
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '1.5rem'
-            }}>
-              {t.freeDesc}
-            </div>
-            <div style={{
-              fontSize: '48px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '0.5rem'
-            }}>
-              $0
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '2rem',
-              paddingBottom: '2rem',
-              borderBottom: '1px solid #e5e7eb'
-            }}>
-              {t.freeForever}
-            </div>
-
-            {/* Features */}
-            <div style={{ marginBottom: '2rem' }}>
-              {t.freeFeatures.map((feature, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  marginBottom: '1rem',
-                  fontSize: '15px',
-                  color: '#374151'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ marginRight: '12px', marginTop: '2px', flexShrink: 0 }}>
-                    <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="#7FB069" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {feature}
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={handleGetStarted}
-              style={{
-                width: '100%',
-                padding: '14px',
-                background: '#f3f4f6',
-                color: '#1f2937',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e5e7eb';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#f3f4f6';
-              }}
-            >
-              {isLoggedIn ? t.goToJournal : t.startFree}
-            </button>
-          </div>
-
           {/* Premium Monthly */}
           <div style={{
             background: 'white',
@@ -671,7 +574,7 @@ export default function PricingPage() {
               e.currentTarget.style.color = '#7FB069';
             }}
           >
-            {t.startFree}
+            {t.tryFree}
           </button>
         </div>
       </div>

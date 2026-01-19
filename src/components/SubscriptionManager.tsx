@@ -30,7 +30,15 @@ const translations = {
     history: 'History',
     days30: '30 days',
     full: 'Full',
-    detailsToggle: 'Details'
+    detailsToggle: 'Details',
+    haveLicenseKey: 'Have a license key?',
+    enterLicenseKey: 'Enter License Key',
+    licenseKeyPlaceholder: 'Enter your Gumroad license key',
+    activateLicense: 'Activate',
+    activating: 'Activating...',
+    licenseActivated: 'License activated successfully!',
+    licenseError: 'Failed to activate license. Please check your key.',
+    licenseAlreadyUsed: 'This license is already in use by another account.'
   },
   ko: {
     planStatus: '플랜 상태',
@@ -54,7 +62,15 @@ const translations = {
     history: '기록',
     days30: '30일',
     full: '전체',
-    detailsToggle: '상세'
+    detailsToggle: '상세',
+    haveLicenseKey: '라이선스 키가 있으신가요?',
+    enterLicenseKey: '라이선스 키 입력',
+    licenseKeyPlaceholder: 'Gumroad 라이선스 키를 입력하세요',
+    activateLicense: '활성화',
+    activating: '활성화 중...',
+    licenseActivated: '라이선스가 성공적으로 활성화되었습니다!',
+    licenseError: '라이선스 활성화에 실패했습니다. 키를 확인해주세요.',
+    licenseAlreadyUsed: '이 라이선스는 이미 다른 계정에서 사용 중입니다.'
   }
 };
 
@@ -84,6 +100,10 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showLicenseInput, setShowLicenseInput] = useState(false);
+  const [licenseKey, setLicenseKey] = useState('');
+  const [licenseLoading, setLicenseLoading] = useState(false);
+  const [licenseMessage, setLicenseMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const t = translations[language];
 
   const loadSubscriptionData = useCallback(async () => {
@@ -148,6 +168,45 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
       loadSubscriptionData();
     }
   }, [user, loadSubscriptionData]);
+
+  const handleActivateLicense = async () => {
+    if (!user || !licenseKey.trim()) return;
+
+    setLicenseLoading(true);
+    setLicenseMessage(null);
+
+    try {
+      const response = await fetch('/api/activate-license', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          licenseKey: licenseKey.trim(),
+          userId: user.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setLicenseMessage({ type: 'success', text: t.licenseActivated });
+        setLicenseKey('');
+        setShowLicenseInput(false);
+        // Reload subscription data
+        await loadSubscriptionData();
+      } else {
+        const errorText = data.error?.includes('already in use')
+          ? t.licenseAlreadyUsed
+          : t.licenseError;
+        setLicenseMessage({ type: 'error', text: errorText });
+      }
+    } catch {
+      setLicenseMessage({ type: 'error', text: t.licenseError });
+    } finally {
+      setLicenseLoading(false);
+    }
+  };
 
   const getPlanBadgeColor = (planSlug: string): string => {
     if (planSlug === 'premium') {
@@ -307,6 +366,87 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               >
                 Upgrade to Premium
               </button>
+
+              {/* License Key Input Section */}
+              <div className="license-section" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
+                {!showLicenseInput ? (
+                  <button
+                    onClick={() => setShowLicenseInput(true)}
+                    className="license-toggle-button"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#6b7280',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    {t.haveLicenseKey}
+                  </button>
+                ) : (
+                  <div className="license-input-container">
+                    <h5 style={{ marginBottom: '0.75rem', color: '#374151' }}>{t.enterLicenseKey}</h5>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input
+                        type="text"
+                        value={licenseKey}
+                        onChange={(e) => setLicenseKey(e.target.value)}
+                        placeholder={t.licenseKeyPlaceholder}
+                        style={{
+                          flex: 1,
+                          padding: '0.75rem',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '0.9rem'
+                        }}
+                        disabled={licenseLoading}
+                      />
+                      <button
+                        onClick={handleActivateLicense}
+                        disabled={licenseLoading || !licenseKey.trim()}
+                        style={{
+                          padding: '0.75rem 1.5rem',
+                          background: licenseLoading ? '#9ca3af' : '#7FB069',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '0.9rem',
+                          cursor: licenseLoading ? 'not-allowed' : 'pointer'
+                        }}
+                      >
+                        {licenseLoading ? t.activating : t.activateLicense}
+                      </button>
+                    </div>
+                    {licenseMessage && (
+                      <p style={{
+                        marginTop: '0.5rem',
+                        fontSize: '0.85rem',
+                        color: licenseMessage.type === 'success' ? '#16a34a' : '#dc2626'
+                      }}>
+                        {licenseMessage.text}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => {
+                        setShowLicenseInput(false);
+                        setLicenseKey('');
+                        setLicenseMessage(null);
+                      }}
+                      style={{
+                        marginTop: '0.5rem',
+                        background: 'none',
+                        border: 'none',
+                        color: '#6b7280',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {language === 'ko' ? '취소' : 'Cancel'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

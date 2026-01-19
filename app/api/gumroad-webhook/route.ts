@@ -74,10 +74,15 @@ export async function POST(request: NextRequest) {
     console.log(`🔍 Processing subscription for: ${purchaserEmail}`);
 
     // Determine subscription duration based on product
-    let subscriptionDays = 30; // Default to 1 month
+    let subscriptionDays: number | null = 30; // Default to 1 month
 
+    // Check if it's the lifetime product
+    if (permalink === 'novakitz_lifetime' || productName?.toLowerCase().includes('lifetime')) {
+      subscriptionDays = null; // Lifetime = no expiry
+      console.log('📅 Detected LIFETIME subscription');
+    }
     // Check if it's the yearly product - check permalink and product name
-    if (permalink === 'novakitz_year' || productName?.toLowerCase().includes('year')) {
+    else if (permalink === 'novakitz_year' || productName?.toLowerCase().includes('year')) {
       subscriptionDays = 365;
       console.log('📅 Detected yearly subscription');
     } else {
@@ -135,10 +140,15 @@ export async function POST(request: NextRequest) {
 
     // Calculate expiry date
     const startDate = new Date();
-    const expiryDate = new Date(startDate);
-    expiryDate.setDate(expiryDate.getDate() + subscriptionDays);
+    let expiryDate: Date | null = null;
 
-    console.log(`📅 Subscription: ${startDate.toISOString()} → ${expiryDate.toISOString()}`);
+    if (subscriptionDays !== null) {
+      expiryDate = new Date(startDate);
+      expiryDate.setDate(expiryDate.getDate() + subscriptionDays);
+      console.log(`📅 Subscription: ${startDate.toISOString()} → ${expiryDate.toISOString()}`);
+    } else {
+      console.log(`📅 Lifetime subscription: ${startDate.toISOString()} → NEVER EXPIRES`);
+    }
 
     // Check if user already has an active subscription
     const { data: existingSubscription, error: checkError } = await sbClient
@@ -165,7 +175,7 @@ export async function POST(request: NextRequest) {
           gumroad_product_id: permalink, // Store the product permalink (novakitz or novakitz_year)
           status: 'active',
           started_at: startDate.toISOString(),
-          expires_at: expiryDate.toISOString(),
+          expires_at: expiryDate ? expiryDate.toISOString() : null,
           renewed_at: startDate.toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -184,8 +194,8 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Subscription updated',
         email: purchaserEmail,
-        duration: subscriptionDays === 365 ? 'yearly' : 'monthly',
-        expiresAt: expiryDate.toISOString()
+        duration: subscriptionDays === null ? 'lifetime' : subscriptionDays === 365 ? 'yearly' : 'monthly',
+        expiresAt: expiryDate ? expiryDate.toISOString() : null
       });
     } else {
       console.log('✨ Creating new subscription...');
@@ -197,10 +207,10 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: permalink, // Store the product permalink (novakitz or novakitz_year)
+          gumroad_product_id: permalink, // Store the product permalink (novakitz, novakitz_year, or novakitz_lifetime)
           status: 'active',
           started_at: startDate.toISOString(),
-          expires_at: expiryDate.toISOString(),
+          expires_at: expiryDate ? expiryDate.toISOString() : null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }]);
@@ -218,8 +228,8 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Subscription created',
         email: purchaserEmail,
-        duration: subscriptionDays === 365 ? 'yearly' : 'monthly',
-        expiresAt: expiryDate.toISOString()
+        duration: subscriptionDays === null ? 'lifetime' : subscriptionDays === 365 ? 'yearly' : 'monthly',
+        expiresAt: expiryDate ? expiryDate.toISOString() : null
       });
     }
 
@@ -236,13 +246,14 @@ export async function POST(request: NextRequest) {
 }
 
 // GET endpoint for testing
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({
     status: 'Gumroad webhook endpoint is active',
     expectedEvent: 'license.created',
     products: {
       monthly: 'https://novakitz.gumroad.com/l/novakitz',
-      yearly: 'https://novakitz.gumroad.com/l/novakitz_year'
+      yearly: 'https://novakitz.gumroad.com/l/novakitz_year',
+      lifetime: 'https://novakitz.gumroad.com/l/novakitz_lifetime'
     }
   });
 }
