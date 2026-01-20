@@ -31,7 +31,7 @@ export default function PricingPage() {
   };
 
   const t = {
-    title: language === 'ko' ? 'NovaKitz 요금제' : 'NovaKitz Pricing',
+    title: language === 'ko' ? '요금제' : 'Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
     premium: 'Premium',
     premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
@@ -50,11 +50,11 @@ export default function PricingPage() {
     lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
     lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
     lifetimeFeatures: language === 'ko'
-      ? ['✨ Premium의 모든 기능', '💎 평생 무제한 AI 해석 (월 200회)', '🎁 모든 미래 기능 평생 무료', '🚀 Product Hunt 론칭 특가', '⏰ 200명 한정 (마감 임박)', '💰 평생 $4.99/월 절약']
-      : ['✨ All Premium features', '💎 Lifetime AI interpretations (200/month)', '🎁 All future features free forever', '🚀 Product Hunt launch special', '⏰ Limited to 200 spots', '💰 Save $4.99/month forever'],
+      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '200명 한정', '평생 $4.99/월 절약']
+      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Limited to 200 spots', 'Save $4.99/month forever'],
     startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
-    buyLifetime: language === 'ko' ? '🎯 평생 이용권 구매하기' : '🎯 Buy Lifetime Access',
+    buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
     noRefund: language === 'ko' ? '환불 불가 • 즉시 라이선스 발급' : 'No refunds • Instant license',
     faq: language === 'ko' ? '자주 묻는 질문' : 'FAQ',
     stillThinking: language === 'ko' ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first',
@@ -78,7 +78,7 @@ export default function PricingPage() {
             fontWeight: 'bold',
             color: '#1f2937',
             marginBottom: '1rem',
-            fontFamily: "'Cormorant', serif"
+            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
           }}>
             {t.title}
           </h1>
@@ -345,7 +345,7 @@ export default function PricingPage() {
               fontWeight: '700',
               letterSpacing: '0.5px'
             }}>
-              🔥 LIMITED 200 SPOTS
+              LIMITED 200 SPOTS
             </div>
 
             <div style={{

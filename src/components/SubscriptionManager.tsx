@@ -85,6 +85,7 @@ interface SubscriptionInfo {
   isActive: boolean;
   expiresAt?: string;
   gumroadLicenseKey?: string;
+  gumroadProductId?: string; // novakitz, novakitz_year, or novakitz_lifetime
 }
 
 interface AIUsageInfo {
@@ -131,12 +132,18 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
         // Check if subscription is not expired
         const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
+        // Determine display name based on product type
+        const productId = subscription.gumroad_product_id || '';
+        const isLifetime = productId.includes('lifetime') || !subscription.expires_at;
+        const displayName = isLifetime ? 'Lifetime' : subscription.subscription_plans.plan_name;
+
         setSubscription({
           planSlug: isExpired ? 'free' : subscription.subscription_plans.plan_slug,
-          planName: isExpired ? 'Free' : subscription.subscription_plans.plan_name,
+          planName: isExpired ? 'Free' : displayName,
           isActive: !isExpired,
           expiresAt: subscription.expires_at,
-          gumroadLicenseKey: subscription.gumroad_license_key
+          gumroadLicenseKey: subscription.gumroad_license_key,
+          gumroadProductId: subscription.gumroad_product_id
         });
       } else {
         // Default to free plan
@@ -208,12 +215,18 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
     }
   };
 
-  const getPlanBadgeColor = (planSlug: string): string => {
+  const getPlanBadgeColor = (planSlug: string, isLifetime?: boolean): string => {
     if (planSlug === 'premium') {
+      if (isLifetime) {
+        return '#9B59B6'; // Purple for lifetime
+      }
       return '#FFD700'; // Gold for premium
     }
     return '#7FB069'; // Pale green for free
   };
+
+  const isLifetimePlan = subscription?.gumroadProductId?.includes('lifetime') ||
+    (subscription?.planSlug === 'premium' && !subscription?.expiresAt);
 
   const getProgressColor = (used: number, limit: number): string => {
     if (limit === -1) return '#7FB069'; // Unlimited - green
@@ -249,9 +262,9 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
           <h3 className="plan-title">
             <span
               className="plan-badge"
-              style={{ backgroundColor: getPlanBadgeColor(subscription.planSlug) }}
+              style={{ backgroundColor: getPlanBadgeColor(subscription.planSlug, isLifetimePlan) }}
             >
-              {subscription.planName}
+              {isLifetimePlan ? '💎 Lifetime' : subscription.planSlug === 'premium' ? '👑 Premium' : subscription.planName}
             </span>
             {subscription.planSlug === 'premium' && subscription.isActive && (
               <span className="active-indicator">Active</span>
@@ -264,7 +277,10 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
           )}
           {subscription.planSlug === 'premium' && (
             <p className="plan-description">
-              Unlimited dream recording and AI interpretations
+              {isLifetimePlan
+                ? (language === 'ko' ? '평생 무제한 꿈 기록 및 AI 해석' : 'Lifetime unlimited dream recording and AI interpretations')
+                : (language === 'ko' ? '무제한 꿈 기록 및 AI 해석' : 'Unlimited dream recording and AI interpretations')
+              }
             </p>
           )}
         </div>
@@ -453,9 +469,12 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
           {subscription.planSlug === 'premium' && (
             <div className="premium-info">
               <div className="info-row">
-                <span className="info-label">Expires:</span>
-                <span className="info-value">
-                  {formatExpiryDate(subscription.expiresAt)}
+                <span className="info-label">{language === 'ko' ? '만료:' : 'Expires:'}</span>
+                <span className="info-value" style={isLifetimePlan ? { color: '#9B59B6', fontWeight: 'bold' } : {}}>
+                  {isLifetimePlan
+                    ? (language === 'ko' ? '✨ 평생 이용권 (만료 없음)' : '✨ Lifetime (Never expires)')
+                    : formatExpiryDate(subscription.expiresAt)
+                  }
                 </span>
               </div>
               {subscription.gumroadLicenseKey && (

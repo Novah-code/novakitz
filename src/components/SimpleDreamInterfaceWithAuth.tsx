@@ -870,10 +870,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                 </svg>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontWeight: '600' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>
                     {isPremium ? '👑 Premium' : '💎 Upgrade to Premium'}
                   </span>
-                  <span style={{ fontSize: '0.8rem', opacity: 0.7, fontWeight: '400' }}>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
                     {isPremium ? 'You have Premium access' : 'Unlimited AI & More'}
                   </span>
                 </div>
