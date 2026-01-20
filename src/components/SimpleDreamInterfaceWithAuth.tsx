@@ -66,6 +66,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [licenseKey, setLicenseKey] = useState('');
@@ -237,6 +238,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     const checkPremiumStatus = async () => {
       if (!user) {
         setIsPremium(false);
+        setIsLifetime(false);
         return;
       }
 
@@ -254,13 +256,14 @@ export default function SimpleDreamInterfaceWithAuth() {
         if (!premiumPlanId) {
           console.log('❌ Could not find premium plan');
           setIsPremium(false);
+          setIsLifetime(false);
           return;
         }
 
-        // Get user subscription
+        // Get user subscription with gumroad_product_id
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('id, status, plan_id, expires_at')
+          .select('id, status, plan_id, expires_at, gumroad_product_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
@@ -270,30 +273,40 @@ export default function SimpleDreamInterfaceWithAuth() {
           // Check if subscription is not expired
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
+          // Check if it's a lifetime subscription
+          const isLifetimeValue = subscription.gumroad_product_id?.includes('lifetime') ||
+            (subscription.plan_id === premiumPlanId && !subscription.expires_at);
+
           console.log('📋 Subscription details:', {
             subscription_id: subscription.id,
             status: subscription.status,
             plan_id: subscription.plan_id,
             premium_plan_id: premiumPlanId,
             expires_at: subscription.expires_at,
-            isExpired
+            gumroad_product_id: subscription.gumroad_product_id,
+            isExpired,
+            isLifetime: isLifetimeValue
           });
 
           if (!isExpired) {
             const isPremiumValue = subscription.plan_id === premiumPlanId;
-            console.log('✅ Setting isPremium to:', isPremiumValue, 'because plan_id matches premium_plan_id');
+            console.log('✅ Setting isPremium to:', isPremiumValue, 'isLifetime to:', isLifetimeValue);
             setIsPremium(isPremiumValue);
+            setIsLifetime(isLifetimeValue);
           } else {
             console.log('⏳ Subscription expired, setting isPremium to false');
             setIsPremium(false);
+            setIsLifetime(false);
           }
         } else {
           console.log('❌ No subscription found');
           setIsPremium(false);
+          setIsLifetime(false);
         }
       } catch (error) {
         console.error('Error checking premium status:', error);
         setIsPremium(false);
+        setIsLifetime(false);
       }
     };
 
@@ -892,12 +905,12 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '1rem 2rem',
-                  background: isPremium ? 'rgba(127, 176, 105, 0.1)' : 'none',
+                  background: isLifetime ? 'rgba(155, 89, 182, 0.1)' : isPremium ? 'rgba(127, 176, 105, 0.1)' : 'none',
                   border: 'none',
                   textAlign: 'left',
                   cursor: isPremium ? 'default' : 'pointer',
                   fontSize: '1rem',
-                  color: isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
+                  color: isLifetime ? '#9B59B6' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
                   transition: 'all 0.2s',
                   fontFamily: 'inherit',
                   display: 'flex',
@@ -919,11 +932,15 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                 </svg>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>
-                    {isPremium ? '👑 Premium' : '💎 Upgrade to Premium'}
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem', color: isLifetime ? '#9B59B6' : undefined }}>
+                    {isLifetime ? '💎 Lifetime' : isPremium ? '👑 Premium' : '💎 Upgrade to Premium'}
                   </span>
                   <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
-                    {isPremium ? 'You have Premium access' : 'Unlimited AI & More'}
+                    {isLifetime
+                      ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
+                      : isPremium
+                        ? (language === 'ko' ? 'Premium 이용 중' : 'You have Premium access')
+                        : 'Unlimited AI & More'}
                   </span>
                 </div>
               </button>
