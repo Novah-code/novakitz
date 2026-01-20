@@ -894,22 +894,27 @@ export default function SimpleDreamInterfaceWithAuth() {
                 margin: '0.5rem 0',
                 padding: '1rem 0',
                 background: isLifetime
-                  ? 'linear-gradient(135deg, rgba(155, 89, 182, 0.15) 0%, rgba(142, 68, 173, 0.1) 100%)'
+                  ? 'linear-gradient(135deg, rgba(255, 182, 193, 0.25) 0%, rgba(255, 218, 233, 0.2) 100%)'
                   : isPremium
-                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(107, 156, 85, 0.1) 100%)'
-                    : 'linear-gradient(135deg, rgba(200, 200, 200, 0.1) 0%, rgba(180, 180, 180, 0.05) 100%)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
+                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.2) 0%, rgba(144, 238, 144, 0.15) 100%)'
+                    : 'linear-gradient(135deg, rgba(200, 200, 200, 0.15) 0%, rgba(220, 220, 220, 0.1) 100%)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
                 borderTop: isLifetime
-                  ? '1px solid rgba(155, 89, 182, 0.2)'
+                  ? '1px solid rgba(255, 182, 193, 0.4)'
                   : isPremium
-                    ? '1px solid rgba(127, 176, 105, 0.2)'
-                    : '1px solid rgba(127, 176, 105, 0.2)',
+                    ? '1px solid rgba(127, 176, 105, 0.3)'
+                    : '1px solid rgba(180, 180, 180, 0.3)',
                 borderBottom: isLifetime
-                  ? '1px solid rgba(155, 89, 182, 0.2)'
+                  ? '1px solid rgba(255, 182, 193, 0.4)'
                   : isPremium
-                    ? '1px solid rgba(127, 176, 105, 0.2)'
-                    : '1px solid rgba(127, 176, 105, 0.2)'
+                    ? '1px solid rgba(127, 176, 105, 0.3)'
+                    : '1px solid rgba(180, 180, 180, 0.3)',
+                boxShadow: isLifetime
+                  ? 'inset 0 1px 2px rgba(255, 255, 255, 0.3)'
+                  : isPremium
+                    ? 'inset 0 1px 2px rgba(255, 255, 255, 0.3)'
+                    : 'inset 0 1px 2px rgba(255, 255, 255, 0.2)'
               }}>
                 <button
                   onClick={() => {
@@ -926,7 +931,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                     textAlign: 'left',
                     cursor: isPremium ? 'default' : 'pointer',
                     fontSize: '1rem',
-                    color: isLifetime ? '#9B59B6' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
+                    color: isLifetime ? '#E91E63' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
                     transition: 'all 0.2s',
                     fontFamily: 'inherit',
                     display: 'flex',
@@ -944,25 +949,9 @@ export default function SimpleDreamInterfaceWithAuth() {
                     }
                   }}
                 >
-                  {/* SVG Icons based on subscription type */}
-                  {isLifetime ? (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M6 3h12l4 6-10 13L2 9z"></path>
-                      <path d="M11 3l1 6 1-6"></path>
-                      <path d="M2 9h20"></path>
-                      <path d="M6.5 9L12 22l5.5-13"></path>
-                    </svg>
-                  ) : isPremium ? (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--matcha-green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"></path>
-                      <path d="M3 20h18"></path>
-                    </svg>
-                  ) : (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="8" r="6"></circle>
-                      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
-                    </svg>
-                  )}
+                  <span style={{ fontSize: '1.5rem' }}>
+                    {isLifetime ? '💎' : isPremium ? '👑' : '✨'}
+                  </span>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>
                       {isLifetime
@@ -1001,7 +990,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                       gap: '0.75rem'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
                       e.currentTarget.style.color = 'var(--matcha-dark)';
                     }}
                     onMouseLeave={(e) => {
@@ -1009,9 +998,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                       e.currentTarget.style.color = 'var(--sage)';
                     }}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
+                    <span style={{ fontSize: '1rem' }}>🔑</span>
                     <span>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
                   </button>
                 )}
