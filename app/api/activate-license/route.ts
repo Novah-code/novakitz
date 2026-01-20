@@ -43,10 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Call Gumroad license verification API
    const params = new URLSearchParams();
-    params.append('license_key', licenseKey.trim());
-
-    //
-    //
+    params.append('product_permalink', 'novakitz_lifetime');
 
     const verifyResponse = await fetch('https://api.gumroad.com/v2/licenses/verify', {
       method: 'POST',
