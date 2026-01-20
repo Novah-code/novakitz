@@ -998,8 +998,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                       e.currentTarget.style.color = 'var(--sage)';
                     }}
                   >
-                    <span style={{ fontSize: '1rem' }}>🔑</span>
-                    <span>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
+                    <span style={{ fontWeight: '600' }}>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
                   </button>
                 )}
               </div>
