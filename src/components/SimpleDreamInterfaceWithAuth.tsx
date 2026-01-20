@@ -889,101 +889,133 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{language === 'ko' ? '나의 아키타입' : 'My Archetype'}</span>
               </button>
 
+              {/* Subscription Status Section with Glassmorphism */}
               <div style={{
-                height: '1px',
-                background: 'rgba(127, 176, 105, 0.2)',
-                margin: '1rem 2rem'
-              }}></div>
-
-              {/* Subscription Status */}
-              <button
-                onClick={() => {
-                  if (!isPremium) {
-                    window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
-                  }
-                  setMenuOpen(false);
-                }}
-                style={{
-                  padding: '1rem 2rem',
-                  background: isLifetime ? 'rgba(155, 89, 182, 0.1)' : isPremium ? 'rgba(127, 176, 105, 0.1)' : 'none',
-                  border: 'none',
-                  textAlign: 'left',
-                  cursor: isPremium ? 'default' : 'pointer',
-                  fontSize: '1rem',
-                  color: isLifetime ? '#9B59B6' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
-                  transition: 'all 0.2s',
-                  fontFamily: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isPremium) {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isPremium) {
-                    e.currentTarget.style.background = 'none';
-                  }
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                </svg>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontWeight: '600', fontSize: '0.9rem', color: isLifetime ? '#9B59B6' : undefined }}>
-                    {isLifetime ? '💎 Lifetime' : isPremium ? '👑 Premium' : '💎 Upgrade to Premium'}
-                  </span>
-                  <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
-                    {isLifetime
-                      ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
-                      : isPremium
-                        ? (language === 'ko' ? 'Premium 이용 중' : 'You have Premium access')
-                        : 'Unlimited AI & More'}
-                  </span>
-                </div>
-              </button>
-
-              {/* License Key Input - Only show for non-premium users */}
-              {!isPremium && (
+                margin: '0.5rem 0',
+                padding: '1rem 0',
+                background: isLifetime
+                  ? 'linear-gradient(135deg, rgba(155, 89, 182, 0.15) 0%, rgba(142, 68, 173, 0.1) 100%)'
+                  : isPremium
+                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(107, 156, 85, 0.1) 100%)'
+                    : 'linear-gradient(135deg, rgba(200, 200, 200, 0.1) 0%, rgba(180, 180, 180, 0.05) 100%)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderTop: isLifetime
+                  ? '1px solid rgba(155, 89, 182, 0.2)'
+                  : isPremium
+                    ? '1px solid rgba(127, 176, 105, 0.2)'
+                    : '1px solid rgba(127, 176, 105, 0.2)',
+                borderBottom: isLifetime
+                  ? '1px solid rgba(155, 89, 182, 0.2)'
+                  : isPremium
+                    ? '1px solid rgba(127, 176, 105, 0.2)'
+                    : '1px solid rgba(127, 176, 105, 0.2)'
+              }}>
                 <button
-                  onClick={() => setShowLicenseModal(true)}
+                  onClick={() => {
+                    if (!isPremium) {
+                      window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
+                    }
+                    setMenuOpen(false);
+                  }}
                   style={{
+                    width: '100%',
                     padding: '0.75rem 2rem',
                     background: 'none',
                     border: 'none',
                     textAlign: 'left',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    color: 'var(--sage)',
+                    cursor: isPremium ? 'default' : 'pointer',
+                    fontSize: '1rem',
+                    color: isLifetime ? '#9B59B6' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
                     transition: 'all 0.2s',
                     fontFamily: 'inherit',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.75rem'
+                    gap: '1rem'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                    e.currentTarget.style.color = 'var(--matcha-dark)';
+                    if (!isPremium) {
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'none';
-                    e.currentTarget.style.color = 'var(--sage)';
+                    if (!isPremium) {
+                      e.currentTarget.style.background = 'none';
+                    }
                   }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                  </svg>
-                  <span>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
+                  {/* SVG Icons based on subscription type */}
+                  {isLifetime ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 3h12l4 6-10 13L2 9z"></path>
+                      <path d="M11 3l1 6 1-6"></path>
+                      <path d="M2 9h20"></path>
+                      <path d="M6.5 9L12 22l5.5-13"></path>
+                    </svg>
+                  ) : isPremium ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--matcha-green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"></path>
+                      <path d="M3 20h18"></path>
+                    </svg>
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="8" r="6"></circle>
+                      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+                    </svg>
+                  )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+                      {isLifetime
+                        ? 'Lifetime'
+                        : isPremium
+                          ? 'Premium'
+                          : (language === 'ko' ? 'Premium 업그레이드' : 'Upgrade to Premium')}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
+                      {isLifetime
+                        ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
+                        : isPremium
+                          ? (language === 'ko' ? 'Premium 이용 중' : 'You have Premium access')
+                          : (language === 'ko' ? '무제한 AI 해석' : 'Unlimited AI & More')}
+                    </span>
+                  </div>
                 </button>
-              )}
 
-              <div style={{
-                height: '1px',
-                background: 'rgba(127, 176, 105, 0.2)',
-                margin: '1rem 2rem'
-              }}></div>
+                {/* License Key Input - Only show for non-premium users */}
+                {!isPremium && (
+                  <button
+                    onClick={() => setShowLicenseModal(true)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 2rem',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      color: 'var(--sage)',
+                      transition: 'all 0.2s',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                      e.currentTarget.style.color = 'var(--matcha-dark)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                      e.currentTarget.style.color = 'var(--sage)';
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                    </svg>
+                    <span>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
+                  </button>
+                )}
+              </div>
 
               {/* Language Selection */}
               <div style={{
