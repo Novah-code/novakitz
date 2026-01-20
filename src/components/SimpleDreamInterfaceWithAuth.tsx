@@ -12,6 +12,7 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import DreamPlaylist from './DreamPlaylist';
 import AIUsageWidget from './AIUsageWidget';
+import LicenseModal from './LicenseModal';
 
 // Translations
 const translations = {
@@ -69,9 +70,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
-  const [licenseKey, setLicenseKey] = useState('');
-  const [licenseLoading, setLicenseLoading] = useState(false);
-  const [licenseMessage, setLicenseMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const t = translations[language];
 
@@ -343,51 +341,6 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-  };
-
-  const handleActivateLicense = async () => {
-    if (!licenseKey.trim() || !user) return;
-
-    setLicenseLoading(true);
-    setLicenseMessage(null);
-
-    try {
-      const response = await fetch('/api/activate-license', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          licenseKey: licenseKey.trim(),
-          userId: user.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setLicenseMessage({
-          type: 'success',
-          text: language === 'ko' ? '라이선스가 활성화되었습니다!' : 'License activated successfully!'
-        });
-        setIsPremium(true);
-        setTimeout(() => {
-          setShowLicenseModal(false);
-          setLicenseKey('');
-          setLicenseMessage(null);
-        }, 2000);
-      } else {
-        setLicenseMessage({
-          type: 'error',
-          text: data.error || (language === 'ko' ? '라이선스 활성화 실패' : 'License activation failed')
-        });
-      }
-    } catch {
-      setLicenseMessage({
-        type: 'error',
-        text: language === 'ko' ? '오류가 발생했습니다' : 'An error occurred'
-      });
-    } finally {
-      setLicenseLoading(false);
-    }
   };
 
   console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
@@ -1267,106 +1220,14 @@ export default function SimpleDreamInterfaceWithAuth() {
       )}
 
       {/* License Key Modal */}
-      {showLicenseModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 3000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
-          onClick={() => setShowLicenseModal(false)}
-        >
-          <div
-            style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '2rem',
-              maxWidth: '400px',
-              width: '100%',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>
-                {language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}
-              </h2>
-              <button
-                onClick={() => setShowLicenseModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem', lineHeight: '1.5' }}>
-              {language === 'ko'
-                ? 'Gumroad에서 구매한 라이선스 키를 입력하세요.'
-                : 'Enter your license key from Gumroad.'}
-            </p>
-
-            <input
-              type="text"
-              value={licenseKey}
-              onChange={(e) => setLicenseKey(e.target.value)}
-              placeholder={language === 'ko' ? '라이선스 키 입력...' : 'Enter license key...'}
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: '1rem',
-                border: '2px solid #e0e0e0',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                boxSizing: 'border-box',
-                transition: 'border-color 0.2s'
-              }}
-              onFocus={(e) => e.target.style.borderColor = 'var(--matcha-green)'}
-              onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
-            />
-
-            {licenseMessage && (
-              <div style={{
-                padding: '10px 12px',
-                borderRadius: '8px',
-                marginBottom: '1rem',
-                fontSize: '0.9rem',
-                background: licenseMessage.type === 'success' ? '#d4edda' : '#f8d7da',
-                color: licenseMessage.type === 'success' ? '#155724' : '#721c24'
-              }}>
-                {licenseMessage.text}
-              </div>
-            )}
-
-            <button
-              onClick={handleActivateLicense}
-              disabled={licenseLoading || !licenseKey.trim()}
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: 'white',
-                background: licenseLoading || !licenseKey.trim() ? '#ccc' : 'var(--matcha-green)',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: licenseLoading || !licenseKey.trim() ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              {licenseLoading
-                ? (language === 'ko' ? '활성화 중...' : 'Activating...')
-                : (language === 'ko' ? '라이선스 활성화' : 'Activate License')}
-            </button>
-          </div>
-        </div>
+      {user && (
+        <LicenseModal
+          isOpen={showLicenseModal}
+          onClose={() => setShowLicenseModal(false)}
+          userId={user.id}
+          language={language}
+          onSuccess={() => setIsPremium(true)}
+        />
       )}
 
     </>
