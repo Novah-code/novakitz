@@ -42,15 +42,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Call Gumroad license verification API
+   const params = new URLSearchParams();
+    params.append('license_key', licenseKey.trim());
+
+    if (process.env.GUMROAD_PRODUCT_ID) {
+      params.append('product_id', process.env.GUMROAD_PRODUCT_ID);
+    }
+
     const verifyResponse = await fetch('https://api.gumroad.com/v2/licenses/verify', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        product_id: process.env.GUMROAD_PRODUCT_ID || '',
-        license_key: licenseKey,
-      }),
+      body: params,
     });
 
     const verifyData = await verifyResponse.json();
