@@ -50,8 +50,8 @@ export default function PricingPage() {
     lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
     lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
     lifetimeFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '200명 한정', '평생 $4.99/월 절약']
-      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Limited to 200 spots', 'Save $4.99/month forever'],
+      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '200명 한정', '평생 $5.99/월 절약']
+      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Limited to 200 spots', 'Save $5.99/month forever'],
     startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
     buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
@@ -130,7 +130,7 @@ export default function PricingPage() {
               color: '#7FB069',
               marginBottom: '0.5rem'
             }}>
-              $4.99
+              $5.99
             </div>
             <div style={{
               fontSize: '14px',
