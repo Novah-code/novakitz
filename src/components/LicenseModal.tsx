@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface LicenseModalProps {
   isOpen: boolean;
@@ -14,6 +14,17 @@ export default function LicenseModal({ isOpen, onClose, userId, language, onSucc
   const [licenseKey, setLicenseKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when modal opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      // Small delay to ensure modal is fully rendered
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -109,11 +120,11 @@ export default function LicenseModal({ isOpen, onClose, userId, language, onSucc
         </p>
 
         <input
+          ref={inputRef}
           type="text"
           value={licenseKey}
           onChange={(e) => setLicenseKey(e.target.value)}
           placeholder={language === 'ko' ? '라이선스 키 입력...' : 'Enter license key...'}
-          autoFocus
           style={{
             width: '100%',
             padding: '12px',

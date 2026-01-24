@@ -91,10 +91,19 @@ export async function POST(request: NextRequest) {
 
     console.log(`📦 Product info - permalink: ${productPermalink}, name: ${productName}`);
 
+    // Get the product ID that was used for successful verification
+    const verifiedProductId = purchase?.product_id || '';
+
     // Determine subscription duration
     let subscriptionDays: number | null = 30;
 
-    if (productPermalink.includes('lifetime') || productName.toLowerCase().includes('lifetime')) {
+    // Check for lifetime - including the specific product ID for lifetime
+    const isLifetime = productPermalink.includes('lifetime') ||
+                       productName.toLowerCase().includes('lifetime') ||
+                       verifiedProductId === 'raW-pDZkbkH1uhWQ7P6Maw==' ||
+                       purchase?.product_permalink === 'novakitz_lifetime';
+
+    if (isLifetime) {
       subscriptionDays = null; // Lifetime
       console.log('📅 Detected LIFETIME license');
     } else if (productPermalink.includes('year') || productName.toLowerCase().includes('year')) {
@@ -103,6 +112,8 @@ export async function POST(request: NextRequest) {
     } else {
       console.log('📅 Detected MONTHLY license');
     }
+
+    console.log(`📦 Verified product ID: ${verifiedProductId}, isLifetime: ${isLifetime}`);
 
     const sbClient = getSupabaseClient();
 
