@@ -29,36 +29,44 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`🔑 Activating license for user: ${userId}`);
-
-    // Verify license with Gumroad API
-    const gumroadApiSecret = process.env.GUMROAD_API_SECRET;
-
-    if (!gumroadApiSecret) {
-      console.error('❌ GUMROAD_API_SECRET not configured');
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
+    console.log(`🔑 License key: ${licenseKey}`);
 
     // Call Gumroad license verification API
-   const params = new URLSearchParams();
-    params.append('product_permalink', 'novakitz_lifetime');
+    // Try with different product permalinks since we have multiple products
+    const productPermalinks = ['novakitz', 'novakitz_year', 'novakitz_lifetime'];
+    let verifyData: any = null;
+    let verifySuccess = false;
 
-    const verifyResponse = await fetch('https://api.gumroad.com/v2/licenses/verify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
+    for (const permalink of productPermalinks) {
+      console.log(`🔍 Trying to verify with product: ${permalink}`);
 
-    const verifyData = await verifyResponse.json();
+      const verifyResponse = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          product_permalink: permalink,
+          license_key: licenseKey,
+        }),
+      });
 
-    if (!verifyData.success) {
-      console.log('❌ License verification failed:', verifyData);
+      verifyData = await verifyResponse.json();
+      console.log(`📦 Response for ${permalink}:`, JSON.stringify(verifyData));
+
+      if (verifyData.success) {
+        console.log(`✅ License verified with product: ${permalink}`);
+        verifySuccess = true;
+        break;
+      }
+
+      console.log(`❌ Not valid for ${permalink}:`, verifyData.message);
+    }
+
+    if (!verifySuccess || !verifyData) {
+      console.log('❌ License verification failed for all products');
       return NextResponse.json(
-        { error: 'Invalid license key', details: verifyData.message },
+        { error: 'Invalid license key. Please check your license key and try again.' },
         { status: 400 }
       );
     }
@@ -69,6 +77,8 @@ export async function POST(request: NextRequest) {
     const purchase = verifyData.purchase;
     const productPermalink = purchase?.permalink || purchase?.product_permalink || '';
     const productName = purchase?.product_name || '';
+
+    console.log(`📦 Product info - permalink: ${productPermalink}, name: ${productName}`);
 
     // Determine subscription duration
     let subscriptionDays: number | null = 30;
