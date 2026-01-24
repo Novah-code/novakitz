@@ -113,14 +113,16 @@ export default function LicenseModal({ isOpen, onClose, userId, language, onSucc
           value={licenseKey}
           onChange={(e) => setLicenseKey(e.target.value)}
           placeholder={language === 'ko' ? '라이선스 키 입력...' : 'Enter license key...'}
+          autoFocus
           style={{
             width: '100%',
             padding: '12px',
             fontSize: '1rem',
-            border: '2px solid #e0e0e0',
+            border: '2px solid var(--matcha-green)',
             borderRadius: '8px',
             marginBottom: '1rem',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            outline: 'none'
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && licenseKey.trim()) {
