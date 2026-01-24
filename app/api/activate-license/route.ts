@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
       expiryDate.setDate(expiryDate.getDate() + subscriptionDays);
     }
 
+    // Get user email
+    const { data: userData } = await sbClient.auth.admin.getUserById(userId);
+    const userEmail = userData?.user?.email || null;
+
     // Check for existing subscription
     const { data: existingSubscription } = await sbClient
       .from('user_subscriptions')
@@ -158,6 +162,7 @@ export async function POST(request: NextRequest) {
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
           gumroad_product_id: productPermalink,
+          user_email: userEmail,
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate ? expiryDate.toISOString() : null,
@@ -182,6 +187,7 @@ export async function POST(request: NextRequest) {
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
           gumroad_product_id: productPermalink,
+          user_email: userEmail,
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate ? expiryDate.toISOString() : null,

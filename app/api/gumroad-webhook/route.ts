@@ -172,7 +172,8 @@ export async function POST(request: NextRequest) {
         .update({
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: permalink, // Store the product permalink (novakitz or novakitz_year)
+          gumroad_product_id: permalink,
+          user_email: purchaserEmail,
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate ? expiryDate.toISOString() : null,
@@ -207,7 +208,8 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_id: premiumPlan.id,
           gumroad_license_key: licenseKey,
-          gumroad_product_id: permalink, // Store the product permalink (novakitz, novakitz_year, or novakitz_lifetime)
+          gumroad_product_id: permalink,
+          user_email: purchaserEmail,
           status: 'active',
           started_at: startDate.toISOString(),
           expires_at: expiryDate ? expiryDate.toISOString() : null,
