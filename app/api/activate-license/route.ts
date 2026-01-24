@@ -32,35 +32,45 @@ export async function POST(request: NextRequest) {
     console.log(`🔑 License key: ${licenseKey}`);
 
     // Call Gumroad license verification API
-    // Try with different product permalinks since we have multiple products
-    const productPermalinks = ['novakitz', 'novakitz_year', 'novakitz_lifetime'];
+    // Try with different product permalinks and IDs since we have multiple products
+    const products = [
+      { type: 'permalink', value: 'novakitz' },
+      { type: 'permalink', value: 'novakitz_year' },
+      { type: 'permalink', value: 'novakitz_lifetime' },
+      { type: 'id', value: 'wsfpqq' }, // Lifetime product ID from Gumroad
+    ];
     let verifyData: any = null;
     let verifySuccess = false;
 
-    for (const permalink of productPermalinks) {
-      console.log(`🔍 Trying to verify with product: ${permalink}`);
+    for (const product of products) {
+      console.log(`🔍 Trying to verify with ${product.type}: ${product.value}`);
+
+      const params = new URLSearchParams();
+      params.append('license_key', licenseKey);
+      if (product.type === 'permalink') {
+        params.append('product_permalink', product.value);
+      } else {
+        params.append('product_id', product.value);
+      }
 
       const verifyResponse = await fetch('https://api.gumroad.com/v2/licenses/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({
-          product_permalink: permalink,
-          license_key: licenseKey,
-        }),
+        body: params,
       });
 
       verifyData = await verifyResponse.json();
-      console.log(`📦 Response for ${permalink}:`, JSON.stringify(verifyData));
+      console.log(`📦 Response for ${product.value}:`, JSON.stringify(verifyData));
 
       if (verifyData.success) {
-        console.log(`✅ License verified with product: ${permalink}`);
+        console.log(`✅ License verified with ${product.type}: ${product.value}`);
         verifySuccess = true;
         break;
       }
 
-      console.log(`❌ Not valid for ${permalink}:`, verifyData.message);
+      console.log(`❌ Not valid for ${product.value}:`, verifyData.message);
     }
 
     if (!verifySuccess || !verifyData) {
