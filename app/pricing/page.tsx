@@ -50,8 +50,8 @@ export default function PricingPage() {
     lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
     lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
     lifetimeFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '200명 한정', '평생 $5.99/월 절약']
-      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Limited to 200 spots', 'Save $5.99/month forever'],
+      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '얼리 빌리버 50명 한정']
+      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Early Believer: 50 spots only'],
     startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
     buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
@@ -339,13 +339,14 @@ export default function PricingPage() {
               transform: 'translateX(-50%)',
               background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
               color: 'white',
-              padding: '6px 20px',
+              padding: '6px 16px',
               borderRadius: '20px',
-              fontSize: '12px',
+              fontSize: '11px',
               fontWeight: '700',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              whiteSpace: 'nowrap'
             }}>
-              LIMITED 200 SPOTS
+              LIMITED 50 SPOTS
             </div>
 
             <div style={{
@@ -363,37 +364,108 @@ export default function PricingPage() {
             }}>
               {t.lifetimeDesc}
             </div>
+
+            {/* 3-Tier Pricing */}
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '0.5rem'
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              border: '1px solid #e5e7eb'
             }}>
+              {/* Tier 1: Super Early Bird - SOLD OUT */}
               <div style={{
-                fontSize: '28px',
-                fontWeight: 'bold',
-                color: '#9ca3af',
-                textDecoration: 'line-through'
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '8px 0',
+                opacity: 0.5,
+                borderBottom: '1px solid #e5e7eb'
               }}>
-                $199
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
+                    {language === 'ko' ? '슈퍼 얼리버드' : 'Super Early Bird'}
+                  </span>
+                  <span style={{
+                    background: '#6b7280',
+                    color: 'white',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontSize: '10px',
+                    fontWeight: '600'
+                  }}>
+                    SOLD OUT
+                  </span>
+                </div>
+                <span style={{ fontSize: '16px', color: '#9ca3af', textDecoration: 'line-through', fontWeight: '600' }}>$99</span>
               </div>
+
+              {/* Tier 2: Early Believer - CURRENT */}
               <div style={{
-                fontSize: '48px',
-                fontWeight: 'bold',
-                color: '#1e40af'
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'linear-gradient(90deg, #dbeafe 0%, transparent 100%)',
+                margin: '8px -1rem',
+                padding: '10px 1rem',
+                borderRadius: '8px'
               }}>
-                $129
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '14px', color: '#1e40af', fontWeight: '600' }}>
+                    {language === 'ko' ? '얼리 빌리버' : 'Early Believer'}
+                  </span>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+                    color: 'white',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontSize: '10px',
+                    fontWeight: '600'
+                  }}>
+                    {language === 'ko' ? '현재가' : 'NOW'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '20px', color: '#1e40af', fontWeight: 'bold' }}>$129</span>
+              </div>
+
+              {/* Tier 3: Standard - COMING SOON */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '8px 0',
+                paddingTop: '10px',
+                opacity: 0.6
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>
+                    {language === 'ko' ? '스탠다드' : 'Standard'}
+                  </span>
+                  <span style={{
+                    background: '#e5e7eb',
+                    color: '#6b7280',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    fontSize: '10px',
+                    fontWeight: '600'
+                  }}>
+                    {language === 'ko' ? '다음 가격' : 'NEXT'}
+                  </span>
+                </div>
+                <span style={{ fontSize: '16px', color: '#6b7280', fontWeight: '600' }}>$159</span>
               </div>
             </div>
+
             <div style={{
-              fontSize: '14px',
+              fontSize: '13px',
               color: '#7c2d12',
               fontWeight: '600',
-              marginBottom: '2rem',
-              paddingBottom: '2rem',
-              borderBottom: '1px solid #bfdbfe'
+              marginBottom: '1.5rem',
+              paddingBottom: '1.5rem',
+              borderBottom: '1px solid #bfdbfe',
+              textAlign: 'center'
             }}>
-              {t.lifetimeDiscount}
+              {language === 'ko' ? '50명 한정 • 평생 $5.99/월 절약' : 'Limited 50 spots • Save $5.99/month forever'}
             </div>
 
             {/* Features */}

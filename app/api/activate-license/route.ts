@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
     // Call Gumroad license verification API
     // Try with different product permalinks and IDs since we have multiple products
     const products = [
+      { type: 'id', value: 'raW-pDZkbkH1uhWQ7P6Maw==' }, // Primary product ID from Gumroad API response
       { type: 'permalink', value: 'novakitz' },
       { type: 'permalink', value: 'novakitz_year' },
       { type: 'permalink', value: 'novakitz_lifetime' },
