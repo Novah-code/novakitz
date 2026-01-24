@@ -926,7 +926,11 @@ export default function SimpleDreamInterfaceWithAuth() {
                 {/* License Key Input - Only show for non-premium users */}
                 {!isPremium && (
                   <button
-                    onClick={() => setShowLicenseModal(true)}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      // Small delay to allow menu to close before modal opens
+                      setTimeout(() => setShowLicenseModal(true), 150);
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.5rem 2rem',
