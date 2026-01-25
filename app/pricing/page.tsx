@@ -3,9 +3,112 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// FAQ Accordion Item Component
+function FAQItem({ question, answer, isOpen, onClick }: {
+  question: string;
+  answer: string;
+  isOpen: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div style={{
+      borderBottom: '1px solid #e5e7eb',
+      overflow: 'hidden'
+    }}>
+      <button
+        onClick={onClick}
+        style={{
+          width: '100%',
+          padding: '1.25rem 0',
+          background: 'none',
+          border: 'none',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          cursor: 'pointer',
+          textAlign: 'left'
+        }}
+      >
+        <span style={{
+          fontSize: '16px',
+          fontWeight: '600',
+          color: '#1f2937',
+          paddingRight: '1rem'
+        }}>
+          {question}
+        </span>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#6b7280"
+          strokeWidth="2"
+          style={{
+            flexShrink: 0,
+            transition: 'transform 0.3s ease',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
+          }}
+        >
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      <div style={{
+        maxHeight: isOpen ? '500px' : '0',
+        overflow: 'hidden',
+        transition: 'max-height 0.3s ease, padding 0.3s ease',
+        paddingBottom: isOpen ? '1.25rem' : '0'
+      }}>
+        <p style={{
+          fontSize: '15px',
+          color: '#6b7280',
+          lineHeight: '1.7',
+          margin: 0
+        }}>
+          {answer}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// FAQ Category Component
+function FAQCategory({ title, faqs, openIndex, setOpenIndex, startIndex }: {
+  title: string;
+  faqs: { q: string; a: string }[];
+  openIndex: number | null;
+  setOpenIndex: (index: number | null) => void;
+  startIndex: number;
+}) {
+  return (
+    <div style={{ marginBottom: '2.5rem' }}>
+      <h3 style={{
+        fontSize: '20px',
+        fontWeight: '700',
+        color: '#7FB069',
+        marginBottom: '1rem',
+        paddingBottom: '0.75rem',
+        borderBottom: '2px solid #7FB069'
+      }}>
+        {title}
+      </h3>
+      {faqs.map((faq, idx) => (
+        <FAQItem
+          key={startIndex + idx}
+          question={faq.q}
+          answer={faq.a}
+          isOpen={openIndex === startIndex + idx}
+          onClick={() => setOpenIndex(openIndex === startIndex + idx ? null : startIndex + idx)}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function PricingPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
+  const [openFAQIndex, setOpenFAQIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // Get language preference
@@ -42,7 +145,7 @@ export default function PricingPage() {
     yearly: language === 'ko' ? '연간' : 'Yearly',
     yearlyDesc: language === 'ko' ? '연간 구독' : 'Annual subscription',
     perYear: language === 'ko' ? '연간 결제' : 'per year',
-    yearlyDiscount: language === 'ko' ? '17% 할인' : '17% Off',
+    yearlyDiscount: language === 'ko' ? '30% 할인' : '30% Off',
     yearlyFeatures: language === 'ko'
       ? ['Premium의 모든 기능', '월 200회 AI 꿈 해석', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '모든 미래 기능 무료 업데이트']
       : ['All Premium features', '200 AI interpretations/month', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'All future updates free'],
@@ -56,9 +159,124 @@ export default function PricingPage() {
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
     buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
     noRefund: language === 'ko' ? '환불 불가 • 즉시 라이선스 발급' : 'No refunds • Instant license',
-    faq: language === 'ko' ? '자주 묻는 질문' : 'FAQ',
+    faq: language === 'ko' ? '자주 묻는 질문' : 'Frequently Asked Questions',
     stillThinking: language === 'ko' ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first',
     tryFree: language === 'ko' ? '무료로 시작하기' : 'Try Free First',
+  };
+
+  // FAQ Categories
+  const faqCategories = language === 'ko' ? {
+    aboutNovakitz: {
+      title: 'Novakitz 소개',
+      faqs: [
+        {
+          q: 'Novakitz란 무엇인가요?',
+          a: 'Novakitz는 AI 기반 꿈 일기 앱입니다. 꿈을 기록하고 융 심리학과 아키타입 분석을 통해 무의식을 탐험할 수 있도록 도와줍니다.'
+        },
+        {
+          q: 'Novakitz는 단순한 꿈 해석 앱인가요?',
+          a: '아니요. Novakitz는 일회성 꿈 해석이 아닌 장기적인 꿈 기록, 무의식 패턴 분석, 개인 아키타입 탐험에 집중합니다. 시간이 지남에 따라 당신의 꿈 패턴과 내면의 변화를 추적할 수 있습니다.'
+        },
+        {
+          q: 'Novakitz는 누구를 위한 앱인가요?',
+          a: '자기 성찰, 융 심리학, 상징적 사고, 꿈을 통한 감정 패턴 이해에 관심 있는 분들을 위한 앱입니다. 심리학 전문가부터 자기 탐구에 관심 있는 일반인까지 모두 사용할 수 있습니다.'
+        }
+      ]
+    },
+    privacySecurity: {
+      title: '개인정보 및 보안',
+      faqs: [
+        {
+          q: '제 꿈 데이터는 안전하게 보호되나요?',
+          a: '네. 모든 꿈 기록은 기본적으로 비공개이며 안전하게 암호화되어 저장됩니다. 귀하의 데이터는 절대 공유되거나 공개되지 않습니다.'
+        },
+        {
+          q: '제 꿈 데이터가 AI 학습에 사용되나요?',
+          a: '아니요. 귀하의 꿈 데이터는 AI 모델 학습에 사용되지 않습니다. 오직 개인화된 분석과 인사이트 제공에만 활용됩니다.'
+        }
+      ]
+    },
+    subscription: {
+      title: '구독 및 결제',
+      faqs: [
+        {
+          q: '월 200회 AI 해석이면 충분한가요?',
+          a: '네! 하루 평균 6~7회 해석이 가능해서 매일 여러 개의 꿈을 기록하고 분석받기에 충분합니다. 대부분의 사용자는 하루 1~2개의 꿈을 기록합니다.'
+        },
+        {
+          q: 'Lifetime 이용권은 정말 평생인가요?',
+          a: '네, 단 한 번 결제로 Novakitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.'
+        },
+        {
+          q: '환불이 가능한가요?',
+          a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.'
+        },
+        {
+          q: 'Premium 월 구독은 언제든 취소 가능한가요?',
+          a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.'
+        },
+        {
+          q: '결제는 어떻게 하나요?',
+          a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.'
+        }
+      ]
+    }
+  } : {
+    aboutNovakitz: {
+      title: 'About Novakitz',
+      faqs: [
+        {
+          q: 'What is Novakitz?',
+          a: 'Novakitz is an AI-powered dream journal designed to help users record dreams and explore their unconscious through Jungian psychology and archetype analysis.'
+        },
+        {
+          q: 'Is Novakitz just a dream interpretation app?',
+          a: 'No. Novakitz focuses on long-term dream journaling, unconscious pattern analysis, and personal archetype exploration rather than one-time dream meanings. Over time, you can track your dream patterns and inner changes.'
+        },
+        {
+          q: 'Who is Novakitz for?',
+          a: 'Novakitz is for people interested in self-reflection, Jungian psychology, symbolic thinking, and understanding emotional patterns through dreams. From psychology enthusiasts to anyone curious about self-discovery.'
+        }
+      ]
+    },
+    privacySecurity: {
+      title: 'Privacy & Security',
+      faqs: [
+        {
+          q: 'Is my dream data private and secure?',
+          a: 'Yes. All dream records are private by default and securely encrypted. Your data is never shared or made public.'
+        },
+        {
+          q: 'Is my dream data used for AI training?',
+          a: 'No. Your dream data is never used to train AI models. It is only used to provide personalized analysis and insights for you.'
+        }
+      ]
+    },
+    subscription: {
+      title: 'Subscription & Payment',
+      faqs: [
+        {
+          q: 'Is 200 AI interpretations per month enough?',
+          a: 'Yes! That allows about 6-7 interpretations per day, which is plenty for recording and analyzing multiple dreams daily. Most users record 1-2 dreams per day.'
+        },
+        {
+          q: 'Is the Lifetime plan really forever?',
+          a: 'Yes, with a single payment you can use Premium features for as long as Novakitz exists. All future feature updates are included for free.'
+        },
+        {
+          q: 'Can I get a refund?',
+          a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.'
+        },
+        {
+          q: 'Can I cancel the Premium monthly subscription anytime?',
+          a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.'
+        },
+        {
+          q: 'How do I pay?',
+          a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.'
+        }
+      ]
+    }
   };
 
   return (
@@ -242,7 +460,7 @@ export default function PricingPage() {
                 color: '#9ca3af',
                 textDecoration: 'line-through'
               }}>
-                $59.88
+                $71.88
               </div>
               <div style={{
                 fontSize: '48px',
@@ -525,7 +743,7 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* FAQ Section */}
+        {/* FAQ Section - Accordion Style */}
         <div style={{
           background: 'white',
           borderRadius: '24px',
@@ -537,78 +755,34 @@ export default function PricingPage() {
             fontSize: '32px',
             fontWeight: 'bold',
             color: '#1f2937',
-            marginBottom: '2rem',
+            marginBottom: '2.5rem',
             textAlign: 'center'
           }}>
             {t.faq}
           </h2>
 
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            {(language === 'ko' ? [
-              {
-                q: '월 200회 AI 해석이면 충분한가요?',
-                a: '네! 하루 평균 6~7회 해석이 가능해서 매일 여러 개의 꿈을 기록하고 분석받기에 충분합니다. 대부분의 사용자는 하루 1~2개의 꿈을 기록합니다.'
-              },
-              {
-                q: 'Lifetime 이용권은 정말 평생인가요?',
-                a: '네, 단 한 번 결제로 NovaKitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.'
-              },
-              {
-                q: '환불이 가능한가요?',
-                a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.'
-              },
-              {
-                q: 'Premium 월 구독은 언제든 취소 가능한가요?',
-                a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.'
-              },
-              {
-                q: '결제는 어떻게 하나요?',
-                a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.'
-              }
-            ] : [
-              {
-                q: 'Is 200 AI interpretations per month enough?',
-                a: 'Yes! That allows about 6-7 interpretations per day, which is plenty for recording and analyzing multiple dreams daily. Most users record 1-2 dreams per day.'
-              },
-              {
-                q: 'Is the Lifetime plan really forever?',
-                a: 'Yes, with a single payment you can use Premium features for as long as NovaKitz exists. All future feature updates are included for free.'
-              },
-              {
-                q: 'Can I get a refund?',
-                a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure NovaKitz works for you.'
-              },
-              {
-                q: 'Can I cancel the Premium monthly subscription anytime?',
-                a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.'
-              },
-              {
-                q: 'How do I pay?',
-                a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.'
-              }
-            ]).map((faq, idx) => (
-              <div key={idx} style={{
-                marginBottom: '2rem',
-                paddingBottom: '2rem',
-                borderBottom: idx < 4 ? '1px solid #e5e7eb' : 'none'
-              }}>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '0.75rem'
-                }}>
-                  {faq.q}
-                </div>
-                <div style={{
-                  fontSize: '15px',
-                  color: '#6b7280',
-                  lineHeight: '1.6'
-                }}>
-                  {faq.a}
-                </div>
-              </div>
-            ))}
+            <FAQCategory
+              title={faqCategories.aboutNovakitz.title}
+              faqs={faqCategories.aboutNovakitz.faqs}
+              openIndex={openFAQIndex}
+              setOpenIndex={setOpenFAQIndex}
+              startIndex={0}
+            />
+            <FAQCategory
+              title={faqCategories.privacySecurity.title}
+              faqs={faqCategories.privacySecurity.faqs}
+              openIndex={openFAQIndex}
+              setOpenIndex={setOpenFAQIndex}
+              startIndex={3}
+            />
+            <FAQCategory
+              title={faqCategories.subscription.title}
+              faqs={faqCategories.subscription.faqs}
+              openIndex={openFAQIndex}
+              setOpenIndex={setOpenFAQIndex}
+              startIndex={5}
+            />
           </div>
         </div>
 
@@ -648,6 +822,25 @@ export default function PricingPage() {
           >
             {t.tryFree}
           </button>
+        </div>
+
+        {/* Legal Links - Footer */}
+        <div style={{
+          textAlign: 'center',
+          paddingTop: '1rem',
+          borderTop: '1px solid #e5e7eb'
+        }}>
+          <a href="/legal/terms" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
+            Terms
+          </a>
+          <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
+          <a href="/legal/privacy" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
+            Privacy
+          </a>
+          <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
+          <a href="/legal/refund" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
+            Refund
+          </a>
         </div>
       </div>
     </div>
