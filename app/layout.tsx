@@ -13,6 +13,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.novakitz.shop'),
+  verification: {
+    google: 'SvyOB5oGhTT8D7TUzeOLkpMP2s04Jg0DIkXb66GgHQo',
+  },
   title: {
     default: "Novakitz - AI Dream Journal & Jungian Analysis | 꿈 해석 다이어리",
     template: "%s | Novakitz"
