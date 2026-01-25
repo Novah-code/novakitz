@@ -12,9 +12,72 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "novakitz",
-  description: "Discover the hidden messages in your dreams with novakitz - your AI-powered dream interpretation companion with modern design.",
-  keywords: "dream interpretation, AI dreams, dream analysis, novakitz, subconscious, personal growth",
+  metadataBase: new URL('https://www.novakitz.shop'),
+  title: {
+    default: "Novakitz - AI Dream Journal & Jungian Analysis | 꿈 해석 다이어리",
+    template: "%s | Novakitz"
+  },
+  description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track your dreams, uncover archetypes, and receive personalized daily affirmations. 무의식 탐험과 AI 꿈 분석으로 자기 성장을 경험하세요.",
+  keywords: [
+    "dream journal", "dream interpretation", "AI dream analysis", "Jungian psychology",
+    "archetypes", "subconscious mind", "dream diary", "self discovery", "personal growth",
+    "꿈 해석", "꿈 분석", "꿈 일기", "무의식", "융 심리학", "아키타입", "자기 성장"
+  ],
+  authors: [{ name: "Novakitz" }],
+  creator: "Novakitz",
+  publisher: "Novakitz",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  // Open Graph - 카카오톡, 페이스북 공유 시 표시
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    alternateLocale: "ko_KR",
+    url: "https://www.novakitz.shop",
+    siteName: "Novakitz",
+    title: "Novakitz - AI Dream Journal & Jungian Analysis",
+    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track dreams, uncover archetypes, and grow.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Novakitz - AI Dream Journal",
+        type: "image/png",
+      }
+    ],
+  },
+  // Twitter Card - 트위터/X 공유 시 표시
+  twitter: {
+    card: "summary_large_image",
+    title: "Novakitz - AI Dream Journal & Jungian Analysis",
+    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis.",
+    images: ["/og-image.png"],
+    creator: "@novakitz",
+  },
+  // 검색 로봇 설정
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  // 정식 URL (중복 콘텐츠 방지)
+  alternates: {
+    canonical: "https://www.novakitz.shop",
+    languages: {
+      'en-US': 'https://www.novakitz.shop',
+      'ko-KR': 'https://www.novakitz.shop',
+    },
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
