@@ -12,7 +12,6 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
 import LicenseModal from './LicenseModal';
-import GuestLanding from './GuestLanding';
 import GuestDreamAnalyzer from './GuestDreamAnalyzer';
 
 // Translations
@@ -70,7 +69,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
-  const [showGuestAnalyzer, setShowGuestAnalyzer] = useState(false);
 
   const t = translations[language];
 
@@ -368,61 +366,46 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   // Show guest mode or login screen if not logged in
   if (!user) {
-    // Show guest dream analyzer
-    if (showGuestAnalyzer) {
+    // Show auth form if user wants to sign in/up
+    if (isGuestMode) {
       return (
-        <GuestDreamAnalyzer
-          language={language}
-          onBack={() => setShowGuestAnalyzer(false)}
-          onSignUp={() => {
-            setShowGuestAnalyzer(false);
-            setIsGuestMode(false);
-          }}
-        />
-      );
-    }
-
-    // Show guest landing page
-    if (!isGuestMode) {
-      return (
-        <GuestLanding
-          language={language}
-          onTryNow={() => setShowGuestAnalyzer(true)}
-          onSignIn={() => setIsGuestMode(true)}
-          onSignUp={() => setIsGuestMode(true)}
-        />
-      );
-    }
-
-    // Show auth form
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        padding: '2rem'
-      }}>
         <div style={{
-          maxWidth: '450px',
-          width: '100%'
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          padding: '2rem'
         }}>
-          <button
-            onClick={() => setIsGuestMode(false)}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              marginBottom: '1rem',
-              color: '#666'
-            }}
-          >
-            ←
-          </button>
-          <Auth onAuthSuccess={() => {}} />
+          <div style={{
+            maxWidth: '450px',
+            width: '100%'
+          }}>
+            <button
+              onClick={() => setIsGuestMode(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                marginBottom: '1rem',
+                color: '#666'
+              }}
+            >
+              ←
+            </button>
+            <Auth onAuthSuccess={() => {}} />
+          </div>
         </div>
-      </div>
+      );
+    }
+
+    // Show guest dream analyzer (same as logged-in interface)
+    return (
+      <GuestDreamAnalyzer
+        language={language}
+        onBack={() => {}}
+        onSignUp={() => setIsGuestMode(true)}
+      />
     );
   }
 
