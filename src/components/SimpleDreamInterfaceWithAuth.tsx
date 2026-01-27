@@ -10,9 +10,10 @@ import DreamInsights from './DreamInsights';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
-import DreamPlaylist from './DreamPlaylist';
 import AIUsageWidget from './AIUsageWidget';
 import LicenseModal from './LicenseModal';
+import GuestLanding from './GuestLanding';
+import GuestDreamAnalyzer from './GuestDreamAnalyzer';
 
 // Translations
 const translations = {
@@ -61,15 +62,15 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [showPlaylist, setShowPlaylist] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [showGuestAnalyzer, setShowGuestAnalyzer] = useState(false);
 
   const t = translations[language];
 
@@ -365,8 +366,35 @@ export default function SimpleDreamInterfaceWithAuth() {
     );
   }
 
-  // Show login screen if not logged in
+  // Show guest mode or login screen if not logged in
   if (!user) {
+    // Show guest dream analyzer
+    if (showGuestAnalyzer) {
+      return (
+        <GuestDreamAnalyzer
+          language={language}
+          onBack={() => setShowGuestAnalyzer(false)}
+          onSignUp={() => {
+            setShowGuestAnalyzer(false);
+            setIsGuestMode(false);
+          }}
+        />
+      );
+    }
+
+    // Show guest landing page
+    if (!isGuestMode) {
+      return (
+        <GuestLanding
+          language={language}
+          onTryNow={() => setShowGuestAnalyzer(true)}
+          onSignIn={() => setIsGuestMode(true)}
+          onSignUp={() => setIsGuestMode(true)}
+        />
+      );
+    }
+
+    // Show auth form
     return (
       <div style={{
         display: 'flex',
@@ -379,6 +407,19 @@ export default function SimpleDreamInterfaceWithAuth() {
           maxWidth: '450px',
           width: '100%'
         }}>
+          <button
+            onClick={() => setIsGuestMode(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              marginBottom: '1rem',
+              color: '#666'
+            }}
+          >
+            ←
+          </button>
           <Auth onAuthSuccess={() => {}} />
         </div>
       </div>
@@ -522,7 +563,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                 onClick={() => {
                   setShowHistory(false);
                   setShowCalendar(false);
-                  setShowPlaylist(false);
                   setShowInsights(false);
                   setShowStreak(false);
                   setShowMonthlyReport(false);
@@ -562,7 +602,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                   console.log('Current showHistory state:', showHistory);
                   // Close all other modals first
                   setShowCalendar(false);
-                  setShowPlaylist(false);
                   setShowInsights(false);
                   setShowStreak(false);
                   setShowMonthlyReport(false);
