@@ -1174,7 +1174,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         </>
       )}
 
-      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} />
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} />
 
       {/* Dream Insights Modal */}
       {showInsights && user && (

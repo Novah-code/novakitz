@@ -29,6 +29,7 @@ interface SimpleDreamInterfaceProps {
   language?: 'en' | 'ko';
   initialShowHistory?: boolean;
   onHistoryClose?: () => void;
+  onGuestAnalyze?: () => void; // Called when guest tries to analyze - prompt login
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -202,7 +203,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -1589,6 +1590,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
     const words = trimmedText.split(/\s+/).filter(word => word.length >= 2);
     if (words.length < 2) {
       alert('Please describe your dream with at least a few words. Tell us what happened!');
+      return;
+    }
+
+    // Check if user is logged in - if not, prompt login
+    if (!user) {
+      if (onGuestAnalyze) {
+        onGuestAnalyze();
+      }
       return;
     }
 
