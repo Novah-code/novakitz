@@ -341,6 +341,16 @@ export default function SimpleDreamInterfaceWithAuth() {
     await supabase.auth.signOut();
   };
 
+  // Helper function for guest users clicking on features that require login
+  const handleGuestAction = (action: () => void) => {
+    if (!user) {
+      setIsGuestMode(true);
+      setMenuOpen(false);
+    } else {
+      action();
+    }
+  };
+
   console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
 
   // Only show loading on initial load, not on profile checks
@@ -484,15 +494,29 @@ export default function SimpleDreamInterfaceWithAuth() {
               flexDirection: 'column'
             }}>
               {/* AI Usage Widget - Top of Menu */}
-              {user && (
-                <div style={{
-                  padding: '1rem 1rem',
-                  borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
-                  flexShrink: 0
-                }}>
+              <div style={{
+                padding: '1rem 1rem',
+                borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
+                flexShrink: 0
+              }}>
+                {user ? (
                   <AIUsageWidget user={user} />
-                </div>
-              )}
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.1) 100%)',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--matcha-dark)', marginBottom: '4px' }}>
+                      {language === 'ko' ? '무료 체험 중' : 'Free Trial'}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--sage)' }}>
+                      {language === 'ko' ? '로그인하면 월 7회 AI 분석!' : 'Sign up for 7 AI analyses/month!'}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Menu Items */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -534,9 +558,8 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               <button
-                onClick={() => {
+                onClick={() => handleGuestAction(() => {
                   console.log('Dream Journal button clicked!');
-                  console.log('Current showHistory state:', showHistory);
                   // Close all other modals first
                   setShowCalendar(false);
                   setShowInsights(false);
@@ -544,9 +567,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                   setShowMonthlyReport(false);
                   // Then open history
                   setShowHistory(true);
-                  console.log('Setting showHistory to true');
                   setMenuOpen(false);
-                }}
+                })}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
@@ -576,11 +598,10 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               <button
-                onClick={() => {
-                  console.log('Calendar button clicked!');
+                onClick={() => handleGuestAction(() => {
                   setShowCalendar(true);
                   setMenuOpen(false);
-                }}
+                })}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
@@ -612,11 +633,10 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               <button
-                onClick={() => {
-                  console.log('Insights button clicked!');
+                onClick={() => handleGuestAction(() => {
                   setShowInsights(true);
                   setMenuOpen(false);
-                }}
+                })}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
@@ -646,11 +666,10 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               <button
-                onClick={() => {
-                  console.log('Streak button clicked!');
+                onClick={() => handleGuestAction(() => {
                   setShowStreak(true);
                   setMenuOpen(false);
-                }}
+                })}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
@@ -679,11 +698,10 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               <button
-                onClick={() => {
-                  console.log('Monthly Report button clicked!');
+                onClick={() => handleGuestAction(() => {
                   setShowMonthlyReport(true);
                   setMenuOpen(false);
-                }}
+                })}
                 style={{
                   padding: '1rem 2rem',
                   background: 'none',
