@@ -12,7 +12,6 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
 import LicenseModal from './LicenseModal';
-import GuestDreamAnalyzer from './GuestDreamAnalyzer';
 
 // Translations
 const translations = {
@@ -364,52 +363,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     );
   }
 
-  // Show guest mode or login screen if not logged in
-  if (!user) {
-    // Show auth form if user wants to sign in/up
-    if (isGuestMode) {
-      return (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          padding: '2rem'
-        }}>
-          <div style={{
-            maxWidth: '450px',
-            width: '100%'
-          }}>
-            <button
-              onClick={() => setIsGuestMode(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '1.5rem',
-                cursor: 'pointer',
-                marginBottom: '1rem',
-                color: '#666'
-              }}
-            >
-              ←
-            </button>
-            <Auth onAuthSuccess={() => {}} />
-          </div>
-        </div>
-      );
-    }
-
-    // Show guest dream analyzer (same as logged-in interface)
-    return (
-      <GuestDreamAnalyzer
-        language={language}
-        onBack={() => {}}
-        onSignUp={() => setIsGuestMode(true)}
-      />
-    );
-  }
-
-  // Show profile setup if user doesn't have a profile
+  // Show profile setup if logged-in user doesn't have a profile
   if (user && hasProfile === false) {
     console.log('Showing profile form for user:', user.id);
     return (
@@ -423,7 +377,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     );
   }
 
-  // Show main app when logged in
+  // Show main app (for both logged-in users and guests)
   return (
     <>
       {/* Hamburger Menu Button (Top Right) */}
@@ -1011,59 +965,108 @@ export default function SimpleDreamInterfaceWithAuth() {
                 margin: '1rem 2rem'
               }}></div>
 
-              {/* User Info */}
-              <div style={{
-                padding: '1rem 2rem',
-                fontSize: '0.9rem',
-                color: 'var(--sage)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
-              }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-                <div>
-                  <div style={{ fontWeight: '500', color: 'var(--matcha-dark)' }}>
-                    {user.user_metadata?.full_name || user.user_metadata?.name || 'User'}
+              {/* User Info - Show for logged in users */}
+              {user ? (
+                <>
+                  <div style={{
+                    padding: '1rem 2rem',
+                    fontSize: '0.9rem',
+                    color: 'var(--sage)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem'
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <div>
+                      <div style={{ fontWeight: '500', color: 'var(--matcha-dark)' }}>
+                        {user.user_metadata?.full_name || user.user_metadata?.name || 'User'}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
+                        {user.email}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                    {user.email}
-                  </div>
-                </div>
-              </div>
 
-              <button
-                onClick={handleSignOut}
-                style={{
-                  padding: '1rem 2rem',
-                  background: 'none',
-                  border: 'none',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  color: '#dc3545',
-                  transition: 'all 0.2s',
-                  fontFamily: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(220, 53, 69, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'none';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                  <polyline points="16 17 21 12 16 7"></polyline>
-                  <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                <span>{t.signOut}</span>
-              </button>
+                  <button
+                    onClick={handleSignOut}
+                    style={{
+                      padding: '1rem 2rem',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      color: '#dc3545',
+                      transition: 'all 0.2s',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'none';
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>{t.signOut}</span>
+                  </button>
+                </>
+              ) : (
+                /* Guest user - Show Sign In/Sign Up */
+                <div style={{ padding: '1rem 2rem' }}>
+                  <div style={{
+                    fontSize: '0.9rem',
+                    color: 'var(--sage)',
+                    marginBottom: '1rem'
+                  }}>
+                    {language === 'ko' ? '게스트 모드' : 'Guest Mode'}
+                  </div>
+                  <button
+                    onClick={() => setIsGuestMode(true)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                      <polyline points="10 17 15 12 10 7"></polyline>
+                      <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    {language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up'}
+                  </button>
+                </div>
+              )}
 
               {/* Divider */}
               <div style={{
@@ -1216,6 +1219,52 @@ export default function SimpleDreamInterfaceWithAuth() {
           language={language}
           onSuccess={() => setIsPremium(true)}
         />
+      )}
+
+      {/* Auth Modal for Guest Users */}
+      {isGuestMode && !user && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 10001,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '24px',
+            padding: '2rem',
+            maxWidth: '450px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setIsGuestMode(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#999'
+              }}
+            >
+              ✕
+            </button>
+            <Auth onAuthSuccess={() => setIsGuestMode(false)} />
+          </div>
+        </div>
       )}
 
     </>
