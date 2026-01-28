@@ -1239,7 +1239,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         />
       )}
 
-      {/* Auth Modal for Guest Users */}
+      {/* Auth Modal for Guest Users - Friendly Brew Prompt */}
       {isGuestMode && !user && (
         <div style={{
           position: 'fixed',
@@ -1255,15 +1255,16 @@ export default function SimpleDreamInterfaceWithAuth() {
           padding: '20px'
         }}>
           <div style={{
-            background: 'white',
+            background: 'linear-gradient(135deg, #f8fdf8 0%, #fdf8fd 50%, #f8fafd 100%)',
             borderRadius: '24px',
             padding: '2rem',
-            maxWidth: '450px',
+            maxWidth: '400px',
             width: '100%',
             maxHeight: '90vh',
             overflowY: 'auto',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            position: 'relative'
+            position: 'relative',
+            textAlign: 'center'
           }}>
             <button
               onClick={() => setIsGuestMode(false)}
@@ -1280,7 +1281,65 @@ export default function SimpleDreamInterfaceWithAuth() {
             >
               ✕
             </button>
+
+            {/* Friendly Welcome Message */}
+            <div style={{ marginBottom: '1.5rem', paddingTop: '0.5rem' }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                color: '#333',
+                marginBottom: '0.5rem',
+                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
+              }}>
+                {language === 'ko'
+                  ? '꿈을 Brew 하고 싶으신가요?'
+                  : 'Want to brew your dreams?'}
+              </h2>
+              <p style={{
+                fontSize: '1rem',
+                color: '#666',
+                lineHeight: '1.6',
+                marginBottom: '0.5rem'
+              }}>
+                {language === 'ko'
+                  ? '가입하고 무의식의 메시지를 발견하세요!'
+                  : 'Join us and discover messages from your unconscious!'}
+              </p>
+              <p style={{
+                fontSize: '0.85rem',
+                color: '#888'
+              }}>
+                {language === 'ko'
+                  ? '무료 플랜: 월 7회 AI 꿈 분석'
+                  : 'Free plan: 7 AI dream analyses per month'}
+              </p>
+            </div>
+
+            {/* Google Sign In Button */}
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
+
+            {/* Maybe Later */}
+            <button
+              onClick={() => setIsGuestMode(false)}
+              style={{
+                marginTop: '1rem',
+                padding: '10px 24px',
+                background: 'none',
+                border: 'none',
+                color: '#999',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                transition: 'color 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#666';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#999';
+              }}
+            >
+              {language === 'ko' ? '나중에 할게요' : 'Maybe later'}
+            </button>
           </div>
         </div>
       )}
