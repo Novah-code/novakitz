@@ -1247,7 +1247,9 @@ export default function SimpleDreamInterfaceWithAuth() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           zIndex: 10001,
           display: 'flex',
           alignItems: 'center',
@@ -1255,16 +1257,17 @@ export default function SimpleDreamInterfaceWithAuth() {
           padding: '20px'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, #f8fdf8 0%, #fdf8fd 50%, #f8fafd 100%)',
+            background: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             borderRadius: '24px',
-            padding: '2rem',
-            maxWidth: '400px',
+            padding: '2.5rem 2rem',
+            maxWidth: '380px',
             width: '100%',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
             position: 'relative',
-            textAlign: 'center'
+            textAlign: 'center',
+            border: '1px solid rgba(127, 176, 105, 0.2)'
           }}>
             <button
               onClick={() => setIsGuestMode(false)}
@@ -1272,46 +1275,65 @@ export default function SimpleDreamInterfaceWithAuth() {
                 position: 'absolute',
                 top: '1rem',
                 right: '1rem',
-                background: 'none',
+                background: 'rgba(127, 176, 105, 0.1)',
                 border: 'none',
-                fontSize: '24px',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                fontSize: '16px',
                 cursor: 'pointer',
-                color: '#999'
+                color: 'var(--matcha-dark)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
               }}
             >
               ✕
             </button>
 
             {/* Friendly Welcome Message */}
-            <div style={{ marginBottom: '1.5rem', paddingTop: '0.5rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
               <h2 style={{
-                fontSize: '1.5rem',
-                fontWeight: '700',
-                color: '#333',
-                marginBottom: '0.5rem',
-                fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
+                fontSize: '1.4rem',
+                fontWeight: '600',
+                color: 'var(--matcha-dark)',
+                marginBottom: '0.75rem',
+                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Cormorant', serif",
+                letterSpacing: language === 'ko' ? '0' : '0.5px'
               }}>
                 {language === 'ko'
                   ? '꿈을 Brew 하고 싶으신가요?'
                   : 'Want to brew your dreams?'}
               </h2>
               <p style={{
-                fontSize: '1rem',
-                color: '#666',
+                fontSize: '0.95rem',
+                color: 'var(--sage)',
                 lineHeight: '1.6',
                 marginBottom: '0.5rem'
               }}>
                 {language === 'ko'
-                  ? '가입하고 무의식의 메시지를 발견하세요!'
-                  : 'Join us and discover messages from your unconscious!'}
+                  ? '가입하고 무의식의 메시지를 발견하세요'
+                  : 'Join us and discover messages from your unconscious'}
               </p>
               <p style={{
-                fontSize: '0.85rem',
-                color: '#888'
+                fontSize: '0.8rem',
+                color: 'var(--matcha-green)',
+                fontWeight: '500',
+                background: 'rgba(127, 176, 105, 0.1)',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                display: 'inline-block'
               }}>
                 {language === 'ko'
-                  ? '무료 플랜: 월 7회 AI 꿈 분석'
-                  : 'Free plan: 7 AI dream analyses per month'}
+                  ? 'Free: 월 7회 AI 분석'
+                  : 'Free: 7 AI analyses/month'}
               </p>
             </div>
 
@@ -1323,19 +1345,20 @@ export default function SimpleDreamInterfaceWithAuth() {
               onClick={() => setIsGuestMode(false)}
               style={{
                 marginTop: '1rem',
-                padding: '10px 24px',
+                padding: '8px 20px',
                 background: 'none',
                 border: 'none',
-                color: '#999',
-                fontSize: '0.9rem',
+                color: 'var(--sage)',
+                fontSize: '0.85rem',
                 cursor: 'pointer',
-                transition: 'color 0.2s'
+                transition: 'color 0.2s',
+                fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#666';
+                e.currentTarget.style.color = 'var(--matcha-dark)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#999';
+                e.currentTarget.style.color = 'var(--sage)';
               }}
             >
               {language === 'ko' ? '나중에 할게요' : 'Maybe later'}
