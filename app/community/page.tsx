@@ -12,6 +12,7 @@ export default function CommunityPage() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
@@ -35,11 +36,8 @@ export default function CommunityPage() {
   }, []);
 
   const t = {
-    title: language === 'ko' ? '꿈 갤러리' : 'Dream Gallery',
-    subtitle: language === 'ko' ? '꿈의 이미지를 공유하세요' : 'Share images from your dreams',
-    upload: language === 'ko' ? '공유하기' : 'Share',
-    back: language === 'ko' ? '홈' : 'Home',
-    loginToShare: language === 'ko' ? '로그인하고 공유하기' : 'Login to share',
+    title: 'Space',
+    searchPlaceholder: language === 'ko' ? '꿈 검색...' : 'Search dreams...',
   };
 
   if (loading) {
@@ -81,59 +79,93 @@ export default function CommunityPage() {
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
         zIndex: 100,
-        padding: '1rem 1.5rem',
+        padding: '0.75rem 1.5rem',
       }}>
         <div style={{
           maxWidth: '1400px',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          gap: '1rem'
         }}>
-          {/* Left: Back + Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <button
-              onClick={() => window.location.href = '/'}
+          {/* Home Icon */}
+          <button
+            onClick={() => window.location.href = '/'}
+            style={{
+              background: 'rgba(127, 176, 105, 0.1)',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '10px',
+              cursor: 'pointer',
+              color: 'var(--matcha-dark, #4a6741)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s',
+              flexShrink: 0
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </button>
+
+          {/* Title */}
+          <h1 style={{
+            fontSize: '1.3rem',
+            fontWeight: '600',
+            color: 'var(--matcha-dark, #4a6741)',
+            margin: 0,
+            flexShrink: 0
+          }}>
+            {t.title}
+          </h1>
+
+          {/* Search Bar */}
+          <div style={{
+            flex: 1,
+            maxWidth: '400px',
+            position: 'relative'
+          }}>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--sage, #6b8e63)"
+              strokeWidth="2"
               style={{
-                background: 'rgba(127, 176, 105, 0.1)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '8px 12px',
-                cursor: 'pointer',
-                color: 'var(--matcha-dark, #4a6741)',
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.2s'
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                opacity: 0.6
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              {t.back}
-            </button>
-            <div>
-              <h1 style={{
-                fontSize: '1.5rem',
-                fontWeight: '600',
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              style={{
+                width: '100%',
+                padding: '10px 12px 10px 40px',
+                border: '1px solid rgba(127, 176, 105, 0.2)',
+                borderRadius: '12px',
+                fontSize: '0.9rem',
+                background: 'rgba(255, 255, 255, 0.8)',
+                outline: 'none',
                 color: 'var(--matcha-dark, #4a6741)',
-                margin: 0,
-                fontFamily: language === 'ko' ? 'inherit' : "'Georgia', serif"
-              }}>
-                {t.title}
-              </h1>
-              <p style={{
-                fontSize: '0.85rem',
-                color: 'var(--sage, #6b8e63)',
-                margin: 0
-              }}>
-                {t.subtitle}
-              </p>
-            </div>
+                fontFamily: 'inherit'
+              }}
+            />
           </div>
 
-          {/* Right: Upload Button */}
+          {/* Add Button (+ icon only) */}
           <button
             onClick={() => {
               if (user) {
@@ -143,27 +175,23 @@ export default function CommunityPage() {
               }
             }}
             style={{
-              background: user
-                ? 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
-                : 'rgba(127, 176, 105, 0.2)',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
               border: 'none',
               borderRadius: '12px',
-              padding: '10px 20px',
+              padding: '10px',
               cursor: 'pointer',
-              color: user ? 'white' : 'var(--matcha-dark, #4a6741)',
-              fontSize: '0.95rem',
-              fontWeight: '600',
+              color: 'white',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              justifyContent: 'center',
               transition: 'all 0.2s',
-              boxShadow: user ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none'
+              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
+              flexShrink: 0
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M12 5v14M5 12h14"/>
             </svg>
-            {user ? t.upload : t.loginToShare}
           </button>
         </div>
       </header>
