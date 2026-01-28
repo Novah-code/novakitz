@@ -1305,7 +1305,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 fontWeight: '600',
                 color: 'var(--matcha-dark)',
                 marginBottom: '0.75rem',
-                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Cormorant', serif",
+                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Georgia', serif",
                 letterSpacing: language === 'ko' ? '0' : '0.5px'
               }}>
                 {language === 'ko'
