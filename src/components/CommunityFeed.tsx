@@ -176,27 +176,23 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
   return (
     <>
       {/* Masonry Grid */}
-      <div style={{
+      <style>{`
+        @media (max-width: 1200px) {
+          .masonry-grid { column-count: 3 !important; }
+        }
+        @media (max-width: 900px) {
+          .masonry-grid { column-count: 2 !important; }
+        }
+        @media (max-width: 500px) {
+          .masonry-grid { column-count: 2 !important; column-gap: 10px !important; }
+        }
+      `}</style>
+      <div className="masonry-grid" style={{
         maxWidth: '1400px',
         margin: '0 auto',
         columnCount: 4,
         columnGap: '16px',
       }}>
-        <style>{`
-          @media (max-width: 1200px) {
-            .masonry-grid { column-count: 3 !important; }
-          }
-          @media (max-width: 900px) {
-            .masonry-grid { column-count: 2 !important; }
-          }
-          @media (max-width: 500px) {
-            .masonry-grid { column-count: 2 !important; column-gap: 10px !important; }
-          }
-        `}</style>
-        <div className="masonry-grid" style={{
-          columnCount: 4,
-          columnGap: '16px',
-        }}>
           {posts.map(post => (
             <div
               key={post.id}
@@ -276,7 +272,6 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
               </div>
             </div>
           ))}
-        </div>
       </div>
 
       {/* Post Detail Modal */}
