@@ -12,6 +12,7 @@ interface CommunityPost {
   created_at: string;
   like_count: number;
   liked_by_user: boolean;
+  nickname: string;
 }
 
 interface CommunityFeedProps {
@@ -29,6 +30,9 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
     noPosts: language === 'ko' ? '아직 공유된 꿈이 없어요' : 'No dreams shared yet',
     beFirst: language === 'ko' ? '첫 번째로 공유해보세요!' : 'Be the first to share!',
     likes: language === 'ko' ? '공감' : 'likes',
+    delete: language === 'ko' ? '삭제' : 'Delete',
+    deleteConfirm: language === 'ko' ? '정말 삭제하시겠습니까?' : 'Are you sure you want to delete this?',
+    myPost: language === 'ko' ? '내 꿈' : 'My dream',
   };
 
   useEffect(() => {
@@ -50,6 +54,18 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
         setLoading(false);
         return;
       }
+
+      // Get user profiles for nicknames
+      const userIds = [...new Set(postsData.map(p => p.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, nickname')
+        .in('id', userIds);
+
+      const nicknames: { [key: string]: string } = {};
+      profilesData?.forEach(profile => {
+        nicknames[profile.id] = profile.nickname || 'dreamer';
+      });
 
       // Get like counts for each post
       const { data: likesData } = await supabase
@@ -76,7 +92,8 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
       const postsWithLikes: CommunityPost[] = postsData.map(post => ({
         ...post,
         like_count: likeCounts[post.id] || 0,
-        liked_by_user: userLikes.includes(post.id)
+        liked_by_user: userLikes.includes(post.id),
+        nickname: nicknames[post.user_id] || 'dreamer'
       }));
 
       setPosts(postsWithLikes);
@@ -130,6 +147,37 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
       console.error('Error toggling like:', error);
       // Revert on error
       loadPosts();
+    }
+  };
+
+  const handleDelete = async (postId: string, imageUrl: string) => {
+    if (!user) return;
+
+    if (!confirm(t.deleteConfirm)) return;
+
+    try {
+      // Delete from storage
+      const fileName = imageUrl.split('/').pop();
+      if (fileName) {
+        await supabase.storage
+          .from('community-images')
+          .remove([`${user.id}/${fileName}`]);
+      }
+
+      // Delete post record
+      const { error } = await supabase
+        .from('community_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      setSelectedPost(null);
+    } catch (error) {
+      console.error('Error deleting post:', error);
     }
   };
 
@@ -225,16 +273,26 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
                 }}
                 loading="lazy"
               />
-              {/* Like indicator overlay */}
+              {/* Bottom bar with like and actions */}
               <div style={{
                 padding: '10px 12px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                justifyContent: 'space-between',
                 fontSize: '0.85rem',
                 color: 'var(--sage, #6b8e63)'
               }}>
-                <button
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {/* Nickname */}
+                  <span style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--matcha-dark, #4a6741)',
+                    fontWeight: 500
+                  }}>
+                    @{post.nickname}
+                  </span>
+                  {/* Like button */}
+                  <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleLike(post.id, post.liked_by_user);
@@ -269,6 +327,47 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
                   </svg>
                   <span>{post.like_count}</span>
                 </button>
+                </div>
+
+                {/* My post indicator + delete */}
+                {user && post.user_id === user.id && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      fontSize: '0.75rem',
+                      color: '#7FB069',
+                      background: 'rgba(127, 176, 105, 0.1)',
+                      padding: '2px 8px',
+                      borderRadius: '10px'
+                    }}>
+                      {t.myPost}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(post.id, post.image_url);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        color: '#999',
+                        transition: 'color 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#e74c3c';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#999';
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -340,48 +439,90 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
             {/* Caption & Like */}
             <div style={{
               marginTop: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
               color: 'white',
             }}>
-              <p style={{
-                fontSize: '0.95rem',
-                opacity: 0.9,
-                margin: 0,
-                flex: 1,
+              {/* Author & Delete */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '12px'
               }}>
-                {selectedPost.caption || ''}
-              </p>
-              <button
-                onClick={() => handleLike(selectedPost.id, selectedPost.liked_by_user)}
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  border: 'none',
-                  borderRadius: '24px',
-                  padding: '10px 20px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  color: selectedPost.liked_by_user ? '#e74c3c' : 'white',
+                <span style={{
+                  fontSize: '0.9rem',
+                  opacity: 0.8,
+                }}>
+                  @{selectedPost.nickname}
+                </span>
+                {user && selectedPost.user_id === user.id && (
+                  <button
+                    onClick={() => handleDelete(selectedPost.id, selectedPost.image_url)}
+                    style={{
+                      background: 'rgba(231, 76, 60, 0.2)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      color: '#e74c3c',
+                      fontSize: '0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    {t.delete}
+                  </button>
+                )}
+              </div>
+
+              {/* Caption & Like */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}>
+                <p style={{
                   fontSize: '0.95rem',
-                  transition: 'all 0.2s',
-                  marginLeft: '16px',
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill={selectedPost.liked_by_user ? '#e74c3c' : 'none'}
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  opacity: 0.9,
+                  margin: 0,
+                  flex: 1,
+                }}>
+                  {selectedPost.caption || ''}
+                </p>
+                <button
+                  onClick={() => handleLike(selectedPost.id, selectedPost.liked_by_user)}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: 'none',
+                    borderRadius: '24px',
+                    padding: '10px 20px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: selectedPost.liked_by_user ? '#e74c3c' : 'white',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s',
+                    marginLeft: '16px',
+                  }}
                 >
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                {selectedPost.like_count} {t.likes}
-              </button>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill={selectedPost.liked_by_user ? '#e74c3c' : 'none'}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                  {selectedPost.like_count} {t.likes}
+                </button>
+              </div>
             </div>
           </div>
         </div>
