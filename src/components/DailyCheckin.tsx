@@ -149,9 +149,19 @@ export default function DailyCheckin({
     }
   };
 
-  const moodLabels = language === 'ko'
-    ? ['', '', '', '', '', '', '', '', '', '✨']
-    : ['', '', '', '', '', '', '', '', '', '✨'];
+  // Mood colors from sad (red) to happy (green)
+  const moodColors = [
+    '#E57373', // 1 - soft red
+    '#FF8A65', // 2 - coral
+    '#FFB74D', // 3 - orange
+    '#FFD54F', // 4 - amber
+    '#FFF176', // 5 - yellow
+    '#DCE775', // 6 - lime
+    '#AED581', // 7 - light green
+    '#81C784', // 8 - green
+    '#7FB069', // 9 - matcha
+    '#66BB6A', // 10 - bright green (with sparkle)
+  ];
 
   const timeLabels = {
     morning: language === 'ko' ? '아침' : 'Morning',
@@ -290,7 +300,7 @@ export default function DailyCheckin({
               fontSize: '1.3rem',
               fontWeight: 600,
               color: 'var(--matcha-dark)',
-              fontFamily: "'Cormorant', serif"
+              fontFamily: "'Georgia', serif"
             }}>
               {timeLabels[timeOfDay]} {language === 'ko' ? '체크인' : 'Check-in'}
             </h2>
@@ -328,27 +338,35 @@ export default function DailyCheckin({
                     onClick={() => setMood(i + 1)}
                     style={{
                       padding: '12px',
-                      fontSize: '1.5rem',
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      color: mood === i + 1 ? 'white' : moodColors[i],
                       background: mood === i + 1
-                        ? 'rgba(127, 176, 105, 0.2)'
-                        : 'transparent',
+                        ? moodColors[i]
+                        : `${moodColors[i]}20`,
                       border: mood === i + 1
-                        ? '2px solid #7FB069'
-                        : '1px solid rgba(127, 176, 105, 0.1)',
-                      borderRadius: '8px',
+                        ? `2px solid ${moodColors[i]}`
+                        : `1px solid ${moodColors[i]}40`,
+                      borderRadius: '10px',
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '44px'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                      if (mood !== i + 1) {
+                        e.currentTarget.style.background = `${moodColors[i]}40`;
+                      }
                     }}
                     onMouseLeave={(e) => {
                       if (mood !== i + 1) {
-                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.background = `${moodColors[i]}20`;
                       }
                     }}
                   >
-                    {moodLabels[i]}
+                    {i === 9 ? '✨' : i + 1}
                   </button>
                 ))}
               </div>
