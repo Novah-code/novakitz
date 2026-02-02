@@ -70,6 +70,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<string | null>(null);
+  const [calendarSelectedDream, setCalendarSelectedDream] = useState<any | null>(null);
 
   const t = translations[language];
 
@@ -1245,7 +1247,10 @@ export default function SimpleDreamInterfaceWithAuth() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '700px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
             <button
-              onClick={() => setShowCalendar(false)}
+              onClick={() => {
+                setShowCalendar(false);
+                setCalendarSelectedDate(null);
+              }}
               style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               ✕
@@ -1254,12 +1259,91 @@ export default function SimpleDreamInterfaceWithAuth() {
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}
-                onDateSelect={() => {
-                  // Handle date selection if needed
-                }}
-                selectedDate={null}
+                onDateSelect={(date) => setCalendarSelectedDate(date)}
+                selectedDate={calendarSelectedDate}
               />
             </div>
+
+            {/* Selected Date Dreams */}
+            {calendarSelectedDate && (() => {
+              const selectedDreams = dreams.filter(dream => {
+                let dreamDate: string;
+                if (dream.date && typeof dream.date === 'string') {
+                  dreamDate = new Date(dream.date).toDateString();
+                } else if (dream.created_at) {
+                  dreamDate = new Date(dream.created_at).toDateString();
+                } else {
+                  dreamDate = new Date().toDateString();
+                }
+                return dreamDate === calendarSelectedDate;
+              });
+
+              if (selectedDreams.length === 0) return null;
+
+              return (
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(127, 176, 105, 0.2)', paddingTop: '1.5rem' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '1rem' }}>
+                    {new Date(calendarSelectedDate).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {selectedDreams.map(dream => (
+                      <button
+                        key={dream.id}
+                        onClick={() => setCalendarSelectedDream(dream)}
+                        style={{
+                          padding: '12px 16px',
+                          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(127, 176, 105, 0.15)',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)';
+                        }}
+                      >
+                        <span style={{ fontSize: '0.95rem', fontWeight: '500', color: 'var(--matcha-dark)' }}>
+                          {dream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Dream Detail Modal (from Calendar) */}
+      {calendarSelectedDream && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+            <button
+              onClick={() => setCalendarSelectedDream(null)}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#999' }}
+            >
+              ✕
+            </button>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600', color: 'var(--matcha-dark)', paddingRight: '2rem' }}>
+              {calendarSelectedDream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--sage)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              {calendarSelectedDream.content?.split('\n\n---\n\n')[0] || ''}
+            </p>
+            {calendarSelectedDream.tags && calendarSelectedDream.tags.length > 0 && (
+              <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {calendarSelectedDream.tags.map((tag: string, idx: number) => (
+                  <span key={idx} style={{ padding: '4px 10px', background: 'rgba(127, 176, 105, 0.15)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--matcha-dark)' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

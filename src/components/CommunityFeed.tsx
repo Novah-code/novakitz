@@ -58,13 +58,13 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
       // Get user profiles for nicknames
       const userIds = [...new Set(postsData.map(p => p.user_id))];
       const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, nickname')
-        .in('id', userIds);
+        .from('user_profiles')
+        .select('user_id, full_name')
+        .in('user_id', userIds);
 
       const nicknames: { [key: string]: string } = {};
       profilesData?.forEach(profile => {
-        nicknames[profile.id] = profile.nickname || 'dreamer';
+        nicknames[profile.user_id] = profile.full_name || 'dreamer';
       });
 
       // Get like counts for each post
@@ -225,28 +225,30 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
     <>
       {/* Masonry Grid */}
       <style>{`
-        @media (max-width: 1200px) {
+        @media (max-width: 1400px) {
           .masonry-grid { column-count: 4 !important; }
         }
-        @media (max-width: 1000px) {
+        @media (max-width: 1100px) {
           .masonry-grid { column-count: 3 !important; }
         }
-        @media (max-width: 700px) {
+        @media (max-width: 800px) {
           .masonry-grid { column-count: 2 !important; }
         }
-        @media (max-width: 500px) {
-          .masonry-grid { column-count: 2 !important; column-gap: 12px !important; }
-          .masonry-card { border-radius: 12px !important; }
+        @media (max-width: 480px) {
+          .masonry-grid { column-count: 2 !important; column-gap: 10px !important; }
+          .masonry-card { border-radius: 10px !important; margin-bottom: 10px !important; }
         }
         .masonry-card {
           break-inside: avoid;
-          margin-bottom: 20px;
+          margin-bottom: 16px;
           border-radius: 16px;
           overflow: hidden;
           background: white;
           cursor: pointer;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
           box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          display: inline-block;
+          width: 100%;
         }
         .masonry-card:hover {
           transform: translateY(-4px);
@@ -257,7 +259,7 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
         maxWidth: '1600px',
         margin: '0 auto',
         columnCount: 5,
-        columnGap: '20px',
+        columnGap: '16px',
         paddingBottom: '60px',
       }}>
           {posts.map(post => (

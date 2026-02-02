@@ -34,7 +34,7 @@ export default function DailyCheckin({
 }: DailyCheckinProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
-  const [mood, setMood] = useState(5);
+  const [mood, setMood] = useState(3);
   const [energyLevel, setEnergyLevel] = useState(5);
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
@@ -120,7 +120,7 @@ export default function DailyCheckin({
         setIsOpen(false);
 
         // Reset form
-        setMood(5);
+        setMood(3);
         setEnergyLevel(5);
 
         // Update today's checkins - using functional setState
@@ -149,18 +149,13 @@ export default function DailyCheckin({
     }
   };
 
-  // Mood colors from sad (red) to happy (green)
+  // Mood colors - 5 options from low to high
   const moodColors = [
-    '#E57373', // 1 - soft red
-    '#FF8A65', // 2 - coral
-    '#FFB74D', // 3 - orange
-    '#FFD54F', // 4 - amber
-    '#FFF176', // 5 - yellow
-    '#DCE775', // 6 - lime
-    '#AED581', // 7 - light green
-    '#81C784', // 8 - green
-    '#7FB069', // 9 - matcha
-    '#66BB6A', // 10 - bright green (with sparkle)
+    '#E57373', // 1 - soft red (low)
+    '#FFB74D', // 2 - orange
+    '#FFF176', // 3 - yellow (neutral)
+    '#AED581', // 4 - light green
+    '#7FB069', // 5 - matcha (high)
   ];
 
   const timeLabels = {
@@ -325,49 +320,44 @@ export default function DailyCheckin({
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px'
               }}>
-                {language === 'ko' ? '기분' : 'Mood'} ({mood}/10)
+                {language === 'ko' ? '기분' : 'Mood'}
               </label>
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '8px'
+                gap: '12px'
               }}>
-                {Array.from({ length: 10 }).map((_, i) => (
+                {Array.from({ length: 5 }).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setMood(i + 1)}
                     style={{
-                      padding: '12px',
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      color: mood === i + 1 ? 'white' : moodColors[i],
-                      background: mood === i + 1
-                        ? moodColors[i]
-                        : `${moodColors[i]}20`,
+                      padding: '0',
+                      width: '100%',
+                      aspectRatio: '1',
+                      background: moodColors[i],
                       border: mood === i + 1
-                        ? `2px solid ${moodColors[i]}`
-                        : `1px solid ${moodColors[i]}40`,
-                      borderRadius: '10px',
+                        ? '3px solid #333'
+                        : '2px solid transparent',
+                      borderRadius: '12px',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minHeight: '44px'
+                      transform: mood === i + 1 ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: mood === i + 1
+                        ? '0 4px 12px rgba(0,0,0,0.2)'
+                        : '0 2px 4px rgba(0,0,0,0.1)'
                     }}
                     onMouseEnter={(e) => {
                       if (mood !== i + 1) {
-                        e.currentTarget.style.background = `${moodColors[i]}40`;
+                        e.currentTarget.style.transform = 'scale(1.05)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (mood !== i + 1) {
-                        e.currentTarget.style.background = `${moodColors[i]}20`;
+                        e.currentTarget.style.transform = 'scale(1)';
                       }
                     }}
-                  >
-                    {i === 9 ? '✨' : i + 1}
-                  </button>
+                  />
                 ))}
               </div>
             </div>

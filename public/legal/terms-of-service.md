@@ -72,6 +72,9 @@ For Korean users, subscription payments are subject to the Electronic Financial 
 
 Transaction records are maintained for 5 years as required by Korean law. You have the right to request transaction records at any time.
 
+### 5.6 Lifetime License Terms
+The Lifetime license is valid for the duration of the Service's operation. In the event of service discontinuation due to force majeure, company circumstances, or other unavoidable reasons, the Lifetime license validity may expire. We will provide reasonable notice before any planned service discontinuation. Lifetime licenses are non-refundable except as required by applicable law.
+
 ## 6. Acceptable Use
 
 You agree NOT to:
@@ -297,6 +300,9 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 한국 사용자의 경우 구독 결제는 전자금융거래법의 적용을 받습니다.
 
 한국 법에 따라 거래 기록은 5년간 보관됩니다. 언제든지 거래 기록을 요청할 권리가 있습니다.
+
+### 5.6 평생(Lifetime) 라이선스 약관
+평생(Lifetime) 라이선스는 서비스가 유지되는 기간 동안 유효합니다. 천재지변, 회사 사정, 기타 불가피한 사유로 서비스가 종료될 경우 평생 라이선스의 효력은 만료될 수 있습니다. 계획된 서비스 종료 전 합리적인 사전 통지를 제공합니다. 평생 라이선스는 관련 법률에서 요구하는 경우를 제외하고 환불이 불가합니다.
 
 ## 6. 허용 가능한 사용
 

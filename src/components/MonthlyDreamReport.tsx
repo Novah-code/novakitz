@@ -437,31 +437,26 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
 
     const averageMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced';
 
-    // Keywords extraction - count each word only ONCE per dream
+    // Keywords extraction - use tags from dreams (AI-generated keywords)
     const keywordCount: { [key: string]: number } = {};
     dreams.forEach((dream) => {
-      const title = dream.title?.toLowerCase() || '';
-      const dreamContent = dream.content?.split('\n\n---\n\n')[0]?.toLowerCase() || '';
-      const text = `${title} ${dreamContent}`;
+      const tags = dream.tags || [];
+      const uniqueTagsInDream = new Set<string>();
 
-      const words = text
-        .split(/[\s.,!?;:()\[\]{}"']+/)
-        .filter((w) => w.length > 3 && !isCommonWord(w))
-        .filter((w) => !/^\d+$/.test(w))
-        .filter((w) => !/^[^a-zA-Z가-힣]+$/.test(w));
-
-      // Use Set to get unique words per dream (count each word only once per dream)
-      const uniqueWordsInDream = new Set<string>();
-      words.forEach((word) => {
-        const cleanWord = word.replace(/^[^\w가-힣]+|[^\w가-힣]+$/g, '');
-        if (cleanWord.length > 3 && !isCommonWord(cleanWord)) {
-          uniqueWordsInDream.add(cleanWord);
+      tags.forEach((tag: string) => {
+        if (!tag) return;
+        // Filter out: "꿈", "no-dream", very short tags
+        if (!tag.includes('꿈') &&
+            !tag.includes('no-dream') &&
+            !tag.includes('꿈안꿈') &&
+            tag.length > 1) {
+          uniqueTagsInDream.add(tag);
         }
       });
 
-      // Add unique words to the global count
-      uniqueWordsInDream.forEach((word) => {
-        keywordCount[word] = (keywordCount[word] || 0) + 1;
+      // Add unique tags from this dream to the global count
+      uniqueTagsInDream.forEach((tag) => {
+        keywordCount[tag] = (keywordCount[tag] || 0) + 1;
       });
     });
 
