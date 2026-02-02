@@ -226,43 +226,45 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
       {/* Masonry Grid */}
       <style>{`
         @media (max-width: 1200px) {
+          .masonry-grid { column-count: 4 !important; }
+        }
+        @media (max-width: 1000px) {
           .masonry-grid { column-count: 3 !important; }
         }
-        @media (max-width: 900px) {
+        @media (max-width: 700px) {
           .masonry-grid { column-count: 2 !important; }
         }
         @media (max-width: 500px) {
-          .masonry-grid { column-count: 2 !important; column-gap: 10px !important; }
+          .masonry-grid { column-count: 2 !important; column-gap: 12px !important; }
+          .masonry-card { border-radius: 12px !important; }
+        }
+        .masonry-card {
+          break-inside: avoid;
+          margin-bottom: 20px;
+          border-radius: 16px;
+          overflow: hidden;
+          background: white;
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .masonry-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 28px rgba(0,0,0,0.12);
         }
       `}</style>
       <div className="masonry-grid" style={{
-        maxWidth: '1400px',
+        maxWidth: '1600px',
         margin: '0 auto',
-        columnCount: 4,
-        columnGap: '16px',
+        columnCount: 5,
+        columnGap: '20px',
+        paddingBottom: '60px',
       }}>
           {posts.map(post => (
             <div
               key={post.id}
-              style={{
-                breakInside: 'avoid',
-                marginBottom: '16px',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                background: 'white',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-              }}
+              className="masonry-card"
               onClick={() => setSelectedPost(post)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-              }}
             >
               <img
                 src={post.image_url}
@@ -273,26 +275,15 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
                 }}
                 loading="lazy"
               />
-              {/* Bottom bar with like and actions */}
+              {/* Minimal bottom bar - like only */}
               <div style={{
-                padding: '10px 12px',
+                padding: '12px 14px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                fontSize: '0.85rem',
-                color: 'var(--sage, #6b8e63)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {/* Nickname */}
-                  <span style={{
-                    fontSize: '0.8rem',
-                    color: 'var(--matcha-dark, #4a6741)',
-                    fontWeight: 500
-                  }}>
-                    @{post.nickname}
-                  </span>
-                  {/* Like button */}
-                  <button
+                {/* Like button */}
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleLike(post.id, post.liked_by_user);
@@ -301,15 +292,17 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '4px',
+                    padding: '0',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    color: post.liked_by_user ? '#e74c3c' : 'var(--sage, #6b8e63)',
+                    gap: '6px',
+                    color: post.liked_by_user ? '#e74c3c' : '#999',
+                    fontSize: '0.9rem',
+                    fontWeight: 500,
                     transition: 'transform 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)';
@@ -325,48 +318,38 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
                   >
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                   </svg>
-                  <span>{post.like_count}</span>
+                  {post.like_count > 0 && <span>{post.like_count}</span>}
                 </button>
-                </div>
 
-                {/* My post indicator + delete */}
+                {/* Delete for own posts */}
                 {user && post.user_id === user.id && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{
-                      fontSize: '0.75rem',
-                      color: '#7FB069',
-                      background: 'rgba(127, 176, 105, 0.1)',
-                      padding: '2px 8px',
-                      borderRadius: '10px'
-                    }}>
-                      {t.myPost}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(post.id, post.image_url);
-                      }}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        color: '#999',
-                        transition: 'color 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.color = '#e74c3c';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.color = '#999';
-                      }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                      </svg>
-                    </button>
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(post.id, post.image_url);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      color: '#ccc',
+                      transition: 'color 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#e74c3c';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#ccc';
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
                 )}
               </div>
             </div>

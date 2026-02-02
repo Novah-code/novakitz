@@ -113,23 +113,26 @@ export async function getMonthDreamStats(userId: string): Promise<DreamStats> {
       'feeling', 'suggests', 'call', 'part', 'inner', 'both'
     ]);
 
-    // Extract keywords from tags and filter stopwords
-    const allTags = dreams
-      .flatMap(d => d.tags || [])
-      .filter(tag => {
-        if (!tag) return false;
+    // Extract keywords from tags - count each tag only ONCE per dream
+    const keywordCounts: { [key: string]: number } = {};
+    dreams.forEach(dream => {
+      const uniqueTagsInDream = new Set<string>();
+      (dream.tags || []).forEach((tag: string) => {
+        if (!tag) return;
         const lowerTag = tag.toLowerCase().trim();
         // Filter out: stopwords, "꿈", "no-dream", single characters, numbers only
-        return !stopwords.has(lowerTag) &&
-               !tag.includes('꿈') &&
-               !tag.includes('no-dream') &&
-               lowerTag.length > 1 &&
-               !/^\d+$/.test(lowerTag);
+        if (!stopwords.has(lowerTag) &&
+            !tag.includes('꿈') &&
+            !tag.includes('no-dream') &&
+            lowerTag.length > 1 &&
+            !/^\d+$/.test(lowerTag)) {
+          uniqueTagsInDream.add(tag);
+        }
       });
-
-    const keywordCounts: { [key: string]: number } = {};
-    allTags.forEach(tag => {
-      keywordCounts[tag] = (keywordCounts[tag] || 0) + 1;
+      // Add unique tags from this dream to the global count
+      uniqueTagsInDream.forEach(tag => {
+        keywordCounts[tag] = (keywordCounts[tag] || 0) + 1;
+      });
     });
 
     const topKeywords = Object.entries(keywordCounts)

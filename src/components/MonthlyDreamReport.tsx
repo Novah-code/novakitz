@@ -437,7 +437,7 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
 
     const averageMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced';
 
-    // Keywords extraction with enhanced filtering
+    // Keywords extraction - count each word only ONCE per dream
     const keywordCount: { [key: string]: number } = {};
     dreams.forEach((dream) => {
       const title = dream.title?.toLowerCase() || '';
@@ -448,13 +448,20 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
         .split(/[\s.,!?;:()\[\]{}"']+/)
         .filter((w) => w.length > 3 && !isCommonWord(w))
         .filter((w) => !/^\d+$/.test(w))
-        .filter((w) => !/^[^a-zA-Z가-힣]+$/.test(w)); // Filter out non-word characters
+        .filter((w) => !/^[^a-zA-Z가-힣]+$/.test(w));
 
+      // Use Set to get unique words per dream (count each word only once per dream)
+      const uniqueWordsInDream = new Set<string>();
       words.forEach((word) => {
         const cleanWord = word.replace(/^[^\w가-힣]+|[^\w가-힣]+$/g, '');
         if (cleanWord.length > 3 && !isCommonWord(cleanWord)) {
-          keywordCount[cleanWord] = (keywordCount[cleanWord] || 0) + 1;
+          uniqueWordsInDream.add(cleanWord);
         }
+      });
+
+      // Add unique words to the global count
+      uniqueWordsInDream.forEach((word) => {
+        keywordCount[word] = (keywordCount[word] || 0) + 1;
       });
     });
 
@@ -476,14 +483,6 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
       );
     }
 
-    if (topKeywords.length > 0 && topKeywords[0].count >= 2) {
-      const topKeyword = topKeywords[0];
-      patterns.push(
-        language === 'ko'
-          ? `🔑 "${topKeyword.word}"가 ${topKeyword.count}번 나타나며 핵심 상징으로 떠올랐습니다`
-          : `🔑 "${topKeyword.word}" emerged as a key symbol, appearing ${topKeyword.count} times`
-      );
-    }
 
     // Monthly trends
     const monthNames = language === 'ko'
@@ -1403,83 +1402,118 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
             </div>
           )}
 
-          {/* Monthly Trends */}
-          {stats.monthlyTrends.length > 1 && (
-            <div style={{
-              background: '#f8fafc',
-              padding: '1.5rem',
-              borderRadius: '16px',
-              marginBottom: '1.5rem'
-            }}>
-              <h3 style={{
-                fontSize: '15px',
-                fontWeight: 'bold',
-                marginBottom: '1.5rem',
-                color: 'var(--matcha-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>📈</span> {t.monthlyTrends}
-              </h3>
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                gap: '8px',
-                height: '140px',
-                padding: '0 8px'
-              }}>
-                {stats.monthlyTrends.map((trend, idx) => {
-                  const maxCount = Math.max(...stats.monthlyTrends.map(t => t.count));
-                  const heightPercentage = maxCount > 0 ? (trend.count / maxCount) * 100 : 0;
-                  const isCurrentMonth = idx === stats.monthlyTrends.length - 1;
+          {/* Monthly Trends - Line Chart */}
+          {stats.monthlyTrends.length > 1 && (() => {
+            const maxCount = Math.max(...stats.monthlyTrends.map(t => t.count), 1);
+            const chartWidth = 280;
+            const chartHeight = 120;
+            const padding = { top: 20, right: 10, bottom: 30, left: 30 };
+            const innerWidth = chartWidth - padding.left - padding.right;
+            const innerHeight = chartHeight - padding.top - padding.bottom;
 
-                  return (
-                    <div key={idx} style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <div style={{
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        color: isCurrentMonth ? 'var(--matcha-green)' : '#9ca3af',
-                        minHeight: '18px'
-                      }}>
-                        {trend.count}
-                      </div>
-                      <div
-                        style={{
-                          width: '100%',
-                          maxWidth: '40px',
-                          height: `${Math.max(heightPercentage, 5)}%`,
-                          background: isCurrentMonth
-                            ? 'linear-gradient(180deg, #7FB069 0%, #8BC34A 100%)'
-                            : 'linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%)',
-                          borderRadius: '6px 6px 0 0',
-                          boxShadow: isCurrentMonth ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none',
-                          animation: `expandBar 1s ease-out ${idx * 0.1}s both`,
-                          transition: 'all 0.3s ease'
-                        }}
+            const points = stats.monthlyTrends.map((trend, idx) => ({
+              x: padding.left + (idx / (stats.monthlyTrends.length - 1)) * innerWidth,
+              y: padding.top + innerHeight - (trend.count / maxCount) * innerHeight,
+              count: trend.count,
+              month: trend.month
+            }));
+
+            const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+            const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + innerHeight} L ${points[0].x} ${padding.top + innerHeight} Z`;
+
+            return (
+              <div style={{
+                background: '#f8fafc',
+                padding: '1.5rem',
+                borderRadius: '16px',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  marginBottom: '1rem',
+                  color: 'var(--matcha-dark)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span>📈</span> {t.monthlyTrends}
+                </h3>
+                <svg width="100%" viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ overflow: 'visible' }}>
+                  {/* Grid lines */}
+                  {[0, 0.5, 1].map((ratio, i) => (
+                    <line
+                      key={i}
+                      x1={padding.left}
+                      y1={padding.top + innerHeight * (1 - ratio)}
+                      x2={chartWidth - padding.right}
+                      y2={padding.top + innerHeight * (1 - ratio)}
+                      stroke="#e5e7eb"
+                      strokeWidth="1"
+                      strokeDasharray={i === 0 ? "0" : "4,4"}
+                    />
+                  ))}
+                  {/* Area fill */}
+                  <path
+                    d={areaPath}
+                    fill="url(#areaGradient)"
+                    opacity="0.3"
+                  />
+                  {/* Line */}
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke="#7FB069"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Points */}
+                  {points.map((p, idx) => (
+                    <g key={idx}>
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={idx === points.length - 1 ? 6 : 4}
+                        fill={idx === points.length - 1 ? '#7FB069' : 'white'}
+                        stroke="#7FB069"
+                        strokeWidth="2"
                       />
-                      <div style={{
-                        fontSize: '10px',
-                        color: isCurrentMonth ? '#374151' : '#9ca3af',
-                        fontWeight: isCurrentMonth ? '600' : '400',
-                        textAlign: 'center',
-                        lineHeight: '1.2'
-                      }}>
-                        {trend.month}
-                      </div>
-                    </div>
-                  );
-                })}
+                      {/* Value label */}
+                      <text
+                        x={p.x}
+                        y={p.y - 10}
+                        textAnchor="middle"
+                        fontSize="10"
+                        fontWeight="600"
+                        fill={idx === points.length - 1 ? '#7FB069' : '#9ca3af'}
+                      >
+                        {p.count}
+                      </text>
+                      {/* Month label */}
+                      <text
+                        x={p.x}
+                        y={chartHeight - 5}
+                        textAnchor="middle"
+                        fontSize="9"
+                        fill={idx === points.length - 1 ? '#374151' : '#9ca3af'}
+                        fontWeight={idx === points.length - 1 ? '600' : '400'}
+                      >
+                        {p.month.split(' ')[0]}
+                      </text>
+                    </g>
+                  ))}
+                  {/* Gradient definition */}
+                  <defs>
+                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#7FB069" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#7FB069" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                </svg>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
         </div>
         {/* End of Blurred Content */}

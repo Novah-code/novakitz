@@ -36,7 +36,6 @@ export default function CommunityPage() {
   }, []);
 
   const t = {
-    title: 'Space',
     searchPlaceholder: language === 'ko' ? '꿈 검색...' : 'Search dreams...',
   };
 
@@ -110,17 +109,6 @@ export default function CommunityPage() {
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </button>
-
-          {/* Title */}
-          <h1 style={{
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: 'var(--matcha-dark, #4a6741)',
-            margin: 0,
-            flexShrink: 0
-          }}>
-            {t.title}
-          </h1>
 
           {/* Search Bar */}
           <div style={{
