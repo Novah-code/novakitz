@@ -27,12 +27,9 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
   const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
 
   const t = {
-    noPosts: language === 'ko' ? '아직 공유된 꿈이 없어요' : 'No dreams shared yet',
-    beFirst: language === 'ko' ? '첫 번째로 공유해보세요!' : 'Be the first to share!',
-    likes: language === 'ko' ? '공감' : 'likes',
-    delete: language === 'ko' ? '삭제' : 'Delete',
+    noPosts: language === 'ko' ? '아직 공유된 이미지가 없어요' : 'No images shared yet',
+    beFirst: language === 'ko' ? '첫 번째로 공유해보세요' : 'Be the first to share',
     deleteConfirm: language === 'ko' ? '정말 삭제하시겠습니까?' : 'Are you sure you want to delete this?',
-    myPost: language === 'ko' ? '내 꿈' : 'My dream',
   };
 
   useEffect(() => {
@@ -181,18 +178,39 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
     }
   };
 
+  const handleDownload = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `dream-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  };
+
+  const handleOpenInNewTab = (imageUrl: string) => {
+    window.open(imageUrl, '_blank');
+  };
+
   if (loading) {
     return (
       <div style={{
         display: 'flex',
         justifyContent: 'center',
-        padding: '4rem'
+        padding: '6rem'
       }}>
         <div style={{
-          width: '40px',
-          height: '40px',
-          border: '3px solid rgba(127, 176, 105, 0.2)',
-          borderTopColor: '#7FB069',
+          width: '32px',
+          height: '32px',
+          border: '2px solid rgba(0, 0, 0, 0.1)',
+          borderTopColor: '#333',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
@@ -205,160 +223,175 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
     return (
       <div style={{
         textAlign: 'center',
-        padding: '4rem 2rem',
-        color: 'var(--sage, #6b8e63)'
+        padding: '6rem 2rem',
+        color: '#666'
       }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }}>
-          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.4 }}>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.3 }}>
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <polyline points="21 15 16 10 5 21"/>
           </svg>
         </div>
-        <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{t.noPosts}</p>
-        <p style={{ fontSize: '0.9rem', opacity: 0.7 }}>{t.beFirst}</p>
+        <p style={{ fontSize: '1rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t.noPosts}</p>
+        <p style={{ fontSize: '0.85rem', opacity: 0.6 }}>{t.beFirst}</p>
       </div>
     );
   }
 
   return (
     <>
-      {/* Masonry Grid */}
+      {/* Cosmos-style Masonry Grid */}
       <style>{`
         @media (max-width: 1400px) {
-          .masonry-grid { column-count: 4 !important; }
+          .cosmos-grid { column-count: 4 !important; }
         }
         @media (max-width: 1100px) {
-          .masonry-grid { column-count: 3 !important; }
+          .cosmos-grid { column-count: 3 !important; }
         }
         @media (max-width: 800px) {
-          .masonry-grid { column-count: 2 !important; }
+          .cosmos-grid { column-count: 2 !important; }
         }
         @media (max-width: 480px) {
-          .masonry-grid { column-count: 2 !important; column-gap: 10px !important; }
-          .masonry-card { border-radius: 10px !important; margin-bottom: 10px !important; }
+          .cosmos-grid { column-count: 2 !important; column-gap: 8px !important; }
+          .cosmos-card { margin-bottom: 8px !important; }
         }
-        .masonry-card {
+        .cosmos-card {
           break-inside: avoid;
-          margin-bottom: 16px;
-          border-radius: 16px;
+          margin-bottom: 12px;
           overflow: hidden;
-          background: white;
           cursor: pointer;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+          position: relative;
           display: inline-block;
           width: 100%;
         }
-        .masonry-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+        .cosmos-card img {
+          width: 100%;
+          display: block;
+          transition: opacity 0.3s ease;
+        }
+        .cosmos-card:hover img {
+          opacity: 0.92;
+        }
+        .cosmos-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 12px;
+        }
+        .cosmos-card:hover .cosmos-overlay {
+          opacity: 1;
+        }
+        .cosmos-actions {
+          display: flex;
+          gap: 8px;
+          justify-content: flex-end;
+        }
+        .cosmos-btn {
+          background: rgba(255,255,255,0.95);
+          border: none;
+          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #333;
+          transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .cosmos-btn:hover {
+          transform: scale(1.1);
+          background: white;
+        }
+        .cosmos-bottom {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: white;
+          font-size: 14px;
+          font-weight: 500;
         }
       `}</style>
-      <div className="masonry-grid" style={{
-        maxWidth: '1600px',
+      <div className="cosmos-grid" style={{
+        maxWidth: '1800px',
         margin: '0 auto',
         columnCount: 5,
-        columnGap: '16px',
+        columnGap: '12px',
         paddingBottom: '60px',
       }}>
           {posts.map(post => (
             <div
               key={post.id}
-              className="masonry-card"
+              className="cosmos-card"
               onClick={() => setSelectedPost(post)}
             >
               <img
                 src={post.image_url}
                 alt="Dream"
-                style={{
-                  width: '100%',
-                  display: 'block',
-                }}
                 loading="lazy"
               />
-              {/* Minimal bottom bar - like only */}
-              <div style={{
-                padding: '12px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                {/* Like button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleLike(post.id, post.liked_by_user);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: '0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    color: post.liked_by_user ? '#e74c3c' : '#999',
-                    fontSize: '0.9rem',
-                    fontWeight: 500,
-                    transition: 'transform 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill={post.liked_by_user ? '#e74c3c' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                  </svg>
-                  {post.like_count > 0 && <span>{post.like_count}</span>}
-                </button>
-
-                {/* Delete for own posts */}
-                {user && post.user_id === user.id && (
+              {/* Hover overlay with actions */}
+              <div className="cosmos-overlay">
+                {/* Top actions */}
+                <div className="cosmos-actions">
+                  {/* Open in new tab */}
                   <button
+                    className="cosmos-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(post.id, post.image_url);
+                      handleOpenInNewTab(post.image_url);
                     }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '4px',
-                      color: '#ccc',
-                      transition: 'color 0.2s',
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#e74c3c';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = '#ccc';
-                    }}
+                    title="Open"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/>
+                      <line x1="10" y1="14" x2="21" y2="3"/>
                     </svg>
                   </button>
-                )}
+                  {/* Download */}
+                  <button
+                    className="cosmos-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload(post.image_url);
+                    }}
+                    title="Download"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  </button>
+                </div>
+                {/* Bottom - likes count */}
+                <div className="cosmos-bottom">
+                  {post.like_count > 0 && (
+                    <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                      <span>{post.like_count}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           ))}
       </div>
 
-      {/* Post Detail Modal */}
+      {/* Post Detail Modal - Cosmos Style */}
       {selectedPost && (
         <div
           style={{
@@ -367,9 +400,9 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0, 0, 0, 0.85)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            background: 'rgba(0, 0, 0, 0.92)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             zIndex: 1000,
             display: 'flex',
             alignItems: 'center',
@@ -386,28 +419,106 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedPost(null)}
-              style={{
-                position: 'absolute',
-                top: '-40px',
-                right: '0',
-                background: 'rgba(255,255,255,0.2)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '36px',
-                height: '36px',
-                cursor: 'pointer',
-                color: 'white',
-                fontSize: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              ✕
-            </button>
+            {/* Top action bar */}
+            <div style={{
+              position: 'absolute',
+              top: '-50px',
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              {/* Left - Delete (only for own posts) */}
+              <div>
+                {user && selectedPost.user_id === user.id && (
+                  <button
+                    onClick={() => handleDelete(selectedPost.id, selectedPost.image_url)}
+                    style={{
+                      background: 'rgba(255,255,255,0.15)',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      color: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(231, 76, 60, 0.8)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Right - Download & Close */}
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => handleDownload(selectedPost.image_url)}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setSelectedPost(null)}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    cursor: 'pointer',
+                    color: 'white',
+                    fontSize: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
 
             {/* Image */}
             <img
@@ -415,99 +526,56 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
               alt="Dream"
               style={{
                 maxWidth: '100%',
-                maxHeight: 'calc(90vh - 80px)',
-                borderRadius: '16px',
+                maxHeight: 'calc(90vh - 100px)',
                 display: 'block',
               }}
             />
 
-            {/* Caption & Like */}
+            {/* Bottom bar - Like only (numbers only) */}
             <div style={{
-              marginTop: '16px',
-              color: 'white',
+              position: 'absolute',
+              bottom: '-50px',
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-              {/* Author & Delete */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '12px'
-              }}>
-                <span style={{
-                  fontSize: '0.9rem',
-                  opacity: 0.8,
-                }}>
-                  @{selectedPost.nickname}
-                </span>
-                {user && selectedPost.user_id === user.id && (
-                  <button
-                    onClick={() => handleDelete(selectedPost.id, selectedPost.image_url)}
-                    style={{
-                      background: 'rgba(231, 76, 60, 0.2)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '6px 12px',
-                      cursor: 'pointer',
-                      color: '#e74c3c',
-                      fontSize: '0.85rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                    {t.delete}
-                  </button>
-                )}
-              </div>
-
-              {/* Caption & Like */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-                <p style={{
-                  fontSize: '0.95rem',
-                  opacity: 0.9,
-                  margin: 0,
-                  flex: 1,
-                }}>
-                  {selectedPost.caption || ''}
-                </p>
-                <button
-                  onClick={() => handleLike(selectedPost.id, selectedPost.liked_by_user)}
-                  style={{
-                    background: 'rgba(255,255,255,0.15)',
-                    border: 'none',
-                    borderRadius: '24px',
-                    padding: '10px 20px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    color: selectedPost.liked_by_user ? '#e74c3c' : 'white',
-                    fontSize: '0.95rem',
-                    transition: 'all 0.2s',
-                    marginLeft: '16px',
-                  }}
+              <button
+                onClick={() => handleLike(selectedPost.id, selectedPost.liked_by_user)}
+                style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  border: 'none',
+                  borderRadius: '24px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: selectedPost.liked_by_user ? '#e74c3c' : 'white',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.25)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                }}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill={selectedPost.liked_by_user ? '#e74c3c' : 'none'}
+                  stroke="currentColor"
+                  strokeWidth="2"
                 >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill={selectedPost.liked_by_user ? '#e74c3c' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                  </svg>
-                  {selectedPost.like_count} {t.likes}
-                </button>
-              </div>
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {selectedPost.like_count}
+              </button>
             </div>
           </div>
         </div>

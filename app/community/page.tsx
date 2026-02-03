@@ -46,13 +46,13 @@ export default function CommunityPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f8fdf8 0%, #fdf8fd 50%, #f8fafd 100%)'
+        background: '#f5f5f5'
       }}>
         <div style={{
           width: '40px',
           height: '40px',
-          border: '3px solid rgba(127, 176, 105, 0.2)',
-          borderTopColor: '#7FB069',
+          border: '3px solid rgba(0, 0, 0, 0.1)',
+          borderTopColor: '#333',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
@@ -64,56 +64,59 @@ export default function CommunityPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fdf8 0%, #fdf8fd 50%, #f8fafd 100%)',
+      background: '#f5f5f5',
       fontFamily: language === 'ko'
         ? "'S-CoreDream', -apple-system, sans-serif"
         : "'Roboto', -apple-system, sans-serif"
     }}>
-      {/* Header */}
+      {/* Header - Cosmos Style */}
       <header style={{
         position: 'sticky',
         top: 0,
-        background: 'rgba(255, 255, 255, 0.85)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
         zIndex: 100,
         padding: '0.75rem 1.5rem',
       }}>
         <div style={{
-          maxWidth: '1400px',
+          maxWidth: '1800px',
           margin: '0 auto',
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem'
+          justifyContent: 'center',
+          gap: '1rem',
+          position: 'relative',
         }}>
-          {/* Home Icon */}
+          {/* Home Icon - Left */}
           <button
             onClick={() => window.location.href = '/'}
             style={{
-              background: 'rgba(127, 176, 105, 0.1)',
+              position: 'absolute',
+              left: 0,
+              background: 'transparent',
               border: 'none',
-              borderRadius: '10px',
-              padding: '10px',
+              borderRadius: '8px',
+              padding: '8px',
               cursor: 'pointer',
-              color: 'var(--matcha-dark, #4a6741)',
+              color: '#333',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s',
-              flexShrink: 0
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               <polyline points="9 22 9 12 15 12 15 22"/>
             </svg>
           </button>
 
-          {/* Search Bar */}
+          {/* Search Bar - Centered */}
           <div style={{
-            flex: 1,
-            maxWidth: '400px',
+            width: '100%',
+            maxWidth: '480px',
             position: 'relative'
           }}>
             <svg
@@ -121,14 +124,13 @@ export default function CommunityPage() {
               height="16"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="var(--sage, #6b8e63)"
+              stroke="#999"
               strokeWidth="2"
               style={{
                 position: 'absolute',
-                left: '12px',
+                left: '14px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                opacity: 0.6
               }}
             >
               <circle cx="11" cy="11" r="8"/>
@@ -141,19 +143,28 @@ export default function CommunityPage() {
               placeholder={t.searchPlaceholder}
               style={{
                 width: '100%',
-                padding: '10px 12px 10px 40px',
-                border: '1px solid rgba(127, 176, 105, 0.2)',
-                borderRadius: '12px',
-                fontSize: '0.9rem',
-                background: 'rgba(255, 255, 255, 0.8)',
+                padding: '12px 14px 12px 44px',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                background: '#fafafa',
                 outline: 'none',
-                color: 'var(--matcha-dark, #4a6741)',
-                fontFamily: 'inherit'
+                color: '#333',
+                fontFamily: 'inherit',
+                transition: 'all 0.2s',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.2)';
+                e.currentTarget.style.background = '#fff';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.1)';
+                e.currentTarget.style.background = '#fafafa';
               }}
             />
           </div>
 
-          {/* Add Button (+ icon only) */}
+          {/* Add Button - Right */}
           <button
             onClick={() => {
               if (user) {
@@ -163,9 +174,11 @@ export default function CommunityPage() {
               }
             }}
             style={{
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+              position: 'absolute',
+              right: 0,
+              background: '#333',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '8px',
               padding: '10px',
               cursor: 'pointer',
               color: 'white',
@@ -173,8 +186,6 @@ export default function CommunityPage() {
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.2s',
-              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
-              flexShrink: 0
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
