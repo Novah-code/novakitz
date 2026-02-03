@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
 import SimpleDreamInterface from './SimpleDreamInterface';
@@ -12,6 +12,7 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
 import LicenseModal from './LicenseModal';
+import ProfileSettings from './ProfileSettings';
 
 // Translations
 const translations = {
@@ -70,6 +71,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [dreams, setDreams] = useState<any[]>([]);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [calendarSelectedDate, setCalendarSelectedDate] = useState<string | null>(null);
   const [calendarSelectedDream, setCalendarSelectedDream] = useState<any | null>(null);
 
@@ -355,6 +358,27 @@ export default function SimpleDreamInterfaceWithAuth() {
     }
   };
 
+  // Fetch user profile for ProfileSettings
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const openProfileSettings = async () => {
+    setMenuOpen(false);
+    await fetchUserProfile();
+    setTimeout(() => setShowProfileSettings(true), 150);
+  };
+
   console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
 
   // Only show loading on initial load, not on profile checks
@@ -524,6 +548,50 @@ export default function SimpleDreamInterfaceWithAuth() {
 
               {/* Menu Items */}
               <div style={{ display: 'flex', flexDirection: 'column' }}>
+
+              {/* Profile Button - Only for logged in users */}
+              {user && (
+                <button
+                  onClick={openProfileSettings}
+                  style={{
+                    padding: '1rem 2rem',
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    color: 'var(--matcha-dark)',
+                    transition: 'all 0.2s',
+                    fontFamily: 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'none';
+                  }}
+                >
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <span>{language === 'ko' ? '프로필' : 'Profile'}</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   setShowHistory(false);
@@ -1015,70 +1083,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </button>
               </div>
 
-              <div style={{
-                height: '1px',
-                background: 'rgba(127, 176, 105, 0.2)',
-                margin: '1rem 2rem'
-              }}></div>
-
-              {/* User Info - Show for logged in users */}
-              {user ? (
-                <>
-                  <div style={{
-                    padding: '1rem 2rem',
-                    fontSize: '0.9rem',
-                    color: 'var(--sage)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem'
-                  }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <div>
-                      <div style={{ fontWeight: '500', color: 'var(--matcha-dark)' }}>
-                        {user.user_metadata?.full_name || user.user_metadata?.name || 'User'}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                        {user.email}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleSignOut}
-                    style={{
-                      padding: '1rem 2rem',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '1rem',
-                      color: '#dc3545',
-                      transition: 'all 0.2s',
-                      fontFamily: 'inherit',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'none';
-                    }}
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                      <polyline points="16 17 21 12 16 7"></polyline>
-                      <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    <span>{t.signOut}</span>
-                  </button>
-                </>
-              ) : (
-                /* Guest user - Show Sign In/Sign Up */
+              {/* Guest user - Show Sign In/Sign Up */}
+              {!user && (
                 <div style={{ padding: '1rem 2rem' }}>
                   <div style={{
                     fontSize: '0.9rem',
@@ -1356,6 +1362,20 @@ export default function SimpleDreamInterfaceWithAuth() {
           userId={user.id}
           language={language}
           onSuccess={() => setIsPremium(true)}
+        />
+      )}
+
+      {/* Profile Settings Modal */}
+      {showProfileSettings && user && (
+        <ProfileSettings
+          user={user}
+          profile={userProfile}
+          language={language}
+          onClose={() => setShowProfileSettings(false)}
+          onSave={() => {
+            setShowProfileSettings(false);
+            fetchUserProfile();
+          }}
         />
       )}
 
