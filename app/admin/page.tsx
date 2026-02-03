@@ -50,6 +50,17 @@ interface ArchetypeStats {
   recentResults: number;
 }
 
+interface UserWithSubscription {
+  id: string;
+  email: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  subscriptionStatus: 'free' | 'active' | 'lifetime' | 'expired';
+  planName: string | null;
+  expiresAt: string | null;
+  paymentMethod: string | null;
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -69,6 +80,11 @@ export default function AdminDashboard() {
   const [manualPlan, setManualPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('monthly');
   const [manualLoading, setManualLoading] = useState(false);
   const [manualResult, setManualResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Users list
+  const [allUsers, setAllUsers] = useState<UserWithSubscription[]>([]);
+  const [activatingUserId, setActivatingUserId] = useState<string | null>(null);
+  const [userActionPlan, setUserActionPlan] = useState<{ [key: string]: 'monthly' | 'yearly' | 'lifetime' }>({});
 
   // Admin email - 이 이메일만 대시보드 접근 가능
   const ADMIN_EMAIL = 'jeongnewna@gmail.com';
@@ -98,6 +114,52 @@ export default function AdminDashboard() {
     setIsAdmin(true);
     loadDashboardData();
     loadArchetypeStats();
+    loadUsers();
+  };
+
+  const loadUsers = async () => {
+    try {
+      const response = await fetch('/api/admin/users');
+      const data = await response.json();
+      if (data.users) {
+        setAllUsers(data.users);
+      }
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    }
+  };
+
+  const activateUserSubscription = async (userEmail: string, userId: string) => {
+    const plan = userActionPlan[userId] || 'monthly';
+    setActivatingUserId(userId);
+
+    try {
+      const response = await fetch('/api/admin/add-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin'
+        },
+        body: JSON.stringify({
+          userEmail,
+          planType: plan,
+          adminEmail: user?.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        loadUsers(); // Refresh user list
+        loadDashboardData(); // Refresh subscription stats
+      } else {
+        alert(data.error || '구독 활성화 실패');
+      }
+    } catch (err) {
+      alert('서버 오류가 발생했습니다');
+    } finally {
+      setActivatingUserId(null);
+    }
   };
 
   const loadArchetypeStats = async () => {
@@ -451,6 +513,146 @@ export default function AdminDashboard() {
               fontSize: '14px',
             }}>
               {manualResult.success ? '✅' : '❌'} {manualResult.message}
+            </div>
+          )}
+        </div>
+
+        {/* All Users List */}
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+          marginBottom: '2rem',
+        }}>
+          <div style={{
+            padding: '1.5rem',
+            borderBottom: '1px solid #e5e7eb',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
+              👥 전체 유저 목록 ({allUsers.length}명)
+            </h2>
+            <button
+              onClick={loadUsers}
+              style={{
+                padding: '0.5rem 1rem',
+                background: '#f3f4f6',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              🔄 새로고침
+            </button>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    이메일
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    가입일
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    구독 상태
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    만료일
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    플랜 선택
+                  </th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                    액션
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {allUsers.map((u) => (
+                  <tr key={u.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                    <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937' }}>
+                      {u.email}
+                    </td>
+                    <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
+                      {new Date(u.created_at).toLocaleDateString('ko-KR')}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        color: 'white',
+                        background: u.subscriptionStatus === 'lifetime' ? '#8b5cf6' :
+                                   u.subscriptionStatus === 'active' ? '#10b981' :
+                                   u.subscriptionStatus === 'expired' ? '#ef4444' : '#9ca3af',
+                      }}>
+                        {u.subscriptionStatus === 'lifetime' ? '평생' :
+                         u.subscriptionStatus === 'active' ? '활성' :
+                         u.subscriptionStatus === 'expired' ? '만료' : '무료'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
+                      {u.expiresAt ? new Date(u.expiresAt).toLocaleDateString('ko-KR') : '-'}
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <select
+                        value={userActionPlan[u.id] || 'monthly'}
+                        onChange={(e) => setUserActionPlan(prev => ({
+                          ...prev,
+                          [u.id]: e.target.value as 'monthly' | 'yearly' | 'lifetime'
+                        }))}
+                        style={{
+                          padding: '0.4rem',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          background: 'white',
+                        }}
+                      >
+                        <option value="monthly">월간</option>
+                        <option value="yearly">연간</option>
+                        <option value="lifetime">평생</option>
+                      </select>
+                    </td>
+                    <td style={{ padding: '1rem' }}>
+                      <button
+                        onClick={() => activateUserSubscription(u.email!, u.id)}
+                        disabled={activatingUserId === u.id}
+                        style={{
+                          padding: '0.4rem 0.75rem',
+                          background: activatingUserId === u.id ? '#9ca3af' : '#7FB069',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: activatingUserId === u.id ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {activatingUserId === u.id ? '처리중...' : '활성화'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {allUsers.length === 0 && (
+            <div style={{
+              padding: '3rem',
+              textAlign: 'center',
+              color: '#9ca3af',
+            }}>
+              유저가 없습니다
             </div>
           )}
         </div>
