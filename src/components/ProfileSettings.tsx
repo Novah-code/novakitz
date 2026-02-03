@@ -18,13 +18,13 @@ type TabType = 'profile' | 'account' | 'subscription';
 export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0 }: ProfileSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form states
   const [username, setUsername] = useState(profile?.full_name || '');
   const [fullName, setFullName] = useState(profile?.display_name || profile?.full_name || '');
-  const [website, setWebsite] = useState('');
+  const [website, setWebsite] = useState(profile?.website || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
 
@@ -111,6 +111,8 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
             full_name: username,
             display_name: fullName,
             bio: bio,
+            website: website,
+            avatar_url: profileImage,
           }, { onConflict: 'user_id' });
 
         if (error) throw error;

@@ -114,6 +114,8 @@ export interface UserProfile {
   occupation?: string
   interests?: string[]
   bio?: string
+  website?: string
+  avatar_url?: string
 
   // Dream Preferences
   dream_goals?: string
