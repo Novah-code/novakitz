@@ -1,8 +1,17 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
+
+interface StreakData {
+  currentStreak: number;
+  weekDays: {
+    day: string;
+    date: string;
+    completed: boolean;
+  }[];
+}
 
 interface ProfileSettingsProps {
   user: User;
@@ -13,7 +22,7 @@ interface ProfileSettingsProps {
   streak?: number;
 }
 
-type TabType = 'profile' | 'account' | 'subscription';
+type TabType = 'profile' | 'account' | 'subscription' | 'streak';
 
 export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0 }: ProfileSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -27,6 +36,81 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const [website, setWebsite] = useState(profile?.website || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
+
+  // Streak states
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
+  const [streakLoading, setStreakLoading] = useState(false);
+
+  const dayNames = language === 'ko'
+    ? ['일', '월', '화', '수', '목', '금', '토']
+    : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+  const loadStreakData = useCallback(async () => {
+    setStreakLoading(true);
+    try {
+      const { data: dreamsData } = await supabase
+        .from('dreams')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const dreamDates = new Set(
+        dreamsData?.map(d => {
+          const dateObj = new Date(d.created_at);
+          return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        }) || []
+      );
+
+      let currentStreak = 0;
+      const today = new Date();
+      const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+      if (dreamDates.has(todayString) || dreamDates.has(yesterdayString)) {
+        currentStreak = 1;
+        const startDate = dreamDates.has(todayString) ? todayString : yesterdayString;
+        const [year, month, day] = startDate.split('-').map(Number);
+        const baseDate = new Date(year, month - 1, day);
+
+        for (let i = 1; i < 365; i++) {
+          const checkDate = new Date(baseDate);
+          checkDate.setDate(checkDate.getDate() - i);
+          const checkDateString = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+          if (dreamDates.has(checkDateString)) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+
+      const weekDays = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        weekDays.push({
+          day: dayNames[date.getDay()],
+          date: dateString,
+          completed: dreamDates.has(dateString)
+        });
+      }
+
+      setStreakData({ currentStreak, weekDays });
+    } catch (error) {
+      console.error('Error loading streak:', error);
+    } finally {
+      setStreakLoading(false);
+    }
+  }, [user.id, dayNames]);
+
+  useEffect(() => {
+    if (activeTab === 'streak' && !streakData) {
+      loadStreakData();
+    }
+  }, [activeTab, streakData, loadStreakData]);
 
   const displayName = username || profile?.full_name || user.email?.split('@')[0] || 'User';
 
@@ -142,6 +226,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     { id: 'profile', label: t.profile },
     { id: 'account', label: t.account, hasNotification: true },
     { id: 'subscription', label: t.subscription },
+    { id: 'streak', label: t.streak },
   ];
 
   return (
@@ -691,6 +776,94 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                   {t.freePlan}
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Streak Tab */}
+          {activeTab === 'streak' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', padding: '20px 0' }}>
+              {streakLoading ? (
+                <p style={{ color: '#666' }}>{language === 'ko' ? '로딩 중...' : 'Loading...'}</p>
+              ) : streakData ? (
+                <>
+                  {/* Streak Circle */}
+                  <div style={{
+                    position: 'relative',
+                    width: '120px',
+                    height: '120px',
+                  }}>
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="54"
+                        fill="none"
+                        stroke="#e5e5e5"
+                        strokeWidth="8"
+                      />
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="54"
+                        fill="none"
+                        stroke="#7FB069"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={`${(streakData.currentStreak / 7) * 339.3} 339.3`}
+                        transform="rotate(-90 60 60)"
+                      />
+                    </svg>
+                    <div style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      fontSize: '36px',
+                      fontWeight: '600',
+                      color: '#333',
+                    }}>
+                      {streakData.currentStreak}
+                    </div>
+                  </div>
+
+                  {/* Week Days */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '12px',
+                    justifyContent: 'center',
+                  }}>
+                    {streakData.weekDays.map((day, index) => (
+                      <div key={index} style={{ textAlign: 'center' }}>
+                        <div style={{
+                          fontSize: '12px',
+                          color: day.completed ? '#7FB069' : '#999',
+                          marginBottom: '8px',
+                          fontWeight: day.completed ? '600' : '400',
+                        }}>
+                          {day.day}
+                        </div>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '50%',
+                          background: day.completed ? '#7FB069' : '#e5e5e5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          {day.completed && (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p style={{ color: '#666' }}>{language === 'ko' ? '데이터를 불러올 수 없습니다' : 'Could not load data'}</p>
+              )}
             </div>
           )}
         </div>

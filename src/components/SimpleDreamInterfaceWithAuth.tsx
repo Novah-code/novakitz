@@ -559,13 +559,9 @@ export default function SimpleDreamInterfaceWithAuth() {
                     border: 'none',
                     textAlign: 'left',
                     cursor: 'pointer',
-                    fontSize: '1rem',
-                    color: 'var(--matcha-dark)',
                     transition: 'all 0.2s',
-                    fontFamily: 'inherit',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '1rem'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
@@ -575,20 +571,12 @@ export default function SimpleDreamInterfaceWithAuth() {
                   }}
                 >
                   <div style={{
-                    width: '24px',
-                    height: '24px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                  </div>
-                  <span>{language === 'ko' ? '프로필' : 'Profile'}</span>
+                    background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
+                    boxShadow: '0 2px 8px rgba(127, 176, 105, 0.3)',
+                  }} />
                 </button>
               )}
 
@@ -735,38 +723,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                   <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
                 </svg>
                 <span>{t.insights}</span>
-              </button>
-
-              <button
-                onClick={() => handleGuestAction(() => {
-                  setShowStreak(true);
-                  setMenuOpen(false);
-                })}
-                style={{
-                  padding: '1rem 2rem',
-                  background: 'none',
-                  border: 'none',
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  fontSize: '1rem',
-                  color: 'var(--matcha-dark)',
-                  transition: 'all 0.2s',
-                  fontFamily: 'inherit',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'none';
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                </svg>
-                <span>{t.streak}</span>
               </button>
 
               <button
