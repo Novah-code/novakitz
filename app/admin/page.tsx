@@ -64,6 +64,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Manual subscription management
+  const [manualEmail, setManualEmail] = useState('');
+  const [manualPlan, setManualPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('monthly');
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualResult, setManualResult] = useState<{ success: boolean; message: string } | null>(null);
+
   // Admin email - 이 이메일만 대시보드 접근 가능
   const ADMIN_EMAIL = 'jeongnewna@gmail.com';
 
@@ -162,6 +168,48 @@ export default function AdminDashboard() {
     if (status === 'active' && !isExpired) return '#10b981'; // green
     if (isExpired) return '#ef4444'; // red
     return '#f59e0b'; // yellow
+  };
+
+  const handleManualSubscription = async () => {
+    if (!manualEmail.trim()) {
+      setManualResult({ success: false, message: '이메일을 입력해주세요' });
+      return;
+    }
+
+    setManualLoading(true);
+    setManualResult(null);
+
+    try {
+      const response = await fetch('/api/admin/add-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin'
+        },
+        body: JSON.stringify({
+          userEmail: manualEmail.trim(),
+          planType: manualPlan,
+          adminEmail: user?.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setManualResult({
+          success: true,
+          message: `${manualEmail} - ${manualPlan === 'lifetime' ? '평생' : manualPlan === 'yearly' ? '연간' : '월간'} 구독 활성화 완료!`
+        });
+        setManualEmail('');
+        loadDashboardData(); // Refresh subscription list
+      } else {
+        setManualResult({ success: false, message: data.error || '구독 추가 실패' });
+      }
+    } catch (err) {
+      setManualResult({ success: false, message: '서버 오류가 발생했습니다' });
+    } finally {
+      setManualLoading(false);
+    }
   };
 
   const getStatusText = (status: string, expiresAt: string | null) => {
@@ -309,6 +357,102 @@ export default function AdminDashboard() {
               ${stats.totalRevenue}
             </div>
           </div>
+        </div>
+
+        {/* Manual Subscription Management */}
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          padding: '1.5rem',
+          marginBottom: '2rem',
+        }}>
+          <h2 style={{
+            fontSize: '20px',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            marginBottom: '1.5rem',
+          }}>
+            ➕ 수동 구독 추가/수정
+          </h2>
+
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            alignItems: 'flex-end',
+          }}>
+            <div style={{ flex: '1', minWidth: '250px' }}>
+              <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                유저 이메일
+              </label>
+              <input
+                type="email"
+                value={manualEmail}
+                onChange={(e) => setManualEmail(e.target.value)}
+                placeholder="user@example.com"
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                }}
+              />
+            </div>
+
+            <div style={{ minWidth: '150px' }}>
+              <label style={{ display: 'block', fontSize: '14px', color: '#6b7280', marginBottom: '0.5rem' }}>
+                플랜 선택
+              </label>
+              <select
+                value={manualPlan}
+                onChange={(e) => setManualPlan(e.target.value as 'monthly' | 'yearly' | 'lifetime')}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  background: 'white',
+                }}
+              >
+                <option value="monthly">월간 (30일)</option>
+                <option value="yearly">연간 (365일)</option>
+                <option value="lifetime">평생</option>
+              </select>
+            </div>
+
+            <button
+              onClick={handleManualSubscription}
+              disabled={manualLoading}
+              style={{
+                padding: '0.75rem 1.5rem',
+                background: manualLoading ? '#9ca3af' : '#7FB069',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: manualLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {manualLoading ? '처리 중...' : '구독 활성화'}
+            </button>
+          </div>
+
+          {manualResult && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '0.75rem',
+              borderRadius: '8px',
+              background: manualResult.success ? '#d1fae5' : '#fee2e2',
+              color: manualResult.success ? '#065f46' : '#991b1b',
+              fontSize: '14px',
+            }}>
+              {manualResult.success ? '✅' : '❌'} {manualResult.message}
+            </div>
+          )}
         </div>
 
         {/* Archetype Test Stats */}
