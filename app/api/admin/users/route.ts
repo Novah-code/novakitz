@@ -59,6 +59,7 @@ export async function GET(request: NextRequest) {
         last_sign_in_at: user.last_sign_in_at,
         subscriptionStatus,
         planName,
+        startedAt: sub?.started_at || null,
         expiresAt,
         paymentMethod: sub?.payment_method || null
       };

@@ -57,6 +57,7 @@ interface UserWithSubscription {
   last_sign_in_at: string | null;
   subscriptionStatus: 'free' | 'active' | 'lifetime' | 'expired';
   planName: string | null;
+  startedAt: string | null;
   expiresAt: string | null;
   paymentMethod: string | null;
 }
@@ -85,6 +86,11 @@ export default function AdminDashboard() {
   const [allUsers, setAllUsers] = useState<UserWithSubscription[]>([]);
   const [activatingUserId, setActivatingUserId] = useState<string | null>(null);
   const [userActionPlan, setUserActionPlan] = useState<{ [key: string]: 'monthly' | 'yearly' | 'lifetime' }>({});
+
+  // Pagination & Filter
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'free' | 'active' | 'lifetime' | 'expired'>('all');
+  const usersPerPage = 10;
 
   // Admin email - 이 이메일만 대시보드 접근 가능
   const ADMIN_EMAIL = 'jeongnewna@gmail.com';
@@ -518,144 +524,234 @@ export default function AdminDashboard() {
         </div>
 
         {/* All Users List */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          overflow: 'hidden',
-          marginBottom: '2rem',
-        }}>
-          <div style={{
-            padding: '1.5rem',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
-              👥 전체 유저 목록 ({allUsers.length}명)
-            </h2>
-            <button
-              onClick={loadUsers}
-              style={{
-                padding: '0.5rem 1rem',
-                background: '#f3f4f6',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: 'pointer',
-              }}
-            >
-              🔄 새로고침
-            </button>
-          </div>
+        {(() => {
+          // Filter users
+          const filteredUsers = statusFilter === 'all'
+            ? allUsers
+            : allUsers.filter(u => u.subscriptionStatus === statusFilter);
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    이메일
-                  </th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    가입일
-                  </th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    구독 상태
-                  </th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    만료일
-                  </th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    플랜 선택
-                  </th>
-                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                    액션
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {allUsers.map((u) => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                    <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937' }}>
-                      {u.email}
-                    </td>
-                    <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
-                      {new Date(u.created_at).toLocaleDateString('ko-KR')}
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        color: 'white',
-                        background: u.subscriptionStatus === 'lifetime' ? '#8b5cf6' :
-                                   u.subscriptionStatus === 'active' ? '#10b981' :
-                                   u.subscriptionStatus === 'expired' ? '#ef4444' : '#9ca3af',
-                      }}>
-                        {u.subscriptionStatus === 'lifetime' ? '평생' :
-                         u.subscriptionStatus === 'active' ? '활성' :
-                         u.subscriptionStatus === 'expired' ? '만료' : '무료'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
-                      {u.expiresAt ? new Date(u.expiresAt).toLocaleDateString('ko-KR') : '-'}
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <select
-                        value={userActionPlan[u.id] || 'monthly'}
-                        onChange={(e) => setUserActionPlan(prev => ({
-                          ...prev,
-                          [u.id]: e.target.value as 'monthly' | 'yearly' | 'lifetime'
-                        }))}
-                        style={{
-                          padding: '0.4rem',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          background: 'white',
-                        }}
-                      >
-                        <option value="monthly">월간</option>
-                        <option value="yearly">연간</option>
-                        <option value="lifetime">평생</option>
-                      </select>
-                    </td>
-                    <td style={{ padding: '1rem' }}>
-                      <button
-                        onClick={() => activateUserSubscription(u.email!, u.id)}
-                        disabled={activatingUserId === u.id}
-                        style={{
-                          padding: '0.4rem 0.75rem',
-                          background: activatingUserId === u.id ? '#9ca3af' : '#7FB069',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          cursor: activatingUserId === u.id ? 'not-allowed' : 'pointer',
-                        }}
-                      >
-                        {activatingUserId === u.id ? '처리중...' : '활성화'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          // Pagination
+          const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+          const startIndex = (currentPage - 1) * usersPerPage;
+          const paginatedUsers = filteredUsers.slice(startIndex, startIndex + usersPerPage);
 
-          {allUsers.length === 0 && (
+          return (
             <div style={{
-              padding: '3rem',
-              textAlign: 'center',
-              color: '#9ca3af',
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              marginBottom: '2rem',
             }}>
-              유저가 없습니다
+              <div style={{
+                padding: '1.5rem',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem',
+              }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
+                  👥 전체 유저 목록 ({filteredUsers.length}명)
+                </h2>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value as typeof statusFilter);
+                      setCurrentPage(1);
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      background: 'white',
+                    }}
+                  >
+                    <option value="all">전체 보기</option>
+                    <option value="free">무료</option>
+                    <option value="active">활성 (월간/연간)</option>
+                    <option value="lifetime">평생</option>
+                    <option value="expired">만료</option>
+                  </select>
+                  <button
+                    onClick={loadUsers}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    🔄 새로고침
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        이메일
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        가입일
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        구독 상태
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        시작일
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        만료일
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        플랜 선택
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        액션
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedUsers.map((u) => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937' }}>
+                          {u.email}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
+                          {new Date(u.created_at).toLocaleDateString('ko-KR')}
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <span style={{
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            color: 'white',
+                            background: u.subscriptionStatus === 'lifetime' ? '#8b5cf6' :
+                                       u.subscriptionStatus === 'active' ? '#10b981' :
+                                       u.subscriptionStatus === 'expired' ? '#ef4444' : '#9ca3af',
+                          }}>
+                            {u.subscriptionStatus === 'lifetime' ? '평생' :
+                             u.subscriptionStatus === 'active' ? '활성' :
+                             u.subscriptionStatus === 'expired' ? '만료' : '무료'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
+                          {u.startedAt ? new Date(u.startedAt).toLocaleDateString('ko-KR') : '-'}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
+                          {u.expiresAt ? new Date(u.expiresAt).toLocaleDateString('ko-KR') : '-'}
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <select
+                            value={userActionPlan[u.id] || 'monthly'}
+                            onChange={(e) => setUserActionPlan(prev => ({
+                              ...prev,
+                              [u.id]: e.target.value as 'monthly' | 'yearly' | 'lifetime'
+                            }))}
+                            style={{
+                              padding: '0.4rem',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              background: 'white',
+                            }}
+                          >
+                            <option value="monthly">월간</option>
+                            <option value="yearly">연간</option>
+                            <option value="lifetime">평생</option>
+                          </select>
+                        </td>
+                        <td style={{ padding: '1rem' }}>
+                          <button
+                            onClick={() => activateUserSubscription(u.email!, u.id)}
+                            disabled={activatingUserId === u.id}
+                            style={{
+                              padding: '0.4rem 0.75rem',
+                              background: activatingUserId === u.id ? '#9ca3af' : '#7FB069',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              cursor: activatingUserId === u.id ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            {activatingUserId === u.id ? '처리중...' : '활성화'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {filteredUsers.length === 0 && (
+                <div style={{
+                  padding: '3rem',
+                  textAlign: 'center',
+                  color: '#9ca3af',
+                }}>
+                  유저가 없습니다
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div style={{
+                  padding: '1rem 1.5rem',
+                  borderTop: '1px solid #e5e7eb',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: currentPage === 1 ? '#e5e7eb' : '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      color: currentPage === 1 ? '#9ca3af' : '#374151',
+                    }}
+                  >
+                    ← 이전
+                  </button>
+                  <span style={{ fontSize: '14px', color: '#6b7280', padding: '0 1rem' }}>
+                    {currentPage} / {totalPages} 페이지
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: currentPage === totalPages ? '#e5e7eb' : '#f3f4f6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      color: currentPage === totalPages ? '#9ca3af' : '#374151',
+                    }}
+                  >
+                    다음 →
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* Archetype Test Stats */}
         {archetypeStats && (
