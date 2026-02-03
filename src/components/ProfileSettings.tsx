@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 
@@ -18,13 +18,13 @@ type TabType = 'profile' | 'account' | 'subscription';
 export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0 }: ProfileSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form states
   const [username, setUsername] = useState(profile?.full_name || '');
   const [fullName, setFullName] = useState(profile?.display_name || profile?.full_name || '');
-  const [website, setWebsite] = useState(profile?.website || '');
+  const [website, setWebsite] = useState('');
   const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
 
@@ -110,9 +110,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
             user_id: user.id,
             full_name: username,
             display_name: fullName,
-            website: website,
             bio: bio,
-            avatar_url: profileImage,
           }, { onConflict: 'user_id' });
 
         if (error) throw error;
