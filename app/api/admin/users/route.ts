@@ -24,10 +24,25 @@ export async function GET(request: NextRequest) {
       console.error('Subscription fetch error:', subsError);
     }
 
+    // Get all user profiles for nicknames
+    const { data: profiles, error: profilesError } = await supabase
+      .from('user_profiles')
+      .select('user_id, full_name');
+
+    if (profilesError) {
+      console.error('Profiles fetch error:', profilesError);
+    }
+
     // Map subscriptions by user_id
     const subscriptionMap = new Map();
     (subscriptions || []).forEach((sub: any) => {
       subscriptionMap.set(sub.user_id, sub);
+    });
+
+    // Map profiles by user_id
+    const profileMap = new Map();
+    (profiles || []).forEach((profile: any) => {
+      profileMap.set(profile.user_id, profile);
     });
 
     // Combine user data with subscription info
@@ -52,9 +67,12 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      const profile = profileMap.get(user.id);
+
       return {
         id: user.id,
         email: user.email,
+        nickname: profile?.full_name || null,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
         subscriptionStatus,

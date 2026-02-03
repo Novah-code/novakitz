@@ -53,6 +53,7 @@ interface ArchetypeStats {
 interface UserWithSubscription {
   id: string;
   email: string;
+  nickname: string | null;
   created_at: string;
   last_sign_in_at: string | null;
   subscriptionStatus: 'free' | 'active' | 'lifetime' | 'expired';
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
   // Users list
   const [allUsers, setAllUsers] = useState<UserWithSubscription[]>([]);
   const [activatingUserId, setActivatingUserId] = useState<string | null>(null);
-  const [userActionPlan, setUserActionPlan] = useState<{ [key: string]: 'monthly' | 'yearly' | 'lifetime' }>({});
+  const [userActionPlan, setUserActionPlan] = useState<{ [key: string]: 'free' | 'monthly' | 'yearly' | 'lifetime' }>({});
 
   // Pagination & Filter
   const [currentPage, setCurrentPage] = useState(1);
@@ -140,26 +141,51 @@ export default function AdminDashboard() {
     setActivatingUserId(userId);
 
     try {
-      const response = await fetch('/api/admin/add-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin'
-        },
-        body: JSON.stringify({
-          userEmail,
-          planType: plan,
-          adminEmail: user?.email
-        })
-      });
+      // If plan is 'free', deactivate subscription
+      if (plan === 'free') {
+        const response = await fetch('/api/admin/deactivate-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer admin'
+          },
+          body: JSON.stringify({
+            userId,
+            adminEmail: user?.email
+          })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        loadUsers(); // Refresh user list
-        loadDashboardData(); // Refresh subscription stats
+        if (data.success) {
+          loadUsers();
+          loadDashboardData();
+        } else {
+          alert(data.error || '구독 비활성화 실패');
+        }
       } else {
-        alert(data.error || '구독 활성화 실패');
+        // Activate subscription
+        const response = await fetch('/api/admin/add-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer admin'
+          },
+          body: JSON.stringify({
+            userEmail,
+            planType: plan,
+            adminEmail: user?.email
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          loadUsers();
+          loadDashboardData();
+        } else {
+          alert(data.error || '구독 활성화 실패');
+        }
       }
     } catch (err) {
       alert('서버 오류가 발생했습니다');
@@ -553,7 +579,7 @@ export default function AdminDashboard() {
                 gap: '1rem',
               }}>
                 <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>
-                  👥 전체 유저 목록 ({filteredUsers.length}명)
+                  👥 전체 유저 목록
                 </h2>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                   <select
@@ -600,6 +626,9 @@ export default function AdminDashboard() {
                         이메일
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                        닉네임
+                      </th>
+                      <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                         가입일
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
@@ -612,7 +641,7 @@ export default function AdminDashboard() {
                         만료일
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                        플랜 선택
+                        플랜 변경
                       </th>
                       <th style={{ padding: '1rem', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                         액션
@@ -624,6 +653,9 @@ export default function AdminDashboard() {
                       <tr key={u.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                         <td style={{ padding: '1rem', fontSize: '14px', color: '#1f2937' }}>
                           {u.email}
+                        </td>
+                        <td style={{ padding: '1rem', fontSize: '14px', color: '#6b7280' }}>
+                          {u.nickname || '-'}
                         </td>
                         <td style={{ padding: '1rem', fontSize: '12px', color: '#6b7280' }}>
                           {new Date(u.created_at).toLocaleDateString('ko-KR')}
@@ -655,7 +687,7 @@ export default function AdminDashboard() {
                             value={userActionPlan[u.id] || 'monthly'}
                             onChange={(e) => setUserActionPlan(prev => ({
                               ...prev,
-                              [u.id]: e.target.value as 'monthly' | 'yearly' | 'lifetime'
+                              [u.id]: e.target.value as 'free' | 'monthly' | 'yearly' | 'lifetime'
                             }))}
                             style={{
                               padding: '0.4rem',
@@ -665,6 +697,7 @@ export default function AdminDashboard() {
                               background: 'white',
                             }}
                           >
+                            <option value="free">무료</option>
                             <option value="monthly">월간</option>
                             <option value="yearly">연간</option>
                             <option value="lifetime">평생</option>
@@ -676,7 +709,8 @@ export default function AdminDashboard() {
                             disabled={activatingUserId === u.id}
                             style={{
                               padding: '0.4rem 0.75rem',
-                              background: activatingUserId === u.id ? '#9ca3af' : '#7FB069',
+                              background: activatingUserId === u.id ? '#9ca3af' :
+                                         (userActionPlan[u.id] === 'free' ? '#ef4444' : '#7FB069'),
                               color: 'white',
                               border: 'none',
                               borderRadius: '6px',
@@ -685,7 +719,8 @@ export default function AdminDashboard() {
                               cursor: activatingUserId === u.id ? 'not-allowed' : 'pointer',
                             }}
                           >
-                            {activatingUserId === u.id ? '처리중...' : '활성화'}
+                            {activatingUserId === u.id ? '처리중...' :
+                             (userActionPlan[u.id] === 'free' ? '비활성화' : '적용')}
                           </button>
                         </td>
                       </tr>
@@ -714,39 +749,21 @@ export default function AdminDashboard() {
                   alignItems: 'center',
                   gap: '0.5rem',
                 }}>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: currentPage === 1 ? '#e5e7eb' : '#f3f4f6',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      color: currentPage === 1 ? '#9ca3af' : '#374151',
-                    }}
-                  >
-                    ← 이전
-                  </button>
-                  <span style={{ fontSize: '14px', color: '#6b7280', padding: '0 1rem' }}>
-                    {currentPage} / {totalPages} 페이지
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: currentPage === totalPages ? '#e5e7eb' : '#f3f4f6',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      color: currentPage === totalPages ? '#9ca3af' : '#374151',
-                    }}
-                  >
-                    다음 →
-                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: currentPage === i + 1 ? '#7FB069' : '#d1d5db',
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    />
+                  ))}
                 </div>
               )}
             </div>
