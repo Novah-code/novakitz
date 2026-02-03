@@ -1332,6 +1332,8 @@ export default function SimpleDreamInterfaceWithAuth() {
             setShowProfileSettings(false);
             fetchUserProfile();
           }}
+          isPremium={isPremium}
+          isLifetime={isLifetime}
         />
       )}
 

@@ -20,11 +20,13 @@ interface ProfileSettingsProps {
   onClose: () => void;
   onSave?: () => void;
   streak?: number;
+  isPremium?: boolean;
+  isLifetime?: boolean;
 }
 
 type TabType = 'profile' | 'account' | 'subscription' | 'streak';
 
-export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0 }: ProfileSettingsProps) {
+export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false, isLifetime = false }: ProfileSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
@@ -36,6 +38,8 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const [website, setWebsite] = useState(profile?.website || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Streak states
   const [streakData, setStreakData] = useState<StreakData | null>(null);
@@ -127,8 +131,11 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     email: language === 'ko' ? '이메일' : 'Email',
     plan: language === 'ko' ? '현재 플랜' : 'Current Plan',
     freePlan: language === 'ko' ? '무료' : 'Free',
+    premiumPlan: 'Premium',
+    lifetimePlan: 'Lifetime',
     logout: language === 'ko' ? '로그아웃' : 'Sign out',
     deleteAccount: language === 'ko' ? '계정 삭제' : 'Delete Account',
+    deleteConfirm: language === 'ko' ? '정말 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.' : 'Are you sure you want to delete your account? This action cannot be undone.',
     streak: language === 'ko' ? '연속 기록' : 'Streak',
     days: language === 'ko' ? '일' : 'days',
   };
@@ -220,6 +227,26 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      // Delete user data from various tables
+      await supabase.from('dreams').delete().eq('user_id', user.id);
+      await supabase.from('user_profiles').delete().eq('user_id', user.id);
+      await supabase.from('nicknames').delete().eq('user_id', user.id);
+      await supabase.from('community_posts').delete().eq('user_id', user.id);
+      await supabase.from('community_likes').delete().eq('user_id', user.id);
+      await supabase.from('user_subscriptions').delete().eq('user_id', user.id);
+
+      // Sign out and redirect
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setDeleting(false);
+    }
   };
 
   const tabs: { id: TabType; label: string; hasNotification?: boolean }[] = [
@@ -726,28 +753,76 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               </div>
 
               {/* Delete Account */}
-              <button
-                style={{
-                  padding: '12px 16px',
-                  background: 'transparent',
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  style={{
+                    padding: '12px 16px',
+                    background: 'transparent',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    fontSize: '15px',
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s',
+                    marginTop: '20px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#fef2f2';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  {t.deleteAccount}
+                </button>
+              ) : (
+                <div style={{
+                  padding: '16px',
+                  background: '#fef2f2',
                   border: '1px solid #fecaca',
                   borderRadius: '8px',
-                  fontSize: '15px',
-                  color: '#ef4444',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s',
                   marginTop: '20px',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#fef2f2';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                {t.deleteAccount}
-              </button>
+                }}>
+                  <p style={{ fontSize: '14px', color: '#dc2626', margin: '0 0 12px 0' }}>
+                    {t.deleteConfirm}
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      style={{
+                        padding: '10px 16px',
+                        background: '#dc2626',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: 'white',
+                        cursor: deleting ? 'not-allowed' : 'pointer',
+                        opacity: deleting ? 0.7 : 1,
+                      }}
+                    >
+                      {deleting ? (language === 'ko' ? '삭제 중...' : 'Deleting...') : (language === 'ko' ? '삭제' : 'Delete')}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={deleting}
+                      style={{
+                        padding: '10px 16px',
+                        background: 'white',
+                        border: '1px solid #e5e5e5',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#666',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {language === 'ko' ? '취소' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -756,10 +831,15 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Current Plan */}
               <div style={{
-                border: '1px solid #e5e5e5',
+                border: isLifetime ? '1px solid #E91E63' : isPremium ? '1px solid #7FB069' : '1px solid #e5e5e5',
                 borderRadius: '8px',
-                padding: '12px 16px',
+                padding: '16px',
                 position: 'relative',
+                background: isLifetime
+                  ? 'linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(255, 218, 233, 0.1) 100%)'
+                  : isPremium
+                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.05) 0%, rgba(144, 238, 144, 0.05) 100%)'
+                    : 'transparent',
               }}>
                 <label style={{
                   position: 'absolute',
@@ -772,10 +852,49 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 }}>
                   {t.plan}
                 </label>
-                <p style={{ fontSize: '15px', color: '#111', margin: 0 }}>
-                  {t.freePlan}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '1.5rem' }}>
+                    {isLifetime ? '💎' : isPremium ? '👑' : '✨'}
+                  </span>
+                  <div>
+                    <p style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: isLifetime ? '#E91E63' : isPremium ? '#7FB069' : '#111',
+                      margin: 0
+                    }}>
+                      {isLifetime ? t.lifetimePlan : isPremium ? t.premiumPlan : t.freePlan}
+                    </p>
+                    <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0 0' }}>
+                      {isLifetime
+                        ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
+                        : isPremium
+                          ? (language === 'ko' ? '프리미엄 이용 중' : 'Premium access')
+                          : (language === 'ko' ? '무료 플랜' : 'Free plan')}
+                    </p>
+                  </div>
+                </div>
               </div>
+
+              {/* Upgrade button for free users */}
+              {!isPremium && !isLifetime && (
+                <button
+                  onClick={() => window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank')}
+                  style={{
+                    padding: '14px 20px',
+                    background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    color: 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {language === 'ko' ? 'Premium 업그레이드' : 'Upgrade to Premium'}
+                </button>
+              )}
             </div>
           )}
 
