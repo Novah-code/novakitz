@@ -149,9 +149,10 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     if (name.length > 20) {
       return { isValid: false, error: language === 'ko' ? '최대 20자 이내입니다' : 'Maximum 20 characters' };
     }
-    const validPattern = /^[a-zA-Z0-9가-힣]+$/;
+    // Only allow English letters and numbers
+    const validPattern = /^[a-zA-Z0-9]+$/;
     if (!validPattern.test(name)) {
-      return { isValid: false, error: language === 'ko' ? '영문, 숫자, 한글만 사용 가능합니다' : 'Only letters, numbers, and Korean allowed' };
+      return { isValid: false, error: language === 'ko' ? '영문과 숫자만 사용 가능합니다' : 'Only English letters and numbers allowed' };
     }
     return { isValid: true, error: '' };
   };
@@ -161,23 +162,44 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     if (!file) return;
 
     try {
-      const fileExt = file.name.split('.').pop();
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        console.error('Invalid file type:', file.type);
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      // Upload directly to root of avatars bucket (no subfolder)
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', uploadData);
 
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
+      console.log('Public URL:', publicUrl);
       setProfileImage(publicUrl);
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
+      alert(language === 'ko' ? '이미지 업로드에 실패했습니다' : 'Failed to upload image');
     }
   };
 
@@ -249,7 +271,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
 
   const tabs: { id: TabType; label: string; hasNotification?: boolean }[] = [
     { id: 'profile', label: t.profile },
-    { id: 'account', label: t.account, hasNotification: true },
+    { id: 'account', label: t.account },
     { id: 'subscription', label: t.subscription },
     { id: 'streak', label: t.streak },
   ];
@@ -307,7 +329,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               borderRadius: '50%',
               background: profileImage
                 ? `url(${profileImage}) center/cover`
-                : 'linear-gradient(135deg, #a78bfa 0%, #f472b6 100%)',
+                : 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
               position: 'relative',
             }}>
               {/* Edit button */}

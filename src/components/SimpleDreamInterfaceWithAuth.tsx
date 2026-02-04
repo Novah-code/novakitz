@@ -561,7 +561,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     display: 'flex',
-                    flexDirection: 'column',
                     alignItems: 'center',
                     gap: '4px',
                   }}
@@ -572,16 +571,30 @@ export default function SimpleDreamInterfaceWithAuth() {
                     e.currentTarget.style.background = 'none';
                   }}
                 >
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
-                    boxShadow: '0 2px 8px rgba(127, 176, 105, 0.3)',
-                  }} />
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="3">
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
+                      boxShadow: '0 2px 8px rgba(127, 176, 105, 0.3)',
+                    }} />
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#999"
+                      strokeWidth="3"
+                      style={{
+                        position: 'absolute',
+                        bottom: '-2px',
+                        right: '-4px',
+                      }}
+                    >
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </div>
                 </button>
               )}
 
