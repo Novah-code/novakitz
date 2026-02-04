@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 interface ArchetypeTestNavProps {
   language: 'en' | 'ko';
   onLanguageChange?: (lang: 'en' | 'ko') => void;
+  isLoggedIn?: boolean;
 }
 
-export default function ArchetypeTestNav({ language, onLanguageChange }: ArchetypeTestNavProps) {
+export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedIn = false }: ArchetypeTestNavProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -322,53 +323,62 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
                 </div>
               )}
 
-              {/* Divider */}
+              {/* Sign In/Up Button - Only show for non-logged in users */}
+              {!isLoggedIn && (
+                <>
+                  <div style={{
+                    height: '1px',
+                    background: 'rgba(127, 176, 105, 0.2)',
+                    margin: '1rem 0'
+                  }}></div>
+                  <div style={{ padding: '1rem 2rem' }}>
+                    <button
+                      onClick={() => {
+                        router.push('/');
+                        setMenuOpen(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                      </svg>
+                      {t.signIn}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* Divider before social links */}
               <div style={{
                 height: '1px',
                 background: 'rgba(127, 176, 105, 0.2)',
                 margin: '1rem 0'
               }}></div>
-
-              {/* Sign In/Up Button */}
-              <div style={{ padding: '1rem 2rem' }}>
-                <button
-                  onClick={() => {
-                    router.push('/');
-                    setMenuOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                    <polyline points="10 17 15 12 10 7"></polyline>
-                    <line x1="15" y1="12" x2="3" y2="12"></line>
-                  </svg>
-                  {t.signIn}
-                </button>
-              </div>
 
               {/* Social Media Links */}
               <div style={{

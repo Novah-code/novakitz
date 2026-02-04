@@ -177,7 +177,7 @@ export default function ArchetypeResult() {
 
   return (
     <>
-      <ArchetypeTestNav language={language} />
+      <ArchetypeTestNav language={language} isLoggedIn={isLoggedIn} />
       <div style={{
         minHeight: '100vh',
         background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,

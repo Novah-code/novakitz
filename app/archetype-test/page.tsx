@@ -63,7 +63,7 @@ export default function ArchetypeTestLanding() {
 
   return (
     <>
-      <ArchetypeTestNav language={language} onLanguageChange={handleLanguageChange} />
+      <ArchetypeTestNav language={language} onLanguageChange={handleLanguageChange} isLoggedIn={isLoggedIn} />
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
