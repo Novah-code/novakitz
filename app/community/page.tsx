@@ -5,6 +5,7 @@ import { supabase } from '../../src/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import CommunityFeed from '../../src/components/CommunityFeed';
 import ImageUploadModal from '../../src/components/ImageUploadModal';
+import Auth from '../../src/components/Auth';
 
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -14,6 +15,7 @@ export default function CommunityPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
@@ -249,86 +251,213 @@ export default function CommunityPage() {
             backdropFilter: 'blur(20px)',
             boxShadow: '-2px 0 20px rgba(0,0,0,0.1)',
             zIndex: 9999,
-            padding: '2rem 0',
+            padding: '0',
             animation: 'slideInRight 0.3s ease-out',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
+            fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Roboto', -apple-system, sans-serif"
           }}>
             <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
 
-            {/* Menu Items */}
-            <button
-              onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
-              style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s' }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(155, 200, 139, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span>{language === 'ko' ? '홈' : 'Home'}</span>
-            </button>
-
-            <button
-              onClick={() => { window.location.href = '/community'; setMenuOpen(false); }}
-              style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s' }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(155, 200, 139, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <span>{language === 'ko' ? '스페이스' : 'Space'}</span>
-            </button>
-
-            <button
-              onClick={() => { window.location.href = '/pricing'; setMenuOpen(false); }}
-              style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s' }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(155, 200, 139, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-              <span>{language === 'ko' ? '요금제' : 'Pricing'}</span>
-            </button>
-
-            <button
-              onClick={() => { window.location.href = '/archetype-test'; setMenuOpen(false); }}
-              style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: '#333', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s' }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(155, 200, 139, 0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-              <span>{language === 'ko' ? '나의 아키타입' : 'My Archetype'}</span>
-            </button>
-
-            <div style={{ height: '1px', background: 'rgba(155, 200, 139, 0.2)', margin: '1rem 2rem' }}></div>
-
-            {/* Language Toggle */}
-            <div style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '1rem', color: '#333' }}>{language === 'ko' ? '언어' : 'Language'}</span>
+            {/* Scrollable Menu Content */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', paddingTop: '1rem' }}>
+              {/* Menu Items */}
               <button
-                onClick={() => {
-                  const newLang = language === 'en' ? 'ko' : 'en';
-                  setLanguage(newLang);
-                  localStorage.setItem('preferredLanguage', newLang);
-                }}
-                style={{ position: 'relative', width: '80px', height: '36px', background: language === 'en' ? '#7FB069' : '#9ca3af', borderRadius: '18px', border: 'none', cursor: 'pointer' }}
+                onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
               >
-                <div style={{ position: 'absolute', top: '4px', left: language === 'en' ? '44px' : '4px', width: '28px', height: '28px', background: 'white', borderRadius: '50%', transition: 'left 0.3s' }}></div>
-                <span style={{ position: 'absolute', top: '50%', left: language === 'en' ? '10px' : '48px', transform: 'translateY(-50%)', fontSize: '11px', fontWeight: '600', color: 'white' }}>{language === 'en' ? 'EN' : 'KO'}</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>{language === 'ko' ? '홈' : 'Home'}</span>
               </button>
-            </div>
 
-            {!user && (
-              <>
-                <div style={{ height: '1px', background: 'rgba(155, 200, 139, 0.2)', margin: '1rem 2rem' }}></div>
-                <div style={{ padding: '1rem 2rem' }}>
-                  <button
-                    onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
-                    style={{ width: '100%', padding: '12px 16px', background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                    {language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up'}
-                  </button>
+              <button
+                onClick={() => { window.location.href = '/community'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>{language === 'ko' ? '스페이스' : 'Space'}</span>
+              </button>
+
+              <button
+                onClick={() => { window.location.href = '/pricing'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                <span>{language === 'ko' ? '요금제' : 'Pricing'}</span>
+              </button>
+
+              <button
+                onClick={() => { window.location.href = '/archetype-test'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <span>{language === 'ko' ? '나의 아키타입' : 'My Archetype'}</span>
+              </button>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: 'rgba(127, 176, 105, 0.2)', margin: '1rem 0' }}></div>
+
+              {/* Language Toggle */}
+              <div style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ fontSize: '1rem', color: 'var(--matcha-dark)', fontWeight: '500' }}>
+                  {language === 'ko' ? '언어' : 'Language'}
                 </div>
-              </>
-            )}
+                <button
+                  onClick={() => {
+                    const newLang = language === 'en' ? 'ko' : 'en';
+                    setLanguage(newLang);
+                    localStorage.setItem('preferredLanguage', newLang);
+                  }}
+                  style={{
+                    position: 'relative',
+                    width: '80px',
+                    height: '36px',
+                    background: language === 'en' ? 'var(--matcha-green)' : '#9ca3af',
+                    borderRadius: '18px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background 0.3s ease',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '4px',
+                    left: language === 'en' ? '44px' : '4px',
+                    width: '28px',
+                    height: '28px',
+                    background: 'white',
+                    borderRadius: '50%',
+                    transition: 'left 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                  }}></div>
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: language === 'en' ? '10px' : '48px',
+                    transform: 'translateY(-50%)',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    color: 'white',
+                    transition: 'all 0.3s ease',
+                    opacity: 0.9
+                  }}>
+                    {language === 'en' ? 'EN' : 'KO'}
+                  </span>
+                </button>
+              </div>
+
+              {/* Guest user - Show Sign In/Sign Up */}
+              {!user && (
+                <>
+                  <div style={{ height: '1px', background: 'rgba(127, 176, 105, 0.2)', margin: '1rem 0' }}></div>
+                  <div style={{ padding: '1rem 2rem' }}>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setShowLoginPrompt(true);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '12px',
+                        fontSize: '1rem',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                      </svg>
+                      {language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up'}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* Divider before social links */}
+              <div style={{ height: '1px', background: 'rgba(127, 176, 105, 0.2)', margin: '1rem 0' }}></div>
+
+              {/* Social Media Links */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                padding: '1rem 2rem',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <a
+                  href="https://instagram.com/novakitz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37"></path>
+                    <circle cx="17.5" cy="6.5" r="1.5"></circle>
+                  </svg>
+                </a>
+                <a
+                  href="mailto:contact@novakitz.shop"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
         </>
       )}
@@ -353,6 +482,134 @@ export default function CommunityPage() {
             setRefreshKey(prev => prev + 1);
           }}
         />
+      )}
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && !user && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.4)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          zIndex: 10001,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderRadius: '24px',
+            padding: '2.5rem 2rem',
+            maxWidth: '380px',
+            width: '100%',
+            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
+            position: 'relative',
+            textAlign: 'center',
+            border: '1px solid rgba(127, 176, 105, 0.2)'
+          }}>
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'rgba(127, 176, 105, 0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                color: 'var(--matcha-dark)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Friendly Welcome Message */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h2 style={{
+                fontSize: '1.4rem',
+                fontWeight: '600',
+                color: 'var(--matcha-dark)',
+                marginBottom: '0.75rem',
+                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Georgia', serif",
+                letterSpacing: language === 'ko' ? '0' : '0.5px'
+              }}>
+                {language === 'ko'
+                  ? '꿈을 Brew 하고 싶으신가요?'
+                  : 'Want to brew your dreams?'}
+              </h2>
+              <p style={{
+                fontSize: '0.95rem',
+                color: 'var(--sage)',
+                lineHeight: '1.6',
+                marginBottom: '0.5rem'
+              }}>
+                {language === 'ko'
+                  ? '가입하고 무의식의 메시지를 발견하세요'
+                  : 'Join us and discover messages from your unconscious'}
+              </p>
+              <p style={{
+                fontSize: '0.8rem',
+                color: 'var(--matcha-green)',
+                fontWeight: '500',
+                background: 'rgba(127, 176, 105, 0.1)',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                display: 'inline-block'
+              }}>
+                {language === 'ko'
+                  ? 'Free: 월 7회 AI 분석'
+                  : 'Free: 7 AI analyses/month'}
+              </p>
+            </div>
+
+            {/* Google Sign In Button */}
+            <Auth onAuthSuccess={() => setShowLoginPrompt(false)} />
+
+            {/* Maybe Later */}
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              style={{
+                marginTop: '1rem',
+                padding: '8px 20px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--sage)',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'color 0.2s',
+                fontFamily: 'inherit'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--matcha-dark)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--sage)';
+              }}
+            >
+              {language === 'ko' ? '나중에 할게요' : 'Maybe later'}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

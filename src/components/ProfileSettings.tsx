@@ -165,11 +165,23 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
       // Validate file type
       if (!file.type.startsWith('image/')) {
         console.error('Invalid file type:', file.type);
+        alert(language === 'ko' ? '이미지 파일만 업로드할 수 있습니다' : 'Only image files are allowed');
         return;
       }
 
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        console.error('File too large:', file.size);
+        alert(language === 'ko' ? '이미지 크기는 5MB 이하여야 합니다' : 'Image must be less than 5MB');
+        return;
+      }
+
+      console.log('Starting upload...', { fileName: file.name, fileSize: file.size, fileType: file.type });
+
       const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+
+      console.log('Uploading to avatars bucket with filename:', fileName);
 
       // Upload directly to root of avatars bucket (no subfolder)
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -180,8 +192,21 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+        console.error('Supabase storage upload error:', {
+          message: uploadError.message,
+          name: uploadError.name,
+          error: uploadError
+        });
+
+        // Provide more specific error messages
+        if (uploadError.message?.includes('Bucket not found')) {
+          alert(language === 'ko' ? '저장소가 설정되지 않았습니다. 관리자에게 문의하세요.' : 'Storage not configured. Please contact support.');
+        } else if (uploadError.message?.includes('not authorized') || uploadError.message?.includes('policy')) {
+          alert(language === 'ko' ? '업로드 권한이 없습니다. 다시 로그인해주세요.' : 'Upload not authorized. Please sign in again.');
+        } else {
+          alert(language === 'ko' ? `업로드 실패: ${uploadError.message}` : `Upload failed: ${uploadError.message}`);
+        }
+        return;
       }
 
       console.log('Upload successful:', uploadData);
@@ -197,9 +222,9 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert(language === 'ko' ? '이미지 업로드에 실패했습니다' : 'Failed to upload image');
+      alert(language === 'ko' ? `이미지 업로드에 실패했습니다: ${error?.message || '알 수 없는 오류'}` : `Failed to upload image: ${error?.message || 'Unknown error'}`);
     }
   };
 

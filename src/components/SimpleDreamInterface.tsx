@@ -4082,14 +4082,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 <div className="modal-actions" style={{display: 'flex', gap: '12px'}}>
                   <button
                     onClick={async () => {
-                      const noDreamMessage = language === 'ko'
-                        ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다. 내일의 꿈을 기대해봅시다!'
-                        : 'You didn\'t remember a dream today. That\'s okay! Let\'s look forward to tomorrow\'s dreams!';
-
-                      setIsLoading(true);
+                      // Close the input modal immediately
                       setShowInput(false);
-                      setShowResponse(true);
-                      setDreamResponse(noDreamMessage);
 
                       // Save "no dream" marker to Supabase for calendar display
                       if (user) {
@@ -4158,14 +4152,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             });
 
                             if (affirmations && affirmations.length > 0) {
-                              // Determine check-in time based on current hour
+                              // Determine check-in time based on current hour (morning or evening only to match DailyCheckin)
                               const currentHour = now.getHours();
-                              let checkInTime: 'morning' | 'afternoon' | 'evening' = 'morning';
-                              if (currentHour >= 12 && currentHour < 18) {
-                                checkInTime = 'afternoon';
-                              } else if (currentHour >= 18) {
-                                checkInTime = 'evening';
-                              }
+                              const checkInTime: 'morning' | 'evening' = currentHour < 12 ? 'morning' : 'evening';
 
                               console.log('💾 [NO DREAM AFFIRMATION] Saving affirmations:', {
                                 checkInTime,
@@ -4173,13 +4162,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               });
                               await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
                               console.log(`✨ [NO DREAM AFFIRMATION] Generated and saved ${affirmations.length} affirmations from recent dreams`);
-
-                              // Update response message to inform user
-                              setDreamResponse(
-                                language === 'ko'
-                                  ? '오늘은 꿈을 기억하지 못했네요. 괜찮습니다.\n최근 꿈을 바탕으로 확언을 생성했어요! '
-                                  : 'You didn\'t remember a dream today. That\'s okay!\nWe created affirmations based on your recent dreams! '
-                              );
                             } else {
                               console.warn('⚠️ [NO DREAM AFFIRMATION] No affirmations returned from API');
                             }
@@ -4198,10 +4180,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setDreamImage(null);
                       setDreamImagePreview('');
 
-                      setTimeout(() => {
-                        setShowResponse(false);
-                        setIsLoading(false);
-                      }, 2000);
+                      // Show streak popup directly (same as regular dream recording)
+                      setShowStreakPopup(true);
                     }}
                     style={{
                       flex: 1,

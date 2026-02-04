@@ -207,8 +207,8 @@ export default function DailyCheckin({
 
   return (
     <>
-      {/* Affirmations Display */}
-      {dreamText && showAffirmations && (
+      {/* Affirmations Display - Show for dreamText OR for existing affirmations (from No Dream) */}
+      {showAffirmations && (
         <AffirmationsDisplay
           user={{ id: userId } as any}
           checkInTime={timeOfDay}
