@@ -12,6 +12,18 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const t = {
+    home: language === 'ko' ? '홈' : 'Home',
+    calendar: language === 'ko' ? '캘린더' : 'Calendar',
+    insights: language === 'ko' ? '인사이트' : 'Insights',
+    monthlyReport: language === 'ko' ? '월간 리포트' : 'Monthly Report',
+    community: language === 'ko' ? '스페이스' : 'Space',
+    pricing: language === 'ko' ? '요금제' : 'Pricing',
+    archetype: language === 'ko' ? '나의 아키타입' : 'My Archetype',
+    language: language === 'ko' ? '언어' : 'Language',
+    signIn: language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up',
+  };
+
   return (
     <>
       {/* Hamburger Menu Button */}
@@ -92,7 +104,8 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
             padding: '0',
             animation: 'slideInRight 0.3s ease-out',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            overflow: 'hidden'
           }}>
             <style>{`
               @keyframes slideInRight {
@@ -103,11 +116,12 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
 
             <div style={{
               flex: 1,
+              overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
-              paddingTop: '2rem'
+              paddingTop: '1rem'
             }}>
-              {/* Home Button */}
+              {/* Home */}
               <button
                 onClick={() => {
                   router.push('/');
@@ -137,13 +151,13 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span>{language === 'ko' ? '홈으로' : 'Home'}</span>
+                <span>{t.home}</span>
               </button>
 
-              {/* Sign Up Button */}
+              {/* Space/Community */}
               <button
                 onClick={() => {
-                  router.push('/');
+                  router.push('/community');
                   setMenuOpen(false);
                 }}
                 style={{
@@ -167,18 +181,85 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="8.5" cy="7" r="4"></circle>
-                  <line x1="20" y1="8" x2="20" y2="14"></line>
-                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
-                <span>{language === 'ko' ? '회원가입 / 로그인' : 'Sign Up / Sign In'}</span>
+                <span>{t.community}</span>
               </button>
 
+              {/* Pricing */}
+              <button
+                onClick={() => {
+                  router.push('/pricing');
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                <span>{t.pricing}</span>
+              </button>
+
+              {/* My Archetype */}
+              <button
+                onClick={() => {
+                  router.push('/archetype-test');
+                  setMenuOpen(false);
+                }}
+                style={{
+                  padding: '1rem 2rem',
+                  background: 'none',
+                  border: 'none',
+                  textAlign: 'left',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  color: 'var(--matcha-dark)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4"></path>
+                  <path d="M12 8h.01"></path>
+                </svg>
+                <span>{t.archetype}</span>
+              </button>
+
+              {/* Divider */}
               <div style={{
                 height: '1px',
                 background: 'rgba(127, 176, 105, 0.2)',
-                margin: '1rem 2rem'
+                margin: '1rem 0'
               }}></div>
 
               {/* Language Toggle */}
@@ -194,7 +275,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
                     color: 'var(--matcha-dark)',
                     fontWeight: '500'
                   }}>
-                    {language === 'ko' ? '언어' : 'Language'}
+                    {t.language}
                   </div>
                   <button
                     onClick={() => {
@@ -240,6 +321,107 @@ export default function ArchetypeTestNav({ language, onLanguageChange }: Archety
                   </button>
                 </div>
               )}
+
+              {/* Divider */}
+              <div style={{
+                height: '1px',
+                background: 'rgba(127, 176, 105, 0.2)',
+                margin: '1rem 0'
+              }}></div>
+
+              {/* Sign In/Up Button */}
+              <div style={{ padding: '1rem 2rem' }}>
+                <button
+                  onClick={() => {
+                    router.push('/');
+                    setMenuOpen(false);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                  </svg>
+                  {t.signIn}
+                </button>
+              </div>
+
+              {/* Social Media Links */}
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                padding: '1rem 2rem',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <a
+                  href="https://instagram.com/novakitz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37"></path>
+                    <circle cx="17.5" cy="6.5" r="1.5"></circle>
+                  </svg>
+                </a>
+                <a
+                  href="mailto:contact@novakitz.shop"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'rgba(127, 176, 105, 0.1)',
+                    color: '#7fb069',
+                    transition: 'all 0.2s',
+                    textDecoration: 'none'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
         </>

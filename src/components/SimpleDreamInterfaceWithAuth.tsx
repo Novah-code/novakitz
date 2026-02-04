@@ -561,8 +561,9 @@ export default function SimpleDreamInterfaceWithAuth() {
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: '4px',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
@@ -578,9 +579,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                     background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
                     boxShadow: '0 2px 8px rgba(127, 176, 105, 0.3)',
                   }} />
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="3">
+                    <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </button>
               )}
@@ -1014,13 +1014,6 @@ export default function SimpleDreamInterfaceWithAuth() {
               {/* Guest user - Show Sign In/Sign Up */}
               {!user && (
                 <div style={{ padding: '1rem 2rem' }}>
-                  <div style={{
-                    fontSize: '0.9rem',
-                    color: 'var(--sage)',
-                    marginBottom: '1rem'
-                  }}>
-                    {language === 'ko' ? '게스트 모드' : 'Guest Mode'}
-                  </div>
                   <button
                     onClick={() => setIsGuestMode(true)}
                     style={{
