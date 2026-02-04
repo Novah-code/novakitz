@@ -34,7 +34,6 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
 
   // Form states
   const [username, setUsername] = useState(profile?.full_name || '');
-  const [fullName, setFullName] = useState(profile?.display_name || profile?.full_name || '');
   const [website, setWebsite] = useState(profile?.website || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
@@ -200,7 +199,6 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
           .upsert({
             user_id: user.id,
             full_name: username,
-            display_name: fullName,
             bio: bio,
             website: website,
             avatar_url: profileImage,
@@ -466,19 +464,19 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               right: '16px',
               width: '32px',
               height: '32px',
-              background: 'transparent',
+              background: '#e5e5e5',
               border: 'none',
               cursor: 'pointer',
-              color: '#666',
-              fontSize: '20px',
+              color: '#888',
+              fontSize: '18px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '6px',
-              transition: 'background 0.15s',
+              transition: 'all 0.15s',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#d5d5d5'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#e5e5e5'}
           >
             ✕
           </button>
@@ -541,39 +539,6 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 {usernameError && (
                   <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '8px' }}>{usernameError}</p>
                 )}
-              </div>
-
-              {/* Full name */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.fullName}
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: '15px',
-                    color: '#111',
-                    background: 'transparent',
-                  }}
-                />
               </div>
 
               {/* Website */}
@@ -665,14 +630,23 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 style={{
                   alignSelf: 'flex-end',
                   padding: '10px 24px',
-                  background: '#111',
-                  color: 'white',
+                  background: '#e5e5e5',
+                  color: '#555',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: saving ? 'not-allowed' : 'pointer',
                   opacity: saving ? 0.7 : 1,
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => {
+                  if (!saving) {
+                    e.currentTarget.style.background = '#d5d5d5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#e5e5e5';
                 }}
               >
                 {saving ? t.saving : t.save}
@@ -729,29 +703,6 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 </p>
               </div>
 
-              {/* Streak Info */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.streak}
-                </label>
-                <p style={{ fontSize: '15px', color: '#111', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>🔥</span> {streak} {t.days}
-                </p>
-              </div>
-
               {/* Delete Account */}
               {!showDeleteConfirm ? (
                 <button
@@ -764,9 +715,10 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                     fontSize: '15px',
                     color: '#ef4444',
                     cursor: 'pointer',
-                    textAlign: 'left',
+                    textAlign: 'center',
                     transition: 'all 0.15s',
                     marginTop: '20px',
+                    width: 'fit-content',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = '#fef2f2';
@@ -784,6 +736,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                   border: '1px solid #fecaca',
                   borderRadius: '8px',
                   marginTop: '20px',
+                  width: 'fit-content',
                 }}>
                   <p style={{ fontSize: '14px', color: '#dc2626', margin: '0 0 12px 0' }}>
                     {t.deleteConfirm}

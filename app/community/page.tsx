@@ -100,7 +100,7 @@ export default function CommunityPage() {
               borderRadius: '8px',
               padding: '8px',
               cursor: 'pointer',
-              color: '#333',
+              color: '#9BC88B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -176,7 +176,7 @@ export default function CommunityPage() {
             style={{
               position: 'absolute',
               right: 0,
-              background: '#333',
+              background: '#9BC88B',
               border: 'none',
               borderRadius: '8px',
               padding: '10px',

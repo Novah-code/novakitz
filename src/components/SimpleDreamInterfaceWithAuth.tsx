@@ -562,6 +562,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                     transition: 'all 0.2s',
                     display: 'flex',
                     alignItems: 'center',
+                    gap: '10px',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
@@ -577,6 +578,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                     background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
                     boxShadow: '0 2px 8px rgba(127, 176, 105, 0.3)',
                   }} />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
                 </button>
               )}
 
@@ -860,93 +865,60 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{language === 'ko' ? '나의 아키타입' : 'My Archetype'}</span>
               </button>
 
-              {/* Subscription Status Section with Glassmorphism */}
-              <div style={{
-                margin: '0.5rem 0',
-                padding: '1rem 0',
-                background: isLifetime
-                  ? 'linear-gradient(135deg, rgba(255, 182, 193, 0.25) 0%, rgba(255, 218, 233, 0.2) 100%)'
-                  : isPremium
-                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.2) 0%, rgba(144, 238, 144, 0.15) 100%)'
-                    : 'linear-gradient(135deg, rgba(200, 200, 200, 0.15) 0%, rgba(220, 220, 220, 0.1) 100%)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                borderTop: isLifetime
-                  ? '1px solid rgba(255, 182, 193, 0.4)'
-                  : isPremium
-                    ? '1px solid rgba(127, 176, 105, 0.3)'
-                    : '1px solid rgba(180, 180, 180, 0.3)',
-                borderBottom: isLifetime
-                  ? '1px solid rgba(255, 182, 193, 0.4)'
-                  : isPremium
-                    ? '1px solid rgba(127, 176, 105, 0.3)'
-                    : '1px solid rgba(180, 180, 180, 0.3)',
-                boxShadow: isLifetime
-                  ? 'inset 0 1px 2px rgba(255, 255, 255, 0.3)'
-                  : isPremium
-                    ? 'inset 0 1px 2px rgba(255, 255, 255, 0.3)'
-                    : 'inset 0 1px 2px rgba(255, 255, 255, 0.2)'
-              }}>
-                <button
-                  onClick={() => {
-                    if (!isPremium) {
+              {/* Subscription Status Section - Only show for free users */}
+              {!isPremium && !isLifetime && (
+                <div style={{
+                  margin: '0.5rem 0',
+                  padding: '1rem 0',
+                  background: 'linear-gradient(135deg, rgba(200, 200, 200, 0.15) 0%, rgba(220, 220, 220, 0.1) 100%)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  borderTop: '1px solid rgba(180, 180, 180, 0.3)',
+                  borderBottom: '1px solid rgba(180, 180, 180, 0.3)',
+                  boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.2)'
+                }}>
+                  <button
+                    onClick={() => {
                       window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
-                    }
-                    setMenuOpen(false);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 2rem',
-                    background: 'none',
-                    border: 'none',
-                    textAlign: 'left',
-                    cursor: isPremium ? 'default' : 'pointer',
-                    fontSize: '1rem',
-                    color: isLifetime ? '#E91E63' : isPremium ? 'var(--matcha-green)' : 'var(--matcha-dark)',
-                    transition: 'all 0.2s',
-                    fontFamily: 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isPremium) {
+                      setMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 2rem',
+                      background: 'none',
+                      border: 'none',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      color: 'var(--matcha-dark)',
+                      transition: 'all 0.2s',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem'
+                    }}
+                    onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isPremium) {
+                    }}
+                    onMouseLeave={(e) => {
                       e.currentTarget.style.background = 'none';
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: '1.5rem' }}>
-                    {isLifetime ? '💎' : isPremium ? '👑' : '✨'}
-                  </span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>
-                      {isLifetime
-                        ? 'Lifetime'
-                        : isPremium
-                          ? 'Premium'
-                          : (language === 'ko' ? 'Premium 업그레이드' : 'Upgrade to Premium')}
-                    </span>
-                    <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
-                      {isLifetime
-                        ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
-                        : isPremium
-                          ? (language === 'ko' ? 'Premium 이용 중' : 'You have Premium access')
-                          : (language === 'ko' ? '무제한 AI 해석' : 'Unlimited AI & More')}
-                    </span>
-                  </div>
-                </button>
+                    }}
+                  >
+                    <span style={{ fontSize: '1.5rem' }}>✨</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>
+                        {language === 'ko' ? 'Premium 업그레이드' : 'Upgrade to Premium'}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', opacity: 0.7, fontWeight: '400' }}>
+                        {language === 'ko' ? '무제한 AI 해석' : 'Unlimited AI & More'}
+                      </span>
+                    </div>
+                  </button>
 
-                {/* License Key Input - Only show for non-premium users */}
-                {!isPremium && (
+                  {/* License Key Input */}
                   <button
                     onClick={() => {
                       setMenuOpen(false);
-                      // Small delay to allow menu to close before modal opens
                       setTimeout(() => setShowLicenseModal(true), 150);
                     }}
                     style={{
@@ -975,8 +947,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                   >
                     <span style={{ fontWeight: '600' }}>{language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Language Selection */}
               <div style={{
