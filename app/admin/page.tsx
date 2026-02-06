@@ -90,6 +90,8 @@ export default function AdminDashboard() {
   });
   const [archetypeStats, setArchetypeStats] = useState<ArchetypeStats | null>(null);
   const [weeklyMetrics, setWeeklyMetrics] = useState<WeeklyMetric[]>([]);
+  const [metricsPage, setMetricsPage] = useState(0);
+  const [metricsPerPage] = useState(8);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -154,12 +156,14 @@ export default function AdminDashboard() {
     }
   };
 
-  const loadWeeklyMetrics = async () => {
+  const loadWeeklyMetrics = async (page = 0) => {
     try {
-      const response = await fetch('/api/admin/weekly-metrics');
+      const offset = page * metricsPerPage;
+      const response = await fetch(`/api/admin/weekly-metrics?weeks=${metricsPerPage}&offset=${offset}`);
       const data = await response.json();
       if (data.weeks) {
         setWeeklyMetrics(data.weeks);
+        setMetricsPage(page);
       }
     } catch (err) {
       console.error('Failed to load weekly metrics:', err);
@@ -507,7 +511,7 @@ export default function AdminDashboard() {
                 📊 주간 메트릭스
               </h2>
               <button
-                onClick={loadWeeklyMetrics}
+                onClick={() => loadWeeklyMetrics(metricsPage)}
                 style={{
                   padding: '0.4rem 0.75rem',
                   background: '#f3f4f6',
@@ -556,12 +560,12 @@ export default function AdminDashboard() {
                     gridTemplateColumns: '140px 80px 100px 80px 90px 70px 80px',
                     gap: '0.5rem',
                     padding: '0.75rem 1rem',
-                    background: idx === 0 ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)' : 'white',
+                    background: (idx === 0 && metricsPage === 0) ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)' : 'white',
                     borderRadius: '8px',
                     fontSize: '13px',
-                    fontWeight: idx === 0 ? '600' : '400',
+                    fontWeight: (idx === 0 && metricsPage === 0) ? '600' : '400',
                     color: '#1f2937',
-                    border: idx === 0 ? '1px solid rgba(127, 176, 105, 0.3)' : '1px solid #e5e7eb',
+                    border: (idx === 0 && metricsPage === 0) ? '1px solid rgba(127, 176, 105, 0.3)' : '1px solid #e5e7eb',
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -588,8 +592,51 @@ export default function AdminDashboard() {
               ))}
             </div>
 
+            {/* Pagination Controls */}
             <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '1rem',
               marginTop: '1rem',
+              padding: '0.75rem',
+            }}>
+              <button
+                onClick={() => loadWeeklyMetrics(metricsPage - 1)}
+                disabled={metricsPage === 0}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: metricsPage === 0 ? '#e5e7eb' : '#7FB069',
+                  color: metricsPage === 0 ? '#9ca3af' : 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: metricsPage === 0 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                ← 최근
+              </button>
+              <span style={{ fontSize: '13px', color: '#6b7280' }}>
+                {metricsPage === 0 ? '최근 8주' : `${metricsPage * metricsPerPage + 1}~${(metricsPage + 1) * metricsPerPage}주 전`}
+              </span>
+              <button
+                onClick={() => loadWeeklyMetrics(metricsPage + 1)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  background: '#7FB069',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+              >
+                과거 →
+              </button>
+            </div>
+
+            <div style={{
+              marginTop: '0.5rem',
               padding: '0.75rem',
               background: '#f9fafb',
               borderRadius: '8px',

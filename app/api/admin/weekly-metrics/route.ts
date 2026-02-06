@@ -30,8 +30,12 @@ function getWeekRange(weeksAgo: number): { start: Date; end: Date } {
 // Admin/test emails to exclude from metrics
 const EXCLUDED_EMAILS = ['jeongnewna@gmail.com', 'nanazzang2025@gmail.com'];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const weeksCount = parseInt(searchParams.get('weeks') || '8');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
     const weeks = [];
 
     // Get user IDs for excluded emails
@@ -42,8 +46,8 @@ export async function GET() {
 
     const excludedUserIds = excludedProfiles?.map(p => p.id) || [];
 
-    // Get metrics for the last 4 weeks
-    for (let i = 0; i < 4; i++) {
+    // Get metrics for the specified weeks with offset
+    for (let i = offset; i < offset + weeksCount; i++) {
       const { start, end } = getWeekRange(i);
       const weekNum = getWeekNumber(start);
 
@@ -127,7 +131,7 @@ export async function GET() {
 
       weeks.push({
         weekNumber: weekNum,
-        weekLabel: i === 0 ? 'This Week' : i === 1 ? 'Last Week' : `Week ${weekNum}`,
+        weekLabel: i === 0 ? 'This Week' : i === 1 ? 'Last Week' : `${weekNum}주차`,
         startDate: start.toISOString().split('T')[0],
         endDate: end.toISOString().split('T')[0],
         traffic: archetypeTests || 0, // Using archetype tests as traffic proxy
@@ -146,7 +150,14 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ weeks });
+    return NextResponse.json({
+      weeks,
+      pagination: {
+        offset,
+        weeksCount,
+        hasMore: true // We can always go back further in time
+      }
+    });
   } catch (error) {
     console.error('Error fetching weekly metrics:', error);
     return NextResponse.json({ error: 'Failed to fetch metrics' }, { status: 500 });
