@@ -430,6 +430,23 @@ export default function ArchetypeResult() {
             </div>
           )}
 
+          {/* Long Description - Always visible */}
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '2rem',
+            marginBottom: '2rem'
+          }}>
+            <div style={{
+              fontSize: '15px',
+              color: '#374151',
+              lineHeight: '1.8',
+              whiteSpace: 'pre-wrap'
+            }}>
+              {getArchetypeLongDescription(result.primary, language)}
+            </div>
+          </div>
+
           {/* Blurred/Unlocked Content Wrapper */}
           <div style={{
             position: 'relative',
@@ -438,23 +455,6 @@ export default function ArchetypeResult() {
             userSelect: (isUnlocked || isLoggedIn) ? 'auto' : 'none',
             transition: 'filter 0.5s ease'
           }}>
-            {/* Long Description */}
-            <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '2rem',
-              marginBottom: '2rem'
-            }}>
-              <div style={{
-                fontSize: '15px',
-                color: '#374151',
-                lineHeight: '1.8',
-                whiteSpace: 'pre-wrap'
-              }}>
-                {getArchetypeLongDescription(result.primary, language)}
-              </div>
-            </div>
-
             {/* Traits */}
             <div style={{
               background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryDarkColor} 100%)`,
