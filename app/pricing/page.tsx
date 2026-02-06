@@ -146,45 +146,33 @@ export default function PricingPage() {
       {
         icon: '📊',
         title: '인생의 1/3을 버리고 있습니다',
-        subtitle: '데이터 관점',
-        problem: '우리는 인생의 30%를 잠자는 데 씁니다. 꿈을 무시하는 건 내 인생 데이터의 1/3을 그냥 휴지통에 버리는 것과 같습니다.',
-        solution: '꿈은 뇌가 밤새 시뮬레이션한 \'무의식의 보고서\'입니다. 이걸 기록하면 남들보다 30% 더 많은 인생의 힌트를 얻을 수 있습니다.'
+        description: '우리는 인생의 30%를 잠자는 데 씁니다. 꿈을 무시하는 건 내 인생의 1/3을 그냥 휴지통에 버리는 것과 같아요. 꿈은 뇌가 밤새 시뮬레이션한 무의식의 보고서입니다.'
       },
       {
         icon: '🌅',
         title: '아침의 첫 5분이 하루를 결정합니다',
-        subtitle: '루틴 관점',
-        problem: '눈 뜨자마자 인스타그램, 뉴스를 보시나요? 남의 인생, 남의 소식을 보며 하루를 시작하면 뇌는 수동적으로 변합니다.',
-        solution: '외부의 소음 대신 \'내면의 목소리(꿈)\'를 듣는 것으로 시작하세요. 이것이 진정한 미라클 모닝입니다.'
+        description: '눈 뜨자마자 인스타그램, 뉴스를 보시나요? 남의 인생, 남의 소식으로 하루를 시작하면 뇌는 수동적으로 변합니다. 외부의 소음 대신 내면의 목소리를 듣는 것으로 시작하세요.'
       },
       {
         icon: '🧠',
         title: '해소되지 않은 감정은 독이 됩니다',
-        subtitle: '심리 관점',
-        problem: '이유 없이 불안하고 우울한가요? 꿈은 해소되지 않은 감정(그림자)이 보내는 신호입니다. 무시하면 계속 따라다닙니다.',
-        solution: '꿈을 기록하고 분석하는 것만으로도 무의식의 응어리가 풀립니다. 노바키츠는 당신만의 \'AI 심리 상담사\'입니다.'
+        description: '이유 없이 불안하고 우울한가요? 꿈은 해소되지 않은 감정이 보내는 신호입니다. 무시하면 계속 따라다녀요. 꿈을 기록하고 들여다보는 것만으로도 마음의 응어리가 풀립니다.'
       }
     ] : [
       {
         icon: '📊',
         title: 'You\'re discarding 1/3 of your life',
-        subtitle: 'Data Perspective',
-        problem: 'We spend 30% of our lives sleeping. Ignoring dreams is like throwing away 1/3 of your life\'s data.',
-        solution: 'Dreams are your brain\'s nightly "unconscious reports." Recording them gives you 30% more life insights than others.'
+        description: 'We spend 30% of our lives sleeping. Ignoring dreams is like throwing away 1/3 of your life. Dreams are your brain\'s nightly unconscious reports.'
       },
       {
         icon: '🌅',
         title: 'The first 5 minutes determine your day',
-        subtitle: 'Routine Perspective',
-        problem: 'Do you check Instagram and news first thing? Starting with others\' lives makes your brain passive.',
-        solution: 'Start by listening to your inner voice (dreams) instead of external noise. This is the true miracle morning.'
+        description: 'Do you check Instagram and news first thing? Starting with others\' lives makes your brain passive. Start by listening to your inner voice instead of external noise.'
       },
       {
         icon: '🧠',
         title: 'Unprocessed emotions become poison',
-        subtitle: 'Psychology Perspective',
-        problem: 'Feeling anxious or depressed for no reason? Dreams are signals from unresolved emotions (shadow). Ignore them and they follow you.',
-        solution: 'Just recording and analyzing dreams releases unconscious blockages. Novakitz is your personal AI therapist.'
+        description: 'Feeling anxious or depressed for no reason? Dreams are signals from unresolved emotions. Ignore them and they follow you. Just recording and reflecting on dreams releases inner blockages.'
       }
     ],
     whyOutro: language === 'ko'
@@ -249,10 +237,6 @@ export default function PricingPage() {
         {
           q: '제 꿈 데이터는 안전하게 보호되나요?',
           a: '네. 모든 꿈 기록은 기본적으로 비공개이며 안전하게 암호화되어 저장됩니다. 귀하의 데이터는 절대 공유되거나 공개되지 않습니다.'
-        },
-        {
-          q: '제 꿈 데이터가 AI 학습에 사용되나요?',
-          a: '아니요. 귀하의 꿈 데이터는 AI 모델 학습에 사용되지 않습니다. 오직 개인화된 분석과 인사이트 제공에만 활용됩니다.'
         }
       ]
     },
@@ -305,10 +289,6 @@ export default function PricingPage() {
         {
           q: 'Is my dream data private and secure?',
           a: 'Yes. All dream records are private by default and securely encrypted. Your data is never shared or made public.'
-        },
-        {
-          q: 'Is my dream data used for AI training?',
-          a: 'No. Your dream data is never used to train AI models. It is only used to provide personalized analysis and insights for you.'
         }
       ]
     },
@@ -370,155 +350,6 @@ export default function PricingPage() {
           }}>
             {t.title}
           </h1>
-        </div>
-
-        {/* Why Record Dreams Section */}
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: '3rem 2rem',
-          marginBottom: '3rem',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
-        }}>
-          {/* Why Title */}
-          <h2 style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            color: '#1f2937',
-            textAlign: 'center',
-            marginBottom: '1.5rem',
-            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Georgia', serif"
-          }}>
-            {t.whyTitle}
-          </h2>
-
-          {/* Intro Text */}
-          <p style={{
-            fontSize: '16px',
-            color: '#6b7280',
-            textAlign: 'center',
-            lineHeight: '1.8',
-            marginBottom: '2.5rem',
-            whiteSpace: 'pre-line',
-            maxWidth: '600px',
-            margin: '0 auto 2.5rem auto'
-          }}>
-            {t.whyIntro}
-          </p>
-
-          {/* 3 Persuasion Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '1.5rem',
-            marginBottom: '2.5rem'
-          }}>
-            {t.whyCards.map((card, idx) => (
-              <div key={idx} style={{
-                background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                border: '1px solid #e5e7eb'
-              }}>
-                <div style={{
-                  fontSize: '32px',
-                  marginBottom: '0.75rem'
-                }}>
-                  {card.icon}
-                </div>
-                <div style={{
-                  fontSize: '12px',
-                  color: '#7FB069',
-                  fontWeight: '600',
-                  marginBottom: '0.25rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }}>
-                  {card.subtitle}
-                </div>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: '#1f2937',
-                  marginBottom: '1rem',
-                  lineHeight: '1.4'
-                }}>
-                  {card.title}
-                </h3>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#dc2626',
-                  marginBottom: '0.75rem',
-                  padding: '0.75rem',
-                  background: 'rgba(220, 38, 38, 0.05)',
-                  borderRadius: '8px',
-                  lineHeight: '1.6'
-                }}>
-                  <strong style={{ color: '#991b1b' }}>Problem:</strong> {card.problem}
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  color: '#166534',
-                  padding: '0.75rem',
-                  background: 'rgba(22, 101, 52, 0.05)',
-                  borderRadius: '8px',
-                  lineHeight: '1.6'
-                }}>
-                  <strong style={{ color: '#14532d' }}>Solution:</strong> {card.solution}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Outro */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '1.5rem'
-          }}>
-            <p style={{
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-line',
-              marginBottom: '1.5rem'
-            }}>
-              {t.whyOutro}
-            </p>
-
-            {/* Use Cases */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '0.75rem',
-              marginBottom: '1.5rem'
-            }}>
-              {t.whyUseCases.map((useCase, idx) => (
-                <div key={idx} style={{
-                  background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  color: '#374151',
-                  border: '1px solid rgba(127, 176, 105, 0.2)'
-                }}>
-                  {useCase}
-                </div>
-              ))}
-            </div>
-
-            {/* Final CTA Text */}
-            <p style={{
-              fontSize: '16px',
-              color: '#7FB069',
-              fontWeight: '600',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-line'
-            }}>
-              {t.whyCTA}
-            </p>
-          </div>
         </div>
 
         {/* Pricing Section Title */}
@@ -973,6 +804,131 @@ export default function PricingPage() {
             }}>
               {t.noRefund}
             </div>
+          </div>
+        </div>
+
+        {/* Why Record Dreams Section */}
+        <div style={{
+          background: 'white',
+          borderRadius: '24px',
+          padding: '3rem 2rem',
+          marginBottom: '3rem',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+        }}>
+          {/* Why Title */}
+          <h2 style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Georgia', serif"
+          }}>
+            {t.whyTitle}
+          </h2>
+
+          {/* Intro Text */}
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280',
+            textAlign: 'center',
+            lineHeight: '1.8',
+            marginBottom: '2.5rem',
+            whiteSpace: 'pre-line',
+            maxWidth: '600px',
+            margin: '0 auto 2.5rem auto'
+          }}>
+            {t.whyIntro}
+          </p>
+
+          {/* 3 Persuasion Cards */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '2.5rem'
+          }}>
+            {t.whyCards.map((card, idx) => (
+              <div key={idx} style={{
+                background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  marginBottom: '0.75rem'
+                }}>
+                  {card.icon}
+                </div>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1rem',
+                  lineHeight: '1.4'
+                }}>
+                  {card.title}
+                </h3>
+                <p style={{
+                  fontSize: '15px',
+                  color: '#4b5563',
+                  lineHeight: '1.7'
+                }}>
+                  {card.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Outro */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <p style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-line',
+              marginBottom: '1.5rem'
+            }}>
+              {t.whyOutro}
+            </p>
+
+            {/* Use Cases */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '0.75rem',
+              marginBottom: '1.5rem'
+            }}>
+              {t.whyUseCases.map((useCase, idx) => (
+                <div key={idx} style={{
+                  background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  color: '#374151',
+                  border: '1px solid rgba(127, 176, 105, 0.2)'
+                }}>
+                  {useCase}
+                </div>
+              ))}
+            </div>
+
+            {/* Final CTA Text */}
+            <p style={{
+              fontSize: '16px',
+              color: '#7FB069',
+              fontWeight: '600',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-line'
+            }}>
+              {t.whyCTA}
+            </p>
           </div>
         </div>
 
