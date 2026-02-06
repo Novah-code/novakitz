@@ -134,8 +134,68 @@ export default function PricingPage() {
   };
 
   const t = {
+    tagline: 'The OS for your subconscious',
     title: language === 'ko' ? '요금제' : 'Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
+    // Why section
+    whyTitle: language === 'ko' ? '우리는 왜 꿈을 기록해야 할까요?' : 'Why should we record our dreams?',
+    whyIntro: language === 'ko'
+      ? '눈을 뜨자마자 스마트폰부터 찾으시나요?\n쏟아지는 알림, 타인의 SNS, 자극적인 뉴스...\n당신의 아침은 \'나\'로 시작하나요, 아니면 \'남\'으로 시작하나요?'
+      : 'Do you reach for your phone the moment you wake up?\nEndless notifications, others\' social media, sensational news...\nDoes your morning start with "you" or with "others"?',
+    whyCards: language === 'ko' ? [
+      {
+        icon: '📊',
+        title: '인생의 1/3을 버리고 있습니다',
+        subtitle: '데이터 관점',
+        problem: '우리는 인생의 30%를 잠자는 데 씁니다. 꿈을 무시하는 건 내 인생 데이터의 1/3을 그냥 휴지통에 버리는 것과 같습니다.',
+        solution: '꿈은 뇌가 밤새 시뮬레이션한 \'무의식의 보고서\'입니다. 이걸 기록하면 남들보다 30% 더 많은 인생의 힌트를 얻을 수 있습니다.'
+      },
+      {
+        icon: '🌅',
+        title: '아침의 첫 5분이 하루를 결정합니다',
+        subtitle: '루틴 관점',
+        problem: '눈 뜨자마자 인스타그램, 뉴스를 보시나요? 남의 인생, 남의 소식을 보며 하루를 시작하면 뇌는 수동적으로 변합니다.',
+        solution: '외부의 소음 대신 \'내면의 목소리(꿈)\'를 듣는 것으로 시작하세요. 이것이 진정한 미라클 모닝입니다.'
+      },
+      {
+        icon: '🧠',
+        title: '해소되지 않은 감정은 독이 됩니다',
+        subtitle: '심리 관점',
+        problem: '이유 없이 불안하고 우울한가요? 꿈은 해소되지 않은 감정(그림자)이 보내는 신호입니다. 무시하면 계속 따라다닙니다.',
+        solution: '꿈을 기록하고 분석하는 것만으로도 무의식의 응어리가 풀립니다. 노바키츠는 당신만의 \'AI 심리 상담사\'입니다.'
+      }
+    ] : [
+      {
+        icon: '📊',
+        title: 'You\'re discarding 1/3 of your life',
+        subtitle: 'Data Perspective',
+        problem: 'We spend 30% of our lives sleeping. Ignoring dreams is like throwing away 1/3 of your life\'s data.',
+        solution: 'Dreams are your brain\'s nightly "unconscious reports." Recording them gives you 30% more life insights than others.'
+      },
+      {
+        icon: '🌅',
+        title: 'The first 5 minutes determine your day',
+        subtitle: 'Routine Perspective',
+        problem: 'Do you check Instagram and news first thing? Starting with others\' lives makes your brain passive.',
+        solution: 'Start by listening to your inner voice (dreams) instead of external noise. This is the true miracle morning.'
+      },
+      {
+        icon: '🧠',
+        title: 'Unprocessed emotions become poison',
+        subtitle: 'Psychology Perspective',
+        problem: 'Feeling anxious or depressed for no reason? Dreams are signals from unresolved emotions (shadow). Ignore them and they follow you.',
+        solution: 'Just recording and analyzing dreams releases unconscious blockages. Novakitz is your personal AI therapist.'
+      }
+    ],
+    whyOutro: language === 'ko'
+      ? '기록하지 않은 꿈은 사라지지만,\n기록된 꿈은 \'자산\'이 됩니다.'
+      : 'Unrecorded dreams disappear,\nbut recorded dreams become assets.',
+    whyUseCases: language === 'ko'
+      ? ['막연한 불안감의 원인을 찾고 싶을 때', '남들이 모르는 창의적인 영감이 필요할 때', '진정한 나 자신(Self)을 만나고 싶을 때']
+      : ['When you want to find the cause of vague anxiety', 'When you need creative inspiration others don\'t have', 'When you want to meet your true Self'],
+    whyCTA: language === 'ko'
+      ? '노바키츠는 사라지는 당신의 꿈을 붙잡아,\n선명한 인생의 지도로 만들어드립니다.'
+      : 'Novakitz captures your fleeting dreams\nand turns them into a clear map of your life.',
     premium: 'Premium',
     premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
     perMonth: language === 'ko' ? '매월 결제' : 'per month',
@@ -286,11 +346,21 @@ export default function PricingPage() {
       padding: '2rem 1rem'
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header */}
+        {/* Header with Tagline */}
         <div style={{
           textAlign: 'center',
-          marginBottom: '3rem'
+          marginBottom: '2rem'
         }}>
+          <div style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#7FB069',
+            letterSpacing: '2px',
+            marginBottom: '0.5rem',
+            textTransform: 'uppercase'
+          }}>
+            {t.tagline}
+          </div>
           <h1 style={{
             fontSize: '48px',
             fontWeight: 'bold',
@@ -300,10 +370,173 @@ export default function PricingPage() {
           }}>
             {t.title}
           </h1>
+        </div>
+
+        {/* Why Record Dreams Section */}
+        <div style={{
+          background: 'white',
+          borderRadius: '24px',
+          padding: '3rem 2rem',
+          marginBottom: '3rem',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+        }}>
+          {/* Why Title */}
+          <h2 style={{
+            fontSize: '28px',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Georgia', serif"
+          }}>
+            {t.whyTitle}
+          </h2>
+
+          {/* Intro Text */}
           <p style={{
-            fontSize: '18px',
+            fontSize: '16px',
             color: '#6b7280',
-            lineHeight: '1.6'
+            textAlign: 'center',
+            lineHeight: '1.8',
+            marginBottom: '2.5rem',
+            whiteSpace: 'pre-line',
+            maxWidth: '600px',
+            margin: '0 auto 2.5rem auto'
+          }}>
+            {t.whyIntro}
+          </p>
+
+          {/* 3 Persuasion Cards */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '1.5rem',
+            marginBottom: '2.5rem'
+          }}>
+            {t.whyCards.map((card, idx) => (
+              <div key={idx} style={{
+                background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  marginBottom: '0.75rem'
+                }}>
+                  {card.icon}
+                </div>
+                <div style={{
+                  fontSize: '12px',
+                  color: '#7FB069',
+                  fontWeight: '600',
+                  marginBottom: '0.25rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}>
+                  {card.subtitle}
+                </div>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '1rem',
+                  lineHeight: '1.4'
+                }}>
+                  {card.title}
+                </h3>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#dc2626',
+                  marginBottom: '0.75rem',
+                  padding: '0.75rem',
+                  background: 'rgba(220, 38, 38, 0.05)',
+                  borderRadius: '8px',
+                  lineHeight: '1.6'
+                }}>
+                  <strong style={{ color: '#991b1b' }}>Problem:</strong> {card.problem}
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#166534',
+                  padding: '0.75rem',
+                  background: 'rgba(22, 101, 52, 0.05)',
+                  borderRadius: '8px',
+                  lineHeight: '1.6'
+                }}>
+                  <strong style={{ color: '#14532d' }}>Solution:</strong> {card.solution}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Outro */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <p style={{
+              fontSize: '20px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-line',
+              marginBottom: '1.5rem'
+            }}>
+              {t.whyOutro}
+            </p>
+
+            {/* Use Cases */}
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '0.75rem',
+              marginBottom: '1.5rem'
+            }}>
+              {t.whyUseCases.map((useCase, idx) => (
+                <div key={idx} style={{
+                  background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  color: '#374151',
+                  border: '1px solid rgba(127, 176, 105, 0.2)'
+                }}>
+                  {useCase}
+                </div>
+              ))}
+            </div>
+
+            {/* Final CTA Text */}
+            <p style={{
+              fontSize: '16px',
+              color: '#7FB069',
+              fontWeight: '600',
+              lineHeight: '1.6',
+              whiteSpace: 'pre-line'
+            }}>
+              {t.whyCTA}
+            </p>
+          </div>
+        </div>
+
+        {/* Pricing Section Title */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '2rem'
+        }}>
+          <h2 style={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            marginBottom: '0.5rem'
+          }}>
+            {language === 'ko' ? '플랜 선택하기' : 'Choose Your Plan'}
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280'
           }}>
             {t.subtitle}
           </p>
