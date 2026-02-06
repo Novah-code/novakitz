@@ -50,6 +50,22 @@ interface ArchetypeStats {
   recentResults: number;
 }
 
+interface WeeklyMetric {
+  weekNumber: number;
+  weekLabel: string;
+  startDate: string;
+  endDate: string;
+  traffic: number;
+  signups: number;
+  signupRate: string;
+  d1Retention: string;
+  activeUsers: number;
+  activeRate: string;
+  paid: number;
+  paidRate: string;
+  emailsCollected: number;
+}
+
 interface UserWithSubscription {
   id: string;
   email: string;
@@ -73,6 +89,7 @@ export default function AdminDashboard() {
     totalRevenue: 0,
   });
   const [archetypeStats, setArchetypeStats] = useState<ArchetypeStats | null>(null);
+  const [weeklyMetrics, setWeeklyMetrics] = useState<WeeklyMetric[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -122,6 +139,7 @@ export default function AdminDashboard() {
     loadDashboardData();
     loadArchetypeStats();
     loadUsers();
+    loadWeeklyMetrics();
   };
 
   const loadUsers = async () => {
@@ -133,6 +151,18 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Failed to load users:', err);
+    }
+  };
+
+  const loadWeeklyMetrics = async () => {
+    try {
+      const response = await fetch('/api/admin/weekly-metrics');
+      const data = await response.json();
+      if (data.weeks) {
+        setWeeklyMetrics(data.weeks);
+      }
+    } catch (err) {
+      console.error('Failed to load weekly metrics:', err);
     }
   };
 
@@ -452,6 +482,121 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Weekly Metrics Dashboard */}
+        {weeklyMetrics.length > 0 && (
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            padding: '1.5rem',
+            marginBottom: '2rem',
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                color: '#1f2937',
+                margin: 0,
+              }}>
+                📊 주간 메트릭스
+              </h2>
+              <button
+                onClick={loadWeeklyMetrics}
+                style={{
+                  padding: '0.4rem 0.75rem',
+                  background: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                🔄 새로고침
+              </button>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+            }}>
+              {/* Header Row */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '100px 80px 100px 80px 90px 70px 80px',
+                gap: '0.5rem',
+                padding: '0.75rem 1rem',
+                background: '#f9fafb',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '600',
+                color: '#6b7280',
+              }}>
+                <span>Week</span>
+                <span>Traffic</span>
+                <span>Signup</span>
+                <span>D1</span>
+                <span>Active(3+)</span>
+                <span>Paid</span>
+                <span>Emails</span>
+              </div>
+
+              {/* Data Rows */}
+              {weeklyMetrics.map((week, idx) => (
+                <div
+                  key={week.weekNumber}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '100px 80px 100px 80px 90px 70px 80px',
+                    gap: '0.5rem',
+                    padding: '0.75rem 1rem',
+                    background: idx === 0 ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)' : 'white',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: idx === 0 ? '600' : '400',
+                    color: '#1f2937',
+                    border: idx === 0 ? '1px solid rgba(127, 176, 105, 0.3)' : '1px solid #e5e7eb',
+                  }}
+                >
+                  <span style={{ fontWeight: '600' }}>
+                    {week.weekLabel}
+                  </span>
+                  <span>{week.traffic.toLocaleString()}</span>
+                  <span>
+                    {week.signups} <span style={{ color: '#6b7280', fontSize: '11px' }}>({week.signupRate}%)</span>
+                  </span>
+                  <span style={{ color: parseFloat(week.d1Retention) > 30 ? '#10b981' : '#6b7280' }}>
+                    {week.d1Retention}%
+                  </span>
+                  <span>
+                    {week.activeUsers} <span style={{ color: '#6b7280', fontSize: '11px' }}>({week.activeRate}%)</span>
+                  </span>
+                  <span style={{ color: parseFloat(week.paidRate) > 3 ? '#10b981' : '#6b7280' }}>
+                    {week.paid} <span style={{ fontSize: '11px' }}>({week.paidRate}%)</span>
+                  </span>
+                  <span style={{ color: '#7FB069' }}>{week.emailsCollected}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{
+              marginTop: '1rem',
+              padding: '0.75rem',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              fontSize: '11px',
+              color: '#6b7280',
+            }}>
+              <strong>지표 설명:</strong> Traffic = 아키타입 테스트 | Signup = 가입자 | D1 = 익일 리텐션(꿈 기록) | Active(3+) = 주 3회 이상 기록 | Paid = 유료 전환 | Emails = 리드 수집
+            </div>
+          </div>
+        )}
 
         {/* Manual Subscription Management */}
         <div style={{
