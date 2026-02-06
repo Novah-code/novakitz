@@ -433,7 +433,7 @@ export default function ArchetypeResult() {
           {/* Blurred/Unlocked Content Wrapper */}
           <div style={{
             position: 'relative',
-            filter: (isUnlocked || isLoggedIn) ? 'none' : 'blur(8px)',
+            filter: (isUnlocked || isLoggedIn) ? 'none' : 'blur(4px)',
             pointerEvents: (isUnlocked || isLoggedIn) ? 'auto' : 'none',
             userSelect: (isUnlocked || isLoggedIn) ? 'auto' : 'none',
             transition: 'filter 0.5s ease'
