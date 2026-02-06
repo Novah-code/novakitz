@@ -91,7 +91,8 @@ export default function AdminDashboard() {
   const [archetypeStats, setArchetypeStats] = useState<ArchetypeStats | null>(null);
   const [weeklyMetrics, setWeeklyMetrics] = useState<WeeklyMetric[]>([]);
   const [metricsPage, setMetricsPage] = useState(0);
-  const [metricsPerPage] = useState(8);
+  const [metricsPerPage] = useState(4);
+  const [metricsLoading, setMetricsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -157,6 +158,7 @@ export default function AdminDashboard() {
   };
 
   const loadWeeklyMetrics = async (page = 0) => {
+    setMetricsLoading(true);
     try {
       const offset = page * metricsPerPage;
       const response = await fetch(`/api/admin/weekly-metrics?weeks=${metricsPerPage}&offset=${offset}`);
@@ -167,6 +169,8 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Failed to load weekly metrics:', err);
+    } finally {
+      setMetricsLoading(false);
     }
   };
 
@@ -488,7 +492,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Weekly Metrics Dashboard */}
-        {weeklyMetrics.length > 0 && (
+        {(weeklyMetrics.length > 0 || metricsLoading) && (
           <div style={{
             background: 'white',
             borderRadius: '12px',
@@ -512,16 +516,17 @@ export default function AdminDashboard() {
               </h2>
               <button
                 onClick={() => loadWeeklyMetrics(metricsPage)}
+                disabled={metricsLoading}
                 style={{
                   padding: '0.4rem 0.75rem',
-                  background: '#f3f4f6',
+                  background: metricsLoading ? '#e5e7eb' : '#f3f4f6',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '12px',
-                  cursor: 'pointer',
+                  cursor: metricsLoading ? 'not-allowed' : 'pointer',
                 }}
               >
-                🔄 새로고침
+                {metricsLoading ? '로딩중...' : '🔄 새로고침'}
               </button>
             </div>
 
@@ -603,32 +608,33 @@ export default function AdminDashboard() {
             }}>
               <button
                 onClick={() => loadWeeklyMetrics(metricsPage - 1)}
-                disabled={metricsPage === 0}
+                disabled={metricsPage === 0 || metricsLoading}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: metricsPage === 0 ? '#e5e7eb' : '#7FB069',
-                  color: metricsPage === 0 ? '#9ca3af' : 'white',
+                  background: (metricsPage === 0 || metricsLoading) ? '#e5e7eb' : '#7FB069',
+                  color: (metricsPage === 0 || metricsLoading) ? '#9ca3af' : 'white',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '13px',
-                  cursor: metricsPage === 0 ? 'not-allowed' : 'pointer',
+                  cursor: (metricsPage === 0 || metricsLoading) ? 'not-allowed' : 'pointer',
                 }}
               >
                 ← 최근
               </button>
               <span style={{ fontSize: '13px', color: '#6b7280' }}>
-                {metricsPage === 0 ? '최근 8주' : `${metricsPage * metricsPerPage + 1}~${(metricsPage + 1) * metricsPerPage}주 전`}
+                {metricsLoading ? '로딩중...' : metricsPage === 0 ? '최근 4주' : `${metricsPage * metricsPerPage + 1}~${(metricsPage + 1) * metricsPerPage}주 전`}
               </span>
               <button
                 onClick={() => loadWeeklyMetrics(metricsPage + 1)}
+                disabled={metricsLoading}
                 style={{
                   padding: '0.5rem 1rem',
-                  background: '#7FB069',
-                  color: 'white',
+                  background: metricsLoading ? '#e5e7eb' : '#7FB069',
+                  color: metricsLoading ? '#9ca3af' : 'white',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '13px',
-                  cursor: 'pointer',
+                  cursor: metricsLoading ? 'not-allowed' : 'pointer',
                 }}
               >
                 과거 →
