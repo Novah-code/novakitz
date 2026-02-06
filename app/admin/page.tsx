@@ -529,7 +529,7 @@ export default function AdminDashboard() {
               {/* Header Row */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '100px 80px 100px 80px 90px 70px 80px',
+                gridTemplateColumns: '140px 80px 100px 80px 90px 70px 80px',
                 gap: '0.5rem',
                 padding: '0.75rem 1rem',
                 background: '#f9fafb',
@@ -553,7 +553,7 @@ export default function AdminDashboard() {
                   key={week.weekNumber}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '100px 80px 100px 80px 90px 70px 80px',
+                    gridTemplateColumns: '140px 80px 100px 80px 90px 70px 80px',
                     gap: '0.5rem',
                     padding: '0.75rem 1rem',
                     background: idx === 0 ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)' : 'white',
@@ -564,9 +564,12 @@ export default function AdminDashboard() {
                     border: idx === 0 ? '1px solid rgba(127, 176, 105, 0.3)' : '1px solid #e5e7eb',
                   }}
                 >
-                  <span style={{ fontWeight: '600' }}>
-                    {week.weekLabel}
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: '600' }}>{week.weekLabel}</span>
+                    <span style={{ fontSize: '10px', color: '#9ca3af' }}>
+                      {week.startDate.slice(5)} ~ {week.endDate.slice(5)}
+                    </span>
+                  </div>
                   <span>{week.traffic.toLocaleString()}</span>
                   <span>
                     {week.signups} <span style={{ color: '#6b7280', fontSize: '11px' }}>({week.signupRate}%)</span>

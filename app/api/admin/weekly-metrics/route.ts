@@ -27,27 +27,40 @@ function getWeekRange(weeksAgo: number): { start: Date; end: Date } {
   return { start: monday, end: sunday };
 }
 
+// Admin/test emails to exclude from metrics
+const EXCLUDED_EMAILS = ['jeongnewna@gmail.com', 'nanazzang2025@gmail.com'];
+
 export async function GET() {
   try {
     const weeks = [];
+
+    // Get user IDs for excluded emails
+    const { data: excludedProfiles } = await supabase
+      .from('profiles')
+      .select('id')
+      .in('email', EXCLUDED_EMAILS);
+
+    const excludedUserIds = excludedProfiles?.map(p => p.id) || [];
 
     // Get metrics for the last 4 weeks
     for (let i = 0; i < 4; i++) {
       const { start, end } = getWeekRange(i);
       const weekNum = getWeekNumber(start);
 
-      // Get signups for this week
+      // Get signups for this week (excluding admin emails)
       const { count: signupCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString());
+        .lte('created_at', end.toISOString())
+        .not('email', 'in', `(${EXCLUDED_EMAILS.join(',')})`);
 
-      // Get total users up to this week's end (for calculating percentage)
+      // Get total users up to this week's end (excluding admin emails)
       const { count: totalUsersAtWeekEnd } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .lte('created_at', end.toISOString());
+        .lte('created_at', end.toISOString())
+        .not('email', 'in', `(${EXCLUDED_EMAILS.join(',')})`);
 
       // Get archetype tests completed this week (proxy for traffic engagement)
       const { count: archetypeTests } = await supabase
@@ -56,16 +69,18 @@ export async function GET() {
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString());
 
-      // Get users who logged dreams (D1-ish retention proxy)
+      // Get users who logged dreams (D1-ish retention proxy, excluding admin)
       const { data: activeUsers } = await supabase
         .from('dreams')
         .select('user_id')
         .gte('created_at', start.toISOString())
         .lte('created_at', end.toISOString());
 
-      const uniqueActiveUsers = new Set(activeUsers?.map(d => d.user_id) || []).size;
+      // Filter out excluded user IDs
+      const filteredActiveUsers = activeUsers?.filter(d => !excludedUserIds.includes(d.user_id)) || [];
+      const uniqueActiveUsers = new Set(filteredActiveUsers.map(d => d.user_id)).size;
 
-      // Get users with 3+ dreams this week (active users)
+      // Get users with 3+ dreams this week (active users, excluding admin)
       const { data: dreamCounts } = await supabase
         .from('dreams')
         .select('user_id')
@@ -74,25 +89,41 @@ export async function GET() {
 
       const userDreamCounts: Record<string, number> = {};
       dreamCounts?.forEach(d => {
+        // Skip excluded users
+        if (excludedUserIds.includes(d.user_id)) return;
         userDreamCounts[d.user_id] = (userDreamCounts[d.user_id] || 0) + 1;
       });
       const activeUsersCount = Object.values(userDreamCounts).filter(count => count >= 3).length;
 
-      // Get paid conversions this week
-      const { count: paidCount } = await supabase
-        .from('subscriptions')
-        .select('*', { count: 'exact', head: true })
-        .gte('started_at', start.toISOString())
-        .lte('started_at', end.toISOString())
-        .eq('status', 'active');
+      // Get paid conversions this week (excluding admin)
+      let paidCount = 0;
+      if (excludedUserIds.length > 0) {
+        const { count } = await supabase
+          .from('subscriptions')
+          .select('*', { count: 'exact', head: true })
+          .gte('started_at', start.toISOString())
+          .lte('started_at', end.toISOString())
+          .eq('status', 'active')
+          .not('user_id', 'in', `(${excludedUserIds.join(',')})`);
+        paidCount = count || 0;
+      } else {
+        const { count } = await supabase
+          .from('subscriptions')
+          .select('*', { count: 'exact', head: true })
+          .gte('started_at', start.toISOString())
+          .lte('started_at', end.toISOString())
+          .eq('status', 'active');
+        paidCount = count || 0;
+      }
 
-      // Get emails collected from archetype test
+      // Get emails collected from archetype test (excluding admin emails)
       const { count: emailsCollected } = await supabase
         .from('guest_archetype_results')
         .select('*', { count: 'exact', head: true })
         .gte('email_submitted_at', start.toISOString())
         .lte('email_submitted_at', end.toISOString())
-        .not('email', 'is', null);
+        .not('email', 'is', null)
+        .not('email', 'in', `(${EXCLUDED_EMAILS.join(',')})`);
 
       weeks.push({
         weekNumber: weekNum,
@@ -108,9 +139,9 @@ export async function GET() {
         activeUsers: activeUsersCount,
         activeRate: totalUsersAtWeekEnd ?
           ((activeUsersCount / (totalUsersAtWeekEnd || 1)) * 100).toFixed(1) : '0',
-        paid: paidCount || 0,
+        paid: paidCount,
         paidRate: totalUsersAtWeekEnd ?
-          (((paidCount || 0) / (totalUsersAtWeekEnd || 1)) * 100).toFixed(1) : '0',
+          ((paidCount / (totalUsersAtWeekEnd || 1)) * 100).toFixed(1) : '0',
         emailsCollected: emailsCollected || 0,
       });
     }
