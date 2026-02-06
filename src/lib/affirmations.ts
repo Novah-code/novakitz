@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { getUserPlan } from './subscription';
 
 export interface Affirmation {
   id: string;
@@ -223,7 +222,7 @@ export async function deleteAffirmationsForTime(
 
 /**
  * Generate affirmations based on recent dreams (for "No dream" days)
- * Premium users only - generates 3 affirmations from last 7 days of dreams
+ * Free users get 1 affirmation, premium users get 3 from last 7 days of dreams
  */
 export async function generateAffirmationsFromRecentDreams(
   userId: string,

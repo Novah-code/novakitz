@@ -103,3 +103,43 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
+
+// PATCH - Update email for a guest result (for lead generation)
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, email, is_subscribed } = body;
+
+    if (!id || !email) {
+      return NextResponse.json({ error: 'Missing id or email' }, { status: 400 });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+    }
+
+    // Update the record with email
+    const { data, error } = await supabase
+      .from('guest_archetype_results')
+      .update({
+        email,
+        is_subscribed: is_subscribed || false,
+        email_submitted_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating guest result with email:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error('Error updating guest result:', error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
+  }
+}

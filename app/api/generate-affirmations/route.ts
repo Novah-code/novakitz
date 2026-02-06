@@ -32,27 +32,16 @@ export async function POST(request: NextRequest) {
       useRecentDreams
     });
 
-    // Handle recent dreams mode (Premium only, for no-dream days)
+    // Handle recent dreams mode (for no-dream days)
+    // Free users get 1 affirmation, premium users get 3
     if (useRecentDreams) {
-      console.log('🔍 [API] Recent dreams mode - Plan check:', {
+      console.log('🔍 [API] Recent dreams mode:', {
         planSlug: plan.planSlug,
         isPremium: plan.planSlug === 'premium',
-        willBlock: plan.planSlug !== 'premium'
+        affirmationCount
       });
 
-      if (plan.planSlug !== 'premium') {
-        console.error('❌ [API] Blocking recent dreams - Not premium:', {
-          userId,
-          planSlug: plan.planSlug,
-          fullPlanObject: plan
-        });
-        return NextResponse.json(
-          { error: 'Recent dreams affirmations are for premium users only' },
-          { status: 403 }
-        );
-      }
-
-      console.log('✅ [API] Premium verified - fetching recent dreams');
+      console.log('✅ [API] Fetching recent dreams for affirmation generation');
 
       // Get recent dreams (last 7 days)
       const sevenDaysAgo = new Date();

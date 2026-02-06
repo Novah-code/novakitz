@@ -31,11 +31,24 @@ export default function ArchetypeResult() {
   const [savedResultId, setSavedResultId] = useState<string | null>(null);
   const [showShareCard, setShowShareCard] = useState(false);
 
+  // Email gate states
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
   useEffect(() => {
     // Load language from localStorage
     const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
     if (savedLanguage) {
       setLanguage(savedLanguage);
+    }
+
+    // Check if already unlocked
+    const unlocked = localStorage.getItem('archetype_unlocked');
+    if (unlocked === 'true') {
+      setIsUnlocked(true);
     }
 
     loadResult();
@@ -152,7 +165,55 @@ export default function ArchetypeResult() {
   const handleRetake = () => {
     localStorage.removeItem('guest_dream');
     localStorage.removeItem('guest_quiz_answers');
+    localStorage.removeItem('guest_result_id');
+    localStorage.removeItem('archetype_unlocked');
     router.push('/archetype-test');
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError(language === 'ko' ? '올바른 이메일 주소를 입력해주세요' : 'Please enter a valid email address');
+      return;
+    }
+
+    if (!savedResultId) {
+      setEmailError(language === 'ko' ? '결과를 저장하는 중입니다. 잠시 후 다시 시도해주세요.' : 'Saving result. Please try again.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/guest-results', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: savedResultId,
+          email,
+          is_subscribed: isSubscribed,
+        }),
+      });
+
+      if (response.ok) {
+        setIsUnlocked(true);
+        localStorage.setItem('archetype_unlocked', 'true');
+      } else {
+        const data = await response.json();
+        setEmailError(data.error || (language === 'ko' ? '오류가 발생했습니다' : 'An error occurred'));
+      }
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      setEmailError(language === 'ko' ? '네트워크 오류가 발생했습니다' : 'Network error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!result) {
@@ -252,48 +313,173 @@ export default function ArchetypeResult() {
             </div>
           </div>
 
-          {/* Long Description */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '2rem',
-            marginBottom: '2rem'
-          }}>
+          {/* Email Gate Section - Show when not unlocked */}
+          {!isUnlocked && (
             <div style={{
-              fontSize: '15px',
-              color: '#374151',
-              lineHeight: '1.8',
-              whiteSpace: 'pre-wrap'
+              background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
+              borderRadius: '16px',
+              padding: '2rem',
+              marginBottom: '2rem',
+              textAlign: 'center',
+              border: '2px solid rgba(127, 176, 105, 0.3)'
             }}>
-              {getArchetypeLongDescription(result.primary, language)}
-            </div>
-          </div>
+              <div style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                color: '#1f2937',
+                marginBottom: '0.75rem'
+              }}>
+                🔒 {language === 'ko' ? '심층 분석 리포트' : 'Deep Analysis Report'}
+              </div>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                marginBottom: '1.5rem',
+                lineHeight: '1.6'
+              }}>
+                {language === 'ko'
+                  ? "융 심리학 기반의 '그림자(Shadow)' 분석과 성장 가이드를 확인하세요."
+                  : "Unlock your Jung-based 'Shadow' analysis and growth guide."}
+              </p>
 
-          {/* Traits */}
-          <div style={{
-            background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryDarkColor} 100%)`,
-            borderRadius: '16px',
-            padding: '2rem',
-            marginBottom: '2rem'
-          }}>
-            <h3 style={{
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '1rem',
-              textAlign: 'center'
-            }}>
-              {language === 'ko' ? '💫 당신의 특징' : '💫 Your Traits'}
-            </h3>
-            <div style={{
-              fontSize: '15px',
-              color: '#374151',
-              lineHeight: '1.8',
-              whiteSpace: 'pre-wrap'
-            }}>
-              {getArchetypeTraits(result.primary, language)}
+              <form onSubmit={handleEmailSubmit} style={{ maxWidth: '320px', margin: '0 auto' }}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={language === 'ko' ? '이메일 주소' : 'Email address'}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    borderRadius: '12px',
+                    border: emailError ? '2px solid #ef4444' : '2px solid rgba(127, 176, 105, 0.3)',
+                    fontSize: '15px',
+                    marginBottom: '0.75rem',
+                    outline: 'none',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onFocus={(e) => {
+                    if (!emailError) e.currentTarget.style.borderColor = '#7FB069';
+                  }}
+                  onBlur={(e) => {
+                    if (!emailError) e.currentTarget.style.borderColor = 'rgba(127, 176, 105, 0.3)';
+                  }}
+                />
+
+                {emailError && (
+                  <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '0.75rem', textAlign: 'left' }}>
+                    {emailError}
+                  </p>
+                )}
+
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '13px',
+                  color: '#6b7280',
+                  marginBottom: '1rem',
+                  cursor: 'pointer',
+                  justifyContent: 'center'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={isSubscribed}
+                    onChange={(e) => setIsSubscribed(e.target.checked)}
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      accentColor: '#7FB069'
+                    }}
+                  />
+                  {language === 'ko' ? '노바키츠 뉴스레터 받기' : 'Subscribe to Novakitz newsletter'}
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  style={{
+                    width: '100%',
+                    padding: '14px 24px',
+                    background: isSubmitting
+                      ? '#9ca3af'
+                      : 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {isSubmitting
+                    ? (language === 'ko' ? '처리 중...' : 'Processing...')
+                    : (language === 'ko' ? '전체 결과 보기' : 'View Full Results')}
+                </button>
+              </form>
+
+              <p style={{
+                fontSize: '12px',
+                color: '#9ca3af',
+                marginTop: '1rem'
+              }}>
+                {language === 'ko' ? '스팸 없이 유용한 콘텐츠만 보내드려요' : 'No spam, only valuable content'}
+              </p>
             </div>
-          </div>
+          )}
+
+          {/* Blurred/Unlocked Content Wrapper */}
+          <div style={{
+            position: 'relative',
+            filter: isUnlocked ? 'none' : 'blur(8px)',
+            pointerEvents: isUnlocked ? 'auto' : 'none',
+            userSelect: isUnlocked ? 'auto' : 'none',
+            transition: 'filter 0.5s ease'
+          }}>
+            {/* Long Description */}
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '2rem',
+              marginBottom: '2rem'
+            }}>
+              <div style={{
+                fontSize: '15px',
+                color: '#374151',
+                lineHeight: '1.8',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {getArchetypeLongDescription(result.primary, language)}
+              </div>
+            </div>
+
+            {/* Traits */}
+            <div style={{
+              background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryDarkColor} 100%)`,
+              borderRadius: '16px',
+              padding: '2rem',
+              marginBottom: '2rem'
+            }}>
+              <h3 style={{
+                fontSize: '20px',
+                fontWeight: 'bold',
+                color: '#1f2937',
+                marginBottom: '1rem',
+                textAlign: 'center'
+              }}>
+                {language === 'ko' ? '💫 당신의 특징' : '💫 Your Traits'}
+              </h3>
+              <div style={{
+                fontSize: '15px',
+                color: '#374151',
+                lineHeight: '1.8',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {getArchetypeTraits(result.primary, language)}
+              </div>
+            </div>
 
           {/* Growth System */}
           {(() => {
@@ -439,38 +625,40 @@ export default function ArchetypeResult() {
             );
           })()}
 
-          {/* Compatible Type */}
-          {result.secondary && (
-            <div style={{
-              background: '#f9fafb',
-              borderRadius: '16px',
-              padding: '1.5rem',
-              marginBottom: '2rem',
-              textAlign: 'center'
-            }}>
+            {/* Compatible Type */}
+            {result.secondary && (
               <div style={{
-                fontSize: '14px',
-                color: '#6b7280',
-                marginBottom: '0.5rem'
+                background: '#f9fafb',
+                borderRadius: '16px',
+                padding: '1.5rem',
+                marginBottom: '2rem',
+                textAlign: 'center'
               }}>
-                {language === 'ko' ? '잘 어울리는 유형' : 'Compatible Type'}
+                <div style={{
+                  fontSize: '14px',
+                  color: '#6b7280',
+                  marginBottom: '0.5rem'
+                }}>
+                  {language === 'ko' ? '잘 어울리는 유형' : 'Compatible Type'}
+                </div>
+                <div style={{
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#1f2937',
+                  marginBottom: '0.5rem'
+                }}>
+                  {getArchetypeName(result.secondary, language)}
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#6b7280'
+                }}>
+                  {getArchetypeDescription(result.secondary, language)}
+                </div>
               </div>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#1f2937',
-                marginBottom: '0.5rem'
-              }}>
-                {getArchetypeName(result.secondary, language)}
-              </div>
-              <div style={{
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>
-                {getArchetypeDescription(result.secondary, language)}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+          {/* End of Blurred Content Wrapper */}
 
           {/* Premium Upselling */}
           <div style={{

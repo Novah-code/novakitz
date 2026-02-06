@@ -4130,43 +4130,31 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             console.log('No dream entry already exists for today, skipping insert');
                           }
 
-                          // Generate affirmations from recent dreams for premium users
-                          console.log('🔍 [NO DREAM AFFIRMATION] Starting premium check');
+                          // Generate affirmations from recent dreams for all users
+                          // Free users get 1 affirmation, premium users get 3
+                          console.log('🔍 [NO DREAM AFFIRMATION] Starting affirmation generation');
                           const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
 
-                          // Check if user is premium first to avoid unnecessary API calls
-                          const { getUserPlan } = await import('../lib/subscription');
-                          const userPlan = await getUserPlan(user.id);
-                          console.log('📊 [NO DREAM AFFIRMATION] User plan:', {
-                            userId: user.id,
-                            planSlug: userPlan.planSlug,
-                            isPremium: userPlan.planSlug === 'premium'
+                          console.log('📤 [NO DREAM AFFIRMATION] Calling generateAffirmationsFromRecentDreams');
+                          const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
+                          console.log('✅ [NO DREAM AFFIRMATION] Response received:', {
+                            affirmationsCount: affirmations?.length || 0,
+                            affirmations
                           });
 
-                          if (userPlan.planSlug === 'premium') {
-                            console.log('📤 [NO DREAM AFFIRMATION] Calling generateAffirmationsFromRecentDreams');
-                            const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
-                            console.log('✅ [NO DREAM AFFIRMATION] Response received:', {
-                              affirmationsCount: affirmations?.length || 0,
-                              affirmations
+                          if (affirmations && affirmations.length > 0) {
+                            // Determine check-in time based on current hour (morning or evening only to match DailyCheckin)
+                            const currentHour = now.getHours();
+                            const checkInTime: 'morning' | 'evening' = currentHour < 12 ? 'morning' : 'evening';
+
+                            console.log('💾 [NO DREAM AFFIRMATION] Saving affirmations:', {
+                              checkInTime,
+                              count: affirmations.length
                             });
-
-                            if (affirmations && affirmations.length > 0) {
-                              // Determine check-in time based on current hour (morning or evening only to match DailyCheckin)
-                              const currentHour = now.getHours();
-                              const checkInTime: 'morning' | 'evening' = currentHour < 12 ? 'morning' : 'evening';
-
-                              console.log('💾 [NO DREAM AFFIRMATION] Saving affirmations:', {
-                                checkInTime,
-                                count: affirmations.length
-                              });
-                              await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
-                              console.log(`✨ [NO DREAM AFFIRMATION] Generated and saved ${affirmations.length} affirmations from recent dreams`);
-                            } else {
-                              console.warn('⚠️ [NO DREAM AFFIRMATION] No affirmations returned from API');
-                            }
+                            await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
+                            console.log(`✨ [NO DREAM AFFIRMATION] Generated and saved ${affirmations.length} affirmations from recent dreams`);
                           } else {
-                            console.log('ℹ️ [NO DREAM AFFIRMATION] User is not premium, skipping affirmation generation');
+                            console.warn('⚠️ [NO DREAM AFFIRMATION] No affirmations returned from API');
                           }
                         } catch (error) {
                           console.error('Error saving no dream marker:', error);
