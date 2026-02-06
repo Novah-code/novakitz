@@ -313,8 +313,8 @@ export default function ArchetypeResult() {
             </div>
           </div>
 
-          {/* Email Gate Section - Show when not unlocked */}
-          {!isUnlocked && (
+          {/* Email Gate Section - Show when not unlocked and not logged in */}
+          {!isUnlocked && !isLoggedIn && (
             <div style={{
               background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
               borderRadius: '16px',
@@ -329,7 +329,7 @@ export default function ArchetypeResult() {
                 color: '#1f2937',
                 marginBottom: '0.75rem'
               }}>
-                🔒 {language === 'ko' ? '심층 분석 리포트' : 'Deep Analysis Report'}
+                {language === 'ko' ? '심층 분석 리포트' : 'Deep Analysis Report'}
               </div>
               <p style={{
                 fontSize: '14px',
@@ -433,9 +433,9 @@ export default function ArchetypeResult() {
           {/* Blurred/Unlocked Content Wrapper */}
           <div style={{
             position: 'relative',
-            filter: isUnlocked ? 'none' : 'blur(8px)',
-            pointerEvents: isUnlocked ? 'auto' : 'none',
-            userSelect: isUnlocked ? 'auto' : 'none',
+            filter: (isUnlocked || isLoggedIn) ? 'none' : 'blur(8px)',
+            pointerEvents: (isUnlocked || isLoggedIn) ? 'auto' : 'none',
+            userSelect: (isUnlocked || isLoggedIn) ? 'auto' : 'none',
             transition: 'filter 0.5s ease'
           }}>
             {/* Long Description */}
