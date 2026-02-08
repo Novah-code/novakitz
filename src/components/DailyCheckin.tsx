@@ -149,13 +149,13 @@ export default function DailyCheckin({
     }
   };
 
-  // Mood colors - 5 options from low to high
+  // Mood colors - 5 pastel gradient options from low to high
   const moodColors = [
-    '#E57373', // 1 - soft red (low)
-    '#FFB74D', // 2 - orange
-    '#FFF176', // 3 - yellow (neutral)
-    '#AED581', // 4 - light green
-    '#7FB069', // 5 - matcha (high)
+    'linear-gradient(135deg, #E8D5D5 0%, #D4B8B8 100%)', // 1 - dusty rose (low)
+    'linear-gradient(135deg, #F5E6D3 0%, #E8D4BE 100%)', // 2 - warm beige
+    'linear-gradient(135deg, #F0EAD2 0%, #DDD5B8 100%)', // 3 - soft sand (neutral)
+    'linear-gradient(135deg, #D8E2DC 0%, #C5D4CB 100%)', // 4 - sage mist
+    'linear-gradient(135deg, #D4E4D9 0%, #B8D4C2 100%)', // 5 - soft mint (high)
   ];
 
   const timeLabels = {
