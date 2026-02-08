@@ -227,7 +227,7 @@ export default function PricingPage() {
         },
         {
           q: 'Novakitz는 누구를 위한 앱인가요?',
-          a: '자기 성찰, 융 심리학, 상징적 사고, 꿈을 통한 감정 패턴 이해에 관심 있는 분들을 위한 앱입니다. 심리학 전문가부터 자기 탐구에 관심 있는 일반인까지 모두 사용할 수 있습니다.'
+          a: '예술가, 크리에이터, 자기 이해에 관심 있는 모든 분들을 위한 앱입니다. 꿈을 통해 감정 패턴을 이해하고 싶은 분, 융 심리학과 상징적 사고에 관심 있는 분, 그리고 자기 탐구에 호기심을 가진 분이라면 누구나 환영합니다.'
         }
       ]
     },
@@ -279,7 +279,7 @@ export default function PricingPage() {
         },
         {
           q: 'Who is Novakitz for?',
-          a: 'Novakitz is for people interested in self-reflection, Jungian psychology, symbolic thinking, and understanding emotional patterns through dreams. From psychology enthusiasts to anyone curious about self-discovery.'
+          a: 'Novakitz is for artists, creators, and anyone interested in self-understanding. Whether you want to explore emotional patterns through dreams, dive into Jungian psychology and symbolic thinking, or simply curious about self-discovery — everyone is welcome.'
         }
       ]
     },
