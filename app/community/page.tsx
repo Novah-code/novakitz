@@ -274,6 +274,46 @@ export default function CommunityPage() {
               </button>
 
               <button
+                onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>{language === 'ko' ? '드림 저널' : 'Dream Journal'}</span>
+              </button>
+
+              <button
+                onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>{language === 'ko' ? '캘린더' : 'Calendar'}</span>
+              </button>
+
+              <button
+                onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                <span>{language === 'ko' ? '인사이트' : 'Insights'}</span>
+              </button>
+
+              <button
+                onClick={() => { window.location.href = '/'; setMenuOpen(false); }}
+                style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>{language === 'ko' ? '월간 리포트' : 'Monthly Report'}</span>
+              </button>
+
+              <button
                 onClick={() => { window.location.href = '/community'; setMenuOpen(false); }}
                 style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
