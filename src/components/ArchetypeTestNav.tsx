@@ -18,7 +18,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
     calendar: language === 'ko' ? '캘린더' : 'Calendar',
     insights: language === 'ko' ? '인사이트' : 'Insights',
     monthlyReport: language === 'ko' ? '월간 리포트' : 'Monthly Report',
-    community: language === 'ko' ? '스페이스' : 'Space',
+    community: language === 'ko' ? '살구정원' : 'Apricot Garden',
     pricing: language === 'ko' ? '요금제' : 'Pricing',
     archetype: language === 'ko' ? '나의 아키타입' : 'My Archetype',
     language: language === 'ko' ? '언어' : 'Language',
