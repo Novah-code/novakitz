@@ -180,6 +180,18 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
 
   const handleDownload = async (imageUrl: string) => {
     try {
+      // Detect iOS (iPhone, iPad, iPod) - includes iPad on iOS 13+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+
+      if (isIOS) {
+        // iOS Safari: Open image directly in new tab for long-press save
+        // This is the most reliable method on iOS
+        window.open(imageUrl, '_blank');
+        return;
+      }
+
+      // For non-iOS browsers: Use blob download
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -192,6 +204,8 @@ export default function CommunityFeed({ user, language, refreshKey }: CommunityF
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading image:', error);
+      // Fallback: open in new tab
+      window.open(imageUrl, '_blank');
     }
   };
 
