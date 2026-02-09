@@ -962,9 +962,9 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           <button
             onClick={onClose}
             style={{
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-              color: 'white',
-              border: 'none',
+              background: 'rgba(0, 0, 0, 0.06)',
+              color: 'rgba(0, 0, 0, 0.6)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
               padding: '1rem 3rem',
               borderRadius: '12px',
               cursor: 'pointer',
@@ -972,15 +972,17 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
               fontWeight: '600',
               fontFamily: 'inherit',
               transition: 'all 0.2s',
-              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)'
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.06)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
             }}
           >
             {t.close}
