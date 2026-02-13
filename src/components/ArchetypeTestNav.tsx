@@ -292,7 +292,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
                 <span>{t.monthlyReport}</span>
               </button>
 
-              {/* Community */}
+              {/* Apricot Garden - temporarily hidden
               <button
                 onClick={() => {
                   router.push('/community');
@@ -325,6 +325,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
                 </svg>
                 <span>{t.community}</span>
               </button>
+              */}
 
               {/* Pricing */}
               <button

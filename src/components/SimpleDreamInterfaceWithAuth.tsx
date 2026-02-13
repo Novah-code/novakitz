@@ -778,6 +778,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <span>{t.monthlyReport}</span>
               </button>
 
+              {/* Apricot Garden - temporarily hidden
               <button
                 onClick={() => {
                   window.location.href = '/community';
@@ -811,6 +812,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </svg>
                 <span>{t.community}</span>
               </button>
+              */}
 
               <button
                 onClick={() => {

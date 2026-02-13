@@ -313,6 +313,7 @@ export default function CommunityPage() {
                 <span>{language === 'ko' ? '먼슬리 리뷰' : 'Monthly Review'}</span>
               </button>
 
+              {/* Apricot Garden - temporarily hidden
               <button
                 onClick={() => { window.location.href = '/community'; setMenuOpen(false); }}
                 style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
@@ -322,6 +323,7 @@ export default function CommunityPage() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 <span>{language === 'ko' ? '살구정원' : 'Apricot Garden'}</span>
               </button>
+              */}
 
               <button
                 onClick={() => { window.location.href = '/pricing'; setMenuOpen(false); }}
