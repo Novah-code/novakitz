@@ -595,7 +595,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 10000,
-      padding: '2rem',
+      padding: 'clamp(0.75rem, 3vw, 2rem)',
       overflowY: 'auto'
     }}>
       <div style={{
@@ -611,7 +611,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         <div style={{
           background: 'linear-gradient(135deg, rgba(196, 226, 195, 0.6) 0%, rgba(168, 213, 168, 0.4) 100%)',
           color: '#5A8449',
-          padding: '2rem',
+          padding: 'clamp(1.25rem, 4vw, 2rem)',
           borderRadius: '24px 24px 0 0',
           position: 'sticky',
           top: 0,
@@ -619,15 +619,15 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(127, 176, 105, 0.15)'
         }}>
-          <h1 style={{ margin: 0, fontSize: '2rem', marginBottom: '0.5rem', fontWeight: 700 }}>{t.title}</h1>
+          <h1 style={{ margin: 0, fontSize: 'clamp(1.25rem, 4vw, 2rem)', marginBottom: '0.5rem', fontWeight: 700 }}>{t.title}</h1>
           <p style={{ margin: 0, opacity: 0.75 }}>{t.subtitle}</p>
         </div>
 
         {/* Stats Cards */}
         <div style={{
-          padding: '2rem',
+          padding: 'clamp(1rem, 3vw, 2rem)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
           gap: '1rem'
         }}>
           <div style={{
@@ -690,7 +690,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* Top Keywords */}
         {stats.topKeywords.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.topKeywords}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {stats.topKeywords.map((kw, idx) => (
@@ -738,7 +738,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* Emotion Distribution */}
         {stats.emotionDistribution.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.emotionDistribution}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {stats.emotionDistribution.map((emotion, idx) => (
@@ -769,7 +769,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* Category Breakdown */}
         {stats.categoryDistribution.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.categoryBreakdown}</h2>
             <div style={{
               display: 'grid',
@@ -796,7 +796,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* Mood Distribution (Pie Chart) */}
         {stats.moodDistribution.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.moodDistribution}</h2>
             <div style={{
               display: 'flex',
@@ -860,7 +860,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* Dream Keywords: Emotion & Symbols */}
         {stats.topTags.length > 0 && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{ color: '#5A8449', marginBottom: '1.5rem' }}>
               {language === 'ko' ? '꿈의 핵심 요소' : 'Dream Essence'}
             </h2>
@@ -922,7 +922,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
 
         {/* AI Pattern Analysis */}
         {stats.aiPatternAnalysis && (
-          <div style={{ padding: '0 2rem 2rem 2rem' }}>
+          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
             <h2 style={{
               color: '#5A8449',
               marginBottom: '1rem',
@@ -958,7 +958,7 @@ export default function DreamInsights({ user, language = 'en', onClose }: DreamI
         )}
 
         {/* Close Button */}
-        <div style={{ padding: '0 2rem 2rem 2rem', textAlign: 'center' }}>
+        <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)', textAlign: 'center' }}>
           <button
             onClick={onClose}
             style={{

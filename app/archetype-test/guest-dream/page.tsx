@@ -179,13 +179,13 @@ export default function GuestDreamRecording() {
         <div style={{
           background: 'white',
           borderRadius: '24px',
-          padding: '3rem',
+          padding: 'clamp(1.5rem, 5vw, 3rem)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <div style={{ fontSize: '60px', marginBottom: '1rem' }}>💭</div>
             <h1 style={{
-              fontSize: '28px',
+              fontSize: 'clamp(22px, 5vw, 28px)',
               fontWeight: 'bold',
               color: '#1f2937',
               marginBottom: '0.5rem',

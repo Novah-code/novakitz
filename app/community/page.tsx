@@ -81,7 +81,7 @@ export default function CommunityPage() {
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
         zIndex: 100,
-        padding: '0.75rem 1.5rem',
+        padding: '0.75rem clamp(0.75rem, 3vw, 1.5rem)',
       }}>
         <div style={{
           maxWidth: '1800px',
@@ -245,7 +245,7 @@ export default function CommunityPage() {
             position: 'fixed',
             top: 0,
             right: 0,
-            width: '280px',
+            width: 'min(280px, 80vw)',
             height: '100vh',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
@@ -503,7 +503,7 @@ export default function CommunityPage() {
       )}
 
       {/* Feed */}
-      <main style={{ padding: '1.5rem' }}>
+      <main style={{ padding: 'clamp(0.75rem, 3vw, 1.5rem)' }}>
         <CommunityFeed
           user={user}
           language={language}
@@ -546,7 +546,7 @@ export default function CommunityPage() {
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderRadius: '24px',
-            padding: '2.5rem 2rem',
+            padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
             maxWidth: '380px',
             width: '100%',
             boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',

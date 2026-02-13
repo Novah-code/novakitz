@@ -97,7 +97,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
             position: 'fixed',
             top: 0,
             right: 0,
-            width: '280px',
+            width: 'min(280px, 80vw)',
             height: '100vh',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',

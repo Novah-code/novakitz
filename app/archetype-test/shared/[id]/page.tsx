@@ -106,7 +106,7 @@ export default function SharedArchetypeResult() {
             width: '100%',
             background: 'white',
             borderRadius: '24px',
-            padding: '3rem',
+            padding: 'clamp(1.5rem, 5vw, 3rem)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
             textAlign: 'center'
           }}>
@@ -199,7 +199,7 @@ export default function SharedArchetypeResult() {
             {/* Header with gradient */}
             <div style={{
               background: `linear-gradient(135deg, ${primaryColor} 0%, ${darkColor} 100%)`,
-              padding: '3rem 2rem',
+              padding: 'clamp(1.5rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem)',
               textAlign: 'center',
               position: 'relative',
               overflow: 'hidden'
@@ -328,13 +328,13 @@ export default function SharedArchetypeResult() {
           <div style={{
             background: 'white',
             borderRadius: '24px',
-            padding: '3rem',
+            padding: 'clamp(1.5rem, 5vw, 3rem)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '48px', marginBottom: '1rem' }}>🌙</div>
             <h2 style={{
-              fontSize: '28px',
+              fontSize: 'clamp(22px, 5vw, 28px)',
               fontWeight: 'bold',
               color: '#1f2937',
               marginBottom: '2rem',

@@ -489,7 +489,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             position: 'fixed',
             top: 0,
             right: 0,
-            width: '280px',
+            width: 'min(280px, 80vw)',
             height: '100vh',
             background: 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(20px)',
@@ -1167,7 +1167,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '600px', width: '90%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '600px', width: '92%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>{t.monthlyReport}</h2>
               <button
@@ -1185,7 +1185,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Calendar Modal */}
       {showCalendar && user && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '700px', width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '700px', width: '92%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
             <button
               onClick={() => {
                 setShowCalendar(false);
@@ -1262,7 +1262,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Dream Detail Modal (from Calendar) */}
       {calendarSelectedDream && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: '2rem', maxWidth: '500px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '500px', width: '92%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
             <button
               onClick={() => setCalendarSelectedDream(null)}
               style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#999' }}
@@ -1337,9 +1337,9 @@ export default function SimpleDreamInterfaceWithAuth() {
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderRadius: '24px',
-            padding: '2.5rem 2rem',
+            padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
             maxWidth: '380px',
-            width: '100%',
+            width: '92%',
             boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
             position: 'relative',
             textAlign: 'center',

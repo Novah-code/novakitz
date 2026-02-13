@@ -84,7 +84,7 @@ export default function ArchetypeQuiz() {
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        padding: '2rem 1rem'
+        padding: 'clamp(1rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem)'
       }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header with Progress */}
@@ -143,7 +143,7 @@ export default function ArchetypeQuiz() {
         <div style={{
           background: 'white',
           borderRadius: '24px',
-          padding: '3rem',
+          padding: 'clamp(1.5rem, 5vw, 3rem)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           marginBottom: '2rem'
         }}>

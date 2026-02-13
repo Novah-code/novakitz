@@ -323,7 +323,7 @@ export default function PricingPage() {
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: '2rem 1rem'
+      padding: 'clamp(0.75rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem)'
     }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         {/* Header with Tagline */}
@@ -342,7 +342,7 @@ export default function PricingPage() {
             {t.tagline}
           </div>
           <h1 style={{
-            fontSize: '48px',
+            fontSize: 'clamp(28px, 6vw, 48px)',
             fontWeight: 'bold',
             color: '#1f2937',
             marginBottom: '1rem',
@@ -358,7 +358,7 @@ export default function PricingPage() {
           marginBottom: '2rem'
         }}>
           <h2 style={{
-            fontSize: '32px',
+            fontSize: 'clamp(22px, 5vw, 32px)',
             fontWeight: 'bold',
             color: '#1f2937',
             marginBottom: '0.5rem'
@@ -376,7 +376,7 @@ export default function PricingPage() {
         {/* Pricing Cards - 3 plans only */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
           gap: '1.5rem',
           marginBottom: '3rem',
           maxWidth: '1000px',
@@ -386,7 +386,7 @@ export default function PricingPage() {
           <div style={{
             background: 'white',
             borderRadius: '24px',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
             border: '2px solid #e5e7eb',
             position: 'relative'
@@ -407,7 +407,7 @@ export default function PricingPage() {
               {t.premiumDesc}
             </div>
             <div style={{
-              fontSize: '48px',
+              fontSize: 'clamp(32px, 7vw, 48px)',
               fontWeight: 'bold',
               color: '#7FB069',
               marginBottom: '0.5rem'
@@ -475,7 +475,7 @@ export default function PricingPage() {
           <div style={{
             background: 'white',
             borderRadius: '24px',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2)',
             border: '3px solid #7FB069',
             position: 'relative'
@@ -608,7 +608,7 @@ export default function PricingPage() {
           <div style={{
             background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
             borderRadius: '24px',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
             border: '2px solid #bfdbfe',
             position: 'relative'
@@ -811,8 +811,8 @@ export default function PricingPage() {
         <div style={{
           background: 'white',
           borderRadius: '24px',
-          padding: '3rem 2rem',
-          marginBottom: '3rem',
+          padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem)',
+          marginBottom: 'clamp(1.5rem, 4vw, 3rem)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
         }}>
           {/* Why Title */}
@@ -844,7 +844,7 @@ export default function PricingPage() {
           {/* 3 Persuasion Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
             gap: '1.5rem',
             marginBottom: '2.5rem'
           }}>
@@ -856,7 +856,7 @@ export default function PricingPage() {
                 border: '1px solid #e5e7eb'
               }}>
                 <div style={{
-                  fontSize: '32px',
+                  fontSize: 'clamp(24px, 5vw, 32px)',
                   marginBottom: '0.75rem'
                 }}>
                   {card.icon}
@@ -936,15 +936,15 @@ export default function PricingPage() {
         <div style={{
           background: 'white',
           borderRadius: '24px',
-          padding: '3rem',
+          padding: 'clamp(1.5rem, 4vw, 3rem)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
           marginBottom: '2rem'
         }}>
           <h2 style={{
-            fontSize: '32px',
+            fontSize: 'clamp(22px, 5vw, 32px)',
             fontWeight: 'bold',
             color: '#1f2937',
-            marginBottom: '2.5rem',
+            marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
             textAlign: 'center'
           }}>
             {t.faq}
