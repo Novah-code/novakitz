@@ -47,7 +47,22 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [userPlanInfo, setUserPlanInfo] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const [checkinMap, setCheckinMap] = useState<Record<string, { mood: number; energy_level: number }>>({});
   const DREAMS_PER_PAGE = 9;
+
+  // Mood color definitions matching DailyCheckin
+  const checkinColors = [
+    { bg: 'linear-gradient(135deg, #E8D5D5 0%, #D4B8B8 100%)', solid: '#D4B8B8' }, // 1 - dusty rose
+    { bg: 'linear-gradient(135deg, #F5E6D3 0%, #E8D4BE 100%)', solid: '#E8D4BE' }, // 2 - warm beige
+    { bg: 'linear-gradient(135deg, #F0EAD2 0%, #DDD5B8 100%)', solid: '#DDD5B8' }, // 3 - soft sand
+    { bg: 'linear-gradient(135deg, #D8E2DC 0%, #C5D4CB 100%)', solid: '#C5D4CB' }, // 4 - sage mist
+    { bg: 'linear-gradient(135deg, #D4E4D9 0%, #B8D4C2 100%)', solid: '#B8D4C2' }, // 5 - soft mint
+  ];
+
+  const checkinColorNames: Record<string, string[]> = {
+    en: ['Dusty Rose', 'Warm Beige', 'Soft Sand', 'Sage Mist', 'Soft Mint'],
+    ko: ['더스티 로즈', '웜 베이지', '소프트 샌드', '세이지 미스트', '소프트 민트'],
+  };
 
   // Load dreams from Supabase
   useEffect(() => {
@@ -78,12 +93,38 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
       // Load user's plan info
       const planInfo = await getUserPlanInfo(user.id);
       setUserPlanInfo(planInfo);
+
+      // Load checkin data for all dream dates
+      const { data: checkins } = await supabase
+        .from('checkins')
+        .select('check_date, mood, energy_level')
+        .eq('user_id', user.id)
+        .eq('time_of_day', 'morning');
+
+      if (checkins) {
+        const map: Record<string, { mood: number; energy_level: number }> = {};
+        checkins.forEach((c: any) => {
+          map[c.check_date] = { mood: c.mood, energy_level: c.energy_level };
+        });
+        setCheckinMap(map);
+      }
     } catch (error: any) {
       setError(error.message);
       console.error('Error loading dreams:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Get YYYY-MM-DD from dream's created_at or date field
+  const getDreamDate = (dream: Dream): string => {
+    if (dream.created_at) {
+      return new Date(dream.created_at).toISOString().split('T')[0];
+    }
+    // Fallback: parse the date string
+    const d = new Date(dream.date);
+    if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+    return '';
   };
 
   const handleSaveDream = async () => {
@@ -474,6 +515,40 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                 <div className="dreams-grid">
                   {getPaginatedDreams().map((dream) => (
                     <div key={dream.id} className="dream-card glass glass-hover">
+                      {/* Checkin Color + Energy Bar */}
+                      {(() => {
+                        const dateKey = getDreamDate(dream);
+                        const checkin = checkinMap[dateKey];
+                        if (!checkin) return null;
+                        const colorIdx = checkin.mood - 1;
+                        const color = checkinColors[colorIdx];
+                        const colorName = checkinColorNames[language]?.[colorIdx] || checkinColorNames['en'][colorIdx];
+                        return (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 12px',
+                            marginBottom: '8px',
+                            background: 'rgba(0,0,0,0.02)',
+                            borderRadius: '10px',
+                            fontSize: '12px',
+                            color: '#666'
+                          }}>
+                            <div style={{
+                              width: '14px',
+                              height: '14px',
+                              borderRadius: '50%',
+                              background: color?.bg,
+                              border: '1px solid rgba(0,0,0,0.08)',
+                              flexShrink: 0
+                            }} />
+                            <span style={{ fontWeight: 500, color: '#555' }}>{colorName}</span>
+                            <span style={{ color: '#ccc' }}>·</span>
+                            <span>⚡ {checkin.energy_level}/10</span>
+                          </div>
+                        );
+                      })()}
                       <div className="dream-card-header">
                         <div className="dream-meta">
                           <span className="dream-date">{dream.created_at ? formatTimeAgo(dream.created_at) : dream.date}</span>
