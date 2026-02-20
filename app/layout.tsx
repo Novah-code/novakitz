@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import PWAInstall from "./pwa-install";
 import UpdateNotification from "../src/components/UpdateNotification";
@@ -144,6 +145,7 @@ export default function RootLayout({
         <PWAInstall />
         <UpdateNotification />
         {children}
+        <Analytics />
       </body>
     </html>
   );
