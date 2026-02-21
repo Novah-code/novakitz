@@ -137,6 +137,16 @@ export default function PricingPage() {
     tagline: 'The OS for your subconscious',
     title: language === 'ko' ? '요금제' : 'Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
+    heroBlocks: language === 'ko' ? [
+      '아침은 늘 어수선합니다.\n생각은 흩어지고, 꿈은 사라집니다.\n\nNovakitz는 아침을\n조용한 리셋 루틴으로 만들어줍니다.',
+      '비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 \'Yesterday\'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다.\n\n위대한 통찰은 종종\n우리가 잠든 사이 시작됩니다.',
+      '단순한 꿈 일기가 아닙니다.\n매일 500단어 이상의\n칼 융 관점 심층 분석을 제공합니다.'
+    ] : [
+      'Mornings are always chaotic.\nThoughts scatter, dreams fade.\n\nNovakitz turns your morning\ninto a quiet reset ritual.',
+      'Paul McCartney composed \'Yesterday\' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas.\n\nGreat insights often begin\nwhile we sleep.',
+      'This is not a simple dream diary.\nWe provide 500+ word\nin-depth Jungian analysis every day.'
+    ],
+    heroCTA: language === 'ko' ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?',
     // Why section
     whyTitle: language === 'ko' ? '우리는 왜 꿈을 기록해야 할까요?' : 'Why should we record our dreams?',
     whyIntro: language === 'ko'
@@ -188,8 +198,8 @@ export default function PricingPage() {
     premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
     perMonth: language === 'ko' ? '매월 결제' : 'per month',
     premiumFeatures: language === 'ko'
-      ? ['월 200회 AI 꿈 해석 (하루 6~7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '융 아키타입 심화 분석', '모든 미래 기능 무료 업데이트']
-      : ['200 AI interpretations/month (~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'Advanced archetype analysis', 'All future updates free'],
+      ? ['월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '융 아키타입 심화 탐구', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '모든 미래 기능 무료 업데이트']
+      : ['200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Advanced archetype exploration', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'All future updates free'],
     yearly: language === 'ko' ? '연간' : 'Yearly',
     yearlyDesc: language === 'ko' ? '연간 구독' : 'Annual subscription',
     perYear: language === 'ko' ? '연간 결제' : 'per year',
@@ -370,6 +380,39 @@ export default function PricingPage() {
             color: '#6b7280'
           }}>
             {t.subtitle}
+          </p>
+        </div>
+
+        {/* Hero Copy Blocks */}
+        <div style={{
+          maxWidth: '680px',
+          margin: '0 auto 3rem auto',
+          textAlign: 'center'
+        }}>
+          {t.heroBlocks.map((block: string, idx: number) => (
+            <div key={idx} style={{
+              marginBottom: '2.5rem',
+              padding: '0 1rem'
+            }}>
+              <p style={{
+                fontSize: idx === 2 ? '17px' : '16px',
+                color: idx === 2 ? '#1f2937' : '#4b5563',
+                lineHeight: '1.8',
+                whiteSpace: 'pre-line',
+                fontWeight: idx === 2 ? '600' : 'normal',
+                fontStyle: idx === 1 ? 'italic' : 'normal'
+              }}>
+                {block}
+              </p>
+            </div>
+          ))}
+          <p style={{
+            fontSize: '20px',
+            fontWeight: '700',
+            color: '#7FB069',
+            marginBottom: '2rem'
+          }}>
+            {t.heroCTA}
           </p>
         </div>
 
