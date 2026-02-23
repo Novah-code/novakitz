@@ -1,28 +1,28 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
-import APIMonitoringDashboard from './APIMonitoringDashboard';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
 import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
-import DreamCalendar from './DreamCalendar';
 import PremiumPromptModal from './PremiumPromptModal';
-import DreamBackgroundGallery from './DreamBackgroundGallery';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
-import DreamShareCard from './DreamShareCard';
-// REMOVED: Affirmation popup disabled - using AffirmationsDisplay only
-// import AffirmationSuggestionCard from './AffirmationSuggestionCard';
-// import { generateAffirmationsFromDream, saveAffirmations } from '../lib/affirmations';
-import DreamTimeline from './DreamTimeline';
-import QuickArchetypeQuiz from './QuickArchetypeQuiz';
+
+// Lazy load heavy components that are not needed on initial render
+const APIMonitoringDashboard = dynamic(() => import('./APIMonitoringDashboard'), { ssr: false });
+const DreamCalendar = dynamic(() => import('./DreamCalendar'), { ssr: false });
+const DreamBackgroundGallery = dynamic(() => import('./DreamBackgroundGallery'), { ssr: false });
+const DreamShareCard = dynamic(() => import('./DreamShareCard'), { ssr: false });
+const DreamTimeline = dynamic(() => import('./DreamTimeline'), { ssr: false });
+const QuickArchetypeQuiz = dynamic(() => import('./QuickArchetypeQuiz'), { ssr: false });
 
 interface SimpleDreamInterfaceProps {
   user?: User | null;
@@ -262,7 +262,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   // Extract background images from saved dreams
   const backgroundImages: string[] = savedDreams
     .map(dream => dream.image)
-    .filter((img): img is string => !!img && img !== '/Default-dream.png' && !img.startsWith('data:'))
+    .filter((img): img is string => !!img && img !== '/Default-dream.jpg' && !img.startsWith('data:'))
     .slice(0, 12); // Limit to 12 images for performance
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 7, remaining: 7, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
@@ -675,8 +675,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   useEffect(() => {
     const img1 = new Image();
     const img2 = new Image();
-    img1.src = '/matcha-frame1.png';
-    img2.src = '/matcha-frame2.png';
+    img1.src = '/matcha-frame1.jpg';
+    img2.src = '/matcha-frame2.jpg';
   }, []);
 
   // Reset page when history modal opens
@@ -728,7 +728,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
 
     // Upload image to Supabase Storage if present
-    let imageUrl = '/Default-dream.png';
+    let imageUrl = '/Default-dream.jpg';
     const dreamId = providedDreamId || Date.now().toString();
 
     if (dreamImage && user) {
@@ -739,7 +739,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       } catch (error) {
         console.error('Failed to upload image:', error);
         // Fall back to default image if upload fails
-        imageUrl = '/Default-dream.png';
+        imageUrl = '/Default-dream.jpg';
       }
     }
 
@@ -5078,7 +5078,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       }}>
                         <div
                           style={{
-                            backgroundImage: 'url(/matcha-frame1.png?v=8)',
+                            backgroundImage: 'url(/matcha-frame1.jpg?v=8)',
                             backgroundSize: 'contain',
                             backgroundRepeat: 'no-repeat',
                             backgroundPosition: 'center',

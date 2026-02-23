@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import html2canvas from 'html2canvas';
+// html2canvas is dynamically imported in handleDownload() to reduce bundle size
 
 interface DreamShareCardProps {
   dreamTitle: string;
@@ -74,6 +74,7 @@ export default function DreamShareCard({
     if (!cardRef.current) return;
 
     try {
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: null,
         scale: 2,

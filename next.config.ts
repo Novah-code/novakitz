@@ -17,8 +17,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       '@supabase/supabase-js',
-      'chart.js',
-      'three',
     ],
   },
   // Enable compression

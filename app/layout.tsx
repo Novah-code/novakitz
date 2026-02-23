@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -10,7 +10,15 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: 'swap',
-  preload: false,
+  preload: true,
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -134,7 +142,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico?v=5" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=5" />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${roboto.variable} font-sans antialiased`}>
         <div className="particles">
           <div className="particle particle-1"></div>
           <div className="particle particle-2"></div>

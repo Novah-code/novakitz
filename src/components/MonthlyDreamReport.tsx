@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase, Dream } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { getUserPlanInfo } from '../lib/subscription';
-import jsPDF from 'jspdf';
+// jsPDF is dynamically imported in downloadPDF() to reduce bundle size
 import AnimatedScore from './AnimatedScore';
 
 interface MonthlyStats {
@@ -630,6 +630,7 @@ Use a friendly, inspiring tone. Avoid over-interpretation and guide users to fin
   const downloadPDF = async () => {
     if (!stats) return;
 
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
