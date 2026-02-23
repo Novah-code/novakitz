@@ -2119,14 +2119,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: relative;
           cursor: pointer;
           transition: transform 0.5s ease, box-shadow 0.5s ease;
-          background: linear-gradient(135deg, rgba(127, 176, 105, 0.4), rgba(168, 213, 168, 0.4));
+          background:
+            radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 40%, transparent 70%),
+            linear-gradient(135deg, rgba(200, 230, 200, 0.3), rgba(220, 240, 220, 0.25));
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          box-shadow: 
-            0 8px 32px rgba(127, 176, 105, 0.3),
-            0 4px 16px rgba(255, 255, 255, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.45);
+          box-shadow:
+            0 8px 32px rgba(127, 176, 105, 0.2),
+            0 4px 16px rgba(255, 255, 255, 0.2),
+            inset 0 0 60px rgba(255, 255, 255, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
           animation: pulse 8s infinite ease-in-out;
           overflow: hidden;
           margin: 0 auto;
@@ -2148,11 +2151,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
-          background: 
-            radial-gradient(ellipse 60% 80% at 50% 100%, 
-              #7FB069 0%, 
-              #A8D5A8 30%, 
-              #F7F3E9 60%, 
+          background:
+            radial-gradient(ellipse 60% 80% at 50% 100%,
+              rgba(127, 176, 105, 0.6) 0%,
+              rgba(200, 230, 200, 0.4) 25%,
+              rgba(255, 255, 255, 0.3) 50%,
               transparent 100%);
         }
 
@@ -2160,10 +2163,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
-          background: 
-            radial-gradient(ellipse 40% 70% at 45% 90%, 
-              rgba(255, 255, 255, 0.8) 0%, 
-              rgba(127, 176, 105, 0.4) 40%, 
+          background:
+            radial-gradient(ellipse 40% 70% at 45% 90%,
+              rgba(255, 255, 255, 0.9) 0%,
+              rgba(200, 230, 200, 0.3) 40%,
               transparent 80%);
           animation: smokeRise1 8s ease-out infinite;
           filter: url(#smoke-distort);
@@ -2173,10 +2176,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
-          background: 
-            radial-gradient(ellipse 50% 60% at 55% 85%, 
-              rgba(168, 213, 168, 0.6) 0%, 
-              rgba(255, 255, 255, 0.3) 50%, 
+          background:
+            radial-gradient(ellipse 50% 60% at 55% 85%,
+              rgba(220, 240, 220, 0.5) 0%,
+              rgba(255, 255, 255, 0.35) 50%,
               transparent 90%);
           animation: smokeRise2 10s ease-out infinite;
           filter: url(#smoke-distort);
@@ -2186,10 +2189,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
-          background: 
-            radial-gradient(ellipse 35% 50% at 50% 80%, 
-              rgba(247, 243, 233, 0.7) 0%, 
-              rgba(168, 213, 168, 0.4) 60%, 
+          background:
+            radial-gradient(ellipse 35% 50% at 50% 80%,
+              rgba(255, 255, 255, 0.7) 0%,
+              rgba(200, 230, 200, 0.3) 60%,
               transparent 100%);
           animation: smokeRise3 12s ease-out infinite;
           filter: url(#smoke-distort);
@@ -2199,9 +2202,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: -5%; left: -5%;
           width: 110%; height: 110%;
-          background: 
-            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.6) 0%, rgba(127, 176, 105, 0.3) 20%, transparent 50%),
-            radial-gradient(circle at 20% 80%, rgba(168, 213, 168, 0.5) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 60%);
+          background:
+            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.7) 0%, rgba(200, 230, 200, 0.2) 25%, transparent 50%),
+            radial-gradient(circle at 20% 80%, rgba(220, 240, 220, 0.4) 0%, rgba(255, 255, 255, 0.25) 30%, transparent 60%);
           animation: rotate 25s linear infinite;
           mix-blend-mode: overlay;
         }
@@ -2210,13 +2213,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           position: absolute;
           top: -8%; left: -8%;
           width: 116%; height: 116%;
-          background: 
-            linear-gradient(45deg, 
-              rgba(255, 255, 255, 0.4) 0%,
-              rgba(168, 213, 168, 0.3) 25%,
-              rgba(127, 176, 105, 0.2) 50%,
-              rgba(247, 243, 233, 0.3) 75%,
-              rgba(255, 255, 255, 0.4) 100%);
+          background:
+            linear-gradient(45deg,
+              rgba(255, 255, 255, 0.5) 0%,
+              rgba(220, 240, 220, 0.25) 25%,
+              rgba(200, 230, 200, 0.15) 50%,
+              rgba(255, 255, 255, 0.3) 75%,
+              rgba(255, 255, 255, 0.5) 100%);
           animation: rotate 35s linear infinite reverse;
           mix-blend-mode: soft-light;
         }

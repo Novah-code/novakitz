@@ -138,11 +138,11 @@ export default function PricingPage() {
     title: language === 'ko' ? '요금제' : 'Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
     heroBlocks: language === 'ko' ? [
-      '비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 \'Yesterday\'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다.\n\n위대한 통찰은 종종\n우리가 잠든 사이 시작됩니다.',
-      '단순한 꿈 일기가 아닙니다.\n매일 500단어 이상의\n칼 융 관점 심층 분석을 제공합니다.'
+      '비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 \'Yesterday\'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다.\n\n위대한 통찰은 종종 우리가 잠든 사이 시작됩니다.',
+      '단순한 꿈 일기가 아닙니다.\n매일 500단어 이상의 칼 융 관점 심층 분석을 제공합니다.'
     ] : [
-      'Paul McCartney composed \'Yesterday\' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas.\n\nGreat insights often begin\nwhile we sleep.',
-      'This is not a simple dream diary.\nWe provide 500+ word\nin-depth Jungian analysis every day.'
+      'Paul McCartney composed \'Yesterday\' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas.\n\nGreat insights often begin while we sleep.',
+      'This is not a simple dream diary.\nWe provide 500+ word in-depth Jungian analysis every day.'
     ],
     heroCTA: language === 'ko' ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?',
     // Why section
@@ -184,8 +184,8 @@ export default function PricingPage() {
       }
     ],
     whyOutro: language === 'ko'
-      ? '기록하지 않은 꿈은 사라지지만,\n기록된 꿈은 \'자산\'이 됩니다.'
-      : 'Unrecorded dreams disappear,\nbut recorded dreams become assets.',
+      ? '기록하지 않은 꿈은 사라지지만, 기록된 꿈은 \'자산\'이 됩니다.'
+      : 'Unrecorded dreams disappear, but recorded dreams become assets.',
     whyUseCases: language === 'ko'
       ? ['막연한 불안감의 원인을 찾고 싶을 때', '남들이 모르는 창의적인 영감이 필요할 때', '진정한 나 자신(Self)을 만나고 싶을 때']
       : ['When you want to find the cause of vague anxiety', 'When you need creative inspiration others don\'t have', 'When you want to meet your true Self'],
@@ -362,11 +362,13 @@ export default function PricingPage() {
 
         {/* Hero Copy Blocks */}
         <div style={{
-          background: 'white',
+          background: 'rgba(255, 255, 255, 0.4)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           borderRadius: '24px',
           padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)',
-          marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: '0 8px 32px rgba(127, 176, 105, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
           maxWidth: '680px',
           margin: '0 auto clamp(1.5rem, 4vw, 2.5rem) auto',
           textAlign: 'center' as const
@@ -377,12 +379,11 @@ export default function PricingPage() {
               padding: '0'
             }}>
               <p style={{
-                fontSize: idx === 1 ? '16px' : '15px',
-                color: idx === 1 ? '#1f2937' : '#4b5563',
+                fontSize: idx === 0 ? '16px' : '15px',
+                color: idx === 0 ? '#1f2937' : '#4b5563',
                 lineHeight: '1.6',
                 whiteSpace: 'pre-line',
-                fontWeight: idx === 1 ? '600' : 'normal',
-                fontStyle: idx === 0 ? 'italic' : 'normal',
+                fontWeight: idx === 0 ? '600' : 'normal',
                 margin: 0
               }}>
                 {block}
