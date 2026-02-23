@@ -1037,15 +1037,6 @@ html[lang="ko"] textarea {
     }
 }
 
-/* Hide extra particles on mobile for performance */
-@media (max-width: 768px) {
-    .particle-4,
-    .particle-5,
-    .particle-6 {
-        display: none;
-    }
-}
-
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
     .particle {
