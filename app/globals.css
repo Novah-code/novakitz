@@ -1044,11 +1044,6 @@ html[lang="ko"] textarea {
     .particle-6 {
         display: none;
     }
-    .particle-1,
-    .particle-2,
-    .particle-3 {
-        opacity: 0.2;
-    }
 }
 
 /* Respect reduced motion preference */
