@@ -101,6 +101,7 @@ interface DreamEntry {
   timestamp: number;
   title?: string;
   image?: string;
+  imagePosition?: { x: number; y: number }; // background-position percentages
   isPrivate?: boolean;
   tags?: string[];
   autoTags?: string[];
@@ -258,6 +259,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   // const [currentDreamForAffirmation, setCurrentDreamForAffirmation] = useState<DreamEntry | null>(null);
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [repositioningDreamId, setRepositioningDreamId] = useState<string | null>(null);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // Extract background images from saved dreams
   const backgroundImages: string[] = savedDreams
@@ -343,6 +346,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                 tags: dream.tags || [],
                 autoTags: dream.tags || [],
                 image: dream.image || undefined,
+                imagePosition: dream.image_position || undefined,
                 mood: dream.mood || undefined,
                 content: dream.content,
                 userName: profileData?.full_name || 'Anonymous'
@@ -4429,77 +4433,211 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setCurrentDreamIndex(0);
                       setSelectedDream(dream);
                     }}>
-                      <div className="dream-image" style={{
-                        background: dream.image ? 'none' : gradients[index % gradients.length],
-                        backgroundImage: dream.image ? `url(${dream.image})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                      }}>
-                        {/* Camera overlay for adding photos */}
-                        <div 
-                          className="camera-overlay"
-                          onClick={(e) => {
+                      <div
+                        className="dream-image"
+                        style={{
+                          background: dream.image ? 'none' : gradients[index % gradients.length],
+                          backgroundImage: dream.image ? `url(${dream.image})` : 'none',
+                          backgroundSize: 'cover',
+                          backgroundPosition: dream.imagePosition
+                            ? `${dream.imagePosition.x}% ${dream.imagePosition.y}%`
+                            : 'center',
+                          cursor: repositioningDreamId === dream.id ? 'grab' : 'pointer'
+                        }}
+                        onMouseDown={(e) => {
+                          if (repositioningDreamId === dream.id) {
+                            e.preventDefault();
                             e.stopPropagation();
-                            // Create hidden file input for this specific dream
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.accept = 'image/*';
-                            input.onchange = async (event) => {
-                              const file = (event.target as HTMLInputElement).files?.[0];
-                              if (file && user) {
-                                let imageUrl: string | null = null;
-
-                                // Try Supabase Storage upload first
-                                try {
-                                  imageUrl = await updateDreamImage(file, user.id, dream.id, dream.image);
-                                } catch (error) {
-                                  console.error('Storage upload failed, using base64 fallback:', error);
-                                }
-
-                                // Fallback: convert to base64 if Storage upload failed
-                                if (!imageUrl) {
-                                  try {
-                                    imageUrl = await new Promise<string>((resolve, reject) => {
-                                      const reader = new FileReader();
-                                      reader.onload = () => resolve(reader.result as string);
-                                      reader.onerror = () => reject(new Error('Failed to read file'));
-                                      reader.readAsDataURL(file);
-                                    });
-                                  } catch (error) {
-                                    console.error('Base64 fallback also failed:', error);
-                                    showToast(language === 'ko' ? '이미지 업로드에 실패했습니다' : 'Failed to upload image', 'error');
-                                    return;
-                                  }
-                                }
-
-                                // Update the dream with new image URL
-                                const updatedDreams = savedDreams.map(d =>
-                                  d.id === dream.id ? { ...d, image: imageUrl! } : d
-                                );
-                                setSavedDreams(updatedDreams);
-                                localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-
-                                // Update in Supabase
-                                try {
-                                  const { error } = await supabase
+                            const pos = dream.imagePosition || { x: 50, y: 50 };
+                            dragRef.current = { startX: e.clientX, startY: e.clientY, startPosX: pos.x, startPosY: pos.y };
+                          }
+                        }}
+                        onMouseMove={(e) => {
+                          if (repositioningDreamId === dream.id && dragRef.current) {
+                            e.preventDefault();
+                            const dx = e.clientX - dragRef.current.startX;
+                            const dy = e.clientY - dragRef.current.startY;
+                            const newX = Math.max(0, Math.min(100, dragRef.current.startPosX - dx * 0.3));
+                            const newY = Math.max(0, Math.min(100, dragRef.current.startPosY - dy * 0.3));
+                            const updatedDreams = savedDreams.map(d =>
+                              d.id === dream.id ? { ...d, imagePosition: { x: newX, y: newY } } : d
+                            );
+                            setSavedDreams(updatedDreams);
+                          }
+                        }}
+                        onMouseUp={() => {
+                          if (repositioningDreamId === dream.id) {
+                            dragRef.current = null;
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (repositioningDreamId === dream.id) {
+                            dragRef.current = null;
+                          }
+                        }}
+                        onTouchStart={(e) => {
+                          if (repositioningDreamId === dream.id) {
+                            e.stopPropagation();
+                            const touch = e.touches[0];
+                            const pos = dream.imagePosition || { x: 50, y: 50 };
+                            dragRef.current = { startX: touch.clientX, startY: touch.clientY, startPosX: pos.x, startPosY: pos.y };
+                          }
+                        }}
+                        onTouchMove={(e) => {
+                          if (repositioningDreamId === dream.id && dragRef.current) {
+                            e.stopPropagation();
+                            const touch = e.touches[0];
+                            const dx = touch.clientX - dragRef.current.startX;
+                            const dy = touch.clientY - dragRef.current.startY;
+                            const newX = Math.max(0, Math.min(100, dragRef.current.startPosX - dx * 0.3));
+                            const newY = Math.max(0, Math.min(100, dragRef.current.startPosY - dy * 0.3));
+                            const updatedDreams = savedDreams.map(d =>
+                              d.id === dream.id ? { ...d, imagePosition: { x: newX, y: newY } } : d
+                            );
+                            setSavedDreams(updatedDreams);
+                          }
+                        }}
+                        onTouchEnd={() => {
+                          if (repositioningDreamId === dream.id) {
+                            dragRef.current = null;
+                          }
+                        }}
+                      >
+                        {/* Reposition mode overlay */}
+                        {repositioningDreamId === dream.id && (
+                          <div
+                            style={{
+                              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                              background: 'rgba(0,0,0,0.3)',
+                              display: 'flex', flexDirection: 'column',
+                              alignItems: 'center', justifyContent: 'center',
+                              zIndex: 5
+                            }}
+                          >
+                            <p style={{ color: 'white', fontSize: '14px', marginBottom: '12px', textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+                              {language === 'ko' ? '드래그하여 위치 조정' : 'Drag to adjust'}
+                            </p>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const pos = dream.imagePosition || { x: 50, y: 50 };
+                                // Save to localStorage
+                                localStorage.setItem('novaDreams', JSON.stringify(savedDreams));
+                                // Save to Supabase
+                                if (user) {
+                                  supabase
                                     .from('dreams')
-                                    .update({ image: imageUrl })
+                                    .update({ image_position: pos })
                                     .eq('id', dream.id)
-                                    .eq('user_id', user.id);
-
-                                  if (error) {
-                                    console.error('Error updating dream image in Supabase:', error);
-                                  }
-                                } catch (error) {
-                                  console.error('Exception updating dream image:', error);
+                                    .eq('user_id', user.id)
+                                    .then(({ error }) => {
+                                      if (error) console.error('Error saving image position:', error);
+                                    });
                                 }
-                              }
-                            };
-                            input.click();
-                          }}
-                        >
-                          <div className="camera-icon">+</div>
-                        </div>
+                                setRepositioningDreamId(null);
+                              }}
+                              style={{
+                                background: 'white', border: 'none', borderRadius: '20px',
+                                padding: '8px 20px', fontSize: '14px', fontWeight: 600,
+                                color: '#4a6741', cursor: 'pointer'
+                              }}
+                            >
+                              {language === 'ko' ? '완료' : 'Done'}
+                            </button>
+                          </div>
+                        )}
+                        {/* Camera overlay for adding/repositioning photos */}
+                        {repositioningDreamId !== dream.id && (
+                          <div
+                            className="camera-overlay"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            style={{ display: undefined }}
+                          >
+                            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                              <div
+                                className="camera-icon"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const input = document.createElement('input');
+                                  input.type = 'file';
+                                  input.accept = 'image/*';
+                                  input.onchange = async (event) => {
+                                    const file = (event.target as HTMLInputElement).files?.[0];
+                                    if (file && user) {
+                                      let imageUrl: string | null = null;
+                                      try {
+                                        imageUrl = await updateDreamImage(file, user.id, dream.id, dream.image);
+                                      } catch (error) {
+                                        console.error('Storage upload failed, using base64 fallback:', error);
+                                      }
+                                      if (!imageUrl) {
+                                        try {
+                                          // Compress via canvas then convert to small base64
+                                          imageUrl = await new Promise<string>((resolve, reject) => {
+                                            const reader = new FileReader();
+                                            reader.onload = () => {
+                                              const img = new Image();
+                                              img.onload = () => {
+                                                const canvas = document.createElement('canvas');
+                                                const MAX = 800;
+                                                let w = img.width, h = img.height;
+                                                if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
+                                                else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
+                                                canvas.width = w;
+                                                canvas.height = h;
+                                                const ctx = canvas.getContext('2d');
+                                                if (!ctx) { reject(new Error('No canvas context')); return; }
+                                                ctx.drawImage(img, 0, 0, w, h);
+                                                resolve(canvas.toDataURL('image/jpeg', 0.7));
+                                              };
+                                              img.onerror = () => reject(new Error('Failed to load image'));
+                                              img.src = reader.result as string;
+                                            };
+                                            reader.onerror = () => reject(new Error('Failed to read file'));
+                                            reader.readAsDataURL(file);
+                                          });
+                                        } catch (error) {
+                                          console.error('Base64 fallback also failed:', error);
+                                          showToast(language === 'ko' ? '이미지 업로드에 실패했습니다' : 'Failed to upload image', 'error');
+                                          return;
+                                        }
+                                      }
+                                      const updatedDreams = savedDreams.map(d =>
+                                        d.id === dream.id ? { ...d, image: imageUrl! } : d
+                                      );
+                                      setSavedDreams(updatedDreams);
+                                      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+                                      try {
+                                        const { error } = await supabase
+                                          .from('dreams')
+                                          .update({ image: imageUrl })
+                                          .eq('id', dream.id)
+                                          .eq('user_id', user.id);
+                                        if (error) console.error('Error updating dream image in Supabase:', error);
+                                      } catch (error) {
+                                        console.error('Exception updating dream image:', error);
+                                      }
+                                    }
+                                  };
+                                  input.click();
+                                }}
+                              >+</div>
+                              {dream.image && dream.image !== '/Default-dream.jpg' && (
+                                <div
+                                  className="camera-icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setRepositioningDreamId(dream.id);
+                                  }}
+                                  style={{ fontSize: '28px' }}
+                                  title={language === 'ko' ? '위치 조정' : 'Adjust position'}
+                                >&#8982;</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="dream-actions">
