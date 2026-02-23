@@ -2799,11 +2799,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           transition: opacity 0.3s ease;
           cursor: pointer;
         }
-        
+
         .dream-image:hover .camera-overlay {
           opacity: 1;
         }
-        
+
         .camera-icon {
           color: white;
           font-size: 48px;
@@ -4447,33 +4447,51 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             input.onchange = async (event) => {
                               const file = (event.target as HTMLInputElement).files?.[0];
                               if (file && user) {
+                                let imageUrl: string | null = null;
+
+                                // Try Supabase Storage upload first
                                 try {
-                                  // Upload image to Supabase Storage
-                                  const imageUrl = await updateDreamImage(file, user.id, dream.id, dream.image);
+                                  imageUrl = await updateDreamImage(file, user.id, dream.id, dream.image);
+                                } catch (error) {
+                                  console.error('Storage upload failed, using base64 fallback:', error);
+                                }
 
-                                  // Update the dream with new image URL
-                                  const updatedDreams = savedDreams.map(d =>
-                                    d.id === dream.id ? { ...d, image: imageUrl } : d
-                                  );
-                                  setSavedDreams(updatedDreams);
-                                  localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
-
-                                  // Update in Supabase
+                                // Fallback: convert to base64 if Storage upload failed
+                                if (!imageUrl) {
                                   try {
-                                    const { error } = await supabase
-                                      .from('dreams')
-                                      .update({ image: imageUrl })
-                                      .eq('id', dream.id)
-                                      .eq('user_id', user.id);
-
-                                    if (error) {
-                                      console.error('Error updating dream image in Supabase:', error);
-                                    }
+                                    imageUrl = await new Promise<string>((resolve, reject) => {
+                                      const reader = new FileReader();
+                                      reader.onload = () => resolve(reader.result as string);
+                                      reader.onerror = () => reject(new Error('Failed to read file'));
+                                      reader.readAsDataURL(file);
+                                    });
                                   } catch (error) {
-                                    console.error('Exception updating dream image:', error);
+                                    console.error('Base64 fallback also failed:', error);
+                                    showToast(language === 'ko' ? '이미지 업로드에 실패했습니다' : 'Failed to upload image', 'error');
+                                    return;
+                                  }
+                                }
+
+                                // Update the dream with new image URL
+                                const updatedDreams = savedDreams.map(d =>
+                                  d.id === dream.id ? { ...d, image: imageUrl! } : d
+                                );
+                                setSavedDreams(updatedDreams);
+                                localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+
+                                // Update in Supabase
+                                try {
+                                  const { error } = await supabase
+                                    .from('dreams')
+                                    .update({ image: imageUrl })
+                                    .eq('id', dream.id)
+                                    .eq('user_id', user.id);
+
+                                  if (error) {
+                                    console.error('Error updating dream image in Supabase:', error);
                                   }
                                 } catch (error) {
-                                  console.error('Failed to upload image:', error);
+                                  console.error('Exception updating dream image:', error);
                                 }
                               }
                             };
