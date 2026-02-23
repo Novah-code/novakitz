@@ -196,21 +196,21 @@ export default function PricingPage() {
     premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
     perMonth: language === 'ko' ? '매월 결제' : 'per month',
     premiumFeatures: language === 'ko'
-      ? ['월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '융 아키타입 심화 탐구', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '모든 미래 기능 무료 업데이트']
-      : ['200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Advanced archetype exploration', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'All future updates free'],
+      ? ['월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언', '월간 드림 리뷰', '꿈 패턴 인사이트', '모든 미래 기능 무료 업데이트']
+      : ['200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation', 'Monthly dream review', 'Dream pattern insights', 'All future updates free'],
     yearly: language === 'ko' ? '연간' : 'Yearly',
     yearlyDesc: language === 'ko' ? '연간 구독' : 'Annual subscription',
     perYear: language === 'ko' ? '연간 결제' : 'per year',
     yearlyDiscount: language === 'ko' ? '30% 할인' : '30% Off',
     yearlyFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '월 200회 AI 꿈 해석', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언 이메일', '주간 꿈 패턴 리포트', '모든 미래 기능 무료 업데이트']
-      : ['All Premium features', '200 AI interpretations/month', 'Unlimited dreams & full history', 'Daily personalized affirmation email', 'Weekly dream pattern report', 'All future updates free'],
+      ? ['Premium의 모든 기능', '월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언', '월간 드림 리뷰', '꿈 패턴 인사이트', '모든 미래 기능 무료 업데이트']
+      : ['All Premium features', '200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation', 'Monthly dream review', 'Dream pattern insights', 'All future updates free'],
     lifetime: 'Lifetime',
     lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
     lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
     lifetimeFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '평생 무제한 AI 해석 (월 200회)', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '얼리 빌리버 50명 한정']
-      : ['All Premium features', 'Lifetime AI interpretations (200/month)', 'All future features free forever', 'Product Hunt launch special', 'Early Believer: 50 spots only'],
+      ? ['Premium의 모든 기능', '평생 200회+/월 융 심리학 기반 꿈 분석', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '얼리 빌리버 50명 한정']
+      : ['All Premium features', 'Lifetime 200+ Jungian dream analyses/month', 'All future features free forever', 'Product Hunt launch special', 'Early Believer: 50 spots only'],
     startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
     startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
     buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
