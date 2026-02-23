@@ -2812,6 +2812,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           color: white;
           font-size: 48px;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          cursor: pointer;
+        }
+
+        .reposition-icon {
+          position: absolute;
+          bottom: 12px;
+          right: 12px;
+          color: white;
+          font-size: 28px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          cursor: pointer;
         }
         
         .dream-actions {
@@ -4555,7 +4566,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                             }}
                             style={{ display: undefined }}
                           >
-                            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                               <div
                                 className="camera-icon"
                                 onClick={(e) => {
@@ -4572,13 +4582,27 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                       } catch (error) {
                                         console.error('Storage upload failed, using base64 fallback:', error);
                                       }
+                                      // Verify the uploaded URL is actually accessible
+                                      if (imageUrl && !imageUrl.startsWith('data:')) {
+                                        const accessible = await new Promise<boolean>((resolve) => {
+                                          const testImg = new window.Image();
+                                          const timer = setTimeout(() => resolve(false), 5000);
+                                          testImg.onload = () => { clearTimeout(timer); resolve(true); };
+                                          testImg.onerror = () => { clearTimeout(timer); resolve(false); };
+                                          testImg.src = imageUrl!;
+                                        });
+                                        if (!accessible) {
+                                          console.warn('Uploaded image URL not accessible, falling back to base64:', imageUrl);
+                                          imageUrl = null;
+                                        }
+                                      }
                                       if (!imageUrl) {
                                         try {
                                           // Compress via canvas then convert to small base64
                                           imageUrl = await new Promise<string>((resolve, reject) => {
                                             const reader = new FileReader();
                                             reader.onload = () => {
-                                              const img = new Image();
+                                              const img = new window.Image();
                                               img.onload = () => {
                                                 const canvas = document.createElement('canvas');
                                                 const MAX = 800;
@@ -4626,16 +4650,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                               >+</div>
                               {dream.image && dream.image !== '/Default-dream.jpg' && (
                                 <div
-                                  className="camera-icon"
+                                  className="reposition-icon"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setRepositioningDreamId(dream.id);
                                   }}
-                                  style={{ fontSize: '28px' }}
                                   title={language === 'ko' ? '위치 조정' : 'Adjust position'}
                                 >&#8982;</div>
                               )}
-                            </div>
                           </div>
                         )}
                       </div>

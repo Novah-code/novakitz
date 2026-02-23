@@ -138,11 +138,9 @@ export default function PricingPage() {
     title: language === 'ko' ? '요금제' : 'Pricing',
     subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
     heroBlocks: language === 'ko' ? [
-      '아침은 늘 어수선합니다.\n생각은 흩어지고, 꿈은 사라집니다.\n\nNovakitz는 아침을\n조용한 리셋 루틴으로 만들어줍니다.',
       '비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 \'Yesterday\'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다.\n\n위대한 통찰은 종종\n우리가 잠든 사이 시작됩니다.',
       '단순한 꿈 일기가 아닙니다.\n매일 500단어 이상의\n칼 융 관점 심층 분석을 제공합니다.'
     ] : [
-      'Mornings are always chaotic.\nThoughts scatter, dreams fade.\n\nNovakitz turns your morning\ninto a quiet reset ritual.',
       'Paul McCartney composed \'Yesterday\' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas.\n\nGreat insights often begin\nwhile we sleep.',
       'This is not a simple dream diary.\nWe provide 500+ word\nin-depth Jungian analysis every day.'
     ],
@@ -362,6 +360,46 @@ export default function PricingPage() {
           </h1>
         </div>
 
+        {/* Hero Copy Blocks */}
+        <div style={{
+          background: 'white',
+          borderRadius: '24px',
+          padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)',
+          marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+          maxWidth: '680px',
+          margin: '0 auto clamp(1.5rem, 4vw, 2.5rem) auto',
+          textAlign: 'center' as const
+        }}>
+          {t.heroBlocks.map((block: string, idx: number) => (
+            <div key={idx} style={{
+              marginBottom: idx === t.heroBlocks.length - 1 ? '0' : '1.25rem',
+              padding: '0'
+            }}>
+              <p style={{
+                fontSize: idx === 1 ? '16px' : '15px',
+                color: idx === 1 ? '#1f2937' : '#4b5563',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-line',
+                fontWeight: idx === 1 ? '600' : 'normal',
+                fontStyle: idx === 0 ? 'italic' : 'normal',
+                margin: 0
+              }}>
+                {block}
+              </p>
+            </div>
+          ))}
+          <p style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#7FB069',
+            marginTop: '1.25rem',
+            marginBottom: '0'
+          }}>
+            {t.heroCTA}
+          </p>
+        </div>
+
         {/* Pricing Section Title */}
         <div style={{
           textAlign: 'center',
@@ -380,39 +418,6 @@ export default function PricingPage() {
             color: '#6b7280'
           }}>
             {t.subtitle}
-          </p>
-        </div>
-
-        {/* Hero Copy Blocks */}
-        <div style={{
-          maxWidth: '680px',
-          margin: '0 auto 3rem auto',
-          textAlign: 'center'
-        }}>
-          {t.heroBlocks.map((block: string, idx: number) => (
-            <div key={idx} style={{
-              marginBottom: '2.5rem',
-              padding: '0 1rem'
-            }}>
-              <p style={{
-                fontSize: idx === 2 ? '17px' : '16px',
-                color: idx === 2 ? '#1f2937' : '#4b5563',
-                lineHeight: '1.8',
-                whiteSpace: 'pre-line',
-                fontWeight: idx === 2 ? '600' : 'normal',
-                fontStyle: idx === 1 ? 'italic' : 'normal'
-              }}>
-                {block}
-              </p>
-            </div>
-          ))}
-          <p style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: '#7FB069',
-            marginBottom: '2rem'
-          }}>
-            {t.heroCTA}
           </p>
         </div>
 
