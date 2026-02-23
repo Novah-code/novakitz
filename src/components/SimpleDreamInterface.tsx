@@ -675,8 +675,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   useEffect(() => {
     const img1 = new Image();
     const img2 = new Image();
-    img1.src = '/matcha-frame1.jpg';
-    img2.src = '/matcha-frame2.jpg';
+    img1.src = '/matcha-frame1.png';
+    img2.src = '/matcha-frame2.png';
   }, []);
 
   // Reset page when history modal opens
@@ -5078,7 +5078,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       }}>
                         <div
                           style={{
-                            backgroundImage: 'url(/matcha-frame1.jpg?v=8)',
+                            backgroundImage: 'url(/matcha-frame1.png?v=8)',
                             backgroundSize: 'contain',
                             backgroundRepeat: 'no-repeat',
                             backgroundPosition: 'center',
