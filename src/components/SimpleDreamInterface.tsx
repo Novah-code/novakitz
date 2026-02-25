@@ -260,6 +260,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [repositioningDreamId, setRepositioningDreamId] = useState<string | null>(null);
+  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { mood: number; energy_level: number }>>({});
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // Extract background images from saved dreams
@@ -354,6 +355,24 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             });
             setSavedDreams(dreams);
             console.log('Loaded dreams from Supabase:', dreams.length);
+
+            // Load checkins for all dream dates
+            try {
+              const { data: checkinData } = await supabase
+                .from('checkins')
+                .select('check_date, time_of_day, mood, energy_level')
+                .eq('user_id', user.id)
+                .eq('time_of_day', 'morning');
+              if (checkinData) {
+                const map: Record<string, { mood: number; energy_level: number }> = {};
+                checkinData.forEach((c: any) => {
+                  map[c.check_date] = { mood: c.mood, energy_level: c.energy_level };
+                });
+                setCheckinsByDate(map);
+              }
+            } catch (e) {
+              console.error('Error loading checkins:', e);
+            }
           }
         } catch (error) {
           console.error('Exception loading from Supabase:', error);
@@ -4514,6 +4533,43 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           }
                         }}
                       >
+                        {/* Morning check-in strip */}
+                        {(() => {
+                          const checkinMoodColors = ['#E8D5D5','#F5E6D3','#F0EAD2','#D8E2DC','#D4E4D9'];
+                          let isoDate: string | null = null;
+                          try {
+                            const d = new Date(dream.date);
+                            if (!isNaN(d.getTime())) isoDate = d.toISOString().split('T')[0];
+                          } catch {}
+                          const checkin = isoDate ? checkinsByDate[isoDate] : null;
+                          if (!checkin) return null;
+                          const colorIdx = Math.min(Math.max((checkin.mood || 1) - 1, 0), 4);
+                          return (
+                            <div style={{
+                              position: 'absolute', top: 0, left: 0, right: 0,
+                              zIndex: 4,
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              padding: '5px 10px',
+                              background: 'rgba(0,0,0,0.30)',
+                              backdropFilter: 'blur(4px)',
+                            }}>
+                              <span style={{
+                                display: 'inline-block', width: '12px', height: '12px',
+                                borderRadius: '50%',
+                                background: checkinMoodColors[colorIdx],
+                                border: '1px solid rgba(255,255,255,0.6)',
+                                flexShrink: 0
+                              }} />
+                              <span style={{ fontSize: '11px', color: 'white', fontWeight: 600, letterSpacing: '0.02em' }}>
+                                {language === 'ko' ? '컬러' : 'Mood'} {checkin.mood}
+                              </span>
+                              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>·</span>
+                              <span style={{ fontSize: '11px', color: 'white', fontWeight: 600 }}>
+                                ⚡{checkin.energy_level}
+                              </span>
+                            </div>
+                          );
+                        })()}
                         {/* Reposition mode overlay */}
                         {repositioningDreamId === dream.id && (
                           <div
@@ -4582,23 +4638,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                       } catch (error) {
                                         console.error('Storage upload failed, using base64 fallback:', error);
                                       }
-                                      // Verify the uploaded URL is actually accessible
-                                      if (imageUrl && !imageUrl.startsWith('data:')) {
-                                        const accessible = await new Promise<boolean>((resolve) => {
-                                          const testImg = new window.Image();
-                                          const timer = setTimeout(() => resolve(false), 5000);
-                                          testImg.onload = () => { clearTimeout(timer); resolve(true); };
-                                          testImg.onerror = () => { clearTimeout(timer); resolve(false); };
-                                          testImg.src = imageUrl!;
-                                        });
-                                        if (!accessible) {
-                                          console.warn('Uploaded image URL not accessible, falling back to base64:', imageUrl);
-                                          imageUrl = null;
-                                        }
-                                      }
+                                      // If Supabase Storage upload failed, use base64 fallback
                                       if (!imageUrl) {
                                         try {
-                                          // Compress via canvas then convert to small base64
                                           imageUrl = await new Promise<string>((resolve, reject) => {
                                             const reader = new FileReader();
                                             reader.onload = () => {
@@ -4609,8 +4651,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                                 let w = img.width, h = img.height;
                                                 if (w > h) { if (w > MAX) { h = h * MAX / w; w = MAX; } }
                                                 else { if (h > MAX) { w = w * MAX / h; h = MAX; } }
-                                                canvas.width = w;
-                                                canvas.height = h;
+                                                canvas.width = w; canvas.height = h;
                                                 const ctx = canvas.getContext('2d');
                                                 if (!ctx) { reject(new Error('No canvas context')); return; }
                                                 ctx.drawImage(img, 0, 0, w, h);
@@ -4628,21 +4669,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                           return;
                                         }
                                       }
-                                      const updatedDreams = savedDreams.map(d =>
-                                        d.id === dream.id ? { ...d, image: imageUrl! } : d
-                                      );
-                                      setSavedDreams(updatedDreams);
-                                      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+                                      // Save to Supabase DB first to confirm persistence
                                       try {
                                         const { error } = await supabase
                                           .from('dreams')
                                           .update({ image: imageUrl })
                                           .eq('id', dream.id)
                                           .eq('user_id', user.id);
-                                        if (error) console.error('Error updating dream image in Supabase:', error);
+                                        if (error) {
+                                          console.error('Error updating dream image in Supabase:', error);
+                                          showToast(language === 'ko' ? '사진 저장에 실패했습니다. 다시 시도해주세요.' : 'Failed to save photo. Please try again.', 'error');
+                                          return;
+                                        }
                                       } catch (error) {
                                         console.error('Exception updating dream image:', error);
+                                        showToast(language === 'ko' ? '사진 저장에 실패했습니다. 다시 시도해주세요.' : 'Failed to save photo. Please try again.', 'error');
+                                        return;
                                       }
+                                      // Update local state only after Supabase confirms
+                                      const updatedDreams = savedDreams.map(d =>
+                                        d.id === dream.id ? { ...d, image: imageUrl! } : d
+                                      );
+                                      setSavedDreams(updatedDreams);
+                                      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
                                     }
                                   };
                                   input.click();
