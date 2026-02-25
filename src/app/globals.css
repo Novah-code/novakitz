@@ -21,15 +21,17 @@
 
 body {
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, 
-        #F7F3E9 0%, 
-        #E8F5E8 25%, 
-        #D4F4DD 50%, 
-        #C1E7C8 75%, 
-        #A8D5A8 100%);
+    background: #e8f5e8;
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
+}
+
+/* PWA standalone mode (installed on home screen) */
+@media (display-mode: standalone) {
+    body {
+        background: #e8f5e8 !important;
+    }
 }
 
 /* Glass effect styles */
