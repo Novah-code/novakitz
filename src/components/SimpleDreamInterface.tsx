@@ -353,8 +353,22 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                 userName: profileData?.full_name || 'Anonymous'
               };
             });
-            setSavedDreams(dreams);
-            console.log('Loaded dreams from Supabase:', dreams.length);
+            // Merge Supabase dreams with localStorage images for resilience
+            // (in case Supabase DB doesn't have image column or update failed)
+            let finalDreams = dreams;
+            const localDreamsStr = localStorage.getItem('novaDreams');
+            if (localDreamsStr) {
+              try {
+                const localDreams: DreamEntry[] = JSON.parse(localDreamsStr);
+                const localImagesMap: Record<string, string> = {};
+                localDreams.forEach((d) => { if (d.id && d.image) localImagesMap[d.id] = d.image; });
+                finalDreams = dreams.map(d => ({ ...d, image: d.image || localImagesMap[d.id] }));
+              } catch {}
+            }
+            setSavedDreams(finalDreams);
+            // Also update localStorage with merged data
+            localStorage.setItem('novaDreams', JSON.stringify(finalDreams));
+            console.log('Loaded dreams from Supabase:', finalDreams.length);
 
             // Load checkins for all dream dates
             try {
@@ -4533,43 +4547,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           }
                         }}
                       >
-                        {/* Morning check-in strip */}
-                        {(() => {
-                          const checkinMoodColors = ['#E8D5D5','#F5E6D3','#F0EAD2','#D8E2DC','#D4E4D9'];
-                          let isoDate: string | null = null;
-                          try {
-                            const d = new Date(dream.date);
-                            if (!isNaN(d.getTime())) isoDate = d.toISOString().split('T')[0];
-                          } catch {}
-                          const checkin = isoDate ? checkinsByDate[isoDate] : null;
-                          if (!checkin) return null;
-                          const colorIdx = Math.min(Math.max((checkin.mood || 1) - 1, 0), 4);
-                          return (
-                            <div style={{
-                              position: 'absolute', top: 0, left: 0, right: 0,
-                              zIndex: 4,
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                              padding: '5px 10px',
-                              background: 'rgba(0,0,0,0.30)',
-                              backdropFilter: 'blur(4px)',
-                            }}>
-                              <span style={{
-                                display: 'inline-block', width: '12px', height: '12px',
-                                borderRadius: '50%',
-                                background: checkinMoodColors[colorIdx],
-                                border: '1px solid rgba(255,255,255,0.6)',
-                                flexShrink: 0
-                              }} />
-                              <span style={{ fontSize: '11px', color: 'white', fontWeight: 600, letterSpacing: '0.02em' }}>
-                                {language === 'ko' ? '컬러' : 'Mood'} {checkin.mood}
-                              </span>
-                              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>·</span>
-                              <span style={{ fontSize: '11px', color: 'white', fontWeight: 600 }}>
-                                ⚡{checkin.energy_level}
-                              </span>
-                            </div>
-                          );
-                        })()}
                         {/* Reposition mode overlay */}
                         {repositioningDreamId === dream.id && (
                           <div
@@ -4669,7 +4646,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                           return;
                                         }
                                       }
-                                      // Save to Supabase DB first to confirm persistence
+                                      // Update local state immediately for instant UX
+                                      const updatedDreams = savedDreams.map(d =>
+                                        d.id === dream.id ? { ...d, image: imageUrl! } : d
+                                      );
+                                      setSavedDreams(updatedDreams);
+                                      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
+                                      // Also save to Supabase DB for persistence across devices/reloads
                                       try {
                                         const { error } = await supabase
                                           .from('dreams')
@@ -4677,21 +4660,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                                           .eq('id', dream.id)
                                           .eq('user_id', user.id);
                                         if (error) {
-                                          console.error('Error updating dream image in Supabase:', error);
-                                          showToast(language === 'ko' ? '사진 저장에 실패했습니다. 다시 시도해주세요.' : 'Failed to save photo. Please try again.', 'error');
-                                          return;
+                                          console.error('Supabase image update error:', error.message, error.details, error.hint);
+                                          showToast(language === 'ko' ? '사진이 저장됐어요 (로컬)' : 'Photo saved locally', 'success');
+                                        } else {
+                                          showToast(language === 'ko' ? '사진이 저장됐어요' : 'Photo saved', 'success');
                                         }
                                       } catch (error) {
-                                        console.error('Exception updating dream image:', error);
-                                        showToast(language === 'ko' ? '사진 저장에 실패했습니다. 다시 시도해주세요.' : 'Failed to save photo. Please try again.', 'error');
-                                        return;
+                                        console.error('Exception updating dream image in Supabase:', error);
                                       }
-                                      // Update local state only after Supabase confirms
-                                      const updatedDreams = savedDreams.map(d =>
-                                        d.id === dream.id ? { ...d, image: imageUrl! } : d
-                                      );
-                                      setSavedDreams(updatedDreams);
-                                      localStorage.setItem('novaDreams', JSON.stringify(updatedDreams));
                                     }
                                   };
                                   input.click();
@@ -5150,7 +5126,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 </div>
                 <div className="dream-detail-body">
                   {selectedDream.image && (
-                    <div className="dream-detail-image-container" style={{marginBottom: '20px'}}>
+                    <div className="dream-detail-image-container" style={{marginBottom: '20px', position: 'relative'}}>
                       <img
                         src={selectedDream.image}
                         alt="Dream visual"
@@ -5159,9 +5135,48 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           maxHeight: '200px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          cursor: 'default'
+                          cursor: 'default',
+                          display: 'block'
                         }}
                       />
+                      {/* Morning check-in strip on modal image */}
+                      {(() => {
+                        const checkinMoodColors = ['#E8D5D5','#F5E6D3','#F0EAD2','#D8E2DC','#D4E4D9'];
+                        let isoDate: string | null = null;
+                        try {
+                          const d = new Date(selectedDream.date);
+                          if (!isNaN(d.getTime())) isoDate = d.toISOString().split('T')[0];
+                        } catch {}
+                        const checkin = isoDate ? checkinsByDate[isoDate] : null;
+                        if (!checkin) return null;
+                        const colorIdx = Math.min(Math.max((checkin.mood || 1) - 1, 0), 4);
+                        return (
+                          <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0,
+                            zIndex: 4,
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '6px 12px',
+                            background: 'rgba(0,0,0,0.35)',
+                            backdropFilter: 'blur(4px)',
+                            borderRadius: '8px 8px 0 0',
+                          }}>
+                            <span style={{
+                              display: 'inline-block', width: '12px', height: '12px',
+                              borderRadius: '50%',
+                              background: checkinMoodColors[colorIdx],
+                              border: '1px solid rgba(255,255,255,0.6)',
+                              flexShrink: 0
+                            }} />
+                            <span style={{ fontSize: '11px', color: 'white', fontWeight: 600, letterSpacing: '0.02em' }}>
+                              {language === 'ko' ? '컬러' : 'Mood'} {checkin.mood}
+                            </span>
+                            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>·</span>
+                            <span style={{ fontSize: '11px', color: 'white', fontWeight: 600 }}>
+                              ⚡{checkin.energy_level}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                   <div className="dream-detail-content">
