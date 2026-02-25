@@ -83,23 +83,13 @@ html[lang="ko"] * {
 
 body {
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
-    background:
-        radial-gradient(ellipse at 20% 80%, rgba(127, 176, 105, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(168, 213, 168, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 40%, rgba(135, 169, 107, 0.04) 0%, transparent 50%),
-        linear-gradient(135deg,
-            #F7F3E9 0%,
-            #EEF6EE 25%,
-            #E4F2E4 50%,
-            #D8ECDA 75%,
-            #CCE6CC 100%);
+    background: #e8f5e8;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
     position: relative;
     padding-top: max(env(safe-area-inset-top), 20px) !important;
     padding-bottom: env(safe-area-inset-bottom);
-    background-attachment: fixed !important;
 }
 
 /* iOS Safari 전용 상태바 수정 */
@@ -117,16 +107,7 @@ html {
 /* PWA에서 상태바 배경 완전 매칭 */
 @media (display-mode: standalone) {
   html, body {
-    background:
-        radial-gradient(ellipse at 20% 80%, rgba(127, 176, 105, 0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(168, 213, 168, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 40% 40%, rgba(135, 169, 107, 0.04) 0%, transparent 50%),
-        linear-gradient(135deg,
-            #F7F3E9 0%,
-            #EEF6EE 25%,
-            #E4F2E4 50%,
-            #D8ECDA 75%,
-            #CCE6CC 100%) !important;
+    background: #e8f5e8 !important;
   }
 }
 
