@@ -83,7 +83,7 @@ html[lang="ko"] * {
 
 body {
     font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #e8f5e8;
+    background: #e8f5e8 !important;
     min-height: 100vh;
     min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
@@ -101,7 +101,7 @@ body {
 
 /* 상태바 영역 배경색 강제 적용 */
 html {
-  background: #F7F3E9 !important;
+  background: #e8f5e8 !important;
 }
 
 /* PWA에서 상태바 배경 완전 매칭 */

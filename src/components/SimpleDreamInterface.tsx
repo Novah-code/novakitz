@@ -2067,9 +2067,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       <div style={{ position: 'relative', zIndex: 1 }}>
       <style jsx global>{`
+        html, body {
+          background: #e8f5e8 !important;
+        }
         body {
           font-family: ${language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
-          background: #e8f5e8;
           color: #1f2937;
           overflow-x: hidden;
         }
