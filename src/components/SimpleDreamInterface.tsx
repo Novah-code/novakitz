@@ -5757,7 +5757,29 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             width: '100%',
             maxHeight: '90vh',
             overflow: 'auto',
+            position: 'relative',
           }}>
+            <button
+              onClick={() => setShowQuickArchetypeQuiz(false)}
+              style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                zIndex: 1,
+                background: 'rgba(255,255,255,0.9)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                fontSize: '20px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                lineHeight: 1,
+                color: '#6b7280',
+              }}
+            >×</button>
             <div style={{
               background: 'white',
               borderRadius: '16px',
@@ -5777,6 +5799,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               language={language}
               onComplete={handleQuizComplete}
               onSkip={handleQuizSkip}
+              onClose={() => setShowQuickArchetypeQuiz(false)}
             />
           </div>
         </div>

@@ -22,13 +22,15 @@ interface QuickArchetypeQuizProps {
     confidence: 'low' | 'medium' | 'high';
   }) => void;
   onSkip?: () => void;
+  onClose?: () => void;
 }
 
 export default function QuickArchetypeQuiz({
   dreamText,
   language,
   onComplete,
-  onSkip
+  onSkip,
+  onClose
 }: QuickArchetypeQuizProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -203,6 +205,26 @@ export default function QuickArchetypeQuiz({
             ))}
           </div>
         </div>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              marginTop: '1rem',
+              width: '100%',
+              padding: '14px',
+              background: 'rgba(255,255,255,0.9)',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1f2937',
+              cursor: 'pointer',
+            }}
+          >
+            {language === 'ko' ? '닫기' : 'Close'}
+          </button>
+        )}
 
         <style jsx>{`
           @keyframes fadeIn {
