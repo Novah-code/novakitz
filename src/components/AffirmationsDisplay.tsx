@@ -173,7 +173,7 @@ export default function AffirmationsDisplay({
           {language === 'ko' ? `${timeLabel} 확언` : `${timeLabel} Affirmation`}
         </h3>
 
-        {isPremium && affirmations.length > 1 && (
+        {affirmations.length > 1 && (
           <span style={{
             fontSize: '12px',
             color: '#6b7280',
@@ -219,7 +219,7 @@ export default function AffirmationsDisplay({
           display: 'flex',
           gap: '8px'
         }}>
-          {isPremium && affirmations.length > 1 && (
+          {affirmations.length > 1 && (
             <>
               <button
                 onClick={handlePrev}

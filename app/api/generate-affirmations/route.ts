@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     // Get user's plan to determine number of affirmations
     const plan = await getUserPlan(userId);
-    affirmationCount = plan.planSlug === 'premium' ? 3 : 1;
+    affirmationCount = 3;
     console.log('🔍 [API] Affirmation generation - User plan:', {
       userId,
       fullPlanObject: plan,
