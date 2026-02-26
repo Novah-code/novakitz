@@ -66,39 +66,6 @@ export default function DreamBackgroundGallery({
           }
         }
 
-        @keyframes noiseAnimation {
-          0%, 100% {
-            transform: translate(0, 0);
-          }
-          10% {
-            transform: translate(-5%, -5%);
-          }
-          20% {
-            transform: translate(-10%, 5%);
-          }
-          30% {
-            transform: translate(5%, -10%);
-          }
-          40% {
-            transform: translate(-5%, 15%);
-          }
-          50% {
-            transform: translate(-10%, 5%);
-          }
-          60% {
-            transform: translate(15%, 0%);
-          }
-          70% {
-            transform: translate(0%, 10%);
-          }
-          80% {
-            transform: translate(-15%, 0%);
-          }
-          90% {
-            transform: translate(10%, 5%);
-          }
-        }
-
         .dream-background-container {
           position: fixed;
           top: 0;
@@ -152,46 +119,6 @@ export default function DreamBackgroundGallery({
         .dream-background-item:nth-child(11) { animation-delay: -20s; }
         .dream-background-item:nth-child(12) { animation-delay: -22s; }
 
-        .noise-overlay {
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background-image:
-            repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(255, 255, 255, ${noiseIntensity * 0.05}) 2px,
-              rgba(255, 255, 255, ${noiseIntensity * 0.05}) 4px
-            ),
-            repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 2px,
-              rgba(0, 0, 0, ${noiseIntensity * 0.05}) 2px,
-              rgba(0, 0, 0, ${noiseIntensity * 0.05}) 4px
-            );
-          opacity: ${noiseIntensity};
-          animation: noiseAnimation 8s steps(10) infinite;
-          pointer-events: none;
-        }
-
-        .gradient-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: radial-gradient(
-            circle at center,
-            transparent 0%,
-            rgba(0, 0, 0, 0.3) 100%
-          );
-          pointer-events: none;
-        }
-
         @media (max-width: 768px) {
           .dream-background-grid {
             grid-template-columns: repeat(3, 1fr);
@@ -222,11 +149,6 @@ export default function DreamBackgroundGallery({
           ))}
         </div>
 
-        {/* Noise overlay */}
-        <div className="noise-overlay" />
-
-        {/* Gradient vignette */}
-        <div className="gradient-overlay" />
       </div>
     </>
   );
