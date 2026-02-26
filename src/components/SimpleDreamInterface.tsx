@@ -765,7 +765,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
 
     // Upload image to Supabase Storage if present
-    let imageUrl = '/Default-dream.jpg';
+    let imageUrl: string | undefined = undefined;
     const dreamId = providedDreamId || Date.now().toString();
 
     if (dreamImage && user) {
@@ -775,8 +775,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         console.log('Image uploaded successfully:', imageUrl);
       } catch (error) {
         console.error('Failed to upload image:', error);
-        // Fall back to default image if upload fails
-        imageUrl = '/Default-dream.jpg';
+        imageUrl = undefined;
       }
     }
 
