@@ -46,7 +46,7 @@ export default function GuestDreamRecording() {
           .select('id, content, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
-          .limit(10);
+          .limit(5);
 
         if (!error && dreams) {
           setPreviousDreams(dreams);
@@ -61,7 +61,8 @@ export default function GuestDreamRecording() {
   };
 
   const handleSelectPreviousDream = (dream: Dream) => {
-    setDreamText(dream.content);
+    const dreamOnly = dream.content.split('\n\n---\n\nAnalysis:')[0].split('\n\n---\n\n분석:')[0];
+    setDreamText(dreamOnly);
     setShowPreviousDreams(false);
   };
 
@@ -294,7 +295,7 @@ export default function GuestDreamRecording() {
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical'
                       }}>
-                        {dream.content}
+                        {dream.content.split('\n\n---\n\nAnalysis:')[0].split('\n\n---\n\n분석:')[0]}
                       </div>
                     </button>
                   ))}

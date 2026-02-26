@@ -116,27 +116,44 @@ export default function UnconsciousProfilePage() {
           width: '100%',
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: '60px', marginBottom: '1rem' }}>📊</div>
+          <div style={{ fontSize: '60px', marginBottom: '1rem' }}>🔮</div>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '1rem' }}>
-            프로파일이 아직 없습니다
+            아키타입 프로파일이 없습니다
           </h1>
           <p style={{ fontSize: '16px', color: '#6b7280', lineHeight: '1.6', marginBottom: '2rem' }}>
-            {error}
+            아키타입 테스트를 완료하면 나만의 무의식 프로파일이 생성됩니다.
           </p>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/archetype-test')}
             style={{
               padding: '12px 24px',
-              background: '#7FB069',
+              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: '600',
               cursor: 'pointer',
+              marginBottom: '1rem',
+              width: '100%',
             }}
           >
-            꿈 기록하러 가기
+            아키타입 테스트 시작하기
+          </button>
+          <button
+            onClick={() => router.push('/')}
+            style={{
+              padding: '12px 24px',
+              background: 'transparent',
+              color: '#9ca3af',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              width: '100%',
+            }}
+          >
+            홈으로 돌아가기
           </button>
         </div>
       </div>
