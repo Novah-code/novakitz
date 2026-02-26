@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     google: 'SvyOB5oGhTT8D7TUzeOLkpMP2s04Jg0DIkXb66GgHQo',
   },
   title: {
-    default: "Novakitz - AI Dream Journal & Jungian Analysis | 꿈 해석 다이어리",
+    default: "Novakitz",
     template: "%s | Novakitz"
   },
   description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track your dreams, uncover archetypes, and receive personalized daily affirmations. 무의식 탐험과 AI 꿈 분석으로 자기 성장을 경험하세요.",
