@@ -130,17 +130,29 @@ echo "------------------------"
 
 GITIGNORE_ISSUES=0
 
-if git check-ignore .env.local .env.production .env.development > /dev/null 2>&1; then
-  echo -e "${GREEN}✅ .env 파일들이 .gitignore에 포함되어 있습니다${NC}"
+# CI/CD 환경(git 저장소 없음)에서는 .gitignore 파일을 직접 확인
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  # 로컬 git 환경
+  if git check-ignore .env.local .env.production .env.development > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ .env 파일들이 .gitignore에 포함되어 있습니다${NC}"
+  else
+    echo -e "${RED}❌ .env 파일이 .gitignore에 없습니다!${NC}"
+    GITIGNORE_ISSUES=$((GITIGNORE_ISSUES + 1))
+  fi
+  if git check-ignore ".secrets" "secrets/" "*.key" "*.pem" > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ 보안 파일들이 .gitignore에 포함되어 있습니다${NC}"
+  else
+    echo -e "${YELLOW}⚠️  경고: 일부 보안 파일 패턴이 .gitignore에 없을 수 있습니다${NC}"
+  fi
 else
-  echo -e "${RED}❌ .env 파일이 .gitignore에 없습니다!${NC}"
-  GITIGNORE_ISSUES=$((GITIGNORE_ISSUES + 1))
-fi
-
-if git check-ignore ".secrets" "secrets/" "*.key" "*.pem" > /dev/null 2>&1; then
-  echo -e "${GREEN}✅ 보안 파일들이 .gitignore에 포함되어 있습니다${NC}"
-else
-  echo -e "${YELLOW}⚠️  경고: 일부 보안 파일 패턴이 .gitignore에 없을 수 있습니다${NC}"
+  # CI/CD 환경 (Vercel 등) - .gitignore 파일 직접 확인
+  echo -e "${YELLOW}⚠️  CI/CD 환경 감지. .gitignore 파일 직접 확인합니다.${NC}"
+  if [ -f .gitignore ] && grep -qE "^\.env" .gitignore; then
+    echo -e "${GREEN}✅ .env 파일들이 .gitignore에 포함되어 있습니다${NC}"
+  else
+    echo -e "${RED}❌ .env 파일이 .gitignore에 없습니다!${NC}"
+    GITIGNORE_ISSUES=$((GITIGNORE_ISSUES + 1))
+  fi
 fi
 
 ISSUES_FOUND=$((ISSUES_FOUND + GITIGNORE_ISSUES))
