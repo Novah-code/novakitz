@@ -163,7 +163,7 @@ export default function PricingPage() {
       },
       {
         icon: '🧠',
-        title: '해소되지 않은 감정은 독이 됩니다',
+        title: '말하지 못한 감정을, 꿈은 이미 알고 있습니다.',
         description: '원인 모를 이유로 불안하거나 우울한 적이 있으신가요? 처리되지 못한 감정은 무의식에 쌓이고, 꿈을 통해 계속 신호를 보내요. 꿈을 기록하고 의식화하는 것만으로도 감정은 인식되고 해소됩니다.'
       }
     ] : [
@@ -179,7 +179,7 @@ export default function PricingPage() {
       },
       {
         icon: '🧠',
-        title: 'Unprocessed emotions become poison',
+        title: 'What you feel but can\'t say, your dreams already know.',
         description: 'Feeling anxious or depressed for no reason? Dreams are signals from unresolved emotions. Ignore them and they follow you. Just recording and reflecting on dreams releases inner blockages.'
       }
     ],
