@@ -425,9 +425,10 @@ export default function SimpleDreamInterfaceWithAuth() {
           position: 'fixed',
           top: '20px',
           right: '20px',
-          background: 'rgba(255, 255, 255, 0.9)',
-          backdropFilter: 'blur(10px)',
-          border: 'none',
+          background: 'rgba(255, 255, 255, 0.25)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
           borderRadius: '12px',
           cursor: 'pointer',
           padding: '12px',
@@ -436,7 +437,7 @@ export default function SimpleDreamInterfaceWithAuth() {
           gap: '5px',
           transition: 'all 0.3s',
           zIndex: 10000,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)'
         }}
         aria-label="Menu"
       >
@@ -491,9 +492,12 @@ export default function SimpleDreamInterfaceWithAuth() {
             right: 0,
             width: 'min(280px, 80vw)',
             height: '100vh',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '-2px 0 20px rgba(0,0,0,0.1)',
+            background: 'rgba(240, 248, 240, 0.45)',
+            backdropFilter: 'blur(40px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+            border: '1px solid rgba(255, 255, 255, 0.5)',
+            borderRight: 'none',
+            boxShadow: '-4px 0 40px rgba(0,0,0,0.12), inset 1px 0 0 rgba(255,255,255,0.6)',
             zIndex: 9999,
             padding: '0',
             fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
