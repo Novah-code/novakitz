@@ -271,6 +271,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [remainingAIUsage, setRemainingAIUsage] = useState({ used: 0, limit: 7, remaining: 7, isUnlimited: false });
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
   const [lastSavedDreamId, setLastSavedDreamId] = useState<string>('');
+  const [lastSavedDreamText, setLastSavedDreamText] = useState<string>('');
   const [carouselDreamIndex, setCarouselDreamIndex] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [showSearchFilter, setShowSearchFilter] = useState(false);
@@ -1652,6 +1653,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
         setDreamResponse(offlineMessage);
         saveDreamWithTags(dreamText, offlineMessage, []); // Save without analysis
+        setLastSavedDreamText(dreamText);
         setDreamText(''); // Reset dream text
         setDreamTitle(''); // Reset dream title
         setDreamDate(new Date()); // Reset dream date
@@ -1674,6 +1676,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             ? '한도 초과로 인해 AI 분석 없이 저장되었습니다.'
             : 'Saved without AI analysis due to limit exceeded.';
           saveDreamWithTags(dreamText, noAnalysisMsg, []);
+          setLastSavedDreamText(dreamText);
           setDreamText('');
           setDreamTitle('');
           setDreamDate(new Date());
@@ -1710,6 +1713,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       // Affirmations will be automatically generated and shown in the Today's Affirmation section
       console.log('✨ [AFFIRMATION] Dream saved - affirmations will be generated in Today\'s Affirmation section');
 
+      setLastSavedDreamText(dreamText);
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamDate(new Date()); // Reset dream date
@@ -1723,6 +1727,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       setDreamResponse(errorMessage);
       saveDreamWithTags(dreamText, `Analysis unavailable: ${errorMessage}`, []); // Save the dream even on error
+      setLastSavedDreamText(dreamText);
       setDreamText(''); // Reset dream text
       setDreamTitle(''); // Reset dream title
       setDreamDate(new Date()); // Reset dream date
@@ -4383,7 +4388,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         userId={user.id}
                         language={language || 'en'}
                         timeOfDay="morning"
-                        dreamText={dreamText}
+                        dreamText={lastSavedDreamText || dreamText}
                         dreamId={lastSavedDreamId}
                         isPremium={isPremium}
                       />
@@ -4391,7 +4396,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         userId={user.id}
                         language={language || 'en'}
                         timeOfDay="evening"
-                        dreamText={dreamText}
+                        dreamText={lastSavedDreamText || dreamText}
                         dreamId={lastSavedDreamId}
                         isPremium={isPremium}
                       />

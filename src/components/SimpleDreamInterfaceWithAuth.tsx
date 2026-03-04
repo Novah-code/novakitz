@@ -479,9 +479,8 @@ export default function SimpleDreamInterfaceWithAuth() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'rgba(0, 0, 0, 0.3)',
-              zIndex: 9998,
-              backdropFilter: 'blur(2px)'
+              background: 'rgba(0, 0, 0, 0.15)',
+              zIndex: 9998
             }}
           />
 
@@ -492,12 +491,11 @@ export default function SimpleDreamInterfaceWithAuth() {
             right: 0,
             width: 'min(280px, 80vw)',
             height: '100vh',
-            background: 'rgba(240, 248, 240, 0.45)',
-            backdropFilter: 'blur(40px) saturate(200%)',
-            WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-            border: '1px solid rgba(255, 255, 255, 0.5)',
-            borderRight: 'none',
-            boxShadow: '-4px 0 40px rgba(0,0,0,0.12), inset 1px 0 0 rgba(255,255,255,0.6)',
+            background: 'rgba(245, 252, 245, 0.88)',
+            backdropFilter: 'blur(30px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+            borderLeft: '1px solid rgba(200, 230, 200, 0.6)',
+            boxShadow: '-8px 0 32px rgba(0,0,0,0.10)',
             zIndex: 9999,
             padding: '0',
             fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
