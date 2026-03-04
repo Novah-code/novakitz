@@ -326,6 +326,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
           borderRadius: '12px',
           width: '100%',
           maxWidth: '800px',
+          height: '560px',
           maxHeight: '90vh',
           overflow: 'hidden',
           display: 'flex',
