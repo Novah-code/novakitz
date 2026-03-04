@@ -320,6 +320,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
       onClick={onClose}
     >
       <div
+        className="profile-settings-modal"
         style={{
           background: 'white',
           borderRadius: '12px',
@@ -333,7 +334,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         onClick={(e) => e.stopPropagation()}
       >
         {/* Sidebar */}
-        <div style={{
+        <div className="profile-settings-sidebar" style={{
           width: '240px',
           background: '#fafafa',
           padding: '24px',
@@ -342,7 +343,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
           flexDirection: 'column',
         }}>
           {/* Profile Photo */}
-          <div style={{
+          <div className="profile-sidebar-photo" style={{
             position: 'relative',
             width: '100px',
             height: '100px',
@@ -392,7 +393,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
           </div>
 
           {/* Username Display */}
-          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+          <div className="profile-sidebar-username" style={{ textAlign: 'center', marginBottom: '8px' }}>
             <p style={{
               fontSize: '16px',
               fontWeight: '600',
@@ -422,7 +423,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
           )}
 
           {/* Navigation */}
-          <nav style={{ flex: 1 }}>
+          <nav className="profile-sidebar-nav" style={{ flex: 1 }}>
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -460,6 +461,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
 
           {/* Sign Out Button */}
           <button
+            className="profile-sidebar-signout"
             onClick={handleLogout}
             style={{
               width: '100%',
@@ -496,7 +498,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         </div>
 
         {/* Main Content */}
-        <div style={{
+        <div className="profile-content" style={{
           flex: 1,
           padding: '24px 32px',
           overflowY: 'auto',
@@ -992,12 +994,49 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         @media (max-width: 640px) {
           .profile-settings-modal {
             flex-direction: column !important;
+            max-height: 92vh !important;
+            border-radius: 20px !important;
           }
           .profile-settings-sidebar {
             width: 100% !important;
+            min-width: 0 !important;
             border-right: none !important;
-            border-bottom: 1px solid #eee !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            padding: 12px 12px 8px !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+          }
+          .profile-sidebar-photo {
+            display: none !important;
+          }
+          .profile-sidebar-username {
+            display: none !important;
+          }
+          .profile-sidebar-signout {
+            display: none !important;
+          }
+          .profile-sidebar-nav {
+            flex-direction: row !important;
+            flex: 1 !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 4px !important;
+            scrollbar-width: none !important;
+          }
+          .profile-sidebar-nav::-webkit-scrollbar {
+            display: none !important;
+          }
+          .profile-sidebar-nav button {
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            padding: 8px 14px !important;
+            font-size: 14px !important;
+            margin-bottom: 0 !important;
+          }
+          .profile-content {
             padding: 16px !important;
+            overflow-y: auto !important;
           }
         }
       `}</style>
