@@ -610,8 +610,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -622,17 +622,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -656,8 +656,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -668,17 +668,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -695,8 +695,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -707,17 +707,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -736,8 +736,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -748,17 +748,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -775,8 +775,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -787,17 +787,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -817,8 +817,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -829,17 +829,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -858,8 +858,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -870,17 +870,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -896,8 +896,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.55)',
-                  border: '1px solid rgba(210, 235, 210, 0.7)',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
                   cursor: 'pointer',
@@ -908,17 +908,17 @@ export default function SimpleDreamInterfaceWithAuth() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '1rem',
-                  margin: '4px 12px',
+                  margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 4px rgba(127, 176, 105, 0.08)'
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.15)';
+                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.55)';
-                  e.currentTarget.style.boxShadow = '0 1px 4px rgba(127, 176, 105, 0.08)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -932,14 +932,11 @@ export default function SimpleDreamInterfaceWithAuth() {
               {/* Subscription Status Section - Only show for free users */}
               {!isPremium && !isLifetime && (
                 <div style={{
-                  margin: '0.5rem 0',
-                  padding: '1rem 0',
-                  background: 'linear-gradient(135deg, rgba(200, 200, 200, 0.15) 0%, rgba(220, 220, 220, 0.1) 100%)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  borderTop: '1px solid rgba(180, 180, 180, 0.3)',
-                  borderBottom: '1px solid rgba(180, 180, 180, 0.3)',
-                  boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.2)'
+                  margin: '4px 12px',
+                  padding: '0.5rem 0',
+                  background: 'rgba(255, 255, 255, 0.32)',
+                  borderRadius: '12px',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
                 }}>
                   <button
                     onClick={() => {
@@ -1083,8 +1080,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                      color: 'white',
+                      background: 'rgba(127, 176, 105, 0.18)',
+                      color: 'var(--matcha-dark)',
                       border: 'none',
                       borderRadius: '12px',
                       fontSize: '1rem',
@@ -1097,12 +1094,10 @@ export default function SimpleDreamInterfaceWithAuth() {
                       transition: 'all 0.2s'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.4)';
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.28)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'none';
+                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.18)';
                     }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
