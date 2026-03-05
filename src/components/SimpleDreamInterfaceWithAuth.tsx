@@ -525,7 +525,6 @@ export default function SimpleDreamInterfaceWithAuth() {
               {/* AI Usage Widget - Top of Menu */}
               <div style={{
                 padding: '1rem 1rem',
-                borderBottom: '1px solid rgba(127, 176, 105, 0.1)',
                 flexShrink: 0
               }}>
                 {user ? (
@@ -1110,12 +1109,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </div>
               )}
 
-              {/* Divider */}
-              <div style={{
-                height: '1px',
-                background: 'rgba(127, 176, 105, 0.2)',
-                margin: '1rem 0'
-              }}></div>
+              {/* Divider removed */}
 
               {/* Social Media Links */}
               <div style={{
