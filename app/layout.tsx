@@ -138,6 +138,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
+        <link rel="dns-prefetch" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
+        <link rel="preconnect" href="https://generativelanguage.googleapis.com" />
         <link rel="icon" href="/favicon.ico?v=5" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico?v=5" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=5" />

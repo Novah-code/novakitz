@@ -82,13 +82,11 @@ export default function SimpleDreamInterfaceWithAuth() {
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
-      // Shorter timeout - 5 seconds max
-      // Default to false on timeout (show profile form) for new users
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
           console.warn('Profile query timeout - returning false (show profile form)');
-          resolve(false); // Return false on timeout to show profile form
-        }, 5000);
+          resolve(false);
+        }, 3000);
       });
 
       const queryPromise = (async (): Promise<boolean> => {
@@ -160,7 +158,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             setLoading(false);
             setCheckingProfile(false);
             resolve();
-          }, 10000);
+          }, 5000);
         });
 
         const initPromise = (async () => {
@@ -385,18 +383,35 @@ export default function SimpleDreamInterfaceWithAuth() {
   if (loading) {
     return (
       <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh'
+        minHeight: '100vh',
+        padding: '24px 20px',
+        maxWidth: '480px',
+        margin: '0 auto'
       }}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{
-            fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
-            color: 'var(--matcha-dark)',
-            fontSize: '1.1rem'
-          }}>{t.loading}</p>
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+          }
+          .skeleton {
+            background: linear-gradient(90deg, rgba(127,176,105,0.08) 25%, rgba(127,176,105,0.15) 50%, rgba(127,176,105,0.08) 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 8px;
+          }
+        `}</style>
+        {/* Header skeleton */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
+          <div className="skeleton" style={{ width: 44, height: 44, borderRadius: 12 }} />
         </div>
+        {/* Title skeleton */}
+        <div className="skeleton" style={{ width: '60%', height: 28, marginBottom: 8 }} />
+        <div className="skeleton" style={{ width: '40%', height: 18, marginBottom: 32 }} />
+        {/* Textarea skeleton */}
+        <div className="skeleton" style={{ width: '100%', height: 160, marginBottom: 16, borderRadius: 12 }} />
+        {/* Button skeleton */}
+        <div className="skeleton" style={{ width: '100%', height: 48, borderRadius: 12, marginBottom: 12 }} />
+        <div className="skeleton" style={{ width: '100%', height: 48, borderRadius: 12 }} />
       </div>
     );
   }
