@@ -4384,22 +4384,26 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                       gap: '12px'
                     }}>
-                      <DailyCheckin
-                        userId={user.id}
-                        language={language || 'en'}
-                        timeOfDay="morning"
-                        dreamText={lastSavedDreamText || dreamText}
-                        dreamId={lastSavedDreamId}
-                        isPremium={isPremium}
-                      />
-                      <DailyCheckin
-                        userId={user.id}
-                        language={language || 'en'}
-                        timeOfDay="evening"
-                        dreamText={lastSavedDreamText || dreamText}
-                        dreamId={lastSavedDreamId}
-                        isPremium={isPremium}
-                      />
+                      <div>
+                        <DailyCheckin
+                          userId={user.id}
+                          language={language || 'en'}
+                          timeOfDay="morning"
+                          dreamText={lastSavedDreamText || dreamText}
+                          dreamId={lastSavedDreamId}
+                          isPremium={isPremium}
+                        />
+                      </div>
+                      <div>
+                        <DailyCheckin
+                          userId={user.id}
+                          language={language || 'en'}
+                          timeOfDay="evening"
+                          dreamText={lastSavedDreamText || dreamText}
+                          dreamId={lastSavedDreamId}
+                          isPremium={isPremium}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
