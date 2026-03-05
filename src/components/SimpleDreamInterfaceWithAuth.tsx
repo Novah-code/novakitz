@@ -610,7 +610,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -624,14 +624,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -656,7 +656,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -670,14 +670,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -695,7 +695,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -709,14 +709,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -736,7 +736,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -750,14 +750,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -775,7 +775,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 })}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -789,14 +789,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -817,7 +817,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -831,14 +831,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -858,7 +858,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -872,14 +872,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -896,7 +896,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                 }}
                 style={{
                   padding: '0.85rem 1.25rem',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   border: 'none',
                   borderRadius: '12px',
                   textAlign: 'left',
@@ -910,14 +910,14 @@ export default function SimpleDreamInterfaceWithAuth() {
                   gap: '1rem',
                   margin: '3px 12px',
                   width: 'calc(100% - 24px)',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
                   e.currentTarget.style.boxShadow = '0 2px 6px rgba(127, 176, 105, 0.12)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.32)';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
                   e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.04)';
                 }}
               >
@@ -934,9 +934,9 @@ export default function SimpleDreamInterfaceWithAuth() {
                 <div style={{
                   margin: '4px 12px',
                   padding: '0.5rem 0',
-                  background: 'rgba(255, 255, 255, 0.32)',
+                  background: 'rgba(255, 255, 255, 0.12)',
                   borderRadius: '12px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+                  boxShadow: 'none'
                 }}>
                   <button
                     onClick={() => {
