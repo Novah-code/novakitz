@@ -93,6 +93,14 @@ export async function saveAffirmations(
       updated_at: new Date().toISOString()
     }));
 
+    // Delete existing affirmations for this time slot first (prevent duplicates)
+    await supabase
+      .from('affirmations')
+      .delete()
+      .eq('user_id', userId)
+      .eq('date', date)
+      .eq('check_in_time', checkInTime);
+
     const { error } = await supabase
       .from('affirmations')
       .insert(affirmationRecords);
