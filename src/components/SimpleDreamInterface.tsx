@@ -4488,10 +4488,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       {language === 'ko' ? '기록된 꿈이 없습니다.' : 'No dreams recorded yet.'}
                     </p>
                   ) : filteredDreams.map((dream) => {
-                    const dateStr = ('date' in dream && dream.date)
-                      ? dream.date
-                      : dream.created_at
-                        ? new Date(dream.created_at).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                    const dreamAny = dream as any;
+                    const dateStr = dreamAny.date
+                      ? dreamAny.date
+                      : dreamAny.created_at
+                        ? new Date(dreamAny.created_at).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
                         : '';
                     return (
                       <div
