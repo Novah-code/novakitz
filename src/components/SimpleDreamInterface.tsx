@@ -215,6 +215,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [dreamDate, setDreamDate] = useState<Date>(new Date());
   const [savedDreams, setSavedDreams] = useState<DreamEntry[]>([]);
   const [showHistory, setShowHistory] = useState(initialShowHistory);
+  const [showDailyRituals, setShowDailyRituals] = useState(true);
   const [selectedDream, setSelectedDream] = useState<DreamEntry | null>(null);
   const [dreamsFromSelectedDate, setDreamsFromSelectedDate] = useState<DreamEntry[]>([]);
   const [currentDreamIndex, setCurrentDreamIndex] = useState(0);
@@ -4349,7 +4350,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px', flexWrap: 'wrap'}}>
                       <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
                       <button onClick={() => {setViewMode('list' as any); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === ('list' as any) ? '#ffffff' : 'transparent', color: viewMode === ('list' as any) ? '#1f2937' : '#64748b', fontWeight: viewMode === ('list' as any) ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{language === 'ko' ? '목록' : 'List'}</button>
-                      <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
                       <button onClick={() => {setViewMode('timeline'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'timeline' ? '#ffffff' : 'transparent', color: viewMode === 'timeline' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'timeline' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.timeline}</button>
                     </div>
                   </div>
@@ -4358,21 +4358,31 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
               {/* Daily Rituals Section */}
               <div style={{
-                padding: '20px 24px',
+                padding: showDailyRituals ? '20px 24px' : '12px 24px',
                 borderTop: '1px solid #e5e7eb',
                 borderBottom: '1px solid #e5e7eb',
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 250, 245, 0.3) 100%)'
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 250, 245, 0.3) 100%)',
+                transition: 'padding 0.2s'
               }}>
-                <h3 style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  color: '#1f2937',
-                  margin: '0 0 20px 0'
-                }}>
-                  {language === 'ko' ? '오늘의 확언' : 'Daily Affirmations & Reflection'}
-                </h3>
+                <div
+                  onClick={() => setShowDailyRituals(v => !v)}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    marginBottom: showDailyRituals ? '20px' : 0
+                  }}
+                >
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
+                    {language === 'ko' ? '오늘의 확언' : 'Daily Affirmations & Reflection'}
+                  </h3>
+                  <span style={{ fontSize: '18px', color: '#9ca3af', lineHeight: 1 }}>
+                    {showDailyRituals ? '∧' : '∨'}
+                  </span>
+                </div>
 
-                {user && (
+                {showDailyRituals && user && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Affirmations - full width above check-in buttons */}
                     <AffirmationsDisplay
