@@ -70,9 +70,8 @@ export default function AffirmationsDisplay({
               setCurrentIndex(0);
             }
           } else {
-            // Same language - use existing affirmations
+            // Same language - use existing affirmations (preserve current index)
             setAffirmations(existing);
-            setCurrentIndex(0);
           }
         } else if (dreamText) {
           // Generate new affirmations from dream
@@ -100,7 +99,7 @@ export default function AffirmationsDisplay({
     };
 
     loadAffirmations();
-  }, [user, checkInTime, dreamText, dreamId, language]);
+  }, [user?.id, checkInTime, dreamText, dreamId, language]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % affirmations.length);
@@ -239,31 +238,7 @@ export default function AffirmationsDisplay({
             </button>
           )}
 
-          {dreamText && (
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              style={{
-                padding: '8px 14px',
-                backgroundColor: 'rgba(127, 176, 105, 0.2)',
-                color: '#7fb069',
-                border: '1px solid rgba(127, 176, 105, 0.3)',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.5 : 1,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.3)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(127, 176, 105, 0.2)')}
-              title={language === 'ko' ? '새로운 확언 생성' : 'Generate new affirmations'}
-            >
-              {isLoading ? '...' : '↻'}
-            </button>
-          )}
-
-          {onClose && (
+{onClose && (
             <button
               onClick={onClose}
               style={{
