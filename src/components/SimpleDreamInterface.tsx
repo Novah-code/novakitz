@@ -4348,6 +4348,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                     <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px', flexWrap: 'wrap'}}>
                       <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
+                      <button onClick={() => {setViewMode('list' as any); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === ('list' as any) ? '#ffffff' : 'transparent', color: viewMode === ('list' as any) ? '#1f2937' : '#64748b', fontWeight: viewMode === ('list' as any) ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{language === 'ko' ? '목록' : 'List'}</button>
                       <button onClick={() => {setViewMode('calendar'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'calendar' ? '#ffffff' : 'transparent', color: viewMode === 'calendar' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'calendar' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>Calendar</button>
                       <button onClick={() => {setViewMode('timeline'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'timeline' ? '#ffffff' : 'transparent', color: viewMode === 'timeline' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'timeline' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.timeline}</button>
                     </div>
@@ -4376,7 +4377,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     {/* Affirmations - full width above check-in buttons */}
                     <AffirmationsDisplay
                       user={user}
-                      checkInTime="morning"
+                      checkInTime={new Date().getHours() < 12 ? 'morning' : 'evening'}
                       dreamText={lastSavedDreamText || dreamText}
                       dreamId={lastSavedDreamId}
                       language={language || 'en'}
@@ -4470,6 +4471,43 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   }}
                   language={language}
                 />
+              ) : viewMode === ('list' as any) ? (
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {filteredDreams.length === 0 ? (
+                    <p style={{ color: '#9ca3af', textAlign: 'center', padding: '32px 0' }}>
+                      {language === 'ko' ? '기록된 꿈이 없습니다.' : 'No dreams recorded yet.'}
+                    </p>
+                  ) : filteredDreams.map((dream) => {
+                    const dateStr = ('date' in dream && dream.date)
+                      ? dream.date
+                      : dream.created_at
+                        ? new Date(dream.created_at).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                        : '';
+                    return (
+                      <div
+                        key={dream.id}
+                        onClick={() => { setDreamsFromSelectedDate([]); setCurrentDreamIndex(0); setSelectedDream(dream as DreamEntry); }}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '14px 16px',
+                          borderBottom: '1px solid rgba(0,0,0,0.06)',
+                          cursor: 'pointer',
+                          borderRadius: '8px',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(127,176,105,0.07)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <span style={{ fontSize: '15px', color: '#1f2937', fontWeight: 500, flex: 1, marginRight: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {(dream as any).title || (language === 'ko' ? '제목 없음' : 'Untitled')}
+                        </span>
+                        <span style={{ fontSize: '13px', color: '#9ca3af', flexShrink: 0 }}>{dateStr}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
               <>
                 {/* Carousel Grid */}
