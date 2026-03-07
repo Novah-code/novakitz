@@ -181,27 +181,16 @@ export default function DailyCheckin({
           gap: '12px'
         }}>
           <span style={{ fontSize: '1.2rem' }}>✅</span>
-          <div>
-            <p style={{
-              margin: 0,
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              color: '#7FB069'
-            }}>
-              {language === 'ko'
-                ? `${timeLabels[timeOfDay]} 체크인 완료`
-                : `${timeLabels[timeOfDay]} check-in done`}
-            </p>
-            <p style={{
-              margin: '4px 0 0 0',
-              fontSize: '0.85rem',
-              color: 'rgba(0, 0, 0, 0.5)'
-            }}>
-              {language === 'ko'
-                ? '훌륭한 업데이트입니다!'
-                : 'Great update!'}
-            </p>
-          </div>
+          <p style={{
+            margin: 0,
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            color: '#7FB069'
+          }}>
+            {language === 'ko'
+              ? `${timeLabels[timeOfDay]} 체크인 완료`
+              : `${timeLabels[timeOfDay]} check-in done`}
+          </p>
         </div>
       </div>
     );
