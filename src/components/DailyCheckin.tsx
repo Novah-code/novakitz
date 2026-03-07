@@ -21,6 +21,7 @@ interface DailyCheckinProps {
   dreamText?: string;
   dreamId?: string;
   isPremium?: boolean;
+  hideAffirmations?: boolean;
 }
 
 export default function DailyCheckin({
@@ -30,7 +31,8 @@ export default function DailyCheckin({
   onCheckInComplete,
   dreamText = '',
   dreamId,
-  isPremium = false
+  isPremium = false,
+  hideAffirmations = false
 }: DailyCheckinProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
@@ -208,7 +210,7 @@ export default function DailyCheckin({
   return (
     <>
       {/* Affirmations Display - Show for dreamText OR for existing affirmations (from No Dream) */}
-      {showAffirmations && (
+      {showAffirmations && !hideAffirmations && (
         <AffirmationsDisplay
           user={{ id: userId } as any}
           checkInTime={timeOfDay}

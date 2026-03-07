@@ -10,8 +10,8 @@ import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/ima
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
-import MorningRitual from './MorningRitual';
 import DailyCheckin from './DailyCheckin';
+import AffirmationsDisplay from './AffirmationsDisplay';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
@@ -4373,12 +4373,25 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
                 {user && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* Morning Ritual */}
-                    <div>
-                      <MorningRitual userId={user.id} language={language || 'en'} isPremium={isPremium} />
-                    </div>
+                    {/* Affirmations - full width above check-in buttons */}
+                    <AffirmationsDisplay
+                      user={user}
+                      checkInTime="morning"
+                      dreamText={lastSavedDreamText || dreamText}
+                      dreamId={lastSavedDreamId}
+                      language={language || 'en'}
+                      isPremium={isPremium}
+                    />
+                    <AffirmationsDisplay
+                      user={user}
+                      checkInTime="evening"
+                      dreamText={lastSavedDreamText || dreamText}
+                      dreamId={lastSavedDreamId}
+                      language={language || 'en'}
+                      isPremium={isPremium}
+                    />
 
-                    {/* Check-in Options */}
+                    {/* Check-in Buttons */}
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -4392,6 +4405,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           dreamText={lastSavedDreamText || dreamText}
                           dreamId={lastSavedDreamId}
                           isPremium={isPremium}
+                          hideAffirmations={true}
                         />
                       </div>
                       <div>
@@ -4402,6 +4416,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           dreamText={lastSavedDreamText || dreamText}
                           dreamId={lastSavedDreamId}
                           isPremium={isPremium}
+                          hideAffirmations={true}
                         />
                       </div>
                     </div>
