@@ -170,7 +170,7 @@ export default function AffirmationsDisplay({
           textTransform: 'uppercase',
           letterSpacing: '1px'
         }}>
-          {language === 'ko' ? `${timeLabel} 확언` : `${timeLabel} Affirmation`}
+          {language === 'ko' ? '확언' : 'Affirmation'}
         </h3>
 
         {affirmations.length > 1 && (
@@ -211,58 +211,32 @@ export default function AffirmationsDisplay({
       {/* Controls */}
       <div style={{
         display: 'flex',
-        gap: '8px',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        gap: '8px'
       }}>
-        <div style={{
-          display: 'flex',
-          gap: '8px'
-        }}>
+        {/* Left: Prev + Refresh */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {affirmations.length > 1 && (
-            <>
-              <button
-                onClick={handlePrev}
-                disabled={isLoading}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#6b7280',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
-                  opacity: isLoading ? 0.5 : 1,
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-              >
-                {language === 'ko' ? '이전' : 'Previous'}
-              </button>
-
-              <button
-                onClick={handleNext}
-                disabled={isLoading || affirmations.length <= 1}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#f3f4f6',
-                  color: '#6b7280',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: (isLoading || affirmations.length <= 1) ? 'not-allowed' : 'pointer',
-                  opacity: (isLoading || affirmations.length <= 1) ? 0.5 : 1,
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-              >
-                {language === 'ko' ? '다음' : 'Next'}
-              </button>
-            </>
+            <button
+              onClick={handlePrev}
+              disabled={isLoading}
+              style={{
+                padding: '8px 14px',
+                backgroundColor: '#f3f4f6',
+                color: '#6b7280',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                opacity: isLoading ? 0.5 : 1,
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+            >
+              ‹
+            </button>
           )}
 
           {dreamText && (
@@ -270,7 +244,7 @@ export default function AffirmationsDisplay({
               onClick={handleRefresh}
               disabled={isLoading}
               style={{
-                padding: '8px 16px',
+                padding: '8px 14px',
                 backgroundColor: 'rgba(127, 176, 105, 0.2)',
                 color: '#7fb069',
                 border: '1px solid rgba(127, 176, 105, 0.3)',
@@ -288,28 +262,50 @@ export default function AffirmationsDisplay({
               {isLoading ? '...' : '↻'}
             </button>
           )}
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              style={{
+                padding: '8px 14px',
+                backgroundColor: '#f3f4f6',
+                color: '#6b7280',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
+              title={language === 'ko' ? '닫기' : 'Close'}
+            >
+              {language === 'ko' ? '닫기' : 'Close'}
+            </button>
+          )}
         </div>
 
-        {onClose && (
+        {/* Right: Next */}
+        {affirmations.length > 1 && (
           <button
-            onClick={onClose}
+            onClick={handleNext}
+            disabled={isLoading || affirmations.length <= 1}
             style={{
-              padding: '8px 16px',
+              padding: '8px 14px',
               backgroundColor: '#f3f4f6',
               color: '#6b7280',
               border: 'none',
               borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              marginLeft: 'auto'
+              fontSize: '16px',
+              cursor: (isLoading || affirmations.length <= 1) ? 'not-allowed' : 'pointer',
+              opacity: (isLoading || affirmations.length <= 1) ? 0.5 : 1,
+              transition: 'all 0.2s ease'
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
+            onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-            title={language === 'ko' ? '닫기' : 'Close'}
           >
-            {language === 'ko' ? '닫기' : 'Close'}
+            ›
           </button>
         )}
       </div>

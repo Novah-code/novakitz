@@ -4382,14 +4382,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       language={language || 'en'}
                       isPremium={isPremium}
                     />
-                    <AffirmationsDisplay
-                      user={user}
-                      checkInTime="evening"
-                      dreamText={lastSavedDreamText || dreamText}
-                      dreamId={lastSavedDreamId}
-                      language={language || 'en'}
-                      isPremium={isPremium}
-                    />
 
                     {/* Check-in Buttons */}
                     <div style={{
