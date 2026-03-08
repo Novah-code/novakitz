@@ -32,6 +32,28 @@ export default function AffirmationsDisplay({
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
+
+  // Load checked state from localStorage
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    const key = `novakitz_affirmation_checked_${user.id}_${today}`;
+    const saved = localStorage.getItem(key);
+    if (saved) setCheckedIds(new Set(JSON.parse(saved)));
+  }, [user?.id]);
+
+  const toggleChecked = (id: string) => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    const key = `novakitz_affirmation_checked_${user.id}_${today}`;
+    setCheckedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      localStorage.setItem(key, JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const timeLabels = {
     morning: { ko: '오전', en: 'Morning' },
@@ -145,6 +167,7 @@ export default function AffirmationsDisplay({
 
   const current = affirmations[currentIndex];
   const timeLabel = timeLabels[checkInTime][language === 'ko' ? 'ko' : 'en'];
+  const isChecked = current?.id ? checkedIds.has(current.id) : false;
 
   return (
     <div style={{
@@ -172,15 +195,31 @@ export default function AffirmationsDisplay({
           {language === 'ko' ? '확언' : 'Affirmation'}
         </h3>
 
-        {affirmations.length > 1 && (
-          <span style={{
-            fontSize: '12px',
-            color: '#6b7280',
-            fontWeight: '500'
-          }}>
-            {currentIndex + 1}/{affirmations.length}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {affirmations.length > 1 && (
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
+              {currentIndex + 1}/{affirmations.length}
+            </span>
+          )}
+          {current?.id && (
+            <button
+              onClick={() => toggleChecked(current.id)}
+              title={isChecked ? (language === 'ko' ? '체크 해제' : 'Uncheck') : (language === 'ko' ? '확언 체크' : 'Mark as done')}
+              style={{
+                width: '24px', height: '24px',
+                borderRadius: '6px',
+                border: `2px solid ${isChecked ? '#7fb069' : 'rgba(127,176,105,0.4)'}`,
+                background: isChecked ? '#7fb069' : 'transparent',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s',
+                flexShrink: 0
+              }}
+            >
+              {isChecked && <span style={{ color: 'white', fontSize: '14px', lineHeight: 1 }}>✓</span>}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Affirmation Text */}
@@ -199,9 +238,11 @@ export default function AffirmationsDisplay({
           margin: 0,
           fontSize: '18px',
           fontWeight: '500',
-          color: '#1f2937',
+          color: isChecked ? '#9ca3af' : '#1f2937',
           lineHeight: '1.6',
-          fontStyle: 'italic'
+          fontStyle: 'italic',
+          textDecoration: isChecked ? 'line-through' : 'none',
+          transition: 'all 0.2s'
         }}>
           {current.affirmation_text}
         </p>

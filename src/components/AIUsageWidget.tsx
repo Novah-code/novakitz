@@ -81,17 +81,9 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
     return 'healthy';
   };
 
-  const getStatusIcon = (): string => {
-    if (usage.remaining === 0) return '🚫';
-    if (usage.remaining <= 2) return '⚠️';
-    if (usage.remaining <= 10) return '⏰';
-    return '✅';
-  };
-
   const getStatusText = (): string => {
-    if (usage.remaining === 0) return 'Limit Reached';
-    if (usage.remaining === 1) return 'Last one!';
-    return `${usage.remaining} left`;
+    if (usage.remaining === 0) return 'AI 해석 한도 도달';
+    return `AI 해석 ${usage.remaining}회 남음`;
   };
 
   return (
@@ -101,7 +93,6 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
         onClick={() => setIsExpanded(!isExpanded)}
         title="AI Interpretation Usage"
       >
-        <span className="status-icon">{getStatusIcon()}</span>
         <span className="status-text">{getStatusText()}</span>
         <span className="toggle-arrow">{isExpanded ? '▲' : '▼'}</span>
       </button>
@@ -133,15 +124,15 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
               <div className="usage-message">
                 {usage.remaining === 0 ? (
                   <p className="error">
-                    You've reached your monthly limit. Next reset: {new Date(Date.now() + (30 - new Date().getDate()) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                    이번 달 AI 해석 한도에 도달했습니다. 꿈 기록은 계속 가능합니다.
                   </p>
                 ) : isPremium ? (
                   <p className="warning">
-                    ⚠️ You're approaching your monthly limit. {usage.remaining} interpretation{usage.remaining !== 1 ? 's' : ''} remaining.
+                    AI 해석 {usage.remaining}회 남았습니다.
                   </p>
                 ) : (
                   <p className="info">
-                    {usage.remaining} interpretation{usage.remaining !== 1 ? 's' : ''} remaining this month
+                    이번 달 AI 해석 {usage.remaining}회 남음. 꿈 기록은 제한 없이 가능합니다.
                   </p>
                 )}
               </div>
