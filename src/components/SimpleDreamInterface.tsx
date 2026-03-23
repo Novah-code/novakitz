@@ -12,6 +12,7 @@ import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
+import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
 import ConfirmDialog from './ConfirmDialog';
@@ -150,7 +151,7 @@ const translations = {
     charactersReady: 'Ready',
     brewing: 'Brewing...',
     brew: 'Brew',
-    dreamJournal: 'Dream Journal',
+    dreamJournal: 'Inner Journal',
     showing: 'Showing',
     of: 'of',
     dreams: 'dreams',
@@ -181,7 +182,7 @@ const translations = {
     charactersReady: '준비됨',
     brewing: '분석 중...',
     brew: '분석하기',
-    dreamJournal: '드림 저널',
+    dreamJournal: '내면의 기록',
     showing: '표시 중',
     of: '/',
     dreams: '개의 꿈',
@@ -288,9 +289,47 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     message: string;
     onConfirm: () => void;
   }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+  const [showEmotionModal, setShowEmotionModal] = useState(false);
+  const [showMoodCardFlow, setShowMoodCardFlow] = useState(false);
+  const [selectedEmotionLabel, setSelectedEmotionLabel] = useState('');
+  const [dreamRefreshTrigger, setDreamRefreshTrigger] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
+  const smokeTurbulenceRef = useRef<SVGFETurbulenceElement | null>(null);
   const recognitionRef = useRef<any>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const emotionList = [
+    { label: language === 'ko' ? '불안' : 'Anxious',  color: 'rgba(217,210,233,0.7)', borderRadius: '40% 60% 30% 70% / 60% 40% 70% 30%', moodValue: 2 },
+    { label: language === 'ko' ? '두려움' : 'Fear',   color: 'rgba(205,224,230,0.7)', borderRadius: '50% 50% 60% 60% / 40% 40% 70% 70%', moodValue: 1 },
+    { label: language === 'ko' ? '평온' : 'Peaceful', color: 'rgba(181,218,185,0.7)', borderRadius: '50%', moodValue: 4 },
+    { label: language === 'ko' ? '기쁨' : 'Joyful',  color: 'rgba(253,232,181,0.7)', borderRadius: '45% 55% 45% 55% / 65% 55% 45% 35%', moodValue: 5 },
+    { label: language === 'ko' ? '외로움' : 'Lonely', color: 'rgba(214,221,229,0.7)', borderRadius: '50% 50% 40% 40% / 40% 40% 60% 60%', moodValue: 2 },
+    { label: language === 'ko' ? '희망' : 'Hopeful', color: 'rgba(214,241,208,0.7)', borderRadius: '50% 50% 50% 50% / 70% 70% 40% 40%', moodValue: 4 },
+    { label: language === 'ko' ? '분노' : 'Anger',   color: 'rgba(250,209,196,0.7)', borderRadius: '15px 30px 15px 30px', moodValue: 2 },
+    { label: language === 'ko' ? '무기력' : 'Low',   color: 'rgba(226,232,240,0.7)', borderRadius: '16px', moodValue: 1 },
+  ];
+
+  const handleEmotionSelect = async (idx: number) => {
+    const emotion = emotionList[idx];
+    setShowEmotionModal(false);
+    setSelectedEmotionLabel(emotion.label);
+    setShowMoodCardFlow(true);
+    if (!user) return; // guest: just show card
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const currentHour = new Date().getHours();
+      const timeOfDay = currentHour < 12 ? 'morning' : 'evening';
+      await supabase.from('checkins').insert([{
+        user_id: user.id,
+        check_date: today,
+        time_of_day: timeOfDay,
+        mood: emotion.moodValue,
+        energy_level: 5,
+      }]);
+    } catch (e) {
+      console.error('Emotion save error:', e);
+    }
+  };
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Toast helper function
@@ -459,7 +498,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     if (seenGuide) {
       setHasSeenVoiceGuide(true);
     }
-  }, [user]);
+  }, [user, dreamRefreshTrigger]);
 
   // Initialize offline storage and sync offline dreams
   useEffect(() => {
@@ -1084,54 +1123,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
   };
 
-  // Smoke-like turbulence animation (pauses when modal is open)
-  useEffect(() => {
-    let frame = 0;
-    let animationId: number;
-
-    const animateSmoke = () => {
-      try {
-        // Pause animation when Dream Journal modal or response modal is open
-        if (showHistory || showResponse || selectedDream || editingDream) {
-          animationId = requestAnimationFrame(animateSmoke);
-          return;
-        }
-
-        if (turbulenceRef.current) {
-          const time = frame * 0.002;
-          // Create upward flowing smoke motion
-          const smokeX = 0.012 + Math.sin(time * 0.8) * 0.005;
-          const smokeY = 0.018 + Math.cos(time * 0.6) * 0.008 + Math.sin(time * 1.2) * 0.003;
-
-          turbulenceRef.current.setAttribute("baseFrequency", `${smokeX} ${smokeY}`);
-
-          // Animate smoke distort filter
-          const smokeFilter = document.querySelector('#smoke-distort feTurbulence');
-          if (smokeFilter) {
-            const smokeFreqX = 0.02 + Math.cos(time * 0.7) * 0.008;
-            const smokeFreqY = 0.08 + Math.sin(time * 0.9) * 0.015;
-            smokeFilter.setAttribute("baseFrequency", `${smokeFreqX} ${smokeFreqY}`);
-          }
-        }
-        frame++;
-        animationId = requestAnimationFrame(animateSmoke);
-      } catch (error) {
-        console.error('Animation error:', error);
-      }
-    };
-
-    // Start animation after a short delay to ensure DOM is ready
-    const timeoutId = setTimeout(() => {
-      animateSmoke();
-    }, 100);
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [showHistory, showResponse, selectedDream, editingDream]);
+  // JS turbulence animation removed — SVG filters replaced with pure CSS
 
 
 
@@ -1206,11 +1198,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
   const handleOrbMouseDown = () => {
     longPressTimerRef.current = setTimeout(() => {
-      if (!hasSeenVoiceGuide) {
-        setShowVoiceGuide(true);
-        return;
-      }
-      startVoiceRecording();
+      // Long press → open dream recording form
+      setShowInput(true);
     }, 800); // 0.8 second long press
   };
 
@@ -1219,12 +1208,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
 
-      // Short click
-      if (!hasSeenVoiceGuide) {
-        setShowVoiceGuide(true);
-        return;
-      }
-      handleAnalyze();
+      // Short click → show emotion modal
+      setShowEmotionModal(true);
     } else if (isRecording) {
       // User released during active voice recording - stop it
       if (recognitionRef.current) {
@@ -2160,12 +2145,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           cursor: pointer;
           transition: transform 0.5s ease, box-shadow 0.5s ease;
           background: linear-gradient(135deg, rgba(127, 176, 105, 0.4), rgba(168, 213, 168, 0.4));
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.3);
           box-shadow:
             0 8px 32px rgba(127, 176, 105, 0.3),
-            0 4px 16px rgba(255, 255, 255, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.4);
           animation: pulse 8s infinite ease-in-out;
           overflow: hidden;
@@ -2174,16 +2158,16 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           -webkit-user-select: none;
           -webkit-touch-callout: none;
           -webkit-tap-highlight-color: transparent;
+          will-change: transform;
         }
-        
+
         .orb-motion {
           position: absolute;
           top: 0; left: 0;
           width: 100%; height: 100%;
-          filter: url(#liquid-motion);
           overflow: hidden;
         }
-        
+
         .smoke-base {
           position: absolute;
           top: 0; left: 0;
@@ -2206,7 +2190,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               rgba(127, 176, 105, 0.4) 40%,
               transparent 80%);
           animation: smokeRise1 8s ease-out infinite;
-          filter: url(#smoke-distort);
+          will-change: transform, opacity;
         }
 
         .smoke-layer-2 {
@@ -2219,7 +2203,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               rgba(255, 255, 255, 0.3) 50%,
               transparent 90%);
           animation: smokeRise2 10s ease-out infinite;
-          filter: url(#smoke-distort);
+          will-change: transform, opacity;
         }
 
         .smoke-layer-3 {
@@ -2232,7 +2216,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               rgba(168, 213, 168, 0.4) 60%,
               transparent 100%);
           animation: smokeRise3 12s ease-out infinite;
-          filter: url(#smoke-distort);
+          will-change: transform, opacity;
         }
 
         .orb-layer-1 {
@@ -2240,10 +2224,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           top: -5%; left: -5%;
           width: 110%; height: 110%;
           background:
-            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.6) 0%, rgba(127, 176, 105, 0.3) 20%, transparent 50%),
-            radial-gradient(circle at 20% 80%, rgba(168, 213, 168, 0.5) 0%, rgba(255, 255, 255, 0.2) 30%, transparent 60%);
+            radial-gradient(circle at 60% 40%, rgba(255, 255, 255, 0.5) 0%, rgba(127, 176, 105, 0.2) 20%, transparent 50%),
+            radial-gradient(circle at 20% 80%, rgba(168, 213, 168, 0.4) 0%, transparent 60%);
           animation: rotate 25s linear infinite;
-          mix-blend-mode: overlay;
+          opacity: 0.7;
+          will-change: transform;
         }
 
         .orb-layer-2 {
@@ -2252,13 +2237,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           width: 116%; height: 116%;
           background:
             linear-gradient(45deg,
-              rgba(255, 255, 255, 0.4) 0%,
-              rgba(168, 213, 168, 0.3) 25%,
-              rgba(127, 176, 105, 0.2) 50%,
-              rgba(247, 243, 233, 0.3) 75%,
-              rgba(255, 255, 255, 0.4) 100%);
+              rgba(255, 255, 255, 0.3) 0%,
+              rgba(168, 213, 168, 0.2) 50%,
+              rgba(255, 255, 255, 0.3) 100%);
           animation: rotate 35s linear infinite reverse;
-          mix-blend-mode: soft-light;
+          opacity: 0.5;
+          will-change: transform;
         }
 
         @keyframes smokeRise1 {
@@ -2804,37 +2788,44 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
         
         .dream-entry {
-          background: white;
-          border-radius: 16px;
+          background: rgba(255,255,255,0.6);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.9);
+          border-radius: 24px;
           overflow: visible;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 10px 30px rgba(74,93,78,0.05);
+          transition: all 0.3s ease;
           cursor: pointer;
           position: relative;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
         }
-        
+
         .dream-entry:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+          transform: translateY(-5px);
+          background: rgba(255,255,255,0.85);
+          box-shadow: 0 15px 40px rgba(74,93,78,0.12);
         }
-        
+
         .dream-image {
           width: 100%;
-          height: 200px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          height: 180px;
+          background: linear-gradient(135deg, #D9D2E9 0%, #C4B8E0 50%, #A99CCF 100%);
           position: relative;
           overflow: hidden;
-          border-radius: 16px 16px 0 0;
+          border-radius: 16px;
           background-size: cover;
           background-position: center;
+          flex-shrink: 0;
         }
-        
+
+
         .camera-overlay {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          top: 0; left: 0; right: 0; bottom: 0;
           background: rgba(0, 0, 0, 0.5);
           display: flex;
           align-items: center;
@@ -2842,6 +2833,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           opacity: 0;
           transition: opacity 0.3s ease;
           cursor: pointer;
+          z-index: 4;
         }
 
         .dream-image:hover .camera-overlay {
@@ -2863,49 +2855,71 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           font-size: 28px;
           text-shadow: 0 2px 4px rgba(0,0,0,0.3);
           cursor: pointer;
+          z-index: 5;
         }
-        
+
         .dream-actions {
           position: absolute;
-          top: 16px;
-          right: 16px;
+          top: 28px;
+          right: 28px;
           display: flex;
           gap: 8px;
+          z-index: 6;
         }
-        
-        
+
+        .dots-menu-btn {
+          width: 28px !important;
+          height: 28px !important;
+          border-radius: 50% !important;
+          background: rgba(255,255,255,0.75) !important;
+          border: 1px solid rgba(255,255,255,0.95) !important;
+          backdrop-filter: blur(4px) !important;
+          -webkit-backdrop-filter: blur(4px) !important;
+          color: #3A4A3E !important;
+          font-size: 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+          padding: 0 !important;
+          line-height: 1 !important;
+        }
+
         .dream-content {
-          padding: 20px;
+          padding: 0;
           text-align: left;
-          background: rgba(127, 176, 105, 0.15);
-          backdrop-filter: blur(10px);
-          border-top: 1px solid rgba(127, 176, 105, 0.3);
+          background: transparent;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
 
         .dream-title {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 12px;
+          margin: 0;
           text-align: left;
         }
-        
+
         .dream-icon {
-          font-size: 18px;
+          display: none;
         }
-        
+
         .dream-title-text {
-          font-size: 18px;
-          font-weight: 600;
-          color: #1f2937;
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #3A4A3E;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
         }
-        
+
         .dream-meta {
           font-size: 14px;
           color: #6b7280;
-          margin-bottom: 16px;
         }
-        
+
         .dream-text {
           font-size: 16px;
           line-height: 1.6;
@@ -2913,11 +2927,22 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           font-family: Georgia, serif;
           text-align: left;
         }
-        
+
         .dream-date {
+          font-family: 'Roboto Mono', monospace;
+          font-size: 11px;
+          color: #8BA390;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+
+        .dream-date strong {
+          color: #7AB382;
+          font-family: 'Noto Sans KR', -apple-system, sans-serif;
+          font-weight: 500;
           font-size: 12px;
-          color: #64748b;
-          margin-bottom: 8px;
         }
         
         .dream-preview {
@@ -3990,44 +4015,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
       `}</style>
 
-      <div className="min-h-screen w-full flex flex-col items-center justify-center p-2 sm:p-4 lg:p-6" style={{minHeight: '100dvh', paddingTop: 'max(env(safe-area-inset-top), 20px)'}}>
-        <svg className="absolute w-0 h-0">
-          <filter id="liquid-motion">
-            <feTurbulence 
-              ref={turbulenceRef}
-              type="fractalNoise" 
-              baseFrequency="0.012 0.018" 
-              numOctaves="3" 
-              result="noise" 
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="noise" 
-              scale="80" 
-              xChannelSelector="R" 
-              yChannelSelector="G" 
-            />
-            <feGaussianBlur stdDeviation="1" result="blur"/>
-          </filter>
-          
-          <filter id="smoke-distort">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency="0.02 0.08" 
-              numOctaves="4" 
-              result="smokeNoise" 
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="smokeNoise" 
-              scale="60" 
-              xChannelSelector="R" 
-              yChannelSelector="G" 
-            />
-            <feGaussianBlur stdDeviation="2" result="smokeBlur"/>
-            <feComposite in="SourceGraphic" in2="smokeBlur" operator="over"/>
-          </filter>
-        </svg>
+      <div className="w-full" style={{height: '100dvh', minHeight: '100dvh', position: 'relative'}}>
 
         
         {/* novakitz Logo */}
@@ -4042,13 +4030,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           </div>
         </div>
         
-        <main className="w-full max-w-xl mx-auto z-10 flex flex-col items-center text-center">
+        <main className="w-full max-w-xl mx-auto z-10 text-center" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
 
           {(() => {
             console.log('SimpleDreamInterface render:', { showInput, showResponse, showHistory });
             return null;
           })()}
           {!showInput && !showResponse && !showHistory && (
+            <div style={{position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10}}>
             <div
               className="dream-orb flex items-center justify-center fade-in"
               onMouseDown={handleOrbMouseDown}
@@ -4064,6 +4053,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 <div className="smoke-layer-2"></div>
                 <div className="smoke-layer-3"></div>
               </div>
+            </div>
             </div>
           )}
 
@@ -4121,15 +4111,58 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   )}
 
 
-                  <textarea
-                    className="dream-input"
-                    value={dreamText}
-                    onChange={(e) => setDreamText(e.target.value)}
-                    placeholder={isRecording ? t.voiceInProgress : t.dreamPlaceholder}
-                    rows={4}
-                    autoFocus={!isRecording}
-                    disabled={isRecording}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <textarea
+                      className="dream-input"
+                      value={dreamText}
+                      onChange={(e) => setDreamText(e.target.value)}
+                      placeholder={isRecording ? t.voiceInProgress : t.dreamPlaceholder}
+                      rows={4}
+                      autoFocus={!isRecording}
+                      disabled={isRecording}
+                      style={{ paddingBottom: '44px' }}
+                    />
+                    {/* Voice recording button */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (isRecording) {
+                          recognitionRef.current?.abort();
+                          setIsRecording(false);
+                        } else {
+                          startVoiceRecording();
+                        }
+                      }}
+                      style={{
+                        position: 'absolute',
+                        bottom: '10px',
+                        right: '10px',
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: '50%',
+                        border: 'none',
+                        background: isRecording ? 'rgba(255,68,68,0.12)' : 'rgba(122,179,130,0.15)',
+                        color: isRecording ? '#ff4444' : '#7AB382',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s',
+                        flexShrink: 0,
+                      }}
+                      title={isRecording ? (language === 'ko' ? '녹음 중지' : 'Stop recording') : (language === 'ko' ? '음성 입력' : 'Voice input')}
+                    >
+                      {isRecording ? (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                      ) : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                          <line x1="12" y1="19" x2="12" y2="22"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
                     {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? t.charactersReady : ''}
                   </div>
@@ -4269,170 +4302,107 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               right: 0,
               bottom: 0,
               zIndex: 1000,
-              background: 'white',
+              background: '#E8F3EA',
               overflowY: 'auto',
               overflowX: 'hidden'
             }}>
-              <div className="dream-history-header" style={{
-                background: 'white',
+              {/* Ambient blobs */}
+              <div style={{ position: 'fixed', top: '-10%', right: '-5%', width: '420px', height: '420px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(122,179,130,0.22) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
+              <div style={{ position: 'fixed', bottom: '5%', left: '-8%', width: '360px', height: '360px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,163,59,0.14) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
+              <div style={{ position: 'fixed', top: '40%', left: '30%', width: '280px', height: '280px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(122,179,130,0.12) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
+              {/* Header */}
+              <div style={{
+                padding: '72px 24px 0',
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                paddingBottom: '16px',
-                borderBottom: '1px solid #e5e7eb'
+                background: 'rgba(232,243,234,0.88)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
               }}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', width: '100%'}}>
-                  <div style={{flex: '1'}}>
-                    <h1 style={{fontSize: '30px', fontWeight: 'bold', color: '#1f2937', margin: '0'}}>
-                      {t.dreamJournal}
-                    </h1>
-                    {searchTerm || selectedTag ? (
-                      <div style={{marginTop: '8px', fontSize: '14px', color: '#6b7280'}}>
-                        {t.showing} {filteredDreams.length} {t.of} {savedDreams.length} {t.dreams}
-                        {searchTerm && ` ${t.matching} "${searchTerm}"`}
-                        {selectedTag && ` ${t.taggedWith} "#${selectedTag}"`}
-                      </div>
-                    ) : null}
-                  </div>
+                {/* Title */}
+                <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '32px', fontWeight: 700, color: '#3A4A3E', margin: '0 0 20px', letterSpacing: '-0.5px' }}>
+                  {t.dreamJournal}
+                </h1>
 
-                  {/* Search & Filter Button */}
-                  <button
-                    onClick={() => setShowSearchFilter(!showSearchFilter)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb',
-                      background: showSearchFilter ? '#f9fafb' : 'white',
-                      color: '#1f2937',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      flexShrink: 0
-                    }}
-                  >
-                    {showSearchFilter ? 'Hide' : 'Search & Filter'}
-                  </button>
-                </div>
-
-                {/* Collapsible Search and Filter Controls */}
-                {showSearchFilter && (
+                {/* Search + view toggles — always visible, no toggle button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '16px', borderBottom: '1px solid rgba(122,179,130,0.15)' }}>
                   <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    paddingBottom: '16px',
-                    borderBottom: '1px solid #e5e7eb',
-                    marginBottom: '16px'
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    background: 'rgba(255,255,255,0.6)',
+                    border: '1px solid rgba(255,255,255,0.9)',
+                    borderRadius: '14px', padding: '8px 14px',
+                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                    flex: 1,
                   }}>
-                    <div className="search-container" style={{flex: '1', minWidth: '200px'}}>
-                      <input
-                        type="text"
-                        placeholder={t.searchPlaceholder}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="search-input"
-                      />
-                    </div>
-                    <div className="filter-container" style={{minWidth: '150px'}}>
-                      <select
-                        value={selectedTag}
-                        onChange={(e) => setSelectedTag(e.target.value)}
-                        className="filter-select"
-                      >
-                        <option value="">All Tags</option>
-                        {allTags.map(tag => (
-                          <option key={tag} value={tag}>#{tag}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div style={{display: 'flex', gap: '4px', background: '#f1f5f9', borderRadius: '8px', padding: '4px', flexWrap: 'wrap'}}>
-                      <button onClick={() => {setViewMode('card'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'card' ? '#ffffff' : 'transparent', color: viewMode === 'card' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'card' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.card}</button>
-                      <button onClick={() => {setViewMode('list' as any); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === ('list' as any) ? '#ffffff' : 'transparent', color: viewMode === ('list' as any) ? '#1f2937' : '#64748b', fontWeight: viewMode === ('list' as any) ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{language === 'ko' ? '목록' : 'List'}</button>
-                      <button onClick={() => {setViewMode('timeline'); setShowHistory(true);}} style={{padding: '6px 12px', borderRadius: '6px', border: 'none', background: viewMode === 'timeline' ? '#ffffff' : 'transparent', color: viewMode === 'timeline' ? '#1f2937' : '#64748b', fontWeight: viewMode === 'timeline' ? '600' : '400', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s'}}>{t.timeline}</button>
-                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8BA390" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input
+                      type="text"
+                      placeholder={language === 'ko' ? '검색...' : 'Search...'}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{ border: 'none', background: 'none', outline: 'none', width: '100%', fontSize: '13px', color: '#3A4A3E', fontFamily: 'inherit' }}
+                    />
                   </div>
-                )}
+                  <div style={{ display: 'flex', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '14px', padding: '3px', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', flexShrink: 0 }}>
+                    {[['card', t.card], ['list', language === 'ko' ? '목록' : 'List'], ['timeline', t.timeline]].map(([mode, label]) => (
+                      <button key={mode} onClick={() => { setViewMode(mode as any); }} style={{ padding: '6px 12px', borderRadius: '10px', border: 'none', background: viewMode === mode ? 'white' : 'transparent', color: viewMode === mode ? '#3A4A3E' : '#8BA390', fontWeight: viewMode === mode ? 600 : 400, fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: viewMode === mode ? '0 2px 8px rgba(0,0,0,0.05)' : 'none', whiteSpace: 'nowrap' }}>{label}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* Daily Rituals Section */}
-              <div style={{
-                padding: showDailyRituals ? '20px 24px' : '12px 24px',
-                borderTop: '1px solid #e5e7eb',
-                borderBottom: '1px solid #e5e7eb',
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 250, 245, 0.3) 100%)',
-                transition: 'padding 0.2s'
-              }}>
-                <div
-                  onClick={() => setShowDailyRituals(v => !v)}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    marginBottom: showDailyRituals ? '20px' : 0
-                  }}
-                >
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1f2937', margin: 0 }}>
-                    {language === 'ko' ? '오늘의 확언' : 'Daily Affirmations & Reflection'}
-                  </h3>
-                  <span style={{ fontSize: '18px', color: '#9ca3af', lineHeight: 1 }}>
-                    {showDailyRituals ? '∧' : '∨'}
-                  </span>
-                </div>
-
-                {showDailyRituals && user && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {/* Affirmations - full width above check-in buttons */}
-                    <AffirmationsDisplay
-                      user={user}
-                      checkInTime={new Date().getHours() < 12 ? 'morning' : 'evening'}
-                      dreamText={lastSavedDreamText || dreamText}
-                      dreamId={lastSavedDreamId}
-                      language={language || 'en'}
-                      isPremium={isPremium}
-                    />
-
-                    {/* Check-in Buttons */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                      gap: '12px'
-                    }}>
-                      <div>
-                        <DailyCheckin
-                          userId={user.id}
-                          language={language || 'en'}
-                          timeOfDay="morning"
-                          dreamText={lastSavedDreamText || dreamText}
-                          dreamId={lastSavedDreamId}
-                          isPremium={isPremium}
-                          hideAffirmations={true}
-                        />
-                      </div>
-                      <div>
-                        <DailyCheckin
-                          userId={user.id}
-                          language={language || 'en'}
-                          timeOfDay="evening"
-                          dreamText={lastSavedDreamText || dreamText}
-                          dreamId={lastSavedDreamId}
-                          isPremium={isPremium}
-                          hideAffirmations={true}
-                        />
-                      </div>
-                    </div>
+              {/* Affirmation Panel — matches prototype */}
+              <div style={{ padding: '20px 24px 0', position: 'relative', zIndex: 1 }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.9)',
+                  borderRadius: '24px',
+                  padding: showDailyRituals ? '28px 30px' : '18px 24px',
+                  marginBottom: '24px',
+                  boxShadow: '0 15px 35px rgba(74,93,78,0.05), inset 2px 2px 10px rgba(255,255,255,0.8)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: showDailyRituals ? 'flex-start' : 'center',
+                  transition: 'padding 0.2s',
+                }}>
+                  {/* decorative symbol */}
+                  <span style={{ position: 'absolute', fontSize: '120px', color: '#7AB382', opacity: 0.07, right: '20px', top: '-20px', fontFamily: 'serif', pointerEvents: 'none', lineHeight: 1 }}>✧</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: "'Roboto Mono', monospace", fontSize: '11px', color: '#7AB382', letterSpacing: '2px', margin: '0 0 10px', textTransform: 'uppercase' }}>
+                      {language === 'ko' ? "Today's Affirmation" : "Today's Affirmation"}
+                    </p>
+                    {showDailyRituals && user ? (
+                      <AffirmationsDisplay
+                        user={user}
+                        checkInTime={new Date().getHours() < 12 ? 'morning' : 'evening'}
+                        dreamText={lastSavedDreamText || dreamText}
+                        dreamId={lastSavedDreamId}
+                        language={language || 'en'}
+                        isPremium={isPremium}
+                      />
+                    ) : null}
                   </div>
-                )}
+                  <button
+                    onClick={() => setShowDailyRituals(v => !v)}
+                    style={{ background: 'none', border: 'none', fontSize: '20px', color: '#8BA390', cursor: 'pointer', marginLeft: '16px', flexShrink: 0, lineHeight: 1 }}
+                  >
+                    {showDailyRituals ? '⌃' : '⌄'}
+                  </button>
+                </div>
               </div>
 
               <div className="dream-history-container" style={{
-                paddingTop: '20px',
+                paddingTop: '0',
                 paddingLeft: '24px',
                 paddingRight: '24px',
                 paddingBottom: '40px',
-                position: 'relative'
+                position: 'relative',
+                zIndex: 1
               }}>
               {viewMode === 'calendar' ? (
                 <div style={{
@@ -4512,7 +4482,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                       >
                         <span style={{ fontSize: '15px', color: '#1f2937', fontWeight: 500, flex: 1, marginRight: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {(dream as any).title || (language === 'ko' ? '제목 없음' : 'Untitled')}
+                          {(dream as any).tags?.includes('emotion-record') ? "Today's Mood" : ((dream as any).title || (language === 'ko' ? '제목 없음' : 'Untitled'))}
                         </span>
                         <span style={{ fontSize: '13px', color: '#9ca3af', flexShrink: 0 }}>{dateStr}</span>
                       </div>
@@ -4546,8 +4516,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       <div
                         className="dream-image"
                         style={{
-                          background: dream.image ? 'none' : gradients[index % gradients.length],
-                          backgroundImage: dream.image ? `url(${dream.image})` : 'none',
+                          background: 'none',
+                          backgroundImage: `url(${dream.image && dream.image !== '/Default-dream.jpg' ? dream.image : '/Default-dream.jpg'})`,
                           backgroundSize: 'cover',
                           backgroundPosition: dream.imagePosition
                             ? `${dream.imagePosition.x}% ${dream.imagePosition.y}%`
@@ -4834,38 +4804,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
                       <div className="dream-content">
                         <div className="dream-title">
-                          <span className="dream-icon"></span>
-                          <span className="dream-title-text">{dream.title || t.dreamEntry}</span>
+                          <span className="dream-title-text">{dream.tags?.includes('emotion-record') ? "Today's Mood" : (dream.title || t.dreamEntry)}</span>
                         </div>
                         <div className="dream-date">
-                          {dream.userName && dream.userName !== 'Anonymous' && <span style={{color: '#7FB069', fontWeight: '500', marginRight: '8px'}}>by {dream.userName}</span>}
-                          {dream.date} {dream.time && `at ${dream.time}`}
+                          {dream.userName && dream.userName !== 'Anonymous' && (
+                            <><strong>{dream.userName}</strong><span>·</span></>
+                          )}
+                          <span>{dream.date}{dream.time ? ` ${dream.time}` : ''}</span>
                         </div>
-
-                        {/* Tags Display */}
-                        {(dream.autoTags && dream.autoTags.length > 0) && (
-                          <div className="dream-tags" style={{marginTop: '12px'}}>
-                            {dream.autoTags.map(tag => (
-                              <span 
-                                key={tag}
-                                className="tag"
-                                style={{
-                                  display: 'inline-block',
-                                  background: '#7FB069',
-                                  color: 'white',
-                                  fontSize: '12px',
-                                  padding: '4px 8px',
-                                  borderRadius: '12px',
-                                  marginRight: '6px',
-                                  marginBottom: '4px'
-                                }}
-                                title=""
-                              >
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     </div>
                   );
@@ -4881,7 +4827,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     fontSize: '18px',
                     fontFamily: 'Georgia, "Times New Roman", Times, serif'
                   }}>
-                    <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '20px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Dream Journal</div>
+                    <div style={{fontWeight: '500', marginBottom: '8px', fontSize: '20px', lineHeight: '1.3', whiteSpace: 'nowrap'}}>Welcome to your Inner Journal</div>
                     <div style={{fontSize: '16px', opacity: '0.8'}}>Record your first dream to begin your journey</div>
                   </div>
                 )}
@@ -4926,11 +4872,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               {/* Close Button - Bottom Footer */}
               <div style={{
                 padding: '16px 24px',
-                borderTop: '1px solid #e5e7eb',
-                background: 'white',
+                borderTop: '1px solid rgba(122,179,130,0.2)',
+                background: 'rgba(232,243,234,0.85)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
                 display: 'flex',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                position: 'relative',
+                zIndex: 1
               }}>
                 <button
                   onClick={() => {
@@ -4938,22 +4888,24 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     onHistoryClose?.();
                   }}
                   style={{
-                    padding: '12px 32px',
-                    background: '#f3f4f6',
-                    color: '#6b7280',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
+                    padding: '10px 32px',
+                    background: 'rgba(255,255,255,0.6)',
+                    color: '#3A4A3E',
+                    border: '1px solid rgba(122,179,130,0.35)',
+                    borderRadius: '14px',
+                    fontSize: '0.95rem',
                     fontWeight: '500',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
                     fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : undefined
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#e5e7eb';
+                    e.currentTarget.style.background = 'rgba(122,179,130,0.15)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#f3f4f6';
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.6)';
                   }}
                 >
                   {language === 'ko' ? '닫기' : 'Close'}
@@ -5038,7 +4990,45 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             </div>
           )}
 
-          {selectedDream && (
+          {selectedDream && (() => {
+            const cleanText = (selectedDream.text ?? '').replace(/^\[감정 기록\] /, '');
+            const cleanLines = cleanText.split('\n');
+            const isMoodCard = selectedDream.tags?.includes('emotion-record') || cleanLines.some(l => l.startsWith('감정:'));
+            if (isMoodCard) {
+              const getF = (p: string) => cleanLines.find(l => l.startsWith(p))?.slice(p.length).trim() ?? '';
+              const emotion = selectedDream.tags?.find(t => t !== 'emotion-record') ?? getF('감정:');
+              const cardName = selectedDream.title?.split(' — ')[1] ?? '';
+              const dreamDateStr = `${selectedDream.date}${selectedDream.time ? ` at ${selectedDream.time}` : ''}`;
+              // Parse analysis from content (ego mode saves analysis inline)
+              const contentParts = cleanText.split('\n\n---\n\nAnalysis:\n');
+              const analysisFromContent = contentParts[1] ?? '';
+              const analysis = selectedDream.response || analysisFromContent;
+              // For ego records (no '—' in title), extract sleep/stress/freetext
+              const isEgoRecord = !selectedDream.title?.includes(' — ');
+              const scene = isEgoRecord ? [
+                getF('수면:') ? `${language === 'ko' ? '수면' : 'Sleep'}: ${getF('수면:')}` : '',
+                getF('스트레스:') ? `${language === 'ko' ? '스트레스' : 'Stress'}: ${getF('스트레스:')}` : '',
+                contentParts[0].split('\n').filter((l: string) => !l.startsWith('감정:') && !l.startsWith('수면:') && !l.startsWith('스트레스:')).join('\n').trim(),
+              ].filter(Boolean).join('\n') : getF('핵심 장면:');
+              return (
+                <MoodCardJournalView
+                  emotion={emotion}
+                  cardName={cardName}
+                  places={isEgoRecord ? '' : getF('장소:')}
+                  persons={isEgoRecord ? '' : getF('등장인물:')}
+                  scene={scene}
+                  analysis={analysis}
+                  keywords={selectedDream.tags?.slice(1) ?? []}
+                  language={language}
+                  nickname={selectedDream.userName ?? ''}
+                  dateStr={dreamDateStr}
+                  onClose={() => setSelectedDream(null)}
+                  onEdit={() => { setSelectedDream(null); startEditDream(selectedDream); }}
+                  onShare={(e) => openShareCard(selectedDream, e)}
+                />
+              );
+            }
+            return (
             <div className="dream-detail-overlay" onClick={() => setSelectedDream(null)}>
               <div className="dream-detail-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dream-detail-header" style={{background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 50%, #c3e6cb 100%)', position: 'relative', paddingTop: '60px'}}>
@@ -5191,10 +5181,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <div className="dream-detail-date">{selectedDream.date} {selectedDream.time && `at ${selectedDream.time}`}</div>
                 </div>
                 <div className="dream-detail-body">
-                  {selectedDream.image && (
+                  {(selectedDream.image || true) && (
                     <div className="dream-detail-image-container" style={{marginBottom: '20px', position: 'relative'}}>
                       <img
-                        src={selectedDream.image}
+                        src={selectedDream.image || '/Default-dream.jpg'}
                         alt="Dream visual"
                         style={{
                           width: '100%',
@@ -5246,7 +5236,46 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   )}
                   <div className="dream-detail-content">
-                    {selectedDream.text}
+                    {(() => {
+                      const lines = selectedDream.text.split('\n');
+                      const isMoodCard = lines.some(l => l.startsWith('감정:') || l.startsWith('장소:') || l.startsWith('등장인물:'));
+                      if (!isMoodCard) return selectedDream.text;
+                      const getField = (prefix: string) => {
+                        const line = lines.find(l => l.startsWith(prefix));
+                        return line ? line.slice(prefix.length).trim() : '';
+                      };
+                      const emotion = getField('감정:');
+                      const place = getField('장소:');
+                      const person = getField('등장인물:');
+                      const scene = getField('핵심 장면:');
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {emotion && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#718096', fontWeight: 700 }}>EMOTION</span>
+                              <span style={{ padding: '3px 10px', borderRadius: '12px', background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontSize: '13px', fontWeight: 600 }}>{emotion}</span>
+                            </div>
+                          )}
+                          {place && (
+                            <div>
+                              <span style={{ fontFamily: 'monospace', fontSize: '10px', color: '#718096', fontWeight: 700 }}>PLACE · </span>
+                              <span style={{ fontSize: '13px', color: '#4A5D4E' }}>{place}</span>
+                            </div>
+                          )}
+                          {person && (
+                            <div>
+                              <span style={{ fontFamily: 'monospace', fontSize: '10px', color: '#718096', fontWeight: 700 }}>WHO · </span>
+                              <span style={{ fontSize: '13px', color: '#4A5D4E' }}>{person}</span>
+                            </div>
+                          )}
+                          {scene && (
+                            <div style={{ marginTop: '4px', fontSize: '15px', lineHeight: 1.7, color: '#4A5D4E', fontWeight: 300 }}>
+                              {scene}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="dream-detail-response">
                     <div className="dream-detail-response-title">{t.dreamAnalysis}</div>
@@ -5343,7 +5372,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 </div>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {showResponse && (
             <div className="modal-overlay" onClick={() => !isLoading && setShowResponse(false)}>
@@ -5886,6 +5916,110 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           © 2026 Novakitz. All rights reserved.
         </p>
       </footer>
+
+      {/* Mood Card Flow */}
+      {showMoodCardFlow && (
+        <MoodCardFlow
+          selectedEmotion={selectedEmotionLabel}
+          language={language}
+          onClose={() => setShowMoodCardFlow(false)}
+          user={user ?? null}
+          onRequestLogin={onGuestAnalyze}
+          onEmotionLogged={() => { setShowStreakPopup(true); setDreamRefreshTrigger(t => t + 1); }}
+        />
+      )}
+
+      {/* Emotion Pebble Modal */}
+      {showEmotionModal && (
+        <div
+          onClick={() => setShowEmotionModal(false)}
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.35)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            zIndex: 20000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '90%', maxWidth: '360px',
+              background: '#EAF4EC',
+              borderRadius: '32px',
+              padding: '35px 25px 45px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+              position: 'relative',
+              textAlign: 'center',
+              maxHeight: 'calc(100vh - 40px)',
+              overflowY: 'auto',
+            }}
+          >
+            <button
+              onClick={() => setShowEmotionModal(false)}
+              style={{
+                position: 'absolute', top: '20px', right: '20px',
+                width: '30px', height: '30px',
+                background: 'rgba(0,0,0,0.05)',
+                border: 'none', borderRadius: '50%',
+                cursor: 'pointer', fontSize: '14px',
+                color: '#4A5D4E', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+
+            <p style={{
+              fontSize: '16px', fontWeight: 500,
+              color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
+              letterSpacing: '-0.5px',
+              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+            }}>
+              {language === 'ko' ? '오늘 아침 기분은 어떤가요?' : 'How are you feeling this morning?'}
+            </p>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px 10px',
+              justifyItems: 'center',
+            }}>
+              {emotionList.map((emotion, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleEmotionSelect(idx)}
+                  style={{
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', gap: '10px',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px) scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
+                >
+                  <div style={{
+                    width: '56px', height: '56px',
+                    backgroundColor: emotion.color,
+                    borderRadius: emotion.borderRadius,
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.8)',
+                    boxShadow: '4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 2px 2px 4px rgba(255,255,255,0.8)',
+                    transition: 'all 0.3s ease',
+                  }} />
+                  <span style={{
+                    fontSize: '11px', fontWeight: 500,
+                    color: '#4A5D4E', opacity: 0.8,
+                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+                  }}>
+                    {emotion.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }/* Force rebuild Tue Sep 16 01:17:14 KST 2025 */

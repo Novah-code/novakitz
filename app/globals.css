@@ -856,6 +856,7 @@ html[lang="ko"] textarea {
     position: absolute;
     border-radius: 50%;
     opacity: 0.4;
+    will-change: transform, opacity;
 }
 
 .particle-1 {
@@ -885,31 +886,13 @@ html[lang="ko"] textarea {
     animation: smokeFlow3 18s ease-in-out infinite;
 }
 
-.particle-4 {
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, rgba(127, 176, 105, 0.15) 0%, rgba(127, 176, 105, 0.03) 50%, transparent 100%);
-    top: 60%;
-    right: 30%;
-    animation: smokeFlow4 22s ease-in-out infinite;
-}
-
-.particle-5 {
-    width: 90px;
-    height: 90px;
-    background: radial-gradient(circle, rgba(168, 213, 168, 0.2) 0%, rgba(168, 213, 168, 0.06) 50%, transparent 100%);
-    bottom: 40%;
-    right: 15%;
-    animation: smokeFlow5 16s ease-in-out infinite;
-}
-
+.particle-1,
+.particle-2,
+.particle-3,
+.particle-4,
+.particle-5,
 .particle-6 {
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(135, 169, 107, 0.18) 0%, rgba(135, 169, 107, 0.04) 50%, transparent 100%);
-    top: 20%;
-    left: 50%;
-    animation: smokeFlow6 24s ease-in-out infinite;
+    display: none;
 }
 
 @keyframes smokeFlow1 {
@@ -2237,8 +2220,8 @@ html[lang="ko"] textarea {
 
 .dreams-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
     margin-bottom: 32px;
 }
 
@@ -2253,26 +2236,26 @@ html[lang="ko"] textarea {
 }
 
 .pagination-arrow {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(127, 176, 105, 0.1);
-    border: 1px solid rgba(127, 176, 105, 0.3);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background: transparent;
+    border: none;
     color: var(--matcha-dark);
-    font-size: 24px;
-    font-weight: 300;
+    font-size: 18px;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
+    opacity: 0.7;
 }
 
 .pagination-arrow:hover:not(:disabled) {
-    background: rgba(127, 176, 105, 0.2);
-    border-color: rgba(127, 176, 105, 0.5);
-    transform: scale(1.05);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .pagination-arrow:disabled {
@@ -2322,20 +2305,6 @@ html[lang="ko"] textarea {
     transform: scale(1);
     opacity: 1;
     filter: blur(0px);
-}
-
-@media (max-width: 1024px) {
-    .dreams-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
-    }
-}
-
-@media (max-width: 768px) {
-    .dreams-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
 }
 
 @media (max-width: 640px) {
@@ -3567,6 +3536,9 @@ html[lang="ko"] textarea {
 .dream-calendar {
     padding: 20px;
     margin-bottom: 24px;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .calendar-header {
@@ -3630,9 +3602,10 @@ html[lang="ko"] textarea {
 
 .calendar-weekdays {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 1px;
     margin-bottom: 1px;
+    overflow: hidden;
 }
 
 .weekday-header {
@@ -3646,9 +3619,10 @@ html[lang="ko"] textarea {
 
 .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 1px;
     background: rgba(127, 176, 105, 0.1);
+    overflow: hidden;
 }
 
 .calendar-day {
@@ -3972,5 +3946,14 @@ html[lang="ko"] textarea {
         padding: 8px 12px;
         font-size: 13px;
         gap: 8px;
+    }
+}
+
+
+/* Mobile performance: disable backdrop-filter (GPU-heavy) */
+@media (max-width: 768px) {
+    * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 }

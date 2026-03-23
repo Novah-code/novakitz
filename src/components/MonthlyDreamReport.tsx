@@ -4,35 +4,6 @@ import { useState, useEffect } from 'react';
 import { supabase, Dream } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { getUserPlanInfo } from '../lib/subscription';
-// jsPDF is dynamically imported in downloadPDF() to reduce bundle size
-import AnimatedScore from './AnimatedScore';
-
-interface MonthlyStats {
-  month: string;
-  totalDreams: number;
-  averageMood: string;
-  topKeywords: { word: string; count: number }[];
-  moodDistribution: { [key: string]: number };
-  patterns: string[];
-  monthlyChange: {
-    dreamCountChange: number;
-    newKeywords: string[];
-    emotionShift: string;
-  };
-  monthlyTrends: { month: string; count: number }[];
-  totalKeywords: number;
-  averageLength: number;
-  longestDream: number;
-  shortestDream: number;
-  // New fields for enhanced report
-  dreamHighlights: { title: string; date: string; mood: string; preview: string }[];
-  archetypes: { name: string; count: number; description: string }[];
-  emotionalJourney: { week: number; mood: string; count: number }[];
-  growthScore: number;
-  lucidDreamCount: number;
-  nightmareCount: number;
-  recurringSymbols: { symbol: string; meaning: string; count: number }[];
-}
 
 interface MonthlyReportProps {
   user: User | null;
@@ -40,1538 +11,631 @@ interface MonthlyReportProps {
   onClose?: () => void;
 }
 
-const translations = {
-  en: {
-    monthlyReport: 'Monthly Dream Report',
-    premiumOnly: 'Premium feature - Monthly reports available once per month',
-    nextReportIn: 'Next report available in',
-    month: 'Month',
-    dreams: 'Dreams Recorded',
-    averageMood: 'Dominant Emotion',
-    topKeywords: 'Dream Symbols',
-    moodBreakdown: 'Emotional Landscape',
-    patterns: 'Discovered Patterns',
-    downloadReport: 'Download Report',
-    noData: 'No dreams recorded this month. Start journaling to unlock insights!',
-    close: 'Close',
-    monthlyTrends: 'Your Dream Journey',
-    reportGeneratedOn1st: 'Your personal dream insights for this month',
-    totalKeywords: 'Unique Symbols',
-    avgLength: 'Avg Detail',
-    longestDream: 'Most Vivid',
-    shortestDream: 'Brief Flash',
-    characters: 'chars',
-    aiPatternAnalysis: 'Deep Insights',
-    aiAnalyzing: 'Analyzing your dream patterns...',
-    statistics: 'Dream Statistics',
-    upgradeToPremium: 'Unlock Full Analysis',
-    teaserMessage: 'Discover what your dreams reveal about you',
-    dreamHighlights: 'Dream Highlights',
-    archetypes: 'Archetypes Appearing',
-    emotionalJourney: 'Emotional Journey',
-    growthScore: 'Growth Score',
-    lucidDreams: 'Lucid Dreams',
-    nightmares: 'Challenges Faced',
-    recurringSymbols: 'Recurring Symbols',
-    weeklyBreakdown: 'Weekly Breakdown',
-    thisMonth: 'This Month',
-    vsLastMonth: 'vs Last Month',
-    moreActive: 'more active',
-    lessActive: 'less active',
-    insightOfMonth: 'Insight of the Month',
-  },
-  ko: {
-    monthlyReport: '월간 꿈 리포트',
-    premiumOnly: '프리미엄 전용 - 월간 리포트는 월 1회 생성 가능',
-    nextReportIn: '다음 리포트 가능',
-    month: '월',
-    dreams: '기록된 꿈',
-    averageMood: '주된 감정',
-    topKeywords: '꿈 속 상징',
-    moodBreakdown: '감정 지형도',
-    patterns: '발견된 패턴',
-    downloadReport: '리포트 저장',
-    noData: '이번 달 기록된 꿈이 없습니다. 꿈을 기록하고 인사이트를 발견하세요!',
-    close: '닫기',
-    monthlyTrends: '나의 꿈 여정',
-    reportGeneratedOn1st: '이번 달 당신만의 꿈 인사이트',
-    totalKeywords: '고유 상징',
-    avgLength: '평균 상세도',
-    longestDream: '가장 선명한 꿈',
-    shortestDream: '짧은 섬광',
-    characters: '자',
-    aiPatternAnalysis: '심층 인사이트',
-    aiAnalyzing: '꿈 패턴을 분석하는 중...',
-    statistics: '꿈 통계',
-    upgradeToPremium: '전체 분석 잠금 해제',
-    teaserMessage: '당신의 꿈이 말하는 것을 발견하세요',
-    dreamHighlights: '이달의 꿈 하이라이트',
-    archetypes: '등장한 아키타입',
-    emotionalJourney: '감정의 여정',
-    growthScore: '성장 점수',
-    lucidDreams: '자각몽',
-    nightmares: '도전적인 꿈',
-    recurringSymbols: '반복되는 상징',
-    weeklyBreakdown: '주간 분석',
-    thisMonth: '이번 달',
-    vsLastMonth: '지난달 대비',
-    moreActive: '더 활발',
-    lessActive: '덜 활발',
-    insightOfMonth: '이달의 인사이트',
-  },
-};
+type DayType = 'mood' | 'dream' | 'both' | 'none';
 
-// Mood emoji mapping
-const moodEmojis: { [key: string]: string } = {
-  happy: '😊',
-  peaceful: '😌',
-  anxious: '😰',
-  sad: '😢',
-  excited: '🤩',
-  confused: '😵',
-  angry: '😤',
-  fearful: '😨',
-  balanced: '😐',
-  curious: '🤔',
-  nostalgic: '🥹',
-  hopeful: '🌟',
-  mysterious: '🔮',
-};
+interface ActivityDay { day: number; type: DayType; }
 
-// Archetype descriptions
-const archetypeInfo: { [key: string]: { en: string; ko: string } } = {
-  water: { en: 'Emotions & Subconscious', ko: '감정과 무의식' },
-  flying: { en: 'Freedom & Transcendence', ko: '자유와 초월' },
-  falling: { en: 'Loss of Control', ko: '통제력 상실' },
-  chase: { en: 'Avoidance & Fear', ko: '회피와 두려움' },
-  house: { en: 'Self & Psyche', ko: '자아와 정신' },
-  animal: { en: 'Instincts & Nature', ko: '본능과 자연' },
-  death: { en: 'Transformation', ko: '변화와 전환' },
-  baby: { en: 'New Beginnings', ko: '새로운 시작' },
-  journey: { en: 'Life Path', ko: '인생의 여정' },
-  stranger: { en: 'Unknown Self', ko: '알려지지 않은 자아' },
+interface AiInsights {
+  narrativeTitle: string;
+  narrativeText: string;
+  synthesisTheme: string;
+  synthesisDescription: string;
+  synthesisQuestion: string;
+  deepDive: string;
+  lookingAheadTitle: string;
+  lookingAheadSuggestion: string;
+}
+
+interface ArchetypeCard { name: string; category: string; meaning: string; iconType: 'compass' | 'key'; }
+
+/* ──────────── SVG icons ──────────── */
+function IconCalendar({ size = 18, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+}
+function IconX({ size = 20, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+function IconSun({ size = 20, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>;
+}
+function IconMoon({ size = 20, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;
+}
+function IconSparkles({ size = 16, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.09 3.36L16.5 7.5l-3.41 1.14L12 12l-1.09-3.36L7.5 7.5l3.41-1.14L12 3z"/><path d="M19 9l.57 1.77L21.34 12l-1.77.73L19 15l-.57-1.77L16.66 12l1.77-.73L19 9z"/><path d="M5 14l.57 1.77L7.34 17l-1.77.73L5 20l-.57-1.77L2.66 17l1.77-.73L5 14z"/></svg>;
+}
+function IconCompass({ size = 16, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>;
+}
+function IconKey({ size = 16, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>;
+}
+function IconArrowRight({ size = 14, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
+}
+function IconQuote({ size = 20, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>;
+}
+
+/* ──────────── Archetype info ──────────── */
+const ARCHETYPE_INFO: Record<string, { name: string; koName: string; category: string; koCategory: string; en: string; ko: string; iconType: 'compass' | 'key' }> = {
+  hero:      { name: 'The Hero',      koName: '영웅',       category: 'Action',         koCategory: '행동',   en: 'You faced challenges head-on, showing courage and determination in your dreams.',             ko: '이달 꿈에서 도전에 정면으로 맞서며 용기와 결단력을 보여주었습니다.',           iconType: 'compass' },
+  sage:      { name: 'The Sage',      koName: '현자',       category: 'Wisdom',         koCategory: '지혜',   en: 'Figures offering knowledge appeared frequently, reflecting a search for deeper understanding.', ko: '지식을 주는 인물이 자주 등장했으며, 깊은 이해를 향한 탐구를 반영합니다.',       iconType: 'key' },
+  explorer:  { name: 'The Explorer',  koName: '탐험가',     category: 'Journey',        koCategory: '여정',   en: 'Your dreams were filled with movement and new territories, signaling a desire for growth.',     ko: '꿈에서 이동과 새로운 영역이 가득했으며, 성장에 대한 욕구를 나타냅니다.',        iconType: 'compass' },
+  magician:  { name: 'The Magician',  koName: '마법사',     category: 'Transformation', koCategory: '변환',   en: 'Symbols of transformation dominated your dreams, marking a shift in your inner world.',         ko: '변화의 상징이 꿈을 지배하며 내면 세계의 전환을 나타냅니다.',                   iconType: 'key' },
+  lover:     { name: 'The Lover',     koName: '연인',       category: 'Connection',     koCategory: '연결',   en: 'Themes of connection and relationships featured prominently in your dream space.',              ko: '연결과 관계에 대한 테마가 꿈 공간에서 두드러지게 나타났습니다.',                iconType: 'key' },
+  caregiver: { name: 'The Caregiver', koName: '돌봄이',     category: 'Nurture',        koCategory: '돌봄',   en: 'Nurturing figures and protective instincts reflect care and responsibility themes.',            ko: '돌봄의 인물과 보호 본능이 두드러지며 책임의 테마를 반영합니다.',               iconType: 'key' },
+  ruler:     { name: 'The Ruler',     koName: '통치자',     category: 'Order',          koCategory: '질서',   en: 'Dreams of control and structure reflect a desire to bring order to your waking life.',          ko: '통제와 구조에 대한 꿈은 일상에 질서를 가져오려는 욕구를 반영합니다.',          iconType: 'compass' },
+  outlaw:    { name: 'The Outlaw',    koName: '무법자',     category: 'Challenge',      koCategory: '도전',   en: 'Your dreams showed themes of breaking boundaries and disrupting the status quo.',               ko: '꿈에서 경계를 넘고 현상 유지를 깨는 테마가 나타났습니다.',                     iconType: 'compass' },
+  creator:   { name: 'The Creator',   koName: '창조자',     category: 'Creation',       koCategory: '창조',   en: 'Creative impulses and novel constructions appeared, signaling innovative energy.',              ko: '창의적 충동과 새로운 구성이 꿈에 나타났으며 혁신적 에너지를 신호합니다.',       iconType: 'key' },
+  innocent:  { name: 'The Innocent',  koName: '순수한 자',  category: 'Purity',         koCategory: '순수',   en: 'Childlike wonder and simple joys featured in your dreams, reflecting core values.',            ko: '순수하고 어린아이 같은 경이로움이 꿈에 나타났으며 핵심 가치를 반영합니다.',    iconType: 'key' },
+  jester:    { name: 'The Jester',    koName: '광대',       category: 'Liberation',     koCategory: '해방',   en: 'Playful or absurd elements appeared often, pointing to a need for lightness.',                 ko: '유쾌하거나 엉뚱한 요소가 자주 등장했으며 가벼움에 대한 필요를 나타냅니다.',    iconType: 'compass' },
+  everyman:  { name: 'The Everyman',  koName: '보통 사람',  category: 'Belonging',      koCategory: '소속',   en: 'Ordinary settings and familiar faces suggest a longing for community and belonging.',           ko: '평범한 환경과 익숙한 얼굴이 공동체와 소속감에 대한 갈망을 나타냅니다.',        iconType: 'compass' },
 };
 
 export default function MonthlyDreamReport({ user, language = 'ko', onClose }: MonthlyReportProps) {
-  const [stats, setStats] = useState<MonthlyStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(0);
-  const [availableMonths, setAvailableMonths] = useState<{value: number, label: string}[]>([]);
-  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [availableMonths, setAvailableMonths] = useState<{ value: number; label: string }[]>([]);
+
+  const [moodCount, setMoodCount] = useState(0);
+  const [dreamCount, setDreamCount] = useState(0);
+  const [activityGrid, setActivityGrid] = useState<ActivityDay[]>([]);
+  const [monthLabel, setMonthLabel] = useState('');
+  const [nextMonthLabel, setNextMonthLabel] = useState('');
+  const [hasData, setHasData] = useState(false);
+
+  const [aiInsights, setAiInsights] = useState<AiInsights | null>(null);
+  const [archetypes, setArchetypes] = useState<ArchetypeCard[]>([]);
   const [aiLoading, setAiLoading] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const t = translations[language];
+  const [showDeepDive, setShowDeepDive] = useState(false);
+  const [isCurrentMonthPreview, setIsCurrentMonthPreview] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      checkPremiumAndLoadReport();
-    }
+    if (user) checkPremiumAndLoadReport();
   }, [user]);
 
   useEffect(() => {
-    if (user && isPremium) {
-      handleMonthChange();
-    }
+    if (user) loadMonthReport(selectedMonth, isPremium);
   }, [selectedMonth]);
 
-  const handleMonthChange = async () => {
-    setIsTransitioning(true);
-    await new Promise(resolve => setTimeout(resolve, 200));
-    await loadMonthReport(selectedMonth);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    setIsTransitioning(false);
-  };
+  const isMoodEntry = (d: Dream) =>
+    !!(d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record'));
 
-  const loadMonthReport = async (monthOffset: number) => {
+  const loadMonthReport = async (monthOffset: number, premium: boolean) => {
     if (!user) return;
-
     try {
       setLoading(true);
+      setAiInsights(null);
+      setArchetypes([]);
+      setShowDeepDive(false);
+
       const now = new Date();
       const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+      const isCurrent = monthOffset === 0;
+      setIsCurrentMonthPreview(isCurrent);
       const monthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
       const monthEnd = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0);
 
-      const { data: dreams } = await supabase
-        .from('dreams')
-        .select('*')
-        .eq('user_id', user.id)
+      const label = targetDate.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' });
+      const nextLabel = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 1)
+        .toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long' });
+      setMonthLabel(label);
+      setNextMonthLabel(nextLabel);
+
+      const { data: allEntries } = await supabase
+        .from('dreams').select('*').eq('user_id', user.id)
         .gte('created_at', monthStart.toISOString())
         .lte('created_at', monthEnd.toISOString())
         .order('created_at', { ascending: false });
 
-      if (!dreams || dreams.length === 0) {
-        setStats(null);
-        setLoading(false);
-        return;
+      if (!allEntries || allEntries.length === 0) { setHasData(false); return; }
+      setHasData(true);
+
+      const moods = allEntries.filter(isMoodEntry);
+      const dreams = allEntries.filter(d => !isMoodEntry(d));
+      setMoodCount(moods.length);
+      setDreamCount(dreams.length);
+
+      const dayKey = (d: Dream) => {
+        const dt = new Date(d.created_at || new Date());
+        return `${dt.getFullYear()}-${dt.getMonth()}-${dt.getDate()}`;
+      };
+      const moodDaySet = new Set<string>();
+      const dreamDaySet = new Set<string>();
+      moods.forEach(m => moodDaySet.add(dayKey(m)));
+      dreams.forEach(d => dreamDaySet.add(dayKey(d)));
+
+      const daysInMonth = monthEnd.getDate();
+      const grid: ActivityDay[] = [];
+      for (let day = 1; day <= daysInMonth; day++) {
+        const key = `${targetDate.getFullYear()}-${targetDate.getMonth()}-${day}`;
+        const hm = moodDaySet.has(key), hd = dreamDaySet.has(key);
+        grid.push({ day, type: hm && hd ? 'both' : hm ? 'mood' : hd ? 'dream' : 'none' });
       }
+      setActivityGrid(grid);
 
-      // Fetch last 6 months of dreams for trends
-      const sixMonthsAgo = new Date(targetDate.getFullYear(), targetDate.getMonth() - 5, 1);
-      const { data: allDreams } = await supabase
-        .from('dreams')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', sixMonthsAgo.toISOString())
-        .lte('created_at', monthEnd.toISOString());
-
-      const report = generateMonthlyReport(dreams, targetDate, allDreams || []);
-      setStats(report);
-
-      // Load AI analysis if we have enough dreams
-      if (dreams.length >= 3) {
-        loadAIAnalysis(dreams);
+      if (premium) {
+        loadPremiumInsights(dreams, moods, label, targetDate.getFullYear(), targetDate.getMonth(), isCurrent);
+        const dreamIds = dreams.map(d => d.id).filter(Boolean);
+        loadArchetypes(dreamIds, dreams);
       }
-    } catch (error) {
-      console.error('Error loading month report:', error);
+    } catch (err) {
+      console.error('Error loading month report:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadAIAnalysis = async (dreams: Dream[]) => {
+  const loadPremiumInsights = async (dreams: Dream[], moods: Dream[], label: string, year: number, month: number, isCurrent: boolean) => {
+    if (dreams.length === 0 && moods.length === 0) return;
+
+    const cacheKey = `mdr_insights_${user!.id}_${year}_${month}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const ageMs = Date.now() - timestamp;
+        const ttl = isCurrent ? 24 * 60 * 60 * 1000 : Infinity;
+        if (ageMs < ttl) {
+          setAiInsights(data);
+          return;
+        }
+      } catch { /* stale cache, re-fetch */ }
+    }
+
     setAiLoading(true);
     try {
-      const dreamSummaries = dreams.slice(0, 15).map((dream, idx) => {
-        const content = dream.content.split('\n\n---\n\n')[0];
-        return `Dream ${idx + 1} (${dream.mood}): ${content.substring(0, 300)}`;
-      }).join('\n\n');
+      const dreamSummaries = dreams.slice(0, 10).map((d, i) =>
+        `Dream ${i + 1}: ${d.title || 'untitled'} — ${d.content?.substring(0, 200) || ''}`
+      ).join('\n');
+      const moodSummaries = moods.slice(0, 8).map((m, i) =>
+        `Mood ${i + 1}: ${m.content?.replace('[감정 기록]', '').trim().substring(0, 120) || ''}`
+      ).join('\n');
 
       const prompt = language === 'ko'
-        ? `다음은 사용자의 이번 달 꿈 기록들입니다. 월간 리포트용으로 깊이 있는 분석을 제공해주세요.
-
-${dreamSummaries}
-
-다음 형식으로 분석해주세요 (각 섹션은 이모지로 시작):
-
-🌙 **이달의 핵심 메시지**
-이 달의 꿈들이 전체적으로 전달하는 핵심 메시지 (3-4문장, 시적이고 따뜻하게)
-
-🔮 **발견된 아키타입**
-꿈에 나타난 융 심리학적 아키타입과 그 의미 (2-3개, 각각 1문장)
-
-📈 **성장 포인트**
-꿈을 통해 보이는 심리적 성장이나 작업 중인 주제 (2-3문장)
-
-💫 **다음 달을 위한 제안**
-꿈이 제시하는 방향성과 자기 돌봄 팁 (2-3문장)
-
-친근하고 영감을 주는 톤으로 작성해주세요. 과도한 해석은 피하고, 사용자가 스스로 통찰을 얻을 수 있게 안내해주세요.`
-        : `Here are the user's dreams from this month. Please provide deep analysis for a monthly report.
-
-${dreamSummaries}
-
-Please provide analysis in this format (each section starts with an emoji):
-
-🌙 **Core Message of the Month**
-The overarching message from this month's dreams (3-4 sentences, poetic and warm)
-
-🔮 **Discovered Archetypes**
-Jungian archetypes appearing in the dreams and their meanings (2-3, one sentence each)
-
-📈 **Growth Points**
-Psychological growth or themes being worked on (2-3 sentences)
-
-💫 **Suggestions for Next Month**
-Direction suggested by dreams and self-care tips (2-3 sentences)
-
-Use a friendly, inspiring tone. Avoid over-interpretation and guide users to find their own insights.`;
+        ? `다음은 ${label}의 기록입니다:\n\n감정 기록:\n${moodSummaries}\n\n꿈 기록:\n${dreamSummaries}\n\n중요한 원칙: 감정과 꿈을 좋고 나쁨으로 평가하지 마세요. 불안, 두려움, 악몽, 어두운 감정 모두 유쾌한 감정과 동등하게 내면의 현상 그 자체로 다루세요. 어떤 감정이나 꿈도 고쳐야 하거나 변화해야 한다는 뉘앙스 없이 있는 그대로 탐색하세요. "정말 힘드셨겠어요" 같은 과장된 공감 표현은 피하고 담백하되 따뜻하게 유지하세요.\n\n다음 JSON 형식으로 분석해주세요:\n{"narrativeTitle":"이달을 표현하는 시적 제목(10단어 이내)","narrativeText":"이달 전체 흐름을 설명하는 2-3문장","synthesisTheme":"이달의 핵심 주제(5단어 이내)","synthesisDescription":"감정과 꿈의 거시적 연결 패턴(4-5문장, 반복적으로 나타난 테마와 변화 포함)","synthesisQuestion":"내면을 깊이 탐색하도록 유도하는 구체적인 성찰 질문(1문장, 판단 없이 현상을 바라보도록)","deepDive":"감정 패턴과 꿈 상징에 대한 심층 탐색(5-7문장, 반복 상징의 의미, 내면의 변화 흐름, 주목할 만한 감정들, 삶에서의 연결 포함. 좋고 나쁨 없이 현상으로 다룰 것)","lookingAheadTitle":"다음 달 제목(5단어 이내)","lookingAheadSuggestion":"이달 패턴을 바탕으로 한 다음 달 구체적 제안(2-3문장)"}`
+        : `Here are entries from ${label}:\n\nMood logs:\n${moodSummaries}\n\nDream logs:\n${dreamSummaries}\n\nImportant principle: Never evaluate emotions or dreams as good or bad. Anxiety, fear, nightmares, and dark emotions are as valid as pleasant ones — treat all as neutral inner phenomena. Do not imply anything needs to change or be fixed. Avoid exaggerated AI-style empathy — stay warm but grounded and matter-of-fact.\n\nAnalyze in this JSON:\n{"narrativeTitle":"Poetic title under 10 words","narrativeText":"2-3 sentence overview of this month's flow","synthesisTheme":"Core theme under 5 words","synthesisDescription":"Macro connection between moods and dreams (4-5 sentences including recurring themes and shifts)","synthesisQuestion":"A specific, deeply reflective question that invites non-judgmental inner exploration (1 sentence)","deepDive":"Deep exploration of emotional patterns and dream symbols (5-7 sentences covering recurring symbols, inner shifts, notable emotions, and connections to waking life — treat all content as neutral phenomena without good/bad framing)","lookingAheadTitle":"Title for next month under 5 words","lookingAheadSuggestion":"Specific suggestion for next month based on this month's patterns (2-3 sentences)"}`;
 
       const response = await fetch('/api/analyze-dream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, dreamText: '' }),
+        body: JSON.stringify({ prompt, dreamText: prompt, mode: 'monthly' }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setAiAnalysis(data.interpretation || data.analysis || null);
+        const text = data.interpretation || data.analysis || data.result || '';
+        const stripped = text.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+        const jsonMatch = stripped.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            const parsed = JSON.parse(jsonMatch[0]);
+            setAiInsights(parsed);
+            localStorage.setItem(cacheKey, JSON.stringify({ data: parsed, timestamp: Date.now() }));
+          } catch { /* ignore */ }
+        }
       }
-    } catch (error) {
-      console.error('Error loading AI analysis:', error);
+    } catch (err) {
+      console.error('Error loading premium insights:', err);
     } finally {
       setAiLoading(false);
     }
   };
 
-  const checkPremiumAndLoadReport = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
+  const loadArchetypes = async (dreamIds: string[], dreams: Dream[]) => {
     try {
-      setLoading(true);
+      const scores: Record<string, number> = {};
 
-      const planInfo = await getUserPlanInfo(user.id);
-      setIsPremium(planInfo.planSlug === 'premium');
+      // Try dream_patterns table first
+      const { data: patterns } = await supabase
+        .from('dream_patterns').select('archetype_hints').in('dream_id', dreamIds);
 
-      // Get available months
-      const { data: allDreams } = await supabase
-        .from('dreams')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (allDreams && allDreams.length > 0) {
-        const months = new Set<string>();
-        const now = new Date();
-        allDreams.forEach(dream => {
-          const dreamDate = new Date(dream.created_at);
-          const monthKey = `${dreamDate.getFullYear()}-${dreamDate.getMonth()}`;
-          months.add(monthKey);
+      if (patterns && patterns.length > 0) {
+        patterns.forEach(p => {
+          Object.entries(p.archetype_hints || {}).forEach(([arch, score]) => {
+            scores[arch] = (scores[arch] || 0) + (score as number);
+          });
         });
-
-        const monthOptions = Array.from(months).map(monthKey => {
-          const [year, month] = monthKey.split('-').map(Number);
-          const date = new Date(year, month, 1);
-          const monthsFromNow = (now.getFullYear() - year) * 12 + (now.getMonth() - month);
-          return {
-            value: -monthsFromNow,
-            label: date.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' })
-          };
-        }).sort((a, b) => b.value - a.value);
-
-        setAvailableMonths(monthOptions);
       }
 
-      await loadMonthReport(selectedMonth);
-    } catch (error) {
-      console.error('Error loading monthly report:', error);
+      // Fallback: keyword-based detection from dream content
+      if (Object.keys(scores).length === 0 && dreams.length > 0) {
+        const allText = dreams.map(d => `${d.title || ''} ${d.content || ''}`).join(' ').toLowerCase();
+        const kwMap: Record<string, string[]> = {
+          hero:      ['hero', 'fight', 'battle', 'overcome', 'brave', 'courage', '영웅', '싸움', '용기'],
+          sage:      ['wisdom', 'knowledge', 'guide', 'teacher', 'answer', '지혜', '가이드', '선생'],
+          explorer:  ['travel', 'journey', 'road', 'path', 'discover', '여행', '탐험', '길'],
+          magician:  ['transform', 'magic', 'change', 'shift', 'power', '변화', '마법', '변신'],
+          lover:     ['love', 'connect', 'intimate', 'relationship', '사랑', '연결', '관계'],
+          caregiver: ['care', 'protect', 'nurture', 'help', 'family', '돌봄', '보호', '가족'],
+          outlaw:    ['break', 'escape', 'freedom', 'rebel', 'rule', '탈출', '자유', '반항'],
+          creator:   ['create', 'build', 'art', 'invent', 'make', '창조', '만들다', '예술'],
+          innocent:  ['child', 'pure', 'simple', 'wonder', 'joy', '아이', '순수', '기쁨'],
+          everyman:  ['ordinary', 'home', 'family', 'belong', 'friend', '가정', '평범', '친구'],
+        };
+        Object.entries(kwMap).forEach(([arch, kws]) => {
+          const count = kws.reduce((s, kw) => s + (allText.split(kw).length - 1), 0);
+          if (count > 0) scores[arch] = count;
+        });
+      }
+
+      const top = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 2);
+      if (top.length === 0) return;
+
+      const cards: ArchetypeCard[] = top.map(([arch], i) => {
+        const info = ARCHETYPE_INFO[arch];
+        return {
+          name: language === 'ko' ? (info?.koName || arch) : (info?.name || arch),
+          category: language === 'ko' ? (info?.koCategory || '상징') : (info?.category || 'Symbol'),
+          meaning: language === 'ko' ? (info?.ko || arch) : (info?.en || arch),
+          iconType: i === 0 ? 'key' : 'compass',
+        };
+      });
+      setArchetypes(cards);
+    } catch (err) {
+      console.error('Error loading archetypes:', err);
+    }
+  };
+
+  const checkPremiumAndLoadReport = async () => {
+    if (!user) { setLoading(false); return; }
+    try {
+      setLoading(true);
+      const planInfo = await getUserPlanInfo(user.id);
+      const premium = planInfo.planSlug === 'premium';
+      setIsPremium(premium);
+
+      const { data: allEntries } = await supabase
+        .from('dreams').select('created_at').eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (allEntries && allEntries.length > 0) {
+        const months = new Set<string>();
+        allEntries.forEach(e => {
+          const d = new Date(e.created_at);
+          months.add(`${d.getFullYear()}-${d.getMonth()}`);
+        });
+        const now2 = new Date();
+        const opts = Array.from(months).map(key => {
+          const [yr, mo] = key.split('-').map(Number);
+          const date = new Date(yr, mo, 1);
+          const offset = (now2.getFullYear() - yr) * 12 + (now2.getMonth() - mo);
+          return { value: -offset, label: date.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' }) };
+        }).sort((a, b) => b.value - a.value);
+        setAvailableMonths(opts);
+      }
+      await loadMonthReport(0, premium);
+    } catch (err) {
+      console.error('Error checking premium:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const isCommonWord = (word: string): boolean => {
-    const commonWords = [
-      // English - Basic
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
-      'from', 'by', 'as', 'into', 'through', 'about', 'after', 'before', 'during',
-      // English - Verbs
-      'was', 'were', 'is', 'are', 'be', 'been', 'being', 'am',
-      'have', 'has', 'had', 'do', 'does', 'did', 'done',
-      'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can',
-      // English - Pronouns
-      'that', 'this', 'these', 'those', 'what', 'which', 'who', 'whom', 'whose', 'where', 'when', 'why', 'how',
-      'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
-      'your', 'his', 'her', 'its', 'our', 'their', 'my', 'mine', 'yours', 'hers', 'ours', 'theirs',
-      // English - Common adjectives/adverbs
-      'not', 'no', 'yes', 'just', 'only', 'very', 'more', 'less', 'most', 'much', 'many', 'some', 'any', 'all',
-      'also', 'even', 'still', 'yet', 'already', 'again', 'always', 'never', 'often', 'sometimes',
-      'here', 'there', 'now', 'then', 'today', 'tomorrow', 'yesterday',
-      // English - Dream-related analysis words
-      'dream', 'dreams', 'dreaming', 'dreamed', 'dreamt',
-      'perhaps', 'maybe', 'possibly', 'likely', 'probably', 'seems', 'appear', 'appears',
-      'feel', 'feels', 'felt', 'feeling', 'feelings',
-      'suggest', 'suggests', 'suggested', 'suggesting', 'suggestion',
-      'indicate', 'indicates', 'indicating',
-      'reflect', 'reflects', 'reflected', 'reflecting', 'reflection',
-      'represent', 'represents', 'represented', 'representing',
-      'symbolize', 'symbolizes', 'symbolic', 'symbol', 'symbols',
-      'mean', 'means', 'meant', 'meaning',
-      'part', 'parts', 'aspect', 'aspects',
-      'inner', 'outer', 'deep', 'deeper', 'deepest',
-      'life', 'lives', 'living', 'lived',
-      'self', 'yourself', 'myself', 'itself', 'themselves',
-      'thing', 'things', 'something', 'anything', 'nothing', 'everything',
-      'time', 'times',
-      // English - Common verbs
-      'like', 'seem', 'find', 'found', 'try', 'tried', 'want', 'wanted', 'need', 'needed',
-      'see', 'saw', 'seen', 'look', 'looked', 'looking', 'watch', 'watched',
-      'get', 'got', 'getting', 'go', 'went', 'gone', 'going', 'come', 'came', 'coming',
-      'make', 'made', 'making', 'take', 'took', 'taken', 'taking',
-      'give', 'gave', 'given', 'giving',
-      'know', 'knew', 'known', 'knowing', 'think', 'thought', 'thinking',
-      'say', 'said', 'saying', 'tell', 'told', 'telling',
-      // English - Journal/Entry related words
-      'entry', 'entries', 'journal', 'journals', 'note', 'notes', 'record', 'records',
-      'wrote', 'write', 'written', 'writing', 'log', 'logs', 'logged',
-      'date', 'dated', 'day', 'days', 'night', 'nights', 'morning', 'evening',
-      'last', 'next', 'first', 'second', 'third',
-      'new', 'old', 'recent', 'previous',
-      'started', 'start', 'starting', 'began', 'begin', 'beginning', 'ended', 'end', 'ending',
-      'woke', 'wake', 'waking', 'asleep', 'sleep', 'sleeping', 'slept',
-      'remember', 'remembered', 'remembering', 'forgot', 'forget', 'forgetting',
-      // English - More common words to filter
-      'really', 'actually', 'basically', 'literally', 'definitely', 'certainly',
-      'kind', 'type', 'sort', 'way', 'ways', 'place', 'places',
-      'back', 'front', 'side', 'around', 'over', 'under', 'between', 'among',
-      'same', 'different', 'other', 'another', 'each', 'every', 'both', 'either', 'neither',
-      'such', 'own', 'able', 'being', 'become', 'became', 'becoming',
-      'while', 'though', 'although', 'however', 'because', 'since', 'until', 'unless',
-      'suddenly', 'slowly', 'quickly', 'finally', 'eventually',
-      'someone', 'anyone', 'everyone', 'nobody', 'somebody',
-      'somewhere', 'anywhere', 'everywhere', 'nowhere',
-      'person', 'people', 'man', 'woman', 'men', 'women', 'child', 'children',
-      'room', 'door', 'window', 'floor', 'wall', 'ceiling',
-      // Korean - Particles
-      '하다', '이다', '있다', '없다', '되다', '가다', '오다', '보다', '주다',
-      '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로', '의', '도', '만', '부터', '까지',
-      '은', '는',
-      // Korean - Common words
-      '그리고', '또는', '하지만', '매우', '너무', '정말', '아주', '정말로',
-      '꿈', '꾼', '꾸었다', '꾸는',
-      '나', '우리', '그', '그녀', '당신', '저', '제',
-      '것', '수', '때', '곳', '중',
-      // Korean - Journal related
-      '일기', '기록', '작성', '메모', '노트',
-      '오늘', '어제', '내일', '아침', '저녁', '밤',
-      '처음', '마지막', '다음', '이전',
-      '사람', '남자', '여자', '아이',
-      '방', '문', '창문', '바닥', '벽',
-    ];
-    return commonWords.includes(word.toLowerCase());
-  };
+  /* ── derived ── */
+  const activeDaysCount = activityGrid.filter(d => d.type !== 'none').length;
+  const totalEntries = moodCount + dreamCount;
+  const moodPct = totalEntries > 0 ? (moodCount / totalEntries) * 100 : 50;
+  const dreamPct = totalEntries > 0 ? (dreamCount / totalEntries) * 100 : 50;
 
-  const generateMonthlyReport = (dreams: Dream[], now: Date, allDreams: {created_at: string}[] = []): MonthlyStats => {
-    const monthName = now.toLocaleString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', year: 'numeric' });
+  const dayBg = (t: DayType) => t === 'both' ? '#7ea886' : t === 'mood' ? '#e8ce90' : t === 'dream' ? '#b8d6c0' : '#f0f5f2';
+  const dayBorder = (t: DayType) => t === 'both' ? '1px solid rgba(92,128,101,0.2)' : t === 'mood' ? '1px solid rgba(214,168,72,0.2)' : t === 'dream' ? '1px solid rgba(126,168,134,0.2)' : '1px solid rgba(232,239,233,0.5)';
 
-    // Mood distribution
-    const moodDistribution: { [key: string]: number } = {};
-    dreams.forEach((d) => {
-      const mood = d.mood || 'balanced';
-      moodDistribution[mood] = (moodDistribution[mood] || 0) + 1;
-    });
+  /* ── Loading ── */
+  if (loading) return (
+    <div style={{ padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+      <style>{`@keyframes mdr-spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ width: 44, height: 44, border: '3px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite' }} />
+      <p style={{ color: '#8ca693', fontSize: 14 }}>{language === 'ko' ? '리포트를 불러오는 중...' : 'Loading your report...'}</p>
+    </div>
+  );
 
-    const averageMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced';
+  /* ── No Data ── */
+  if (!hasData) return (
+    <div style={{ padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+      <IconMoon size={48} color="#7ea886" />
+      <p style={{ fontSize: 16, color: '#334139', lineHeight: 1.6, maxWidth: 280 }}>
+        {language === 'ko' ? '이번 달 기록된 꿈이 없습니다. 꿈을 기록하고 인사이트를 발견하세요!' : 'No dreams recorded this month. Start journaling to unlock insights!'}
+      </p>
+      {onClose && <button onClick={onClose} style={{ padding: '12px 24px', background: '#7ea886', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{language === 'ko' ? '꿈 기록하러 가기' : 'Start Recording Dreams'}</button>}
+    </div>
+  );
 
-    // Keywords extraction - use tags from dreams (AI-generated keywords)
-    const keywordCount: { [key: string]: number } = {};
-    dreams.forEach((dream) => {
-      const tags = dream.tags || [];
-      const uniqueTagsInDream = new Set<string>();
-
-      tags.forEach((tag: string) => {
-        if (!tag) return;
-        // Filter out: "꿈", "no-dream", very short tags
-        if (!tag.includes('꿈') &&
-            !tag.includes('no-dream') &&
-            !tag.includes('꿈안꿈') &&
-            tag.length > 1) {
-          uniqueTagsInDream.add(tag);
-        }
-      });
-
-      // Add unique tags from this dream to the global count
-      uniqueTagsInDream.forEach((tag) => {
-        keywordCount[tag] = (keywordCount[tag] || 0) + 1;
-      });
-    });
-
-    const topKeywords = Object.entries(keywordCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([word, count]) => ({ word, count }));
-
-    // Pattern detection
-    const patterns: string[] = [];
-    const dominantMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0];
-    if (dominantMood && dominantMood[1] > dreams.length * 0.3) {
-      const percentage = Math.round((dominantMood[1] / dreams.length) * 100);
-      const moodEmoji = moodEmojis[dominantMood[0]] || '💭';
-      patterns.push(
-        language === 'ko'
-          ? `${moodEmoji} 이달의 꿈에서 "${dominantMood[0]}" 감정이 ${percentage}%로 가장 두드러졌습니다`
-          : `${moodEmoji} "${dominantMood[0]}" was your dominant emotion at ${percentage}%`
-      );
-    }
-
-
-    // Monthly trends
-    const monthNames = language === 'ko'
-      ? ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
-      : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    const monthCounts: { [key: string]: number } = {};
-    allDreams.forEach(dream => {
-      const date = new Date(dream.created_at);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
-    });
-
-    const monthlyTrends = Object.entries(monthCounts)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-6)
-      .map(([monthKey, count]) => {
-        const [year, month] = monthKey.split('-');
-        const monthName = monthNames[parseInt(month) - 1];
-        return { month: `${monthName} ${year.slice(2)}`, count };
-      });
-
-    // Additional statistics
-    const totalKeywords = Object.keys(keywordCount).length;
-    const dreamLengths = dreams.map(d => (d.content?.split('\n\n---\n\n')[0]?.length || 0));
-    const averageLength = dreamLengths.length > 0
-      ? Math.round(dreamLengths.reduce((sum, len) => sum + len, 0) / dreamLengths.length)
-      : 0;
-    const longestDream = dreamLengths.length > 0 ? Math.max(...dreamLengths) : 0;
-    const shortestDream = dreamLengths.length > 0 ? Math.min(...dreamLengths.filter(l => l > 0)) : 0;
-
-    // Dream highlights (top 3 most detailed dreams)
-    const dreamHighlights = dreams
-      .sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0))
-      .slice(0, 3)
-      .map(d => ({
-        title: d.title || (language === 'ko' ? '제목 없음' : 'Untitled'),
-        date: new Date(d.created_at || new Date()).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric' }),
-        mood: d.mood || 'balanced',
-        preview: d.content?.split('\n\n---\n\n')[0]?.substring(0, 80) + '...' || ''
-      }));
-
-    // Simple archetype detection
-    const archetypeKeywords: { [key: string]: string[] } = {
-      water: ['water', 'ocean', 'sea', 'river', 'lake', 'rain', 'swimming', 'drowning', '물', '바다', '강', '호수', '비', '수영'],
-      flying: ['fly', 'flying', 'flight', 'soar', 'float', 'wings', '날다', '비행', '날개', '떠다니다'],
-      falling: ['fall', 'falling', 'drop', 'cliff', '떨어지다', '추락', '절벽'],
-      chase: ['chase', 'chasing', 'run', 'running', 'escape', 'pursue', '쫓기다', '도망', '달리다'],
-      house: ['house', 'home', 'room', 'building', 'door', '집', '방', '건물', '문'],
-      animal: ['animal', 'dog', 'cat', 'bird', 'snake', 'wolf', '동물', '개', '고양이', '새', '뱀'],
-      death: ['death', 'die', 'dead', 'dying', 'funeral', '죽음', '죽다', '장례'],
-      baby: ['baby', 'child', 'birth', 'pregnant', '아기', '아이', '출산', '임신'],
-      journey: ['travel', 'journey', 'road', 'path', 'car', 'train', '여행', '길', '차', '기차'],
-      stranger: ['stranger', 'unknown', 'mysterious', 'shadow', '낯선', '모르는', '신비한', '그림자'],
-    };
-
-    const archetypes: { name: string; count: number; description: string }[] = [];
-    const allText = dreams.map(d => `${d.title} ${d.content}`).join(' ').toLowerCase();
-
-    Object.entries(archetypeKeywords).forEach(([archetype, keywords]) => {
-      const count = keywords.reduce((sum, kw) => {
-        const regex = new RegExp(kw, 'gi');
-        return sum + (allText.match(regex)?.length || 0);
-      }, 0);
-      if (count > 0) {
-        archetypes.push({
-          name: archetype,
-          count,
-          description: archetypeInfo[archetype]?.[language] || archetype
-        });
-      }
-    });
-    archetypes.sort((a, b) => b.count - a.count);
-
-    // Growth score (based on dream frequency, detail, and variety)
-    const frequencyScore = Math.min(dreams.length / 10, 1) * 40;
-    const detailScore = Math.min(averageLength / 500, 1) * 30;
-    const varietyScore = Math.min(Object.keys(moodDistribution).length / 5, 1) * 30;
-    const growthScore = Math.round(frequencyScore + detailScore + varietyScore);
-
-    // Count lucid dreams and nightmares
-    const lucidDreamCount = dreams.filter(d =>
-      d.content?.toLowerCase().includes('lucid') ||
-      d.content?.includes('자각몽') ||
-      d.title?.toLowerCase().includes('lucid') ||
-      d.title?.includes('자각몽')
-    ).length;
-
-    const nightmareCount = dreams.filter(d =>
-      d.mood === 'fearful' ||
-      d.mood === 'anxious' ||
-      d.content?.toLowerCase().includes('nightmare') ||
-      d.content?.includes('악몽')
-    ).length;
-
-    // Weekly breakdown for emotional journey
-    const emotionalJourney: { week: number; mood: string; count: number }[] = [];
-    for (let week = 1; week <= 4; week++) {
-      const weekStart = new Date(now.getFullYear(), now.getMonth(), (week - 1) * 7 + 1);
-      const weekEnd = new Date(now.getFullYear(), now.getMonth(), week * 7);
-      const weekDreams = dreams.filter(d => {
-        const date = new Date(d.created_at || new Date());
-        return date >= weekStart && date <= weekEnd;
-      });
-      const weekMood = weekDreams.length > 0
-        ? Object.entries(weekDreams.reduce((acc: {[k:string]: number}, d) => {
-            acc[d.mood || 'balanced'] = (acc[d.mood || 'balanced'] || 0) + 1;
-            return acc;
-          }, {})).sort((a, b) => b[1] - a[1])[0]?.[0] || 'balanced'
-        : 'balanced';
-      emotionalJourney.push({ week, mood: weekMood, count: weekDreams.length });
-    }
-
-    // Recurring symbols with meanings
-    const recurringSymbols = topKeywords.slice(0, 5).map(kw => ({
-      symbol: kw.word,
-      meaning: language === 'ko'
-        ? `${kw.count}회 등장 - 당신의 무의식이 주목하는 상징`
-        : `Appeared ${kw.count} times - A symbol your unconscious is highlighting`,
-      count: kw.count
-    }));
-
-    return {
-      month: monthName,
-      totalDreams: dreams.length,
-      averageMood,
-      topKeywords,
-      moodDistribution,
-      patterns,
-      monthlyChange: {
-        dreamCountChange: 0,
-        newKeywords: topKeywords.slice(0, 3).map((k) => k.word),
-        emotionShift: 'Exploring new emotional themes',
-      },
-      monthlyTrends,
-      totalKeywords,
-      averageLength,
-      longestDream,
-      shortestDream,
-      dreamHighlights,
-      archetypes: archetypes.slice(0, 4),
-      emotionalJourney,
-      growthScore,
-      lucidDreamCount,
-      nightmareCount,
-      recurringSymbols,
-    };
-  };
-
-  const downloadPDF = async () => {
-    if (!stats) return;
-
-    const { default: jsPDF } = await import('jspdf');
-    const pdf = new jsPDF();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let yPosition = 0;
-
-    // Helper function to add new page if needed
-    const checkNewPage = (neededSpace: number) => {
-      if (yPosition + neededSpace > pageHeight - 20) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-    };
-
-    // Header with gradient effect (simulated with rectangles)
-    pdf.setFillColor(127, 176, 105);
-    pdf.rect(0, 0, pageWidth, 50, 'F');
-    pdf.setFillColor(139, 195, 74);
-    pdf.rect(0, 35, pageWidth, 15, 'F');
-
-    // Title
-    pdf.setFontSize(28);
-    pdf.setTextColor(255, 255, 255);
-    pdf.setFont('Helvetica', 'bold');
-    pdf.text('DREAM REPORT', pageWidth / 2, 22, { align: 'center' });
-    pdf.setFontSize(16);
-    pdf.text(stats.month, pageWidth / 2, 38, { align: 'center' });
-
-    yPosition = 65;
-
-    // Stats row
-    pdf.setFillColor(248, 250, 252);
-    pdf.roundedRect(15, yPosition - 5, pageWidth - 30, 35, 5, 5, 'F');
-
-    pdf.setFontSize(10);
-    pdf.setTextColor(100, 100, 100);
-    pdf.setFont('Helvetica', 'normal');
-
-    const statsY = yPosition + 5;
-    pdf.text('Dreams', 30, statsY);
-    pdf.text('Mood', 75, statsY);
-    pdf.text('Symbols', 120, statsY);
-    pdf.text('Growth', 165, statsY);
-
-    pdf.setFontSize(20);
-    pdf.setTextColor(127, 176, 105);
-    pdf.setFont('Helvetica', 'bold');
-    pdf.text(String(stats.totalDreams), 30, statsY + 15);
-    pdf.setFontSize(12);
-    pdf.text(stats.averageMood, 75, statsY + 15);
-    pdf.setFontSize(20);
-    pdf.text(String(stats.totalKeywords), 120, statsY + 15);
-    pdf.text(`${stats.growthScore}%`, 165, statsY + 15);
-
-    yPosition += 45;
-
-    // Top Keywords Section
-    checkNewPage(50);
-    pdf.setFontSize(14);
-    pdf.setTextColor(127, 176, 105);
-    pdf.setFont('Helvetica', 'bold');
-    pdf.text('DREAM SYMBOLS', 15, yPosition);
-    yPosition += 10;
-
-    pdf.setFontSize(10);
-    pdf.setTextColor(80, 80, 80);
-    pdf.setFont('Helvetica', 'normal');
-
-    const keywordsText = stats.topKeywords.slice(0, 8).map(k => `${k.word} (${k.count})`).join('  |  ');
-    const splitKeywords = pdf.splitTextToSize(keywordsText, pageWidth - 30);
-    pdf.text(splitKeywords, 15, yPosition);
-    yPosition += splitKeywords.length * 6 + 10;
-
-    // Patterns Section
-    if (stats.patterns.length > 0) {
-      checkNewPage(40);
-      pdf.setFontSize(14);
-      pdf.setTextColor(127, 176, 105);
-      pdf.setFont('Helvetica', 'bold');
-      pdf.text('PATTERNS DISCOVERED', 15, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setTextColor(80, 80, 80);
-      pdf.setFont('Helvetica', 'normal');
-
-      stats.patterns.forEach(pattern => {
-        checkNewPage(15);
-        const cleanPattern = pattern.replace(/[^\x00-\x7F]/g, ''); // Remove emojis for PDF
-        const splitPattern = pdf.splitTextToSize(`• ${cleanPattern}`, pageWidth - 30);
-        pdf.text(splitPattern, 15, yPosition);
-        yPosition += splitPattern.length * 5 + 5;
-      });
-      yPosition += 5;
-    }
-
-    // AI Analysis Section
-    if (aiAnalysis) {
-      checkNewPage(60);
-      pdf.setFontSize(14);
-      pdf.setTextColor(3, 105, 161);
-      pdf.setFont('Helvetica', 'bold');
-      pdf.text('AI INSIGHTS', 15, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(9);
-      pdf.setTextColor(60, 60, 60);
-      pdf.setFont('Helvetica', 'normal');
-
-      // Clean AI analysis for PDF (remove emojis, format nicely)
-      const cleanAnalysis = aiAnalysis
-        .replace(/[^\x00-\x7F\n]/g, '')
-        .replace(/\*\*/g, '')
-        .trim();
-
-      const splitAnalysis = pdf.splitTextToSize(cleanAnalysis, pageWidth - 30);
-
-      splitAnalysis.forEach((line: string) => {
-        checkNewPage(6);
-        pdf.text(line, 15, yPosition);
-        yPosition += 5;
-      });
-      yPosition += 10;
-    }
-
-    // Mood Distribution
-    checkNewPage(50);
-    pdf.setFontSize(14);
-    pdf.setTextColor(127, 176, 105);
-    pdf.setFont('Helvetica', 'bold');
-    pdf.text('EMOTIONAL LANDSCAPE', 15, yPosition);
-    yPosition += 12;
-
-    const moodEntries = Object.entries(stats.moodDistribution).sort((a, b) => b[1] - a[1]);
-    moodEntries.forEach(([mood, count]) => {
-      checkNewPage(10);
-      const percentage = Math.round((count / stats.totalDreams) * 100);
-      pdf.setFontSize(10);
-      pdf.setTextColor(80, 80, 80);
-      pdf.text(`${mood}: ${count} (${percentage}%)`, 15, yPosition);
-
-      // Draw bar
-      const barWidth = (percentage / 100) * 80;
-      pdf.setFillColor(127, 176, 105);
-      pdf.roundedRect(80, yPosition - 4, barWidth, 5, 2, 2, 'F');
-      yPosition += 10;
-    });
-
-    // Footer
-    pdf.setFontSize(8);
-    pdf.setTextColor(150, 150, 150);
-    pdf.text('Generated by Novakitz - AI Dream Journal', pageWidth / 2, pageHeight - 10, { align: 'center' });
-
-    pdf.save(`novakitz-dream-report-${stats.month.replace(' ', '-').toLowerCase()}.pdf`);
-  };
-
-  if (loading) {
-    return (
-      <div style={{
-        padding: '3rem',
-        textAlign: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '1rem'
-      }}>
-        <div style={{
-          width: '60px',
-          height: '60px',
-          border: '4px solid #e5e7eb',
-          borderTopColor: 'var(--matcha-green)',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <p style={{ color: '#666', fontSize: '14px' }}>
-          {language === 'ko' ? '리포트를 생성하고 있습니다...' : 'Generating your report...'}
-        </p>
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <div style={{
-        padding: '3rem',
-        textAlign: 'center',
-        color: '#666',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '1.5rem'
-      }}>
-        <div style={{ fontSize: '64px' }}>🌙</div>
-        <p style={{ fontSize: '16px', lineHeight: '1.6' }}>{t.noData}</p>
-        {onClose && (
-          <button
-            onClick={onClose}
-            style={{
-              padding: '12px 24px',
-              background: 'var(--matcha-green)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-          >
-            {language === 'ko' ? '꿈 기록하러 가기' : 'Start Recording Dreams'}
-          </button>
-        )}
-      </div>
-    );
-  }
-
+  /* ── Main ── */
   return (
-    <div style={{ padding: '1.5rem', animation: 'fadeIn 0.5s ease', position: 'relative', maxWidth: '500px', margin: '0 auto' }}>
+    <div style={{ fontFamily: 'inherit', color: '#334139', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        @keyframes expandBar {
-          from { width: 0; }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
-        }
-        .content-transition {
-          transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .content-transitioning {
-          opacity: 0.3;
-          transform: scale(0.98);
-        }
-        .blur-overlay {
-          filter: blur(8px);
-          pointer-events: none;
-          user-select: none;
-        }
-        .stat-card {
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .stat-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-        .insight-card {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          background-size: 200% 200%;
-          animation: shimmer 3s ease infinite;
-        }
+        @keyframes mdr-spin { to { transform: rotate(360deg); } }
+        .mdr-scroll::-webkit-scrollbar { width: 4px; }
+        .mdr-scroll::-webkit-scrollbar-thumb { background: #c6dfce; border-radius: 4px; }
+        .mdr-day { transition: transform 0.2s; }
+        .mdr-day:hover { transform: scale(1.15); }
+        .mdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
+        .mdr-journal:hover { color: #5c8065 !important; }
+        .mdr-intention:hover { color: white !important; }
       `}</style>
 
-      {/* Header with Month Selector */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
-          <h2 style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: 0 }}>
-            {t.monthlyReport}
-          </h2>
-          <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>{t.reportGeneratedOn1st}</p>
+      {/* ── Sticky Header ── */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
+          <IconCalendar size={17} color="#5c8065" />
+          {availableMonths.length > 1 ? (
+            <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}
+              style={{ fontSize: 13, fontWeight: 700, color: '#5c8065', border: 'none', background: 'transparent', cursor: 'pointer', outline: 'none', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {availableMonths.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          ) : (
+            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{monthLabel}</span>
+          )}
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065' }}>{language === 'ko' ? '리뷰' : 'Review'}</span>
+          {isPremium && (
+            <span style={{ marginLeft: 4, padding: '2px 8px', background: 'linear-gradient(to right, #e8ce90, #7ea886)', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Premium
+            </span>
+          )}
         </div>
-        {availableMonths.length > 1 && (
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '12px',
-              border: '2px solid var(--matcha-green)',
-              fontSize: '13px',
-              fontWeight: '600',
-              color: 'var(--matcha-dark)',
-              cursor: 'pointer',
-              background: 'white'
-            }}
-          >
-            {availableMonths.map(month => (
-              <option key={month.value} value={month.value}>
-                {month.label}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
-      <div className={`content-transition ${isTransitioning ? 'content-transitioning' : ''}`}>
-
-        {/* Hero Section - Main Stats */}
-        <div style={{
-          background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 50%, #C5E1A5 100%)',
-          padding: '2rem',
-          borderRadius: '20px',
-          marginBottom: '1.5rem',
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          animation: 'slideUp 0.6s ease'
-        }}>
-          {/* Decorative elements */}
-          <div style={{
-            position: 'absolute',
-            top: '-20px',
-            right: '-20px',
-            width: '100px',
-            height: '100px',
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '50%'
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: '-30px',
-            left: '30%',
-            width: '80px',
-            height: '80px',
-            background: 'rgba(255,255,255,0.08)',
-            borderRadius: '50%'
-          }} />
-
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h3 style={{ fontSize: '18px', marginBottom: '1.5rem', fontWeight: '600', opacity: 0.95 }}>
-              {stats.month}
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div>
-                <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t.dreams}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <AnimatedScore value={stats.totalDreams} duration={1500} style={{ fontSize: '48px', fontWeight: 'bold' }} />
-                  <span style={{ fontSize: '16px', opacity: 0.8 }}>
-                    {language === 'ko' ? '개' : 'dreams'}
-                  </span>
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '12px', opacity: 0.85, marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {t.averageMood}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '36px', animation: 'float 2s ease-in-out infinite' }}>
-                    {moodEmojis[stats.averageMood] || '💭'}
-                  </span>
-                  <span style={{ fontSize: '20px', fontWeight: '600', textTransform: 'capitalize' }}>
-                    {stats.averageMood}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Growth Score */}
-            <div style={{
-              marginTop: '1.5rem',
-              padding: '1rem',
-              background: 'rgba(255,255,255,0.15)',
-              borderRadius: '12px',
-              backdropFilter: 'blur(10px)'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '13px', fontWeight: '600' }}>{t.growthScore}</span>
-                <span style={{ fontSize: '18px', fontWeight: 'bold' }}>{stats.growthScore}%</span>
-              </div>
-              <div style={{
-                height: '8px',
-                background: 'rgba(255,255,255,0.3)',
-                borderRadius: '4px',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  width: `${stats.growthScore}%`,
-                  height: '100%',
-                  background: 'white',
-                  borderRadius: '4px',
-                  animation: 'expandBar 1.5s ease-out'
-                }} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Teaser for Free Users */}
-        {!isPremium && stats.topKeywords.length > 0 && (
-          <div style={{
-            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            marginBottom: '1.5rem',
-            border: '2px solid #fcd34d',
-          }}>
-            <div style={{ fontSize: '24px', marginBottom: '0.5rem' }}>🔮</div>
-            <p style={{ fontSize: '15px', color: '#92400e', lineHeight: '1.6', marginBottom: '1rem', fontWeight: '500' }}>
-              {language === 'ko'
-                ? `이번 달 "${stats.topKeywords[0].word}"가 ${stats.topKeywords[0].count}번 나타났습니다. 이 상징이 당신에게 전하는 메시지는...`
-                : `"${stats.topKeywords[0].word}" appeared ${stats.topKeywords[0].count} times this month. What this symbol is telling you is...`
-              }
-            </p>
-            <button
-              onClick={() => window.location.href = '/pricing'}
-              style={{
-                width: '100%',
-                padding: '14px',
-                background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '15px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(127, 176, 105, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}
-            >
-              <span>✨</span> {t.upgradeToPremium}
-            </button>
-          </div>
-        )}
-
-        {/* Blurred Content for Free Users */}
-        <div className={!isPremium ? 'blur-overlay' : ''}>
-
-          {/* Quick Stats Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '1.5rem' }}>
-            <div className="stat-card" style={{
-              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-              padding: '1.25rem',
-              borderRadius: '16px',
-              border: '1px solid #93c5fd'
-            }}>
-              <div style={{ fontSize: '11px', color: '#1e40af', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase' }}>
-                {t.lucidDreams}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '24px' }}>🌟</span>
-                <AnimatedScore value={stats.lucidDreamCount} duration={1000} style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e40af' }} />
-              </div>
-            </div>
-            <div className="stat-card" style={{
-              background: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)',
-              padding: '1.25rem',
-              borderRadius: '16px',
-              border: '1px solid #f9a8d4'
-            }}>
-              <div style={{ fontSize: '11px', color: '#9d174d', marginBottom: '4px', fontWeight: '600', textTransform: 'uppercase' }}>
-                {t.nightmares}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '24px' }}>🌩️</span>
-                <AnimatedScore value={stats.nightmareCount} duration={1000} style={{ fontSize: '28px', fontWeight: 'bold', color: '#9d174d' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* AI Insights */}
-          {(aiAnalysis || aiLoading) && (
-            <div className="insight-card" style={{
-              padding: '1.5rem',
-              borderRadius: '16px',
-              marginBottom: '1.5rem',
-              color: 'white',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <h3 style={{
-                fontSize: '15px',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span style={{ fontSize: '20px' }}>🔮</span> {t.aiPatternAnalysis}
-              </h3>
-              {aiLoading ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: 'white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }} />
-                  <p style={{ fontSize: '14px', opacity: 0.9 }}>{t.aiAnalyzing}</p>
-                </div>
-              ) : (
-                <div style={{
-                  fontSize: '14px',
-                  lineHeight: '1.8',
-                  whiteSpace: 'pre-wrap',
-                  opacity: 0.95
-                }}>
-                  {aiAnalysis}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Dream Highlights */}
-          {stats.dreamHighlights.length > 0 && (
-            <div style={{
-              background: '#f8fafc',
-              padding: '1.5rem',
-              borderRadius: '16px',
-              marginBottom: '1.5rem'
-            }}>
-              <h3 style={{
-                fontSize: '15px',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
-                color: 'var(--matcha-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>✨</span> {t.dreamHighlights}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {stats.dreamHighlights.map((dream, idx) => (
-                  <div key={idx} style={{
-                    background: 'white',
-                    padding: '1rem',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontWeight: '600', fontSize: '14px', color: '#1f2937' }}>
-                        {dream.title}
-                      </span>
-                      <span style={{ fontSize: '12px', color: '#6b7280' }}>{dream.date}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '16px' }}>{moodEmojis[dream.mood] || '💭'}</span>
-                      <span style={{ fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>{dream.mood}</span>
-                    </div>
-                    <p style={{ fontSize: '13px', color: '#4b5563', lineHeight: '1.5', margin: 0 }}>
-                      {dream.preview}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Archetypes */}
-          {stats.archetypes.length > 0 && (
-            <div style={{
-              background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
-              padding: '1.5rem',
-              borderRadius: '16px',
-              marginBottom: '1.5rem',
-              border: '1px solid #ddd6fe'
-            }}>
-              <h3 style={{
-                fontSize: '15px',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
-                color: '#5b21b6',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>🎭</span> {t.archetypes}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {stats.archetypes.map((archetype, idx) => (
-                  <div key={idx} style={{
-                    background: 'white',
-                    padding: '10px 14px',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px',
-                    boxShadow: '0 2px 8px rgba(91, 33, 182, 0.1)'
-                  }}>
-                    <span style={{ fontWeight: '600', fontSize: '13px', color: '#5b21b6', textTransform: 'capitalize' }}>
-                      {archetype.name}
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#7c3aed' }}>
-                      {archetype.description}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Top Keywords / Dream Symbols */}
-          <div style={{
-            background: '#f8fafc',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            marginBottom: '1.5rem'
-          }}>
-            <h3 style={{
-              fontSize: '15px',
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-              color: 'var(--matcha-dark)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span>🔑</span> {t.topKeywords}
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {stats.topKeywords.slice(0, 10).map((kw, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    background: idx < 3
-                      ? 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
-                      : '#e2e8f0',
-                    color: idx < 3 ? 'white' : '#475569',
-                    padding: '8px 14px',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: idx < 3 ? '600' : '500',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  {kw.word}
-                  <span style={{
-                    background: idx < 3 ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.1)',
-                    padding: '2px 6px',
-                    borderRadius: '10px',
-                    fontSize: '11px'
-                  }}>
-                    {kw.count}
-                  </span>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Mood Distribution */}
-          <div style={{
-            background: '#f8fafc',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            marginBottom: '1.5rem'
-          }}>
-            <h3 style={{
-              fontSize: '15px',
-              fontWeight: 'bold',
-              marginBottom: '1rem',
-              color: 'var(--matcha-dark)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span>🌈</span> {t.moodBreakdown}
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {Object.entries(stats.moodDistribution)
-                .sort((a, b) => b[1] - a[1])
-                .map(([mood, count], idx) => {
-                  const percentage = (count / stats.totalDreams) * 100;
-                  const moodColors: { [key: string]: string } = {
-                    happy: '#7FB069',
-                    peaceful: '#8BC34A',
-                    anxious: '#FF9800',
-                    sad: '#7986CB',
-                    excited: '#FFB74D',
-                    confused: '#9575CD',
-                    angry: '#E57373',
-                    fearful: '#F06292',
-                    balanced: '#4DB6AC',
-                    curious: '#64B5F6',
-                    nostalgic: '#CE93D8',
-                    hopeful: '#81C784',
-                    mysterious: '#7E57C2'
-                  };
-                  const color = moodColors[mood] || '#9E9E9E';
-
-                  return (
-                    <div key={mood}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '18px' }}>{moodEmojis[mood] || '💭'}</span>
-                          <span style={{ fontSize: '13px', color: '#374151', textTransform: 'capitalize', fontWeight: '500' }}>
-                            {mood}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: '13px', fontWeight: '600', color }}>
-                          {count} ({Math.round(percentage)}%)
-                        </span>
-                      </div>
-                      <div style={{
-                        height: '10px',
-                        background: '#e5e7eb',
-                        borderRadius: '5px',
-                        overflow: 'hidden'
-                      }}>
-                        <div
-                          style={{
-                            width: `${percentage}%`,
-                            height: '100%',
-                            background: `linear-gradient(90deg, ${color} 0%, ${color}dd 100%)`,
-                            borderRadius: '5px',
-                            animation: `expandBar 1.2s ease-out ${idx * 0.1}s both`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-
-          {/* Patterns */}
-          {stats.patterns.length > 0 && (
-            <div style={{
-              background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
-              padding: '1.5rem',
-              borderRadius: '16px',
-              marginBottom: '1.5rem',
-              border: '1px solid #a7f3d0'
-            }}>
-              <h3 style={{
-                fontSize: '15px',
-                fontWeight: 'bold',
-                marginBottom: '1rem',
-                color: '#065f46',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>🔍</span> {t.patterns}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {stats.patterns.map((pattern, idx) => (
-                  <div key={idx} style={{
-                    background: 'white',
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    fontSize: '14px',
-                    color: '#047857',
-                    lineHeight: '1.5',
-                    boxShadow: '0 2px 6px rgba(6, 95, 70, 0.08)'
-                  }}>
-                    {pattern}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Monthly Trends - Line Chart */}
-          {stats.monthlyTrends.length > 1 && (() => {
-            const maxCount = Math.max(...stats.monthlyTrends.map(t => t.count), 1);
-            const chartWidth = 280;
-            const chartHeight = 120;
-            const padding = { top: 20, right: 10, bottom: 30, left: 30 };
-            const innerWidth = chartWidth - padding.left - padding.right;
-            const innerHeight = chartHeight - padding.top - padding.bottom;
-
-            const points = stats.monthlyTrends.map((trend, idx) => ({
-              x: padding.left + (idx / (stats.monthlyTrends.length - 1)) * innerWidth,
-              y: padding.top + innerHeight - (trend.count / maxCount) * innerHeight,
-              count: trend.count,
-              month: trend.month
-            }));
-
-            const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-            const areaPath = `${linePath} L ${points[points.length - 1].x} ${padding.top + innerHeight} L ${points[0].x} ${padding.top + innerHeight} Z`;
-
-            return (
-              <div style={{
-                background: '#f8fafc',
-                padding: '1.5rem',
-                borderRadius: '16px',
-                marginBottom: '1.5rem'
-              }}>
-                <h3 style={{
-                  fontSize: '15px',
-                  fontWeight: 'bold',
-                  marginBottom: '1rem',
-                  color: 'var(--matcha-dark)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span>📈</span> {t.monthlyTrends}
-                </h3>
-                <svg width="100%" viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ overflow: 'visible' }}>
-                  {/* Grid lines */}
-                  {[0, 0.5, 1].map((ratio, i) => (
-                    <line
-                      key={i}
-                      x1={padding.left}
-                      y1={padding.top + innerHeight * (1 - ratio)}
-                      x2={chartWidth - padding.right}
-                      y2={padding.top + innerHeight * (1 - ratio)}
-                      stroke="#e5e7eb"
-                      strokeWidth="1"
-                      strokeDasharray={i === 0 ? "0" : "4,4"}
-                    />
-                  ))}
-                  {/* Area fill */}
-                  <path
-                    d={areaPath}
-                    fill="url(#areaGradient)"
-                    opacity="0.3"
-                  />
-                  {/* Line */}
-                  <path
-                    d={linePath}
-                    fill="none"
-                    stroke="#7FB069"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  {/* Points */}
-                  {points.map((p, idx) => (
-                    <g key={idx}>
-                      <circle
-                        cx={p.x}
-                        cy={p.y}
-                        r={idx === points.length - 1 ? 6 : 4}
-                        fill={idx === points.length - 1 ? '#7FB069' : 'white'}
-                        stroke="#7FB069"
-                        strokeWidth="2"
-                      />
-                      {/* Value label */}
-                      <text
-                        x={p.x}
-                        y={p.y - 10}
-                        textAnchor="middle"
-                        fontSize="10"
-                        fontWeight="600"
-                        fill={idx === points.length - 1 ? '#7FB069' : '#9ca3af'}
-                      >
-                        {p.count}
-                      </text>
-                      {/* Month label */}
-                      <text
-                        x={p.x}
-                        y={chartHeight - 5}
-                        textAnchor="middle"
-                        fontSize="9"
-                        fill={idx === points.length - 1 ? '#374151' : '#9ca3af'}
-                        fontWeight={idx === points.length - 1 ? '600' : '400'}
-                      >
-                        {p.month.split(' ')[0]}
-                      </text>
-                    </g>
-                  ))}
-                  {/* Gradient definition */}
-                  <defs>
-                    <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#7FB069" stopOpacity="0.4" />
-                      <stop offset="100%" stopColor="#7FB069" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            );
-          })()}
-
-        </div>
-        {/* End of Blurred Content */}
-
-        {/* Download Button - Only for Premium */}
-        {isPremium && (
-          <button
-            onClick={downloadPDF}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '14px',
-              fontSize: '15px',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(127, 176, 105, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              marginBottom: onClose ? '12px' : '0',
-              transition: 'transform 0.2s, box-shadow 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 176, 105, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(127, 176, 105, 0.3)';
-            }}
-          >
-            <span style={{ fontSize: '18px' }}>📥</span> {t.downloadReport}
+        {onClose && (
+          <button className="mdr-close" onClick={onClose} style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#8ca693', display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}>
+            <IconX size={20} />
           </button>
         )}
       </div>
 
-      {/* Close Button */}
-      {onClose && (
-        <button
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#f3f4f6',
-            color: '#374151',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#f3f4f6'}
-        >
-          {t.close}
-        </button>
-      )}
+      {/* ── Scrollable body ── */}
+      <div className="mdr-scroll" style={{ overflowY: 'auto', padding: '24px 20px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+
+        {/* 1. Narrative */}
+        <section style={{ textAlign: 'center', paddingTop: 8 }}>
+          {aiLoading && !aiInsights ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#8ca693', fontSize: 13 }}>
+              <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
+              {language === 'ko' ? '분석 중...' : 'Analyzing...'}
+            </div>
+          ) : (
+            <>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#3d6044', marginBottom: 16, lineHeight: 1.25, fontFamily: 'Georgia, serif' }}>
+                {aiInsights?.narrativeTitle || (language === 'ko' ? `${monthLabel}의 기록` : `${monthLabel} in Review`)}
+              </h1>
+              <p style={{ color: '#5c8065', lineHeight: 1.7, maxWidth: 380, margin: '0 auto', fontSize: 14 }}>
+                {aiInsights?.narrativeText || (language === 'ko'
+                  ? `이달에 ${dreamCount}개의 꿈과 ${moodCount}개의 감정을 기록했습니다.`
+                  : `You recorded ${dreamCount} dreams and ${moodCount} moods this month.`)}
+              </p>
+            </>
+          )}
+        </section>
+
+        {/* 2. Moments of Pause */}
+        <section style={{ background: '#fff', border: '1px solid #e8efe9', borderRadius: 20, padding: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginBottom: 8, margin: '0 0 8px' }}>
+            {language === 'ko' ? '기록의 발자취' : 'Moments of Pause'}
+          </h3>
+          <p style={{ textAlign: 'center', color: '#4a6b52', marginBottom: 24, fontSize: 14, fontWeight: 500 }}>
+            {language === 'ko'
+              ? <>{`이달 `}<strong style={{ color: '#3d6044', fontSize: 20 }}>{activeDaysCount}</strong>{`일을 기록했습니다`}</>
+              : <>You took time to reflect on <strong style={{ color: '#3d6044', fontSize: 20, margin: '0 2px' }}>{activeDaysCount}</strong> days this month.</>}
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6 }}>
+            {activityGrid.map(({ day, type }) => (
+              <div key={day} className="mdr-day" title={`Day ${day}`} style={{ width: 24, height: 24, borderRadius: 6, flexShrink: 0, background: dayBg(type), border: dayBorder(type), boxShadow: type !== 'none' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20, fontSize: 11, fontWeight: 500, color: '#8ca693' }}>
+            {[{ bg: '#e8ce90', label: language === 'ko' ? '감정만' : 'Mood Only' }, { bg: '#b8d6c0', label: language === 'ko' ? '꿈만' : 'Dream Only' }, { bg: '#7ea886', label: language === 'ko' ? '둘 다' : 'Both' }].map(({ bg, label }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{ width: 10, height: 10, borderRadius: 3, background: bg }} />{label}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 3. Your Dual Logs */}
+        <section style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 24 }}>
+          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', margin: '0 0 20px' }}>
+            {language === 'ko' ? '나의 두 가지 기록' : 'Your Dual Logs'}
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <IconSun size={20} color="#d6a848" />
+              <span style={{ fontSize: 26, fontWeight: 700, color: '#3d6044', lineHeight: 1.1, marginTop: 4 }}>{moodCount}</span>
+              <span style={{ fontSize: 10, color: '#8ca693', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '감정' : 'Moods'}</span>
+            </div>
+            <div style={{ width: '45%', height: 12, borderRadius: 99, overflow: 'hidden', background: '#f0f5f2', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)', display: 'flex', flexShrink: 0 }}>
+              <div style={{ height: '100%', background: '#e8ce90', width: `${moodPct}%` }} />
+              <div style={{ height: '100%', background: '#7ea886', width: `${dreamPct}%` }} />
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <IconMoon size={20} color="#7ea886" />
+              <span style={{ fontSize: 26, fontWeight: 700, color: '#3d6044', lineHeight: 1.1, marginTop: 4 }}>{dreamCount}</span>
+              <span style={{ fontSize: 10, color: '#8ca693', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '꿈' : 'Dreams'}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Premium divider + sections ── */}
+        <div style={{ position: 'relative' }}>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+            <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, #dbece0)' }} />
+            <span style={{ fontSize: 9, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>
+              {language === 'ko' ? '프리미엄 인사이트' : 'Premium Insights'}
+            </span>
+            <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, #dbece0)' }} />
+          </div>
+
+          {/* Current month preview banner */}
+          {isCurrentMonthPreview && isPremium && (
+            <div style={{ background: '#fffbea', border: '1px solid #e8ce90', borderRadius: 12, padding: '10px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <IconSparkles size={13} color="#d6a848" />
+              <p style={{ fontSize: 12, color: '#a07c2a', margin: 0, lineHeight: 1.5 }}>
+                {language === 'ko'
+                  ? '이번 달이 아직 끝나지 않았어요. 프리뷰 분석이며 월말에 완성된 분석이 제공됩니다.'
+                  : "This month isn't over yet. This is a preview — final analysis arrives at month end."}
+              </p>
+            </div>
+          )}
+
+          {/* Premium sections — titles always visible, content blurred for free users */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+
+            {/* 4. AI Monthly Synthesis */}
+            <section style={{ background: 'linear-gradient(135deg, #f2f7f4 0%, #e8edea 100%)', borderRadius: 20, padding: 24, border: '1px solid #c6dfce', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -48, right: -48, width: 128, height: 128, background: '#e8ce90', borderRadius: '50%', opacity: 0.1, filter: 'blur(16px)', pointerEvents: 'none' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                {/* Title — always visible */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <IconSparkles size={16} color="#d6a848" />
+                  <h3 style={{ fontSize: 11, fontWeight: 700, color: '#d6a848', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                    {language === 'ko' ? 'AI 월간 종합' : 'AI Monthly Synthesis'}
+                  </h3>
+                </div>
+                {/* Content */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
+                    {aiLoading && !aiInsights ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#8ca693', fontSize: 13 }}>
+                        <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
+                        {language === 'ko' ? '생성 중...' : 'Generating...'}
+                      </div>
+                    ) : (
+                      <>
+                        <h4 style={{ fontSize: 20, fontWeight: 800, color: '#3d6044', marginBottom: 12 }}>
+                          {aiInsights?.synthesisTheme || (language === 'ko' ? '이달의 패턴' : "This Month's Pattern")}
+                        </h4>
+                        <p style={{ fontSize: 13, color: '#5c8065', lineHeight: 1.7, marginBottom: 20 }}>
+                          {aiInsights?.synthesisDescription || (language === 'ko' ? '이달의 감정과 꿈 사이의 연결 패턴을 분석하고 있습니다.' : 'Analyzing the connection patterns between your moods and dreams this month.')}
+                        </p>
+                        <div style={{ background: 'white', borderRadius: 14, padding: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #e8efe9' }}>
+                          <div style={{ display: 'flex', gap: 12 }}>
+                            <div style={{ flexShrink: 0, transform: 'rotate(180deg)', color: '#a4b8a9' }}><IconQuote size={20} color="#a4b8a9" /></div>
+                            <div style={{ flex: 1 }}>
+                              <p style={{ fontSize: 13, fontWeight: 700, color: '#4a6b52', marginBottom: 10 }}>
+                                {aiInsights?.synthesisQuestion || (language === 'ko' ? '이달 꿈이 당신에게 전하는 메시지는 무엇인가요?' : 'What message are your dreams sending you this month?')}
+                              </p>
+                              {aiInsights?.deepDive && showDeepDive && (
+                                <p style={{ fontSize: 13, color: '#5c8065', lineHeight: 1.75, marginBottom: 10 }}>
+                                  {aiInsights.deepDive}
+                                </p>
+                              )}
+                              <button className="mdr-journal" onClick={() => setShowDeepDive(v => !v)} style={{ fontSize: 11, fontWeight: 700, color: '#7ea886', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
+                                {language === 'ko' ? (showDeepDive ? '접기' : '더보기') : (showDeepDive ? 'Show less' : 'Read more')} <IconArrowRight size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {!isPremium && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                        <IconKey size={13} color="#7ea886" />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* 5. Discovered Archetypes */}
+            <section>
+              {/* Title — always visible */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, paddingLeft: 2 }}>
+                <IconCompass size={17} color="#7ea886" />
+                <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                  {language === 'ko' ? '발견된 아키타입' : 'Discovered Archetypes'}
+                </h3>
+              </div>
+              {/* Content */}
+              <div style={{ position: 'relative' }}>
+                <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    {(archetypes.length > 0 ? archetypes : [
+                      { name: language === 'ko' ? '분석 중...' : 'Analyzing...', category: '—', meaning: language === 'ko' ? '꿈 패턴을 분석하고 있습니다.' : 'Analyzing your dream patterns.', iconType: 'key' as const },
+                      { name: language === 'ko' ? '분석 중...' : 'Analyzing...', category: '—', meaning: language === 'ko' ? '곧 결과가 나타납니다.' : 'Results will appear shortly.', iconType: 'compass' as const },
+                    ]).map((arch, i) => (
+                      <div key={i} style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f0f5f2', color: '#7ea886', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {arch.iconType === 'key' ? <IconKey size={16} color="#7ea886" /> : <IconCompass size={16} color="#7ea886" />}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: '#3d6044' }}>{arch.name}</div>
+                            <div style={{ fontSize: 9, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{arch.category}</div>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: 12, color: '#5c8065', lineHeight: 1.6, margin: 0 }}>{arch.meaning}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {!isPremium && (
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                      <IconKey size={13} color="#7ea886" />
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* 6. Looking Ahead */}
+            <section style={{ background: '#3d6044', borderRadius: 20, padding: 24, color: 'white', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 16px rgba(61,96,68,0.3)' }}>
+              <div style={{ position: 'absolute', bottom: -40, right: -40, width: 160, height: 160, background: '#5c8065', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', pointerEvents: 'none' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                {/* Title — always visible */}
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 12 }}>
+                  {aiInsights?.lookingAheadTitle || (language === 'ko' ? `${nextMonthLabel}을 바라보며` : `Looking Ahead to ${nextMonthLabel}`)}
+                </h3>
+                {/* Content */}
+                <div style={{ position: 'relative' }}>
+                  <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
+                    <p style={{ fontSize: 13, color: '#b8d6c0', lineHeight: 1.7, marginBottom: 20 }}>
+                      {aiInsights?.lookingAheadSuggestion || (language === 'ko' ? '다음 달을 위한 가이드를 준비하고 있습니다.' : 'Preparing your guidance for next month.')}
+                    </p>
+                    <button className="mdr-intention" onClick={() => onClose?.()} style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
+                      {language === 'ko' ? `${nextMonthLabel}에도 꿈 기록하기` : `Keep journaling in ${nextMonthLabel}`} <IconArrowRight size={15} />
+                    </button>
+                  </div>
+                  {!isPremium && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ background: 'rgba(61,96,68,0.7)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.2)' }}>
+                        <IconKey size={13} color="#e8ce90" />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+
+            {/* Upgrade CTA for free users */}
+            {!isPremium && (
+              <div style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 20, padding: '24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ marginBottom: 10, color: '#7ea886', display: 'flex', justifyContent: 'center' }}><IconSparkles size={24} color="#7ea886" /></div>
+                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#3d6044', marginBottom: 6 }}>
+                  {language === 'ko' ? '프리미엄으로 잠금 해제' : 'Unlock with Premium'}
+                </h3>
+                <p style={{ fontSize: 12, color: '#8ca693', lineHeight: 1.6, marginBottom: 16, maxWidth: 260, margin: '0 auto 16px' }}>
+                  {language === 'ko'
+                    ? 'AI 월간 분석, 아키타입 발견, 다음 달 가이드를 모두 확인하세요'
+                    : 'Access AI analysis, archetype discovery, and your personalized next-month guide'}
+                </p>
+                <button onClick={() => window.location.href = '/pricing'} style={{ padding: '12px 28px', background: '#7ea886', color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(126,168,134,0.35)' }}>
+                  {language === 'ko' ? '프리미엄 시작하기' : 'Unlock Premium'}
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

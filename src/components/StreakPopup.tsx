@@ -190,7 +190,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
 
     const message = t.shareMessage(streakData.currentStreak);
     const url = window.location.origin;
-    const shareText = `${message}\n\nNovakitz - Dream Journal\n${url}`;
+    const shareText = `${message}\n\nNovakitz - Inner Journal\n${url}`;
 
     // Try native share API first
     if (navigator.share) {

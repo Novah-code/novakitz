@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     const productName = data.product_name;
     const productPermalink = data.product_permalink;
     const permalink = data.permalink;
-    const eventType = data.type || (data.sale_id ? 'license.created' : null); // Gumroad purchases are license.created events
+    const eventType = data.type; // 'sale', 'refund', 'cancellation', etc.
     const isTestEvent = data.test === 'true';
 
     console.log('📦 Parsed data:', {
@@ -57,9 +57,15 @@ export async function POST(request: NextRequest) {
       purchaser_email: purchaserEmail
     });
 
-    // Verify this is a license.created event
-    if (eventType !== 'license.created') {
-      console.log('⏭️  Skipping non-license.created event:', eventType);
+    // Process sale events (and license.created for backwards compatibility)
+    const isSaleEvent = !eventType || eventType === 'sale' || eventType === 'license.created';
+    if (!isSaleEvent) {
+      console.log('⏭️  Skipping non-sale event:', eventType);
+      return NextResponse.json({ success: true, message: 'Event not processed' });
+    }
+
+    // Must have sale_id or license_key to process
+    if (!data.sale_id && !licenseKey) {
       return NextResponse.json({ success: true, message: 'Event not processed' });
     }
 
@@ -89,32 +95,48 @@ export async function POST(request: NextRequest) {
       console.log('📅 Detected monthly subscription');
     }
 
-    // Find or create user by email
+    // Find user by email directly
     const sbClient = getSupabaseClient();
-    const { data: existingUser, error: userError } = await sbClient.auth.admin.listUsers();
+    const { data: userList, error: userError } = await sbClient.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    let userId: string | null = null;
 
     if (userError) {
       console.error('❌ Error listing users:', userError);
-      // Try to find user another way
-    }
-
-    // Search for user with this email
-    let userId: string | null = null;
-
-    if (existingUser) {
-      const user = existingUser.users.find(u => u.email === purchaserEmail);
+    } else if (userList) {
+      const normalizedEmail = purchaserEmail.toLowerCase().trim();
+      const user = userList.users.find(u => u.email?.toLowerCase().trim() === normalizedEmail);
       userId = user?.id || null;
+      console.log(`🔍 Email lookup: "${normalizedEmail}" → ${userId ? 'found' : 'not found'}`);
     }
 
     if (!userId) {
-      console.log(`⚠️  User not found for email: ${purchaserEmail}`);
-      console.log('📌 User must sign up first before subscription can be activated');
+      console.log(`⚠️  User not found for email: ${purchaserEmail} — saving to pending_purchases`);
+
+      // Save pending purchase so it activates automatically when user signs up
+      const { error: pendingError } = await sbClient
+        .from('pending_purchases')
+        .upsert([{
+          email: purchaserEmail.toLowerCase().trim(),
+          license_key: licenseKey,
+          product_permalink: permalink || productName || '',
+          subscription_days: subscriptionDays,
+          status: 'pending',
+        }], { onConflict: 'license_key' });
+
+      if (pendingError) {
+        console.error('❌ Error saving pending purchase:', pendingError);
+      } else {
+        console.log('✅ Pending purchase saved — will activate on signup');
+      }
 
       return NextResponse.json({
         success: true,
-        message: 'License recorded. User must complete signup to activate subscription.',
+        message: 'Purchase recorded. Subscription will activate when user signs up with this email.',
         email: purchaserEmail,
-        licenseKey: licenseKey,
         status: 'pending_signup'
       });
     }

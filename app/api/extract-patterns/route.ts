@@ -80,7 +80,7 @@ ${interpretation ? `해석: "${interpretation}"` : ''}
 반드시 유효한 JSON만 응답하세요.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {

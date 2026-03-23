@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Privacy Policy - Novakitz',
-  description: 'Privacy Policy for Novakitz dream journaling platform',
+  description: 'Privacy Policy for Novakitz inner journaling platform',
 };
 
 export default function PrivacyPage() {

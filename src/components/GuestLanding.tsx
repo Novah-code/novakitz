@@ -14,7 +14,7 @@ export default function GuestLanding({ language, onTryNow, onSignIn, onSignUp }:
     title: language === 'ko' ? 'Novakitz' : 'Novakitz',
     subtitle: language === 'ko'
       ? 'AI 기반 꿈 일기 & 융 심리학 분석'
-      : 'AI Dream Journal & Jungian Analysis',
+      : 'AI Inner Journal & Jungian Analysis',
     description: language === 'ko'
       ? '당신의 꿈 속 숨겨진 메시지를 발견하세요.\n무의식의 패턴을 탐험하고 자기 성장을 경험하세요.'
       : 'Discover hidden messages in your dreams.\nExplore unconscious patterns and experience personal growth.',

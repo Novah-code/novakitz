@@ -47,7 +47,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '희망적인 생각을 한 가지 행동으로 옮기기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Acknowledge and accept one uncomfortable emotion',
         'Turn one hopeful thought into action'
       ]
@@ -81,7 +81,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '불완전한 이해로도 결정 하나 내리기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Put one learned wisdom into practice',
         'Make one decision despite incomplete understanding'
       ]
@@ -115,7 +115,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '새로운 경험을 누군가와 공유하기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Stay in one place and experience deeply',
         'Share a new experience with someone'
       ]
@@ -149,7 +149,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '파괴보다 창조에 에너지 쓰기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Criticize something unfair and offer an alternative',
         'Spend energy on creation rather than destruction'
       ]
@@ -183,7 +183,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '작은 변화를 실제로 만들어내기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Materialize one idea that came to mind',
         'Create one small actual change'
       ]
@@ -217,7 +217,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '자신의 취약함을 한 번 인정하기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Solve a problem through dialogue, not fighting',
         'Acknowledge your vulnerability once'
       ]
@@ -251,7 +251,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '타인의 사랑에 의존하지 않고 완전함 느끼기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Enjoy time alone and love yourself',
         'Feel complete without depending on others\' love'
       ]
@@ -285,7 +285,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '유머 뒤에 숨긴 진짜 감정 한 가지 표현하기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Fully participate in one serious conversation',
         'Express one true emotion hidden behind humor'
       ]
@@ -319,7 +319,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '있는 그대로의 자신을 누군가에게 보이기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Express one unique opinion of your own',
         'Show your true self to someone'
       ]
@@ -353,7 +353,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '도움을 거절하고 자신을 먼저 돌보기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Have one time for yourself',
         'Decline helping and care for yourself first'
       ]
@@ -387,7 +387,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '권위가 아닌 섬김으로 이끌기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Let go of control and listen to other opinions',
         'Lead through service, not authority'
       ]
@@ -421,7 +421,7 @@ export const ARCHETYPE_GROWTH: Record<string, GrowthStage> = {
         '과정을 즐기며 결과에 집착하지 않기'
       ],
       en: [
-        'Record your dream journal today',
+        'Record your inner journal today',
         'Put one imperfect creation into the world',
         'Enjoy the process without obsessing over results'
       ]

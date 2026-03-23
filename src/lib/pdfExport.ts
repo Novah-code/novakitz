@@ -19,7 +19,7 @@ export async function generateDreamPDF(
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${dream.title || 'Dream Journal'}</title>
+        <title>${dream.title || 'Inner Journal'}</title>
         <style>
           * {
             margin: 0;
@@ -130,7 +130,7 @@ export async function generateDreamPDF(
       <body>
         <div class="header">
           <h1>${dream.title || 'My Dream'}</h1>
-          <p style="color: #6b7280; margin-top: 8px;">Dream Journal Entry</p>
+          <p style="color: #6b7280; margin-top: 8px;">Inner Journal Entry</p>
         </div>
 
         <div class="meta">
@@ -170,7 +170,7 @@ export async function generateDreamPDF(
         ` : ''}
 
         <div class="footer">
-          <p>Generated from Novakitz Dream Journal</p>
+          <p>Generated from Novakitz Inner Journal</p>
           <p>${new Date().toLocaleString()}</p>
         </div>
       </body>
@@ -373,7 +373,7 @@ export async function generateMonthlyReportPDF(
         ` : ''}
 
         <div class="footer">
-          <p>Generated from Novakitz Dream Journal</p>
+          <p>Generated from Novakitz Inner Journal</p>
           <p>${new Date().toLocaleString()}</p>
         </div>
       </body>

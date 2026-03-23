@@ -57,7 +57,7 @@ export function generateDynamicSubject(
       ],
       en: [
         `🌙 ${userName}, We Miss You!`,
-        `✨ Your Dream Journal is Waiting, ${userName}`,
+        `✨ Your Inner Journal is Waiting, ${userName}`,
         `💫 Welcome Back, ${userName}`,
         `🎯 ${userName}, Share Your Dreams Today`,
         `🌟 It's Been a While, ${userName}`

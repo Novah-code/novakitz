@@ -5,8 +5,8 @@ import { User } from '@supabase/supabase-js';
 import {
   generateAffirmationsFromDream,
   saveAffirmations,
-  getAffirmationsByTime,
   deleteAffirmationsForTime,
+  getTodayAffirmations,
   Affirmation
 } from '../lib/affirmations';
 
@@ -31,7 +31,6 @@ export default function AffirmationsDisplay({
 }: AffirmationsDisplayProps) {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [checkedIds, setCheckedIds] = useState<Set<string>>(new Set());
 
   // Load checked state from localStorage
@@ -55,62 +54,32 @@ export default function AffirmationsDisplay({
     });
   };
 
-  const timeLabels = {
-    morning: { ko: '오전', en: 'Morning' },
-    afternoon: { ko: '오후', en: 'Afternoon' },
-    evening: { ko: '저녁', en: 'Evening' }
-  };
-
-  // Load existing affirmations or generate new ones
+  // Load all today's affirmations
   useEffect(() => {
-    const loadAffirmations = async () => {
+    const load = async () => {
       if (!user) return;
-
       setIsLoading(true);
       try {
-        // Check if affirmations already exist for this time
-        const existing = await getAffirmationsByTime(user.id, checkInTime);
+        const existing = await getTodayAffirmations(user.id);
 
         if (existing.length > 0) {
-          // Check if existing affirmations are in a different language
-          const existingLanguage = existing[0]?.language || 'en';
-
-          if (existingLanguage !== language && dreamText) {
-            // Language changed - regenerate affirmations in the new language
+          // Check language mismatch for dream-generated affirmations
+          const dreamBased = existing.filter(a => a.check_in_time === checkInTime);
+          if (dreamBased.length > 0 && dreamBased[0].language !== language && dreamText) {
             await deleteAffirmationsForTime(user.id, checkInTime);
-
-            const generated = await generateAffirmationsFromDream(
-              user.id,
-              dreamText,
-              language
-            );
-
+            const generated = await generateAffirmationsFromDream(user.id, dreamText, language);
             if (generated.length > 0) {
               await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
-              const saved = await getAffirmationsByTime(user.id, checkInTime);
-              setAffirmations(saved);
-              setCurrentIndex(0);
             }
+            setAffirmations(await getTodayAffirmations(user.id));
           } else {
-            // Same language - use existing affirmations (preserve current index)
             setAffirmations(existing);
           }
         } else if (dreamText) {
-          // Generate new affirmations from dream
-          const generated = await generateAffirmationsFromDream(
-            user.id,
-            dreamText,
-            language
-          );
-
+          const generated = await generateAffirmationsFromDream(user.id, dreamText, language);
           if (generated.length > 0) {
-            // Save to database with language
             await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
-
-            // Fetch saved affirmations
-            const saved = await getAffirmationsByTime(user.id, checkInTime);
-            setAffirmations(saved);
-            setCurrentIndex(0);
+            setAffirmations(await getTodayAffirmations(user.id));
           }
         }
       } catch (error) {
@@ -119,225 +88,75 @@ export default function AffirmationsDisplay({
         setIsLoading(false);
       }
     };
-
-    loadAffirmations();
+    load();
   }, [user?.id, checkInTime, dreamText, dreamId, language]);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % affirmations.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? affirmations.length - 1 : prev - 1
+  if (isLoading) {
+    return (
+      <div style={{ padding: '8px 0', color: '#8BA390', fontSize: 13, fontStyle: 'italic' }}>
+        {language === 'ko' ? '확언 불러오는 중...' : 'Loading affirmations...'}
+      </div>
     );
-  };
-
-  const handleRefresh = async () => {
-    if (!user || !dreamText) return;
-
-    setIsLoading(true);
-    try {
-      // Delete existing affirmations
-      await deleteAffirmationsForTime(user.id, checkInTime);
-
-      // Generate new ones
-      const generated = await generateAffirmationsFromDream(
-        user.id,
-        dreamText,
-        language
-      );
-
-      if (generated.length > 0) {
-        await saveAffirmations(user.id, generated, checkInTime, dreamId, language);
-        const saved = await getAffirmationsByTime(user.id, checkInTime);
-        setAffirmations(saved);
-        setCurrentIndex(0);
-      }
-    } catch (error) {
-      console.error('Error refreshing affirmations:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!affirmations.length || !affirmations[currentIndex]) {
-    return null;
   }
 
-  const current = affirmations[currentIndex];
-  const timeLabel = timeLabels[checkInTime][language === 'ko' ? 'ko' : 'en'];
-  const isChecked = current?.id ? checkedIds.has(current.id) : false;
+  if (!affirmations.length) return null;
+
+  const displayList = affirmations.slice(0, 3);
 
   return (
-    <div style={{
-      backgroundColor: 'rgba(127, 176, 105, 0.08)',
-      border: '2px solid rgba(127, 176, 105, 0.3)',
-      borderRadius: '12px',
-      padding: '24px',
-      marginBottom: '20px'
-    }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '16px'
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: '16px',
-          fontWeight: '600',
-          color: '#7fb069',
-          textTransform: 'uppercase',
-          letterSpacing: '1px'
-        }}>
-          {language === 'ko' ? '확언' : 'Affirmation'}
-        </h3>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {affirmations.length > 1 && (
-            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
-              {currentIndex + 1}/{affirmations.length}
-            </span>
-          )}
-          {current?.id && (
-            <button
-              onClick={() => toggleChecked(current.id)}
-              title={isChecked ? (language === 'ko' ? '체크 해제' : 'Uncheck') : (language === 'ko' ? '확언 체크' : 'Mark as done')}
-              style={{
-                width: '24px', height: '24px',
-                borderRadius: '6px',
-                border: `2px solid ${isChecked ? '#7fb069' : 'rgba(127,176,105,0.4)'}`,
-                background: isChecked ? '#7fb069' : 'transparent',
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-                flexShrink: 0
-              }}
-            >
-              {isChecked && <span style={{ color: 'white', fontSize: '14px', lineHeight: 1 }}>✓</span>}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Affirmation Text */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        padding: '20px',
-        marginBottom: '16px',
-        minHeight: '80px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center'
-      }}>
-        <p style={{
-          margin: 0,
-          fontSize: '18px',
-          fontWeight: '500',
-          color: isChecked ? '#9ca3af' : '#1f2937',
-          lineHeight: '1.6',
-          fontStyle: 'italic',
-          textDecoration: isChecked ? 'line-through' : 'none',
-          transition: 'all 0.2s'
-        }}>
-          {current.affirmation_text}
-        </p>
-      </div>
-
-      {/* Controls */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '8px'
-      }}>
-        {/* Left: Prev + Refresh */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {affirmations.length > 1 && (
-            <button
-              onClick={handlePrev}
-              disabled={isLoading}
-              style={{
-                padding: '8px 14px',
-                backgroundColor: '#f3f4f6',
-                color: '#6b7280',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '16px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                opacity: isLoading ? 0.5 : 1,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-            >
-              ‹
-            </button>
-          )}
-
-{onClose && (
-            <button
-              onClick={onClose}
-              style={{
-                padding: '8px 14px',
-                backgroundColor: '#f3f4f6',
-                color: '#6b7280',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-              title={language === 'ko' ? '닫기' : 'Close'}
-            >
-              {language === 'ko' ? '닫기' : 'Close'}
-            </button>
-          )}
-        </div>
-
-        {/* Right: Next */}
-        {affirmations.length > 1 && (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {displayList.map((aff) => {
+        const isChecked = aff.id ? checkedIds.has(aff.id) : false;
+        return (
           <button
-            onClick={handleNext}
-            disabled={isLoading || affirmations.length <= 1}
+            key={aff.id}
+            onClick={() => aff.id && toggleChecked(aff.id)}
             style={{
-              padding: '8px 14px',
-              backgroundColor: '#f3f4f6',
-              color: '#6b7280',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              cursor: (isLoading || affirmations.length <= 1) ? 'not-allowed' : 'pointer',
-              opacity: (isLoading || affirmations.length <= 1) ? 0.5 : 1,
-              transition: 'all 0.2s ease'
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              background: isChecked ? 'rgba(122,179,130,0.1)' : 'rgba(255,255,255,0.5)',
+              border: `1px solid ${isChecked ? 'rgba(122,179,130,0.4)' : 'rgba(255,255,255,0.8)'}`,
+              borderRadius: 12,
+              padding: '10px 12px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              width: '100%',
+              transition: 'all 0.2s',
             }}
-            onMouseEnter={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
           >
-            ›
+            {/* Checkbox */}
+            <div style={{
+              width: 20, height: 20,
+              borderRadius: 6,
+              border: `2px solid ${isChecked ? '#7AB382' : 'rgba(122,179,130,0.4)'}`,
+              background: isChecked ? '#7AB382' : 'transparent',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+              marginTop: 1,
+              transition: 'all 0.2s',
+            }}>
+              {isChecked && (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
+            </div>
+            {/* Text */}
+            <span style={{
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: isChecked ? '#8BA390' : '#3A4A3E',
+              textDecoration: isChecked ? 'line-through' : 'none',
+              fontStyle: 'italic',
+              transition: 'all 0.2s',
+              whiteSpace: 'pre-line',
+            }}>
+              {aff.affirmation_text}
+            </span>
           </button>
-        )}
-      </div>
-
-      {/* Info Text */}
-      <p style={{
-        fontSize: '12px',
-        color: '#9ca3af',
-        marginTop: '12px',
-        marginBottom: 0,
-        textAlign: 'center'
-      }}>
-        {language === 'ko'
-          ? '이 확언을 마음에 새기고 반복해보세요.'
-          : 'Take a moment to internalize this affirmation.'}
-      </p>
+        );
+      })}
     </div>
   );
 }

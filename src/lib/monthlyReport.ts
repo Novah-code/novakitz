@@ -214,52 +214,60 @@ export async function generateMonthlyInsights(
         : 'No dreams recorded this month yet.';
     }
 
-    const dreamSummaries = dreams
+    const emotionRecords = dreams.filter(d => d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record'));
+    const regularDreams = dreams.filter(d => !d.content?.startsWith('[감정 기록]') && !d.tags?.includes('emotion-record'));
+
+    const dreamSummaries = regularDreams
       .slice(0, 5)
       .map(d => `- ${d.title || 'Untitled'}: ${d.content?.substring(0, 100) || ''}`)
       .join('\n');
 
+    const emotionSummaries = emotionRecords
+      .slice(0, 5)
+      .map(d => `- ${d.content?.replace('[감정 기록] ', '').substring(0, 100) || ''}`)
+      .join('\n');
+
     const prompt = language === 'ko'
-      ? `이번 달의 꿈 기록 통계와 몇 가지 꿈을 기반으로 심리적 통찰을 제공하세요.
+      ? `이번 달의 꿈 기록과 감정 기록 통계를 기반으로 심리적 통찰을 제공하세요.
 
 통계:
-- 총 꿈 기록: ${stats.totalDreams}개
-- AI 분석된 꿈: ${stats.totalAnalyzed}개
+- 총 꿈 기록: ${stats.totalDreams}개 (꿈: ${regularDreams.length}개, 감정 기록: ${emotionRecords.length}개)
+- AI 분석된 기록: ${stats.totalAnalyzed}개
 - 평균 감정 점수: ${stats.averageMood}/5
 - 주요 감정: ${stats.dominantMood}
-- 발생한 확언: ${stats.totalAffirmations}개
 - 주요 키워드: ${stats.topKeywords.map(k => k.keyword).join(', ')}
 
-이번 달의 꿈 샘플:
-${dreamSummaries}
+${dreamSummaries ? `이번 달의 꿈 샘플:\n${dreamSummaries}` : ''}
 
-이 통계와 꿈들을 분석하여:
-1. 이번 달 감정적 패턴
-2. 꿈에서 나타난 주요 테마
+${emotionSummaries ? `이번 달의 감정 기록 샘플:\n${emotionSummaries}` : ''}
+
+이 통계와 기록들을 분석하여:
+1. 이번 달 감정적 패턴 (꿈과 일상 감정 기록 모두 포함)
+2. 꿈과 감정에서 나타난 주요 테마
 3. 심리적 성장 영역
 4. 제안하는 실천 활동
 
-을 포함한 간결하고 따뜻한 통찰을 제공하세요 (200-250단어).`
-      : `Based on this month's dream statistics and a sample of dreams, provide psychological insights.
+을 포함한 간결하고 따뜻한 통찰을 제공하세요 (${emotionRecords.length > 0 ? '200-250' : '100-130'}단어).`
+      : `Based on this month's dream and emotion record statistics, provide psychological insights.
 
 Statistics:
-- Total dreams recorded: ${stats.totalDreams}
+- Total records: ${stats.totalDreams} (dreams: ${regularDreams.length}, emotion records: ${emotionRecords.length})
 - AI analyzed: ${stats.totalAnalyzed}
 - Average mood score: ${stats.averageMood}/5
 - Dominant mood: ${stats.dominantMood}
-- Affirmations generated: ${stats.totalAffirmations}
 - Top keywords: ${stats.topKeywords.map(k => k.keyword).join(', ')}
 
-Sample dreams from this month:
-${dreamSummaries}
+${dreamSummaries ? `Sample dreams this month:\n${dreamSummaries}` : ''}
 
-Analyze these statistics and dreams to provide concise, warm insights including:
-1. Emotional patterns this month
-2. Major themes in your dreams
+${emotionSummaries ? `Sample emotion records this month:\n${emotionSummaries}` : ''}
+
+Analyze these records to provide concise, warm insights including:
+1. Emotional patterns this month (from both dreams and daily emotion records)
+2. Major themes in dreams and emotions
 3. Areas of psychological growth
 4. Suggested practices
 
-Keep it to 200-250 words.`;
+Keep it to ${emotionRecords.length > 0 ? '200-250' : '100-130'} words.`;
 
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {

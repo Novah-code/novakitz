@@ -7,7 +7,7 @@ import DreamCalendar from './DreamCalendar';
 import SubscriptionManager from './SubscriptionManager';
 import { filterDreamsByHistoryLimit, getUserPlanInfo } from '../lib/subscription';
 
-interface DreamJournalProps {
+interface InnerJournalProps {
   user: User | null;
   onSignOut: () => void;
   showGuestMode?: boolean;
@@ -32,7 +32,7 @@ const moodEmojis = {
   surreal: ''
 };
 
-export default function DreamJournal({ user, onSignOut, showGuestMode = false, onShowAuth, language = 'en' }: DreamJournalProps) {
+export default function InnerJournal({ user, onSignOut, showGuestMode = false, onShowAuth, language = 'en' }: InnerJournalProps) {
   const [currentView, setCurrentView] = useState<'new' | 'history' | 'patterns' | 'calendar'>('new');
   const [dreams, setDreams] = useState<Dream[]>([]);
   const [newDream, setNewDream] = useState({
@@ -341,7 +341,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
         {/* Header */}
         <div className="hero-section">
           <div className="hero-teacup">🍵</div>
-          <h1 className="hero-main-title">Welcome to your Dream Journal</h1>
+          <h1 className="hero-main-title">Welcome to your Inner Journal</h1>
           <p className="hero-subtitle">Record your first dream to begin your journey</p>
         </div>
 
@@ -471,7 +471,7 @@ export default function DreamJournal({ user, onSignOut, showGuestMode = false, o
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
-                })}` : 'My Dream Journal'}
+                })}` : 'My Inner Journal'}
               </h2>
               {selectedDate && (
                 <button

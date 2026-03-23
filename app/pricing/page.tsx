@@ -3,104 +3,68 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-// FAQ Accordion Item Component
-function FAQItem({ question, answer, isOpen, onClick }: {
-  question: string;
-  answer: string;
-  isOpen: boolean;
-  onClick: () => void;
-}) {
+// Design tokens
+const G = {
+  bgMain: '#E8F3EA',
+  glass: 'rgba(255,255,255,0.5)',
+  glassHover: 'rgba(255,255,255,0.75)',
+  glassBorder: 'rgba(255,255,255,0.8)',
+  textDark: '#3A4A3E',
+  textBase: '#5C7061',
+  textLight: '#8BA390',
+  green: '#7AB382',
+  gold: '#D4A33B',
+  pink: '#D67A6B',
+};
+
+const panel = {
+  background: G.glass,
+  backdropFilter: 'blur(24px)',
+  WebkitBackdropFilter: 'blur(24px)',
+  border: `1px solid ${G.glassBorder}`,
+  borderRadius: 32,
+  boxShadow: '0 10px 40px rgba(0,0,0,0.03), inset 2px 2px 10px rgba(255,255,255,0.5)',
+} as React.CSSProperties;
+
+function Check({ color = G.green }: { color?: string }) {
   return (
-    <div style={{
-      borderBottom: '1px solid #e5e7eb',
-      overflow: 'hidden'
-    }}>
-      <button
-        onClick={onClick}
-        style={{
-          width: '100%',
-          padding: '1.25rem 0',
-          background: 'none',
-          border: 'none',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          cursor: 'pointer',
-          textAlign: 'left'
-        }}
-      >
-        <span style={{
-          fontSize: '16px',
-          fontWeight: '600',
-          color: '#1f2937',
-          paddingRight: '1rem'
-        }}>
-          {question}
-        </span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#6b7280"
-          strokeWidth="2"
-          style={{
-            flexShrink: 0,
-            transition: 'transform 0.3s ease',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)'
-          }}
-        >
-          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-      <div style={{
-        maxHeight: isOpen ? '500px' : '0',
-        overflow: 'hidden',
-        transition: 'max-height 0.3s ease, padding 0.3s ease',
-        paddingBottom: isOpen ? '1.25rem' : '0'
-      }}>
-        <p style={{
-          fontSize: '15px',
-          color: '#6b7280',
-          lineHeight: '1.7',
-          margin: 0
-        }}>
-          {answer}
-        </p>
-      </div>
-    </div>
+    <svg viewBox="0 0 24 24" fill="none" width={18} height={18} style={{ flexShrink: 0, marginTop: 2 }}
+      stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
   );
 }
 
-// FAQ Category Component
-function FAQCategory({ title, faqs, openIndex, setOpenIndex, startIndex }: {
-  title: string;
-  faqs: { q: string; a: string }[];
-  openIndex: number | null;
-  setOpenIndex: (index: number | null) => void;
-  startIndex: number;
-}) {
+function FAQItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div style={{ marginBottom: '2.5rem' }}>
-      <h3 style={{
-        fontSize: '20px',
-        fontWeight: '700',
-        color: '#7FB069',
-        marginBottom: '1rem',
-        paddingBottom: '0.75rem',
-        borderBottom: '2px solid #7FB069'
+    <div style={{
+      marginBottom: 12,
+      background: open ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
+      border: `1px solid ${open ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)'}`,
+      borderRadius: 16, overflow: 'hidden',
+      transition: 'all 0.3s ease',
+      boxShadow: open ? '0 10px 20px rgba(0,0,0,0.02)' : 'none',
+    }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', padding: '20px 24px', background: 'none', border: 'none',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        cursor: 'pointer', textAlign: 'left',
       }}>
-        {title}
-      </h3>
-      {faqs.map((faq, idx) => (
-        <FAQItem
-          key={startIndex + idx}
-          question={faq.q}
-          answer={faq.a}
-          isOpen={openIndex === startIndex + idx}
-          onClick={() => setOpenIndex(openIndex === startIndex + idx ? null : startIndex + idx)}
-        />
-      ))}
+        <span style={{ fontSize: 15, fontWeight: 500, color: G.textDark, paddingRight: '1rem' }}>{q}</span>
+        <span style={{
+          fontFamily: 'monospace', fontSize: 20, color: G.green, flexShrink: 0,
+          transition: 'transform 0.3s', display: 'inline-block',
+          transform: open ? 'rotate(45deg)' : 'none',
+        }}>+</span>
+      </button>
+      <div style={{
+        maxHeight: open ? 400 : 0, overflow: 'hidden',
+        transition: 'max-height 0.3s ease',
+        padding: open ? '0 24px 20px' : '0 24px 0',
+      }}>
+        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: G.textBase, whiteSpace: 'pre-line' }}>{a}</p>
+      </div>
     </div>
   );
 }
@@ -108,977 +72,418 @@ function FAQCategory({ title, faqs, openIndex, setOpenIndex, startIndex }: {
 export default function PricingPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
-  const [openFAQIndex, setOpenFAQIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    // Get language preference
-    const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
+    const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
+    if (saved) setLanguage(saved);
   }, []);
 
-  const handleGetStarted = () => {
-    // Go to main page (dream journal interface)
-    router.push('/');
+  const ko = language === 'ko';
+
+  const handleBuy = (plan: 'lifetime' | 'premium' | 'yearly') => {
+    const urls = {
+      lifetime: process.env.NEXT_PUBLIC_GUMROAD_LIFETIME_URL || 'https://novakitz.gumroad.com/l/novakitz-lifetime',
+      yearly: process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL || 'https://novakitz.gumroad.com/l/novakitz_year',
+      premium: process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz',
+    };
+    window.open(urls[plan], '_blank');
   };
 
-  const handleUpgradeClick = (plan: 'lifetime' | 'premium' | 'yearly') => {
-    if (plan === 'lifetime') {
-      window.open(process.env.NEXT_PUBLIC_GUMROAD_LIFETIME_URL || 'https://novakitz.gumroad.com/l/novakitz-lifetime', '_blank');
-    } else if (plan === 'yearly') {
-      window.open(process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL || 'https://novakitz.gumroad.com/l/novakitz_year', '_blank');
-    } else {
-      window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank');
-    }
-  };
+  const premiumFeatures = ko ? [
+    '무제한 꿈 & 감정 기반 무의식 분석',
+    '무제한 꿈 기록 및 전체 히스토리',
+    '맞춤 확언 제공',
+    '월간 드림 리뷰 & 꿈 패턴 분석',
+    '개인 아키타입 여정 타임라인',
+    '모든 미래 기능 무료 업데이트',
+  ] : [
+    'Unlimited dream & emotion-based unconscious analysis',
+    'Unlimited dreams & full history',
+    'Personalized affirmations',
+    'Monthly dream review & pattern analysis',
+    'Personal archetype journey timeline',
+    'All future updates free',
+  ];
 
-  const t = {
-    tagline: 'The OS for your subconscious',
-    title: language === 'ko' ? '요금제' : 'Pricing',
-    subtitle: language === 'ko' ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams',
-    heroBlocks: language === 'ko' ? [
-      '비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 \'Yesterday\'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다.\n\n위대한 통찰은 종종 우리가 잠든 사이 시작됩니다.',
-      '단순한 꿈 일기가 아닙니다.\n매일 500단어 이상의 칼 융 관점 심층 분석을 제공합니다.'
-    ] : [
-      'Paul McCartney composed \'Yesterday\' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas.\n\nGreat insights often begin while we sleep.',
-      'This is not a simple dream diary.\nWe provide 500+ word in-depth Jungian analysis every day.'
-    ],
-    heroCTA: language === 'ko' ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?',
-    // Why section
-    whyTitle: language === 'ko' ? '우리는 왜 꿈을 기록해야 할까요?' : 'Why should we record our dreams?',
-    whyIntro: language === 'ko'
-      ? '눈을 뜨자마자 스마트폰부터 찾으시나요?\n쏟아지는 알림, 타인의 SNS, 자극적인 뉴스...\n당신의 아침은 \'나\'로 시작하나요, 아니면 \'남\'으로 시작하나요?'
-      : 'Do you reach for your phone the moment you wake up?\nEndless notifications, others\' social media, sensational news...\nDoes your morning start with "you" or with "others"?',
-    whyCards: language === 'ko' ? [
-      {
-        icon: '📊',
-        title: '인생의 1/3을 버리고 있습니다',
-        description: '우리는 인생의 30%를 잠자며 보냅니다. 이때 뇌는 감정을 정리하고 장기 기억을 형성합니다. 꿈을 무시하는 건 이 귀중한 처리 과정의 결과물을 날리는 것과 같아요. 꿈은 뇌가 밤새 시뮬레이션한 무의식의 보고서입니다.'
-      },
-      {
-        icon: '🌅',
-        title: '아침의 첫 5분이 하루를 결정합니다',
-        description: '눈 뜨자마자 SNS부터 확인하시나요? 뉴스, 타인의 소식으로 하루를 시작하면 뇌는 점점 수동적으로 변해갑니다. 아침 단 5분, 외부의 소음 대신 내 안의 목소리를 듣는 것으로 시작해보세요. 능동적인 하루를 만드는 첫 걸음입니다.'
-      },
-      {
-        icon: '🧠',
-        title: '말하지 못한 감정을, 꿈은 이미 알고 있습니다.',
-        description: '원인 모를 이유로 불안하거나 우울한 적이 있으신가요? 처리되지 못한 감정은 무의식에 쌓이고, 꿈을 통해 계속 신호를 보내요. 꿈을 기록하고 의식화하는 것만으로도 감정은 인식되고 해소됩니다.'
-      }
-    ] : [
-      {
-        icon: '📊',
-        title: 'You\'re discarding 1/3 of your life',
-        description: 'We spend 30% of our lives sleeping. Ignoring dreams is like throwing away 1/3 of your life. Dreams are your brain\'s nightly unconscious reports.'
-      },
-      {
-        icon: '🌅',
-        title: 'The first 5 minutes determine your day',
-        description: 'Do you check Instagram and news first thing? Starting with others\' lives makes your brain passive. Start by listening to your inner voice instead of external noise.'
-      },
-      {
-        icon: '🧠',
-        title: 'What you feel but can\'t say, your dreams already know.',
-        description: 'Feeling anxious or depressed for no reason? Dreams are signals from unresolved emotions. Ignore them and they follow you. Just recording and reflecting on dreams releases inner blockages.'
-      }
-    ],
-    whyOutro: language === 'ko'
-      ? '기록하지 않은 꿈은 사라지지만, 기록된 꿈은 \'자산\'이 됩니다.'
-      : 'Unrecorded dreams disappear, but recorded dreams become assets.',
-    whyUseCases: language === 'ko'
-      ? ['막연한 불안감의 원인을 찾고 싶을 때', '남들이 모르는 창의적인 영감이 필요할 때', '진정한 나 자신(Self)을 만나고 싶을 때']
-      : ['When you want to find the cause of vague anxiety', 'When you need creative inspiration others don\'t have', 'When you want to meet your true Self'],
-    whyCTA: language === 'ko'
-      ? '노바키츠는 사라지는 당신의 꿈을 붙잡아,\n선명한 인생의 지도로 만들어드립니다.'
-      : 'Novakitz captures your fleeting dreams\nand turns them into a clear map of your life.',
-    premium: 'Premium',
-    premiumDesc: language === 'ko' ? '매월 구독' : 'Monthly subscription',
-    perMonth: language === 'ko' ? '매월 결제' : 'per month',
-    premiumFeatures: language === 'ko'
-      ? ['월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언', '월간 드림 리뷰', '꿈 패턴 인사이트', '모든 미래 기능 무료 업데이트']
-      : ['200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation', 'Monthly dream review', 'Dream pattern insights', 'All future updates free'],
-    yearly: language === 'ko' ? '연간' : 'Yearly',
-    yearlyDesc: language === 'ko' ? '연간 구독' : 'Annual subscription',
-    perYear: language === 'ko' ? '연간 결제' : 'per year',
-    yearlyDiscount: language === 'ko' ? '30% 할인' : '30% Off',
-    yearlyFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '월 200회+ 융 심리학 기반 꿈 분석 (각 500자 이상, 하루 ~6-7회)', '무제한 꿈 기록 및 전체 히스토리', '매일 아침 맞춤 확언', '월간 드림 리뷰', '꿈 패턴 인사이트', '모든 미래 기능 무료 업데이트']
-      : ['All Premium features', '200+ Jungian dream analyses/month (500+ words each, ~6-7/day)', 'Unlimited dreams & full history', 'Daily personalized affirmation', 'Monthly dream review', 'Dream pattern insights', 'All future updates free'],
-    lifetime: 'Lifetime',
-    lifetimeDesc: language === 'ko' ? '평생 이용권' : 'Lifetime access',
-    lifetimeDiscount: language === 'ko' ? '단 한 번 결제로 평생 사용 • 35% 할인' : 'Pay once, use forever • 35% off',
-    lifetimeFeatures: language === 'ko'
-      ? ['Premium의 모든 기능', '평생 200회+/월 융 심리학 기반 꿈 분석', '모든 미래 기능 평생 무료', 'Product Hunt 론칭 특가', '얼리 빌리버 50명 한정']
-      : ['All Premium features', 'Lifetime 200+ Jungian dream analyses/month', 'All future features free forever', 'Product Hunt launch special', 'Early Believer: 50 spots only'],
-    startPremium: language === 'ko' ? 'Premium 시작하기' : 'Start Premium',
-    startYearly: language === 'ko' ? '연간 구독 시작하기' : 'Start Yearly',
-    buyLifetime: language === 'ko' ? '평생 이용권 구매하기' : 'Buy Lifetime Access',
-    noRefund: language === 'ko' ? '환불 불가 • 즉시 라이선스 발급' : 'No refunds • Instant license',
-    faq: language === 'ko' ? '자주 묻는 질문' : 'Frequently Asked Questions',
-    stillThinking: language === 'ko' ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first',
-    tryFree: language === 'ko' ? '무료로 시작하기' : 'Try Free First',
-  };
+  const yearlyFeatures = ko ? [
+    'Premium의 모든 기능 포함',
+    '연간 결제로 30% 절약',
+    '무제한 꿈 & 감정 기반 무의식 분석',
+    '무제한 꿈 기록 및 전체 히스토리',
+    '맞춤 확언 제공',
+    '월간 드림 리뷰 & 아키타입 타임라인',
+  ] : [
+    'Everything in Premium',
+    'Save 30% with annual billing',
+    'Unlimited dream & emotion-based unconscious analysis',
+    'Unlimited dreams & full history',
+    'Personalized affirmations',
+    'Monthly dream review & archetype timeline',
+  ];
 
-  // FAQ Categories
-  const faqCategories = language === 'ko' ? {
-    aboutNovakitz: {
+  const lifetimeFeatures = ko ? [
+    'Premium의 모든 기능',
+    '꿈과 감정 기반 무의식 분석 평생 무제한',
+    '모든 미래 기능 평생 무료',
+    'Product Hunt 론칭 특가',
+  ] : [
+    'All Premium features',
+    'Lifetime unlimited dream & emotion analysis',
+    'All future features free forever',
+    'Product Hunt launch special',
+  ];
+
+  const whyCards = [
+    {
+      c: '#729EAB',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" width={24} height={24} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+          <line x1="18" y1="20" x2="18" y2="10" stroke="#729EAB" />
+          <line x1="12" y1="20" x2="12" y2="4" stroke="#729EAB" />
+          <line x1="6" y1="20" x2="6" y2="14" stroke="#729EAB" />
+        </svg>
+      ),
+      title: ko ? '인생의 1/3을 버리고 있습니다' : "You're discarding 1/3 of your life",
+      desc: ko
+        ? '우리는 인생의 30%를 잠자며 보냅니다. 꿈을 무시하는 건 뇌가 밤새 정리한 무의식과 감정의 보고서를 버리는 것과 같습니다.'
+        : "We spend 30% of our lives sleeping. Ignoring dreams means discarding the unconscious reports — full of emotions and insights — your brain spent all night writing.",
+    },
+    {
+      c: '#D4A33B',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" width={24} height={24} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+          <circle cx="12" cy="12" r="5" stroke="#D4A33B" />
+          <line x1="12" y1="1" x2="12" y2="3" stroke="#D4A33B" />
+          <line x1="12" y1="21" x2="12" y2="23" stroke="#D4A33B" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="#D4A33B" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="#D4A33B" />
+          <line x1="1" y1="12" x2="3" y2="12" stroke="#D4A33B" />
+          <line x1="21" y1="12" x2="23" y2="12" stroke="#D4A33B" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="#D4A33B" />
+          <line x1="18.36" y1="4.22" x2="19.78" y2="5.64" stroke="#D4A33B" />
+        </svg>
+      ),
+      title: ko ? '아침의 첫 5분이 하루를 결정합니다' : 'The first 5 minutes determine your day',
+      desc: ko
+        ? '눈 뜨자마자 SNS부터 확인하시나요? 아침 단 5분, 외부 소음 대신 내 안의 목소리를 듣는 것이 능동적인 하루의 시작입니다.'
+        : "Do you check Instagram first thing? Starting with others' lives makes your brain passive. Start by listening to your inner voice instead.",
+    },
+    {
+      c: '#D67A6B',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" width={24} height={24} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#D67A6B" />
+        </svg>
+      ),
+      title: ko ? '말하지 못한 감정을, 꿈은 이미 알고 있습니다.' : "What you feel but can't say, your dreams already know.",
+      desc: ko
+        ? '원인 모를 불안이나 우울함을 느끼시나요? 처리되지 못한 감정이 꿈을 통해 신호를 보냅니다. 기록하는 것만으로도 해소가 시작됩니다.'
+        : "Feeling anxious for no reason? Dreams are signals from unresolved emotions. Just recording and reflecting on them begins the release.",
+    },
+  ];
+
+  const faqCategories = ko ? [
+    {
       title: 'Novakitz 소개',
-      faqs: [
-        {
-          q: 'Novakitz란 무엇인가요?',
-          a: 'Novakitz는 AI 기반 꿈 일기 앱입니다. 꿈을 기록하고 융 심리학과 아키타입 분석을 통해 무의식을 탐험할 수 있도록 도와줍니다.'
-        },
-        {
-          q: 'Novakitz는 단순한 꿈 해석 앱인가요?',
-          a: '아니요. Novakitz는 일회성 꿈 해석이 아닌 장기적인 꿈 기록, 무의식 패턴 분석, 개인 아키타입 탐험에 집중합니다. 시간이 지남에 따라 당신의 꿈 패턴과 내면의 변화를 추적할 수 있습니다.'
-        },
-        {
-          q: 'Novakitz는 누구를 위한 앱인가요?',
-          a: '내 안에 뭔가 비어있는 것 같은 느낌이 드는 사람들을 위해.\n\n일기를 쓰고, 생각을 정리해도 정작 깊은 내면은 여전히 수수께끼로 남아있죠.\n\n노바키츠는 당신의 무의식에 귀 기울여 꿈을 의미 있는 통찰로 바꿔줍니다.'
-        }
-      ]
+      items: [
+        { q: 'Novakitz란 무엇인가요?', a: 'Novakitz는 AI 기반 꿈 일기 앱입니다. 꿈을 기록하고 융 심리학과 아키타입 분석을 통해 무의식을 탐험할 수 있도록 도와줍니다.' },
+        { q: 'Novakitz는 단순한 꿈 해석 앱인가요?', a: '아니요. Novakitz는 일회성 꿈 해석이 아닌 장기적인 꿈 기록, 무의식 패턴 분석, 개인 아키타입 탐험에 집중합니다. 시간이 지남에 따라 당신의 꿈 패턴과 내면의 변화를 추적할 수 있습니다.' },
+        { q: 'Novakitz는 누구를 위한 앱인가요?', a: '내 안에 뭔가 비어있는 것 같은 느낌이 드는 사람들을 위해.\n\n일기를 쓰고, 생각을 정리해도 정작 깊은 내면은 여전히 수수께끼로 남아있죠.\n\n노바키츠는 당신의 무의식에 귀 기울여 꿈을 의미 있는 통찰로 바꿔줍니다.' },
+      ],
     },
-    privacySecurity: {
+    {
       title: '개인정보 및 보안',
-      faqs: [
-        {
-          q: '제 꿈 데이터는 안전하게 보호되나요?',
-          a: '네. 모든 꿈 기록은 기본적으로 비공개이며 안전하게 암호화되어 저장됩니다. 귀하의 데이터는 절대 공유되거나 공개되지 않습니다.'
-        }
-      ]
+      items: [
+        { q: '제 꿈 데이터는 안전하게 보호되나요?', a: '네. 모든 꿈 기록은 기본적으로 비공개이며 안전하게 암호화되어 저장됩니다. 귀하의 데이터는 절대 공유되거나 공개되지 않습니다.' },
+      ],
     },
-    subscription: {
+    {
       title: '구독 및 결제',
-      faqs: [
-        {
-          q: '월 200회 AI 해석이면 충분한가요?',
-          a: '네! 하루 평균 6~7회 해석이 가능해서 매일 여러 개의 꿈을 기록하고 분석받기에 충분합니다. 대부분의 사용자는 하루 1~2개의 꿈을 기록합니다.'
-        },
-        {
-          q: 'Lifetime 이용권은 정말 평생인가요?',
-          a: '네, 단 한 번 결제로 Novakitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.'
-        },
-        {
-          q: '환불이 가능한가요?',
-          a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.'
-        },
-        {
-          q: 'Premium 월 구독은 언제든 취소 가능한가요?',
-          a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.'
-        },
-        {
-          q: '결제는 어떻게 하나요?',
-          a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.'
-        }
-      ]
-    }
-  } : {
-    aboutNovakitz: {
+      items: [
+        { q: 'Lifetime 이용권은 정말 평생인가요?', a: '네, 단 한 번 결제로 Novakitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.' },
+        { q: '환불이 가능한가요?', a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.' },
+        { q: 'Premium 월 구독은 언제든 취소 가능한가요?', a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.' },
+        { q: '결제는 어떻게 하나요?', a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.' },
+      ],
+    },
+  ] : [
+    {
       title: 'About Novakitz',
-      faqs: [
-        {
-          q: 'What is Novakitz?',
-          a: 'Novakitz is an AI-powered dream journal designed to help users record dreams and explore their unconscious through Jungian psychology and archetype analysis.'
-        },
-        {
-          q: 'Is Novakitz just a dream interpretation app?',
-          a: 'No. Novakitz focuses on long-term dream journaling, unconscious pattern analysis, and personal archetype exploration rather than one-time dream meanings. Over time, you can track your dream patterns and inner changes.'
-        },
-        {
-          q: 'Who is Novakitz for?',
-          a: 'For people who feel like they\'re missing something inside themselves.\n\nYou journal. You reflect. But your dreams stay mysterious.\n\nNovakitz helps you listen to your unconscious and turn dreams into insights.'
-        }
-      ]
+      items: [
+        { q: 'What is Novakitz?', a: 'Novakitz is an AI-powered inner journal designed to help users record dreams and explore their unconscious through Jungian psychology and archetype analysis.' },
+        { q: 'Is Novakitz just a dream interpretation app?', a: 'No. Novakitz focuses on long-term inner journaling, unconscious pattern analysis, and personal archetype exploration rather than one-time dream meanings. Over time, you can track your dream patterns and inner changes.' },
+        { q: 'Who is Novakitz for?', a: "For people who feel like they're missing something inside themselves.\n\nYou journal. You reflect. But your dreams stay mysterious.\n\nNovakitz helps you listen to your unconscious and turn dreams into meaningful insights." },
+      ],
     },
-    privacySecurity: {
+    {
       title: 'Privacy & Security',
-      faqs: [
-        {
-          q: 'Is my dream data private and secure?',
-          a: 'Yes. All dream records are private by default and securely encrypted. Your data is never shared or made public.'
-        }
-      ]
+      items: [
+        { q: 'Is my dream data private and secure?', a: 'Yes. All dream records are private by default and securely encrypted. Your data is never shared or made public.' },
+      ],
     },
-    subscription: {
+    {
       title: 'Subscription & Payment',
-      faqs: [
-        {
-          q: 'Is 200 AI interpretations per month enough?',
-          a: 'Yes! That allows about 6-7 interpretations per day, which is plenty for recording and analyzing multiple dreams daily. Most users record 1-2 dreams per day.'
-        },
-        {
-          q: 'Is the Lifetime plan really forever?',
-          a: 'Yes, with a single payment you can use Premium features for as long as Novakitz exists. All future feature updates are included for free.'
-        },
-        {
-          q: 'Can I get a refund?',
-          a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.'
-        },
-        {
-          q: 'Can I cancel the Premium monthly subscription anytime?',
-          a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.'
-        },
-        {
-          q: 'How do I pay?',
-          a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.'
-        }
-      ]
-    }
-  };
+      items: [
+        { q: 'Is the Lifetime plan really forever?', a: 'Yes, with a single payment you can use Premium features for as long as Novakitz exists. All future feature updates are included for free.' },
+        { q: 'Can I get a refund?', a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.' },
+        { q: 'Can I cancel the Premium monthly subscription anytime?', a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.' },
+        { q: 'How do I pay?', a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.' },
+      ],
+    },
+  ];
+
+  const S = { fontFamily: "'Playfair Display', Georgia, serif" } as React.CSSProperties;
+  const M = { fontFamily: 'monospace' } as React.CSSProperties;
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-      padding: 'clamp(0.75rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem)'
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header with Tagline */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            fontSize: '14px',
-            fontWeight: '600',
-            color: '#7FB069',
-            letterSpacing: '2px',
-            marginBottom: '0.5rem',
-            textTransform: 'uppercase'
-          }}>
-            {t.tagline}
-          </div>
-          <h1 style={{
-            fontSize: 'clamp(28px, 6vw, 48px)',
-            fontWeight: 'bold',
-            color: '#1f2937',
-            marginBottom: '1rem',
-            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-          }}>
-            {t.title}
+    <div style={{ minHeight: '100vh', background: G.bgMain, overflowX: 'hidden', position: 'relative' }}>
+
+      {/* Ambient blobs */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'rgba(181,218,185,0.6)', filter: 'blur(80px)', top: -100, left: -100 }} />
+        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'rgba(253,232,181,0.4)', filter: 'blur(80px)', bottom: -100, right: -50 }} />
+        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(217,210,233,0.5)', filter: 'blur(80px)', top: '40%', left: '30%' }} />
+      </div>
+
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(48px,8vw,80px) 24px', position: 'relative', zIndex: 1 }}>
+
+        {/* ── Header ── */}
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <span style={{ ...M, fontSize: 11, letterSpacing: 2, color: G.green, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
+            The OS for your subconscious
+          </span>
+          <h1 style={{ ...S, fontSize: 'clamp(36px,6vw,48px)', fontWeight: 700, color: G.textDark, margin: '0 0 40px', letterSpacing: -0.5 }}>
+            {ko ? '요금제' : 'Pricing'}
           </h1>
+
+          <div style={{ ...panel, maxWidth: 680, margin: '0 auto', padding: 'clamp(24px,4vw,40px)', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: G.textDark, whiteSpace: 'pre-line' }}>
+              {ko
+                ? "비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 'Yesterday'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다."
+                : "Paul McCartney composed 'Yesterday' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas."}
+            </p>
+            <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: G.textDark }}>
+              {ko ? '위대한 통찰은 종종 우리가 잠든 사이 시작됩니다.' : 'Great insights often begin while we sleep.'}
+            </p>
+            <p style={{ ...S, fontSize: 20, fontStyle: 'italic', color: G.green, margin: '8px 0 0' }}>
+              {ko ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?'}
+            </p>
+          </div>
         </div>
 
-        {/* Hero Copy Blocks */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.4)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderRadius: '24px',
-          padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem)',
-          border: '1px solid rgba(255, 255, 255, 0.5)',
-          boxShadow: '0 8px 32px rgba(127, 176, 105, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-          maxWidth: '680px',
-          margin: '0 auto clamp(1.5rem, 4vw, 2.5rem) auto',
-          textAlign: 'center' as const
-        }}>
-          {t.heroBlocks.map((block: string, idx: number) => (
-            <div key={idx} style={{
-              marginBottom: idx === t.heroBlocks.length - 1 ? '0' : '1.25rem',
-              padding: '0'
-            }}>
-              <p style={{
-                fontSize: idx === 0 ? '16px' : '15px',
-                color: idx === 0 ? '#1f2937' : '#4b5563',
-                lineHeight: '1.6',
-                whiteSpace: 'pre-line',
-                fontWeight: idx === 0 ? '600' : 'normal',
-                margin: 0
-              }}>
-                {block}
+        {/* ── Pricing Cards ── */}
+        <div style={{ marginBottom: 100 }}>
+          <div style={{ textAlign: 'center', marginBottom: 50 }}>
+            <h2 style={{ ...S, fontSize: 32, color: G.textDark, margin: '0 0 10px' }}>
+              {ko ? '플랜 선택하기' : 'Choose Your Plan'}
+            </h2>
+            <p style={{ fontSize: 15, color: G.textLight, margin: 0 }}>
+              {ko ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams'}
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24, alignItems: 'stretch' }}>
+
+            {/* Premium */}
+            <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>
+              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Premium</h3>
+              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  $5.99 <span style={{ fontSize: 14, fontWeight: 400, color: G.textLight }}>/ {ko ? '월' : 'mo'}</span>
+                </div>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
+                {premiumFeatures.map((f, i) => (
+                  <li key={i} style={{ fontSize: 14, color: G.textDark, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                    <Check />{f}
+                  </li>
+                ))}
+              </ul>
+              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
+                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
               </p>
-            </div>
-          ))}
-          <p style={{
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#7FB069',
-            marginTop: '1.25rem',
-            marginBottom: '0'
-          }}>
-            {t.heroCTA}
-          </p>
-        </div>
-
-        {/* Pricing Section Title */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(22px, 5vw, 32px)',
-            fontWeight: 'bold',
-            color: '#1f2937',
-            marginBottom: '0.5rem'
-          }}>
-            {language === 'ko' ? '플랜 선택하기' : 'Choose Your Plan'}
-          </h2>
-          <p style={{
-            fontSize: '16px',
-            color: '#6b7280'
-          }}>
-            {t.subtitle}
-          </p>
-        </div>
-
-        {/* Pricing Cards - 3 plans only */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-          gap: '1.5rem',
-          marginBottom: '3rem',
-          maxWidth: '1000px',
-          margin: '0 auto 3rem auto'
-        }}>
-          {/* Premium Monthly */}
-          <div style={{
-            background: 'white',
-            borderRadius: '24px',
-            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            border: '2px solid #e5e7eb',
-            position: 'relative'
-          }}>
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '0.5rem'
-            }}>
-              {t.premium}
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '1.5rem'
-            }}>
-              {t.premiumDesc}
-            </div>
-            <div style={{
-              fontSize: 'clamp(32px, 7vw, 48px)',
-              fontWeight: 'bold',
-              color: '#7FB069',
-              marginBottom: '0.5rem'
-            }}>
-              $5.99
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '2rem',
-              paddingBottom: '2rem',
-              borderBottom: '1px solid #e5e7eb'
-            }}>
-              {t.perMonth}
+              <button
+                onClick={() => handleBuy('premium')}
+                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: 'rgba(255,255,255,0.4)', border: `1px solid ${G.green}`, color: G.green, transition: 'background 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(122,179,130,0.12)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.4)'; }}
+              >
+                {ko ? 'Premium 시작하기' : 'Start Premium'}
+              </button>
             </div>
 
-            {/* Features */}
-            <div style={{ marginBottom: '2rem' }}>
-              {t.premiumFeatures.map((feature, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  marginBottom: '1rem',
-                  fontSize: '15px',
-                  color: '#374151',
-                  fontWeight: idx < 2 ? '600' : 'normal'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ marginRight: '12px', marginTop: '2px', flexShrink: 0 }}>
-                    <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="#7FB069" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {feature}
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => handleUpgradeClick('premium')}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(127, 176, 105, 0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 176, 105, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 176, 105, 0.3)';
-              }}
-            >
-              {t.startPremium}
-            </button>
-          </div>
-
-          {/* Yearly Plan */}
-          <div style={{
-            background: 'white',
-            borderRadius: '24px',
-            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
-            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2)',
-            border: '3px solid #7FB069',
-            position: 'relative'
-          }}>
-            {/* Popular Badge */}
-            <div style={{
-              position: 'absolute',
-              top: '-12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-              color: 'white',
-              padding: '6px 20px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: '700',
-              letterSpacing: '0.5px'
-            }}>
-              POPULAR
-            </div>
-
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '0.5rem'
-            }}>
-              {t.yearly}
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '1.5rem'
-            }}>
-              {t.yearlyDesc}
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              marginBottom: '0.5rem'
-            }}>
-              <div style={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#9ca3af',
-                textDecoration: 'line-through'
-              }}>
-                $71.88
+            {/* Yearly – Popular */}
+            <div style={{ ...panel, border: `2px solid ${G.green}`, background: 'rgba(255,255,255,0.7)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: 'white', letterSpacing: 1, borderRadius: '12px 24px 12px 24px', background: G.green, boxShadow: '0 4px 10px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}>
+                POPULAR
               </div>
-              <div style={{
-                fontSize: '48px',
-                fontWeight: 'bold',
-                color: '#7FB069'
-              }}>
-                $49.99
+              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>{ko ? '연간' : 'Yearly'}</h3>
+              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '연간 구독' : 'Annual subscription'}</p>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 16, color: G.textLight, textDecoration: 'line-through', opacity: 0.7 }}>$71.88</span>
+                  $49.99
+                </div>
+                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 14, color: G.textLight }}>{ko ? '연간 결제' : 'per year'}</span>
+                  <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(122,179,130,0.15)', color: G.green, borderRadius: 8, fontWeight: 700 }}>30% Off</span>
+                </div>
               </div>
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '2rem',
-              paddingBottom: '2rem',
-              borderBottom: '1px solid #e5e7eb'
-            }}>
-              {t.perYear}
-              <span style={{
-                background: '#dcfce7',
-                color: '#166534',
-                padding: '2px 8px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '600'
-              }}>
-                {t.yearlyDiscount}
-              </span>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
+                {yearlyFeatures.map((f, i) => (
+                  <li key={i} style={{ fontSize: 14, color: i === 0 ? G.green : G.textDark, fontWeight: i === 0 ? 700 : 400, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                    <Check />{f}
+                  </li>
+                ))}
+              </ul>
+              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
+                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
+              </p>
+              <button
+                onClick={() => handleBuy('yearly')}
+                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: G.green, border: `1px solid ${G.green}`, color: 'white', boxShadow: '0 6px 15px rgba(122,179,130,0.3)', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(122,179,130,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(122,179,130,0.3)'; }}
+              >
+                {ko ? '연간 구독 시작하기' : 'Start Yearly'}
+              </button>
             </div>
 
-            {/* Features */}
-            <div style={{ marginBottom: '2rem' }}>
-              {t.yearlyFeatures.map((feature, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  marginBottom: '1rem',
-                  fontSize: '15px',
-                  color: '#374151',
-                  fontWeight: idx === 0 ? '600' : 'normal'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ marginRight: '12px', marginTop: '2px', flexShrink: 0 }}>
-                    <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="#7FB069" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {feature}
-                </div>
-              ))}
-            </div>
+            {/* Lifetime */}
+            <div style={{ ...panel, background: 'linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(217,210,233,0.3) 100%)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: 'white', letterSpacing: 1, borderRadius: '12px 24px 12px 24px', background: G.gold, boxShadow: '0 4px 10px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}>
+                LIMITED 50 SPOTS
+              </div>
+              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Lifetime</h3>
+              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 20px' }}>{ko ? '평생 이용권' : 'Lifetime access'}</p>
 
-            <button
-              onClick={() => handleUpgradeClick('yearly')}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(127, 176, 105, 0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(127, 176, 105, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(127, 176, 105, 0.3)';
-              }}
-            >
-              {t.startYearly}
-            </button>
-          </div>
-
-          {/* Lifetime */}
-          <div style={{
-            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-            borderRadius: '24px',
-            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            border: '2px solid #bfdbfe',
-            position: 'relative'
-          }}>
-            {/* Limited Badge */}
-            <div style={{
-              position: 'absolute',
-              top: '-12px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              color: 'white',
-              padding: '6px 16px',
-              borderRadius: '20px',
-              fontSize: '11px',
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              LIMITED 50 SPOTS
-            </div>
-
-            <div style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              marginBottom: '0.5rem'
-            }}>
-              {t.lifetime}
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#6b7280',
-              marginBottom: '1.5rem'
-            }}>
-              {t.lifetimeDesc}
-            </div>
-
-            {/* 3-Tier Pricing */}
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1rem',
-              marginBottom: '1.5rem',
-              border: '1px solid #e5e7eb'
-            }}>
-              {/* Tier 1: Super Early Bird - SOLD OUT */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '8px 0',
-                opacity: 0.5,
-                borderBottom: '1px solid #e5e7eb'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '14px', color: '#9ca3af', textDecoration: 'line-through' }}>
-                    {language === 'ko' ? '슈퍼 얼리버드' : 'Super Early Bird'}
-                  </span>
-                  <span style={{
-                    background: '#6b7280',
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontSize: '10px',
-                    fontWeight: '600'
-                  }}>
-                    SOLD OUT
-                  </span>
-                </div>
-                <span style={{ fontSize: '16px', color: '#9ca3af', textDecoration: 'line-through', fontWeight: '600' }}>$99</span>
+              {/* Tier box */}
+              <div style={{ background: 'rgba(255,255,255,0.6)', borderRadius: 16, padding: 16, marginBottom: 14, border: '1px solid rgba(255,255,255,0.9)' }}>
+                {[
+                  { label: ko ? '슈퍼 얼리버드' : 'Super Early Bird', price: '$99', badge: 'SOLD OUT', badgeBg: G.textLight, dim: true },
+                  { label: ko ? '얼리 빌리버' : 'Early Believer', price: '$129', badge: 'NOW', badgeBg: G.gold, dim: false },
+                  { label: ko ? '스탠다드' : 'Standard', price: '$159', badge: 'NEXT', badgeBg: G.textLight, dim: true },
+                ].map((tier, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', opacity: tier.dim ? 0.45 : 1, textDecoration: tier.dim && i === 0 ? 'line-through' : 'none', fontSize: 13, borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
+                    <span style={{ color: i === 1 ? G.green : G.textBase, fontWeight: i === 1 ? 700 : 400 }}>{tier.label}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ ...M, fontSize: 9, padding: '2px 6px', borderRadius: 6, background: tier.badgeBg, color: 'white' }}>{tier.badge}</span>
+                      <span style={{ fontWeight: i === 1 ? 700 : 400, fontSize: i === 1 ? 16 : 13 }}>{tier.price}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Tier 2: Early Believer - CURRENT */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'linear-gradient(90deg, #dbeafe 0%, transparent 100%)',
-                margin: '8px -1rem',
-                padding: '10px 1rem',
-                borderRadius: '8px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '14px', color: '#1e40af', fontWeight: '600' }}>
-                    {language === 'ko' ? '얼리 빌리버' : 'Early Believer'}
-                  </span>
-                  <span style={{
-                    background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-                    color: 'white',
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontSize: '10px',
-                    fontWeight: '600'
-                  }}>
-                    {language === 'ko' ? '현재가' : 'NOW'}
-                  </span>
-                </div>
-                <span style={{ fontSize: '20px', color: '#1e40af', fontWeight: 'bold' }}>$129</span>
-              </div>
+              <p style={{ fontSize: 12, color: G.green, fontWeight: 700, textAlign: 'center', margin: '0 0 24px' }}>
+                {ko ? '평생 $5.99/월 절약' : 'Save $5.99/month forever'}
+              </p>
 
-              {/* Tier 3: Standard - COMING SOON */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '8px 0',
-                paddingTop: '10px',
-                opacity: 0.6
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '14px', color: '#6b7280' }}>
-                    {language === 'ko' ? '스탠다드' : 'Standard'}
-                  </span>
-                  <span style={{
-                    background: '#e5e7eb',
-                    color: '#6b7280',
-                    padding: '2px 8px',
-                    borderRadius: '10px',
-                    fontSize: '10px',
-                    fontWeight: '600'
-                  }}>
-                    {language === 'ko' ? '다음 가격' : 'NEXT'}
-                  </span>
-                </div>
-                <span style={{ fontSize: '16px', color: '#6b7280', fontWeight: '600' }}>$159</span>
-              </div>
-            </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
+                {lifetimeFeatures.map((f, i) => (
+                  <li key={i} style={{ fontSize: 14, color: G.textDark, fontWeight: i === 0 ? 700 : 400, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                    <Check color={G.gold} />{f}
+                  </li>
+                ))}
+              </ul>
 
-            <div style={{
-              fontSize: '13px',
-              color: '#7c2d12',
-              fontWeight: '600',
-              marginBottom: '1.5rem',
-              paddingBottom: '1.5rem',
-              borderBottom: '1px solid #bfdbfe',
-              textAlign: 'center'
-            }}>
-              {language === 'ko' ? '50명 한정 • 평생 $5.99/월 절약' : 'Limited 50 spots • Save $5.99/month forever'}
-            </div>
-
-            {/* Features */}
-            <div style={{ marginBottom: '2rem' }}>
-              {t.lifetimeFeatures.map((feature, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  marginBottom: '1rem',
-                  fontSize: '15px',
-                  color: '#374151',
-                  fontWeight: idx === 0 || idx === 1 ? '600' : 'normal'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ marginRight: '12px', marginTop: '2px', flexShrink: 0 }}>
-                    <path d="M16.6666 5L7.49992 14.1667L3.33325 10" stroke="#1e40af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {feature}
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => handleUpgradeClick('lifetime')}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(30, 64, 175, 0.3)',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(30, 64, 175, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(30, 64, 175, 0.3)';
-              }}
-            >
-              {t.buyLifetime}
-            </button>
-
-            <div style={{
-              marginTop: '1rem',
-              fontSize: '12px',
-              color: '#6b7280',
-              textAlign: 'center'
-            }}>
-              {t.noRefund}
+              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
+                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
+              </p>
+              <button
+                onClick={() => handleBuy('lifetime')}
+                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: G.textDark, border: `1px solid ${G.textDark}`, color: 'white', boxShadow: '0 6px 15px rgba(58,74,62,0.3)', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+              >
+                {ko ? 'Lifetime 시작하기' : 'Start Lifetime'}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Why Record Dreams Section */}
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem)',
-          marginBottom: 'clamp(1.5rem, 4vw, 3rem)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
-        }}>
-          {/* Why Title */}
-          <h2 style={{
-            fontSize: '28px',
-            fontWeight: 'bold',
-            color: '#1f2937',
-            textAlign: 'center',
-            marginBottom: '1.5rem',
-            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Georgia', serif"
-          }}>
-            {t.whyTitle}
-          </h2>
+        {/* ── Why Record Dreams ── */}
+        <div style={{ marginBottom: 100 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ ...S, fontSize: 32, color: G.textDark, margin: '0 0 14px' }}>
+              {ko ? '우리는 왜 꿈과 감정을 기록해야 할까요?' : 'Why should we record our dreams and emotions?'}
+            </h2>
+            <p style={{ fontSize: 15, color: G.textLight, margin: 0, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+              {ko
+                ? "꿈과 감정은 우리 무의식의 언어입니다.\n매일 아침 사라지는 꿈 속에, 당신이 미처 말하지 못한 감정이 담겨 있습니다.\n기록하고 분석할 때 비로소 내면의 지도가 완성됩니다."
+                : 'Dreams and emotions are the language of your unconscious.\nEvery morning, the dreams that fade away carry feelings you never had words for.\nRecording and analyzing them is how you map your inner world.'}
+            </p>
+          </div>
 
-          {/* Intro Text */}
-          <p style={{
-            fontSize: '16px',
-            color: '#6b7280',
-            textAlign: 'center',
-            lineHeight: '1.8',
-            marginBottom: '2.5rem',
-            whiteSpace: 'pre-line',
-            maxWidth: '600px',
-            margin: '0 auto 2.5rem auto'
-          }}>
-            {t.whyIntro}
-          </p>
-
-          {/* 3 Persuasion Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))',
-            gap: '1.5rem',
-            marginBottom: '2.5rem'
-          }}>
-            {t.whyCards.map((card, idx) => (
-              <div key={idx} style={{
-                background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                border: '1px solid #e5e7eb'
-              }}>
-                <div style={{
-                  fontSize: 'clamp(24px, 5vw, 32px)',
-                  marginBottom: '0.75rem'
-                }}>
-                  {card.icon}
-                </div>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  color: '#1f2937',
-                  marginBottom: '1rem',
-                  lineHeight: '1.4'
-                }}>
-                  {card.title}
-                </h3>
-                <p style={{
-                  fontSize: '15px',
-                  color: '#4b5563',
-                  lineHeight: '1.7'
-                }}>
-                  {card.description}
-                </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px,100%), 1fr))', gap: 24, marginBottom: 40 }}>
+            {whyCards.map((card, i) => (
+              <div key={i} style={{ ...panel, padding: '35px 25px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {card.icon}
+                <h3 style={{ fontSize: 18, color: G.textDark, margin: 0, lineHeight: 1.4 }}>{card.title}</h3>
+                <p style={{ fontSize: 14, color: G.textBase, lineHeight: 1.7, margin: 0 }}>{card.desc}</p>
               </div>
             ))}
           </div>
 
-          {/* Outro */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '1.5rem'
-          }}>
-            <p style={{
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-line',
-              marginBottom: '1.5rem'
-            }}>
-              {t.whyOutro}
-            </p>
-
-            {/* Use Cases */}
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              gap: '0.75rem',
-              marginBottom: '1.5rem'
-            }}>
-              {t.whyUseCases.map((useCase, idx) => (
-                <div key={idx} style={{
-                  background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  color: '#374151',
-                  border: '1px solid rgba(127, 176, 105, 0.2)'
-                }}>
-                  {useCase}
+          <div style={{ textAlign: 'center' }}>
+            <h4 style={{ fontSize: 18, color: G.textDark, margin: '0 0 20px' }}>
+              {ko ? "기록하지 않은 꿈과 감정은 사라지지만, 기록된 것들은 '자산'이 됩니다." : "Unrecorded dreams and emotions disappear, but recorded ones become assets."}
+            </h4>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+              {(ko
+                ? ['막연한 불안감의 원인을 찾고 싶을 때', '남들이 모르는 창의적인 영감이 필요할 때', '진정한 나 자신(Self)을 만나고 싶을 때']
+                : ['When you want to find the cause of vague anxiety', 'When you need creative inspiration', 'When you want to meet your true Self']
+              ).map((pill, i) => (
+                <div key={i} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 30, fontSize: 13, color: G.textBase }}>
+                  {pill}
                 </div>
               ))}
             </div>
-
-            {/* Final CTA Text */}
-            <p style={{
-              fontSize: '16px',
-              color: '#7FB069',
-              fontWeight: '600',
-              lineHeight: '1.6',
-              whiteSpace: 'pre-line'
-            }}>
-              {t.whyCTA}
+            <p style={{ ...S, fontSize: 20, fontStyle: 'italic', color: G.green, whiteSpace: 'pre-line', margin: 0 }}>
+              {ko
+                ? '노바키츠는 사라지는 꿈과 감정을 붙잡아,\n당신 내면의 선명한 지도로 만들어드립니다.'
+                : 'Novakitz captures your fleeting dreams and emotions\nand turns them into a clear map of your inner life.'}
             </p>
           </div>
         </div>
 
-        {/* FAQ Section - Accordion Style */}
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: 'clamp(1.5rem, 4vw, 3rem)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-          marginBottom: '2rem'
-        }}>
-          <h2 style={{
-            fontSize: 'clamp(22px, 5vw, 32px)',
-            fontWeight: 'bold',
-            color: '#1f2937',
-            marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
-            textAlign: 'center'
-          }}>
-            {t.faq}
-          </h2>
-
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <FAQCategory
-              title={faqCategories.aboutNovakitz.title}
-              faqs={faqCategories.aboutNovakitz.faqs}
-              openIndex={openFAQIndex}
-              setOpenIndex={setOpenFAQIndex}
-              startIndex={0}
-            />
-            <FAQCategory
-              title={faqCategories.privacySecurity.title}
-              faqs={faqCategories.privacySecurity.faqs}
-              openIndex={openFAQIndex}
-              setOpenIndex={setOpenFAQIndex}
-              startIndex={3}
-            />
-            <FAQCategory
-              title={faqCategories.subscription.title}
-              faqs={faqCategories.subscription.faqs}
-              openIndex={openFAQIndex}
-              setOpenIndex={setOpenFAQIndex}
-              startIndex={5}
-            />
-          </div>
+        {/* ── FAQ ── */}
+        <div style={{ maxWidth: 800, margin: '0 auto 60px' }}>
+          {faqCategories.map((cat, ci) => (
+            <div key={ci}>
+              <h2 style={{ ...S, fontSize: 24, color: G.green, margin: ci === 0 ? '0 0 20px' : '40px 0 20px', paddingBottom: 10, borderBottom: '1px solid rgba(122,179,130,0.3)' }}>
+                {cat.title}
+              </h2>
+              {cat.items.map((item, ii) => (
+                <FAQItem key={ii} q={item.q} a={item.a} />
+              ))}
+            </div>
+          ))}
         </div>
 
-        {/* CTA */}
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          <p style={{
-            fontSize: '16px',
-            color: '#6b7280',
-            marginBottom: '1rem'
-          }}>
-            {t.stillThinking}
+        {/* ── Bottom CTA ── */}
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <p style={{ fontSize: 16, color: G.textLight, marginBottom: 16 }}>
+            {ko ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first'}
           </p>
           <button
-            onClick={handleGetStarted}
-            style={{
-              padding: '14px 32px',
-              background: 'white',
-              color: '#7FB069',
-              border: '2px solid #7FB069',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#7FB069';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'white';
-              e.currentTarget.style.color = '#7FB069';
-            }}
+            onClick={() => router.push('/')}
+            style={{ padding: '14px 32px', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', color: G.green, border: `2px solid ${G.green}`, borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = G.green; e.currentTarget.style.color = 'white'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = G.green; }}
           >
-            {t.tryFree}
+            {ko ? '무료로 시작하기' : 'Try Free First'}
           </button>
         </div>
 
-        {/* Legal Links - Footer */}
-        <div style={{
-          textAlign: 'center',
-          paddingTop: '1rem',
-          borderTop: '1px solid #e5e7eb'
-        }}>
-          <a href="/legal/terms" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
-            Terms
-          </a>
-          <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
-          <a href="/legal/privacy" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
-            Privacy
-          </a>
-          <span style={{ fontSize: '11px', color: '#d1d5db' }}>·</span>
-          <a href="/legal/refund" style={{ fontSize: '11px', color: '#9ca3af', textDecoration: 'none', margin: '0 8px' }}>
-            Refund
-          </a>
+        {/* Footer links */}
+        <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid rgba(122,179,130,0.2)' }}>
+          {[['Terms', '/legal/terms'], ['Privacy', '/legal/privacy'], ['Refund', '/legal/refund']].map(([label, href], i) => (
+            <span key={i}>
+              {i > 0 && <span style={{ fontSize: 11, color: G.textLight, margin: '0 4px' }}>·</span>}
+              <a href={href} style={{ fontSize: 11, color: G.textLight, textDecoration: 'none', margin: '0 6px' }}>{label}</a>
+            </span>
+          ))}
         </div>
       </div>
     </div>

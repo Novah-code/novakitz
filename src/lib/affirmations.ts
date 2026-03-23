@@ -197,6 +197,46 @@ export async function hasAffirmationsForTime(
 }
 
 /**
+ * Add a single affirmation to today's pool (max 3 total, no duplicates)
+ */
+export async function addSingleAffirmation(
+  userId: string,
+  affirmationText: string,
+  language: 'en' | 'ko' = 'en'
+): Promise<boolean> {
+  try {
+    const now = new Date();
+    const date = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .split('T')[0];
+
+    const existing = await getTodayAffirmations(userId);
+    if (existing.length >= 3) return false;
+    if (existing.some(a => a.affirmation_text === affirmationText)) return false;
+
+    const hour = now.getHours();
+    const checkInTime: 'morning' | 'afternoon' | 'evening' =
+      hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+
+    const { error } = await supabase.from('affirmations').insert({
+      user_id: userId,
+      affirmation_text: affirmationText,
+      daily_count: existing.length + 1,
+      check_in_time: checkInTime,
+      language,
+      date,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+    return !error;
+  } catch (error) {
+    console.error('Error in addSingleAffirmation:', error);
+    return false;
+  }
+}
+
+/**
  * Delete affirmations for a specific time slot today
  */
 export async function deleteAffirmationsForTime(

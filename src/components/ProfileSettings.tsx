@@ -539,7 +539,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
             marginBottom: '32px',
             fontFamily: "'Times New Roman', serif",
           }}>
-            {activeTab === 'profile' ? t.profile : activeTab === 'account' ? t.account : t.subscription}
+            {activeTab === 'profile' ? t.profile : activeTab === 'account' ? t.account : activeTab === 'streak' ? t.streak : t.subscription}
           </h2>
 
           {/* Profile Tab */}

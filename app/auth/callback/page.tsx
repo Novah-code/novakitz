@@ -12,59 +12,72 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // URL에서 fragment 처리
-        const hashParams = new URLSearchParams(window.location.hash.slice(1));
-        const accessToken = hashParams.get('access_token');
+        // PKCE flow: code is in URL query string (?code=xxx)
+        const code = new URLSearchParams(window.location.search).get('code');
 
-        if (accessToken) {
-          // 토큰이 있으면 세션 설정 대기
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        let session = null;
+
+        if (code) {
+          // Explicitly exchange the PKCE code for a session
+          console.log('Exchanging PKCE code for session...');
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            console.error('Code exchange error:', error);
+            router.replace('/?error=auth_failed');
+            return;
+          }
+          session = data.session;
+        } else {
+          // Fallback: implicit flow (hash fragment) or already-exchanged session
+          const { data, error } = await supabase.auth.getSession();
+          if (error) {
+            console.error('Get session error:', error);
+            router.replace('/?error=auth_failed');
+            return;
+          }
+          session = data.session;
         }
 
-        const { data, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('인증 오류:', error);
-          router.replace('/?error=auth_failed');
-          return;
-        }
-
-        if (data.session) {
-          const user = data.session.user;
-          console.log('로그인 성공:', user);
+        if (session) {
+          const user = session.user;
+          console.log('로그인 성공:', user.id);
 
           // Google에서 제공하는 이름 자동 저장
           if (user.user_metadata?.name) {
             const googleName = user.user_metadata.name;
-
             try {
-              // user_profiles에 Google 이름 저장
-              const { error: profileError } = await supabase
+              await supabase
                 .from('user_profiles')
                 .upsert(
-                  {
-                    user_id: user.id,
-                    full_name: googleName,
-                    display_name: googleName, // Google 이름을 display_name으로도 저장
-                  },
+                  { user_id: user.id, full_name: googleName, display_name: googleName },
                   { onConflict: 'user_id' }
                 );
-
-              if (profileError) {
-                console.warn('프로필 저장 오류:', profileError);
-                // 에러가 있어도 로그인은 계속 진행
-              } else {
-                console.log('✅ Google 이름 저장 완료:', googleName);
-              }
+              console.log('✅ Google 이름 저장 완료:', googleName);
             } catch (profileSaveError) {
-              console.error('프로필 저장 중 오류:', profileSaveError);
-              // 에러가 있어도 로그인은 계속 진행
+              console.warn('프로필 저장 오류 (무시):', profileSaveError);
             }
           }
 
-          // URL 파라미터 없이 홈으로 이동
+          // Check for pending Gumroad purchase and activate if found
+          if (user.email) {
+            try {
+              const res = await fetch('/api/activate-pending', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, email: user.email }),
+              });
+              const result = await res.json();
+              if (result.activated) {
+                console.log('✅ Pending purchase activated:', result.type);
+              }
+            } catch (e) {
+              console.warn('Pending activation check failed (non-critical):', e);
+            }
+          }
+
           router.replace('/');
         } else {
+          console.error('No session after exchange');
           router.replace('/?error=no_session');
         }
       } catch (error) {

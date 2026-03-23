@@ -20,14 +20,13 @@ interface UsageStats {
 
 export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetProps) {
   const [usage, setUsage] = useState<UsageStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (user) {
       loadUsageStats();
-      // Refresh stats every 30 seconds
-      const interval = setInterval(loadUsageStats, 30000);
+      // Refresh stats every 5 minutes
+      const interval = setInterval(loadUsageStats, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }
   }, [user]);
@@ -57,8 +56,6 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
       }
     } catch (error) {
       console.error('Error loading AI usage stats:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

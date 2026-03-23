@@ -51,14 +51,14 @@ export const metadata: Metadata = {
     alternateLocale: "ko_KR",
     url: "https://www.novakitz.shop",
     siteName: "Novakitz",
-    title: "Novakitz - AI Dream Journal & Jungian Analysis",
+    title: "Novakitz - AI Inner Journal & Jungian Analysis",
     description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track dreams, uncover archetypes, and grow.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Novakitz - AI Dream Journal",
+        alt: "Novakitz - AI Inner Journal",
         type: "image/png",
       }
     ],
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   // Twitter Card - 트위터/X 공유 시 표시
   twitter: {
     card: "summary_large_image",
-    title: "Novakitz - AI Dream Journal & Jungian Analysis",
+    title: "Novakitz - AI Inner Journal & Jungian Analysis",
     description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis.",
     images: ["/og-image.png"],
     creator: "@novakitz",

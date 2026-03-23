@@ -1,992 +1,476 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import AnimatedScore from './AnimatedScore';
 
 interface DreamInsightsProps {
   user: User;
   language?: 'en' | 'ko';
   onClose: () => void;
+  isPremium?: boolean;
+  onOpenMonthlyReview?: () => void;
 }
 
 interface KeywordData {
   keyword: string;
   category: string;
-  sentiment: string;
   count: number;
+  trend: 'up' | 'down' | 'flat';
 }
 
-interface EmotionData {
-  sentiment: string;
+interface MoodData {
+  mood: string;
   count: number;
-  percentage: number;
+  trend: 'up' | 'down' | 'flat';
 }
 
 interface DreamStats {
   totalDreams: number;
-  totalKeywords: number;
-  topKeywords: KeywordData[];
-  emotionDistribution: EmotionData[];
-  categoryDistribution: { category: string; count: number }[];
-  averageDreamsPerWeek: number;
-  longestStreak: number;
-  moodDistribution: { mood: string; count: number; percentage: number }[];
-  averageLength: number;
-  longestDream: number;
-  shortestDream: number;
-  topTags: { tag: string; count: number }[];
+  thisWeek: number;
   currentStreak: number;
-  aiPatternAnalysis: string | null;
-  daysWithoutDreams: number;
+  moodPatterns: MoodData[];
+  dreamSymbols: KeywordData[];
+  sentimentBalance: { positive: number; neutral: number; negative: number };
 }
 
-const translations = {
-  en: {
-    title: 'Dream Insights',
-    subtitle: 'Discover patterns in your dreams',
-    loading: 'Analyzing your dreams...',
-    noData: 'No dream data yet. Start recording your dreams to see insights!',
-    minRecords: 'Record at least 5 dreams to see detailed insights',
-    totalDreams: 'Total Dreams',
-    totalKeywords: 'Keywords Extracted',
-    avgPerWeek: 'Dreams per Week',
-    longestStreak: 'Longest Streak',
-    currentStreak: 'Current Streak',
-    avgLength: 'Average Length',
-    longestDream: 'Longest Dream',
-    shortestDream: 'Shortest Dream',
-    daysWithoutDreams: 'Days Without Dreams',
-    characters: 'characters',
-    topKeywords: 'Most Common Keywords',
-    emotionDistribution: 'Emotional Patterns',
-    categoryBreakdown: 'Dream Categories',
-    moodDistribution: 'Mood Distribution',
-    topTags: 'Popular Tags',
-    recentPatterns: 'Recent Patterns',
-    aiPatternAnalysis: 'AI Pattern Analysis',
-    aiAnalyzing: 'Analyzing your dream patterns...',
-    yourDreamStory: 'Your Dream Story',
-    days: 'days',
-    positive: 'Positive',
-    negative: 'Negative',
-    neutral: 'Neutral',
-    mixed: 'Mixed',
-    emotion: 'Emotion',
-    symbol: 'Symbol',
-    person: 'Person',
-    place: 'Place',
-    action: 'Action',
-    theme: 'Theme',
-    peaceful: 'Peaceful',
-    anxious: 'Anxious',
-    joyful: 'Joyful',
-    mysterious: 'Mysterious',
-    close: 'Close'
-  },
-  ko: {
-    title: '드림 인사이트',
-    subtitle: '당신의 꿈 패턴을 발견하세요',
-    loading: '꿈을 분석하는 중...',
-    noData: '아직 꿈 데이터가 없어요. 꿈을 기록하고 인사이트를 확인하세요!',
-    minRecords: '자세한 인사이트를 보려면 최소 5개의 꿈을 기록하세요',
-    totalDreams: '총 꿈 기록',
-    totalKeywords: '추출된 키워드',
-    avgPerWeek: '주간 평균',
-    longestStreak: '최장 연속',
-    currentStreak: '현재 연속',
-    avgLength: '평균 길이',
-    longestDream: '가장 긴 꿈',
-    shortestDream: '가장 짧은 꿈',
-    daysWithoutDreams: '꿈 안 꾼 날',
-    characters: '자',
-    topKeywords: '자주 나타나는 키워드',
-    emotionDistribution: '감정 패턴',
-    categoryBreakdown: '꿈 카테고리',
-    moodDistribution: '무드 분포',
-    topTags: '인기 태그',
-    recentPatterns: '최근 패턴',
-    aiPatternAnalysis: 'AI 패턴 분석',
-    aiAnalyzing: '꿈 패턴을 분석하는 중...',
-    yourDreamStory: '당신의 꿈 이야기',
-    days: '일',
-    positive: '긍정',
-    negative: '부정',
-    neutral: '중립',
-    mixed: '복합',
-    emotion: '감정',
-    symbol: '상징',
-    person: '인물',
-    place: '장소',
-    action: '행동',
-    theme: '주제',
-    peaceful: '평온',
-    anxious: '불안',
-    joyful: '기쁨',
-    mysterious: '신비',
-    close: '닫기'
-  }
-};
+/* ── SVG Icon Components ── */
+function BaseIcon({ size = 24, children }: { size?: number; children: React.ReactNode }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'block', flexShrink: 0 }}
+    >
+      {children}
+    </svg>
+  );
+}
 
-const sentimentColors = {
-  positive: '#7FB069',
-  negative: '#E07A5F',
-  neutral: '#81B29A',
-  mixed: '#F2CC8F'
-};
+function XIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></BaseIcon>;
+}
+function SunIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></BaseIcon>;
+}
+function MoonIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></BaseIcon>;
+}
+function ActivityIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></BaseIcon>;
+}
+function TrendingUpIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></BaseIcon>;
+}
+function TrendingDownIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></BaseIcon>;
+}
+function MinusIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><line x1="5" y1="12" x2="19" y2="12"/></BaseIcon>;
+}
+function SparklesIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M3 5h4"/></BaseIcon>;
+}
+function LockIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></BaseIcon>;
+}
+function BarChart3Icon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></BaseIcon>;
+}
+function ArrowUpRightIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M7 7h10v10"/><path d="M7 17 17 7"/></BaseIcon>;
+}
+function ArrowDownRightIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M7 17h10V7"/><path d="M17 17 7 7"/></BaseIcon>;
+}
+function DropletsIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7 2.9 7 2.9s-2.15 6.16-2.29 6.16c-1.14.93-1.71 2.03-1.71 3.19 0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 1 14 8.5c.64.9 1 2 1 3.2 0 2.8-2.2 5-5 5s-5-2.2-5-5c0-1.2.36-2.3 1-3.2"/></BaseIcon>;
+}
+function FootprintsIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></BaseIcon>;
+}
+function HomeIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></BaseIcon>;
+}
+function UserIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></BaseIcon>;
+}
+function StarIcon({ size = 24 }: { size?: number }) {
+  return <BaseIcon size={size}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></BaseIcon>;
+}
 
-const categoryColors = {
-  emotion: '#7FB069',
-  symbol: '#81B29A',
-  person: '#F2CC8F',
-  place: '#E07A5F',
-  action: '#3D5A80',
-  theme: '#98C1D9'
-};
+type IconComponent = ({ size }: { size?: number }) => React.ReactElement;
 
-const moodColors = {
-  peaceful: '#7FB069',
-  anxious: '#E07A5F',
-  joyful: '#F2CC8F',
-  mysterious: '#81B29A'
-};
+const POSITIVE_MOODS = new Set(['happy', 'peaceful', 'excited', 'hopeful', 'curious', 'joyful', 'calm', 'content', 'grateful', 'serene', 'balanced', '행복', '평화', '설렘', '희망', '호기심']);
+const NEGATIVE_MOODS = new Set(['anxious', 'fearful', 'angry', 'sad', 'confused', 'worried', 'stressed', 'nervous', 'scared', 'overwhelmed', '불안', '두려움', '화남', '슬픔', '혼란']);
 
-// AI Pattern Analysis Function
-const analyzePatterns = async (dreams: any[], language: 'en' | 'ko') => {
-  try {
-    // Prepare dream summaries for analysis
-    const dreamSummaries = dreams.slice(0, 30).map((dream, idx) => {
-      const content = dream.content.split('\n\n---\n\n')[0]; // Get dream text only
-      return `Dream ${idx + 1} (${dream.mood}): ${content.substring(0, 200)}...`;
-    }).join('\n\n');
+function getMoodStyle(mood: string) {
+  const m = mood.toLowerCase();
+  if (POSITIVE_MOODS.has(m)) return { color: '#7ea886', bg: '#ebf2ed' };
+  if (NEGATIVE_MOODS.has(m)) return { color: '#d6a848', bg: '#fbf4e6' };
+  return { color: '#5c8065', bg: '#e8efe9' };
+}
 
-    const prompt = language === 'ko'
-      ? `다음은 사용자의 최근 꿈 기록들입니다. 이 꿈들을 분석해서 패턴과 인사이트를 제공해주세요.
+function getSymbolInfo(keyword: string, category: string): { Icon: IconComponent; display: string } {
+  const kw = keyword.toLowerCase();
+  if (/water|ocean|rain|river|lake|sea|물|바다|강/.test(kw)) return { Icon: DropletsIcon, display: 'Nature' };
+  if (/run|chase|walk|fly|달리|달음|걷|비행/.test(kw)) return { Icon: FootprintsIcon, display: 'Action' };
+  if (/house|home|room|building|door|집|방|건물/.test(kw)) return { Icon: HomeIcon, display: 'Space' };
+  if (/stranger|person|man|woman|낯선|사람|인물/.test(kw)) return { Icon: UserIcon, display: 'Persona' };
+  if (category === 'place') return { Icon: HomeIcon, display: 'Space' };
+  if (category === 'person') return { Icon: UserIcon, display: 'Persona' };
+  if (category === 'action') return { Icon: FootprintsIcon, display: 'Action' };
+  return { Icon: StarIcon, display: category.charAt(0).toUpperCase() + category.slice(1) || 'Symbol' };
+}
 
-${dreamSummaries}
-
-다음 형식으로 분석해주세요:
-1. **반복되는 테마**: 자주 나타나는 주제나 상징
-2. **감정 패턴**: 꿈에서의 전반적인 감정 변화
-3. **개인적 해석**: 이 꿈들이 보여주는 사용자의 심리 상태나 관심사
-4. **조언**: 꿈을 통해 발견할 수 있는 것들
-
-각 섹션을 2-3문장으로 간결하게 작성해주세요. 친근하고 따뜻한 톤으로 작성하되, 과도한 해석은 피해주세요.`
-      : `Here are the user's recent dream records. Please analyze these dreams and provide patterns and insights.
-
-${dreamSummaries}
-
-Please provide analysis in the following format:
-1. **Recurring Themes**: Frequently appearing subjects or symbols
-2. **Emotional Patterns**: Overall emotional trends in dreams
-3. **Personal Interpretation**: What these dreams reveal about the user's psychological state or interests
-4. **Advice**: Insights that can be discovered through dreams
-
-Keep each section concise (2-3 sentences). Use a warm, friendly tone and avoid over-interpretation.`;
-
-    const response = await fetch('/api/analyze-dream', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt,
-        dreamText: '' // Not needed for pattern analysis
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to analyze patterns');
-    }
-
-    const data = await response.json();
-    return data.analysis || null;
-  } catch (error) {
-    console.error('Pattern analysis error:', error);
-    return null;
-  }
-};
-
-export default function DreamInsights({ user, language = 'en', onClose }: DreamInsightsProps) {
-  const t = translations[language];
+export default function DreamInsights({ user, language = 'en', onClose, isPremium = false, onOpenMonthlyReview }: DreamInsightsProps) {
+  const ko = language === 'ko';
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DreamStats | null>(null);
-  const [animateCharts, setAnimateCharts] = useState(false);
 
-  useEffect(() => {
-    loadDreamInsights();
-  }, [user.id]);
+  useEffect(() => { loadData(); }, [user.id]);
 
-  // Trigger chart animations after stats are loaded
-  useEffect(() => {
-    if (stats && !loading) {
-      // Small delay to ensure DOM is ready
-      setTimeout(() => setAnimateCharts(true), 100);
-    }
-  }, [stats, loading]);
-
-  const loadDreamInsights = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      console.log('Loading dream insights for user:', user.id);
-
-      // Fetch dreams with all data for comprehensive analysis (get all dream data first)
-      const { data: dreamsData, error: dreamsError } = await supabase
+      const { data: allEntries } = await supabase
         .from('dreams')
-        .select('id, created_at, content, mood, tags, title')
+        .select('id, created_at, mood, tags, content')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      console.log('Dreams data count:', dreamsData?.length || 0);
-      if (dreamsError) {
-        console.error('Error fetching dreams:', dreamsError);
-        throw dreamsError;
-      }
+      const entries = allEntries || [];
 
-      const dreamCount = dreamsData?.length || 0;
-      console.log('Dream count:', dreamCount);
+      // Separate mood/emotion logs from dream entries
+      const isMoodEntry = (d: { content?: string; tags?: string[] }) =>
+        d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record');
+      const dreamEntries = entries.filter(d => !isMoodEntry(d));
+      const dreamIds = dreamEntries.map(d => d.id);
 
-      // Get only keywords for existing dreams (filter by dream_id)
-      const existingDreamIds = dreamsData?.map(d => d.id) || [];
-
-      // Fetch keywords only for existing dreams
-      const { data: keywordsData, error: keywordsError } = await supabase
+      const { data: keywordsData } = await supabase
         .from('dream_keywords')
-        .select('keyword, category, sentiment')
-        .in('dream_id', existingDreamIds.length > 0 ? existingDreamIds : ['null']);
+        .select('keyword, category, sentiment, dream_id')
+        .in('dream_id', dreamIds.length > 0 ? dreamIds : ['null']);
 
-      if (keywordsError) {
-        console.error('Error fetching keywords:', keywordsError);
-        // Continue without keywords data
-      }
+      const now = Date.now();
+      const week = 7 * 86400000;
+      const thisWeek = entries.filter(d => now - new Date(d.created_at).getTime() < week).length;
 
-      // Calculate keyword frequency
-      const keywordFrequency: { [key: string]: KeywordData } = {};
-      keywordsData?.forEach((kw) => {
-        const key = kw.keyword.toLowerCase();
-        if (keywordFrequency[key]) {
-          keywordFrequency[key].count++;
-        } else {
-          keywordFrequency[key] = {
-            keyword: kw.keyword,
-            category: kw.category,
-            sentiment: kw.sentiment,
-            count: 1
-          };
-        }
-      });
-
-      // Top keywords
-      const topKeywords = Object.values(keywordFrequency)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-
-      // Emotion distribution
-      const emotionCounts: { [key: string]: number } = {};
-      keywordsData?.forEach((kw) => {
-        if (kw.category === 'emotion') {
-          emotionCounts[kw.sentiment] = (emotionCounts[kw.sentiment] || 0) + 1;
-        }
-      });
-
-      const totalEmotions = Object.values(emotionCounts).reduce((sum, count) => sum + count, 0);
-      const emotionDistribution = Object.entries(emotionCounts).map(([sentiment, count]) => ({
-        sentiment,
-        count,
-        percentage: Math.round((count / totalEmotions) * 100)
-      }));
-
-      // Category distribution
-      const categoryCounts: { [key: string]: number } = {};
-      keywordsData?.forEach((kw) => {
-        categoryCounts[kw.category] = (categoryCounts[kw.category] || 0) + 1;
-      });
-
-      const categoryDistribution = Object.entries(categoryCounts).map(([category, count]) => ({
-        category,
-        count
-      }));
-
-      // Calculate average dreams per week
-      let averageDreamsPerWeek = 0;
-      if (dreamsData && dreamsData.length > 0) {
-        const oldestDream = new Date(dreamsData[dreamsData.length - 1].created_at);
-        const now = new Date();
-        const weeksDiff = Math.max(1, (now.getTime() - oldestDream.getTime()) / (7 * 24 * 60 * 60 * 1000));
-        averageDreamsPerWeek = Math.round((dreamsData.length / weeksDiff) * 10) / 10;
-      }
-
-      // Calculate longest streak and current streak
-      let longestStreak = 0;
-      let tempStreak = 0;
-      let calculatedCurrentStreak = 0;
-      if (dreamsData && dreamsData.length > 0) {
-        const dates = dreamsData.map(d => new Date(d.created_at).toDateString());
-        const uniqueDates = [...new Set(dates)].sort((a, b) => new Date(b).getTime() - new Date(a).getTime()); // Most recent first
-
-        // Calculate current streak (from today backwards)
+      // Streak: consecutive days with any entry
+      let currentStreak = 0;
+      if (entries.length > 0) {
+        const uniqueDates = [...new Set(entries.map(d => new Date(d.created_at).toDateString()))]
+          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
         const today = new Date().toDateString();
-        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
-
+        const yesterday = new Date(now - 86400000).toDateString();
         if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
-          calculatedCurrentStreak = 1;
+          currentStreak = 1;
           for (let i = 1; i < uniqueDates.length; i++) {
-            const currentDate = new Date(uniqueDates[i]);
-            const prevDate = new Date(uniqueDates[i - 1]); // prevDate is more recent
-            const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
-            if (diffDays === -1) { // -1 because we're going backwards in time
-              calculatedCurrentStreak++;
-            } else {
-              break;
-            }
+            const diff = Math.round((new Date(uniqueDates[i]).getTime() - new Date(uniqueDates[i - 1]).getTime()) / 86400000);
+            if (diff === -1) currentStreak++; else break;
           }
         }
-
-        // Calculate longest streak
-        tempStreak = 1;
-        for (let i = 1; i < uniqueDates.length; i++) {
-          const currentDate = new Date(uniqueDates[i]);
-          const prevDate = new Date(uniqueDates[i - 1]); // prevDate is more recent
-          const diffDays = Math.round((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
-          if (diffDays === -1) { // -1 because we're going backwards in time
-            tempStreak++;
-          } else {
-            longestStreak = Math.max(longestStreak, tempStreak);
-            tempStreak = 1;
-          }
-        }
-        longestStreak = Math.max(longestStreak, tempStreak);
       }
 
-      // Calculate mood distribution
-      const moodCounts: { [key: string]: number } = {};
-      dreamsData?.forEach((dream) => {
-        if (dream.mood) {
-          moodCounts[dream.mood] = (moodCounts[dream.mood] || 0) + 1;
-        }
+      // Trend window: recent 14 days vs previous 14 days
+      const recent14Ids = new Set(entries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
+      const older14Ids = new Set(entries.filter(d => {
+        const age = now - new Date(d.created_at).getTime();
+        return age >= 14 * 86400000 && age < 28 * 86400000;
+      }).map(d => d.id));
+      const r14 = recent14Ids.size || 1, o14 = older14Ids.size || 1;
+
+      // Mood patterns from ALL entries with a mood field
+      const moodCounts: Record<string, number> = {};
+      const moodRecent: Record<string, number> = {};
+      const moodOlder: Record<string, number> = {};
+      entries.forEach(d => {
+        if (!d.mood) return;
+        moodCounts[d.mood] = (moodCounts[d.mood] || 0) + 1;
+        if (recent14Ids.has(d.id)) moodRecent[d.mood] = (moodRecent[d.mood] || 0) + 1;
+        if (older14Ids.has(d.id)) moodOlder[d.mood] = (moodOlder[d.mood] || 0) + 1;
       });
-
-      const totalMoods = Object.values(moodCounts).reduce((sum, count) => sum + count, 0);
-      const moodDistribution = Object.entries(moodCounts).map(([mood, count]) => ({
-        mood,
-        count,
-        percentage: totalMoods > 0 ? Math.round((count / totalMoods) * 100) : 0
-      }));
-
-      // Calculate average, longest, and shortest dream length
-      let averageLength = 0;
-      let longestDream = 0;
-      let shortestDream = 0;
-      if (dreamsData && dreamsData.length > 0) {
-        const lengths = dreamsData.map(d => {
-          // Extract dream text from content (before "---\n\nAnalysis:")
-          const dreamText = d.content.split('\n\n---\n\n')[0];
-          return dreamText.length;
+      const moodPatterns: MoodData[] = Object.entries(moodCounts)
+        .sort((a, b) => b[1] - a[1]).slice(0, 3)
+        .map(([mood, count]) => {
+          const rPct = (moodRecent[mood] || 0) / r14;
+          const oPct = (moodOlder[mood] || 0) / o14;
+          const trend: 'up' | 'down' | 'flat' = rPct > oPct * 1.2 ? 'up' : rPct < oPct * 0.8 ? 'down' : 'flat';
+          return { mood, count, trend };
         });
-        averageLength = Math.round(lengths.reduce((sum, len) => sum + len, 0) / lengths.length);
-        longestDream = Math.max(...lengths);
-        shortestDream = Math.min(...lengths);
-      }
 
-      // Calculate top tags (filter out "no dream" markers and stopwords)
-      const stopwords = new Set([
-        // English stopwords - articles, prepositions, conjunctions
-        'from', 'to', 'in', 'on', 'at', 'by', 'for', 'with', 'about', 'as', 'of', 'the', 'a', 'an',
-        'into', 'through', 'after', 'before', 'during', 'between', 'among',
-        'and', 'or', 'but', 'if', 'then', 'so', 'very', 'too', 'just', 'only', 'now', 'here', 'there',
-        // English common verbs
-        'feel', 'see', 'look', 'get', 'go', 'come', 'make', 'take', 'give', 'have', 'be', 'do',
-        'know', 'think', 'want', 'need', 'keep',
-        // English adverbs and frequency words
-        'often', 'even', 'always', 'never', 'sometimes', 'usually', 'rarely', 'frequently',
-        'still', 'yet', 'already', 'again', 'once', 'twice', 'ever',
-        // English contractions
-        "it's", "i'm", "you're", "he's", "she's", "we're", "they're",
-        "isn't", "aren't", "wasn't", "weren't", "hasn't", "haven't", "hadn't",
-        "doesn't", "don't", "didn't", "won't", "wouldn't", "can't", "couldn't", "shouldn't",
-        // English generic nouns
-        'life', 'time', 'thing', 'things', 'way', 'ways', 'day', 'days',
-        // Korean stopwords - particles, conjunctions
-        '있는', '하는', '되는', '같은', '많은', '있다', '하다', '되다', '보다', '가다', '오다',
-        '그리고', '그러나', '하지만', '그래서', '또는', '또한', '매우', '너무', '조금', '많이',
-        '와', '과', '이', '가', '을', '를', '에', '에서', '으로', '로', '부터', '까지', '은', '는'
-      ]);
+      // Dream symbols from dream_keywords (dream entries only)
+      const dreamRecent14Ids = new Set(dreamEntries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
+      const dreamOlder14Ids = new Set(dreamEntries.filter(d => {
+        const age = now - new Date(d.created_at).getTime();
+        return age >= 14 * 86400000 && age < 28 * 86400000;
+      }).map(d => d.id));
+      const dr14 = dreamRecent14Ids.size || 1, do14 = dreamOlder14Ids.size || 1;
 
-      const tagCounts: { [key: string]: number } = {};
-      dreamsData?.forEach((dream) => {
-        dream.tags?.forEach((tag: string) => {
-          const normalizedTag = tag.toLowerCase().trim();
-          // Skip "no dream" tags and stopwords
-          if (tag !== '꿈안꿈' &&
-              tag !== 'no-dream' &&
-              !normalizedTag.includes('no dream') &&
-              !stopwords.has(normalizedTag)) {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-          }
+      const kwFreq: Record<string, { category: string; total: number; recent: number; older: number }> = {};
+      (keywordsData || []).forEach(kw => {
+        const key = kw.keyword.toLowerCase();
+        if (!kwFreq[key]) kwFreq[key] = { category: kw.category, total: 0, recent: 0, older: 0 };
+        kwFreq[key].total++;
+        if (dreamRecent14Ids.has(kw.dream_id)) kwFreq[key].recent++;
+        if (dreamOlder14Ids.has(kw.dream_id)) kwFreq[key].older++;
+      });
+      const dreamSymbols: KeywordData[] = Object.entries(kwFreq)
+        .sort((a, b) => b[1].total - a[1].total).slice(0, 4)
+        .map(([keyword, v]) => {
+          const rPct = v.recent / dr14, oPct = v.older / do14;
+          const trend: 'up' | 'down' | 'flat' = rPct > oPct * 1.2 ? 'up' : rPct < oPct * 0.8 ? 'down' : 'flat';
+          return { keyword, category: v.category, count: v.total, trend };
         });
+
+      // Sentiment balance from ALL entries that have a mood
+      let pos = 0, neg = 0, neu = 0;
+      entries.forEach(d => {
+        if (!d.mood) return;
+        const m = d.mood.toLowerCase();
+        if (POSITIVE_MOODS.has(m)) pos++;
+        else if (NEGATIVE_MOODS.has(m)) neg++;
+        else neu++;
       });
-
-      const topTags = Object.entries(tagCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([tag, count]) => ({ tag, count }));
-
-      // Calculate days without dreams (count dreams with "no dream" tags)
-      let daysWithoutDreams = 0;
-      dreamsData?.forEach((dream) => {
-        const isNoDream = dream.tags?.includes('꿈안꿈') ||
-                         dream.tags?.includes('no-dream') ||
-                         dream.title?.includes('꿈 안 꿈') ||
-                         dream.title?.includes('No Dream');
-        if (isNoDream) {
-          daysWithoutDreams++;
-        }
-      });
-
-      // AI Pattern Analysis (only if 5+ dreams)
-      let aiPatternAnalysis = null;
-      if (dreamCount && dreamCount >= 5 && dreamsData) {
-        try {
-          aiPatternAnalysis = await analyzePatterns(dreamsData, language);
-        } catch (error) {
-          console.error('Error analyzing patterns:', error);
-        }
-      }
-
-      const statsData = {
-        totalDreams: dreamCount || 0,
-        totalKeywords: keywordsData?.length || 0,
-        topKeywords,
-        emotionDistribution,
-        categoryDistribution,
-        averageDreamsPerWeek,
-        longestStreak,
-        moodDistribution,
-        averageLength,
-        longestDream,
-        shortestDream,
-        topTags,
-        currentStreak: calculatedCurrentStreak,
-        aiPatternAnalysis,
-        daysWithoutDreams
+      const total = pos + neg + neu || 1;
+      const posPct = Math.round((pos / total) * 100);
+      const neuPct = Math.round((neu / total) * 100);
+      const sentimentBalance = {
+        positive: posPct,
+        neutral: neuPct,
+        negative: Math.max(0, 100 - posPct - neuPct),
       };
 
-      console.log('Stats calculated successfully:', statsData);
-      setStats(statsData);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading dream insights:', error);
-      // Set empty stats to show "no data" message
-      setStats({
-        totalDreams: 0,
-        totalKeywords: 0,
-        topKeywords: [],
-        emotionDistribution: [],
-        categoryDistribution: [],
-        averageDreamsPerWeek: 0,
-        longestStreak: 0,
-        moodDistribution: [],
-        averageLength: 0,
-        longestDream: 0,
-        shortestDream: 0,
-        topTags: [],
-        currentStreak: 0,
-        aiPatternAnalysis: null,
-        daysWithoutDreams: 0
-      });
+      setStats({ totalDreams: entries.length, thisWeek, currentStreak, moodPatterns, dreamSymbols, sentimentBalance });
+    } catch {
+      setStats({ totalDreams: 0, thisWeek: 0, currentStreak: 0, moodPatterns: [], dreamSymbols: [], sentimentBalance: { positive: 0, neutral: 0, negative: 0 } });
+    } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10000
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '2rem',
-          borderRadius: '16px',
-          textAlign: 'center',
-          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-        }}>
-          <p>{t.loading}</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, padding: 'clamp(12px,3vw,24px)', fontFamily: 'inherit' }}>
+      <style>{`
+        @keyframes di-spin { to { transform: rotate(360deg); } }
+        .di-scroll::-webkit-scrollbar { width: 4px; }
+        .di-scroll::-webkit-scrollbar-thumb { background: #c6dfce; border-radius: 4px; }
+        .di-row:hover { background: #f0f5f2 !important; }
+        .di-symbol-card:hover { border-color: #7ea886 !important; }
+        .di-hdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
+        .di-cta-btn:hover { background: #d6a848 !important; }
+      `}</style>
 
-  if (!stats || stats.totalDreams === 0) {
-    return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(10px)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10000
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '3rem',
-          borderRadius: '24px',
-          maxWidth: '500px',
-          textAlign: 'center',
-          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-        }}>
-          <h2 style={{ color: '#7FB069', marginBottom: '1rem' }}>{t.title}</h2>
-          <p style={{ color: '#666', marginBottom: '2rem' }}>{t.noData}</p>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 600, background: 'white', borderRadius: 24, boxShadow: '0 25px 60px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+
+        {/* ── Sticky Header ── */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
+            <BarChart3Icon size={17} />
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065', margin: 0 }}>
+              {ko ? '리플렉션' : 'Reflection'}
+            </h2>
+          </div>
           <button
+            className="di-hdr-close"
             onClick={onClose}
-            style={{
-              background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-              color: 'white',
-              border: 'none',
-              padding: '0.75rem 2rem',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontFamily: 'inherit',
-              boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
-            }}
+            style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#8ca693', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s, color 0.15s' }}
           >
-            {t.close}
+            <XIcon size={20} />
           </button>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.5)',
-      backdropFilter: 'blur(10px)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 10000,
-      padding: 'clamp(0.75rem, 3vw, 2rem)',
-      overflowY: 'auto'
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '24px',
-        maxWidth: '900px',
-        width: '100%',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-      }}>
-        {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(196, 226, 195, 0.6) 0%, rgba(168, 213, 168, 0.4) 100%)',
-          color: '#5A8449',
-          padding: 'clamp(1.25rem, 4vw, 2rem)',
-          borderRadius: '24px 24px 0 0',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(127, 176, 105, 0.15)'
-        }}>
-          <h1 style={{ margin: 0, fontSize: 'clamp(1.25rem, 4vw, 2rem)', marginBottom: '0.5rem', fontWeight: 700 }}>{t.title}</h1>
-          <p style={{ margin: 0, opacity: 0.75 }}>{t.subtitle}</p>
-        </div>
+        {/* ── Scrollable Body ── */}
+        <div className="di-scroll" style={{ overflowY: 'auto', padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
-        {/* Stats Cards */}
-        <div style={{
-          padding: 'clamp(1rem, 3vw, 2rem)',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
-          gap: '1rem'
-        }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <AnimatedScore
-              value={stats.totalDreams}
-              className="text-4xl font-bold"
-              style={{ color: '#5A8449', fontSize: '2.5rem' }}
-            />
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.totalDreams}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <AnimatedScore
-              value={stats.currentStreak}
-              className="text-4xl font-bold"
-              style={{ color: '#5A8449', fontSize: '2.5rem' }}
-            />
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.currentStreak}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <AnimatedScore
-              value={stats.longestStreak}
-              className="text-4xl font-bold"
-              style={{ color: '#5A8449', fontSize: '2.5rem' }}
-            />
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.longestStreak}</div>
-          </div>
-
-          <div style={{
-            background: 'linear-gradient(135deg, #ffe8e0 0%, #f4a261 100%)',
-            padding: '1.5rem',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <AnimatedScore
-              value={stats.daysWithoutDreams}
-              className="text-4xl font-bold"
-              style={{ color: '#8B4513', fontSize: '2.5rem' }}
-            />
-            <div style={{ color: '#666', marginTop: '0.5rem', fontSize: '0.9rem' }}>{t.daysWithoutDreams}</div>
-          </div>
-
-        </div>
-
-        {/* Top Keywords */}
-        {stats.topKeywords.length > 0 && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.topKeywords}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {stats.topKeywords.map((kw, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  background: '#f8f9fa',
-                  padding: '1rem',
-                  borderRadius: '12px'
-                }}>
-                  <div style={{
-                    minWidth: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: categoryColors[kw.category as keyof typeof categoryColors] || '#ccc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 'bold'
-                  }}>
-                    {idx + 1}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '600', fontSize: '1.1rem' }}>{kw.keyword}</div>
-                    <div style={{ fontSize: '0.9rem', color: '#666' }}>
-                      {t[kw.category as keyof typeof t] as string} • {t[kw.sentiment as keyof typeof t] as string}
-                    </div>
-                  </div>
-                  <div style={{
-                    background: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                    color: '#5A8449'
-                  }}>
-                    <AnimatedScore value={kw.count} suffix="x" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Emotion Distribution */}
-        {stats.emotionDistribution.length > 0 && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.emotionDistribution}</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {stats.emotionDistribution.map((emotion, idx) => (
-                <div key={idx}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                    <span style={{ fontWeight: '600' }}>{t[emotion.sentiment as keyof typeof t] as string}</span>
-                    <AnimatedScore value={emotion.percentage} suffix="%" style={{ color: '#666' }} />
-                  </div>
-                  <div style={{
-                    height: '12px',
-                    background: '#e8f5e8',
-                    borderRadius: '6px',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      height: '100%',
-                      width: animateCharts ? `${emotion.percentage}%` : '0%',
-                      background: sentimentColors[emotion.sentiment as keyof typeof sentimentColors] || '#ccc',
-                      borderRadius: '6px',
-                      transition: 'width 1s ease'
-                    }}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Category Breakdown */}
-        {stats.categoryDistribution.length > 0 && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.categoryBreakdown}</h2>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '1rem'
-            }}>
-              {stats.categoryDistribution.map((cat, idx) => (
-                <div key={idx} style={{
-                  background: categoryColors[cat.category as keyof typeof categoryColors] || '#ccc',
-                  color: 'white',
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    <AnimatedScore value={cat.count} />
-                  </div>
-                  <div style={{ opacity: 0.9 }}>{t[cat.category as keyof typeof t] as string}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Mood Distribution (Pie Chart) */}
-        {stats.moodDistribution.length > 0 && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1rem' }}>{t.moodDistribution}</h2>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem',
-              alignItems: 'center'
-            }}>
-              {/* Simple Pie Chart */}
-              <div style={{
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
-                background: `conic-gradient(${
-                  stats.moodDistribution.map((mood, idx) => {
-                    const prevPercentage = stats.moodDistribution.slice(0, idx).reduce((sum, m) => sum + m.percentage, 0);
-                    const color = moodColors[mood.mood as keyof typeof moodColors] || '#ccc';
-                    return `${color} ${prevPercentage}% ${prevPercentage + mood.percentage}%`;
-                  }).join(', ')
-                })`,
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
-              }}></div>
-
-              {/* Legend */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1rem',
-                width: '100%',
-                maxWidth: '400px'
-              }}>
-                {stats.moodDistribution.map((mood, idx) => (
-                  <div key={idx} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem',
-                    background: '#f8f9fa',
-                    borderRadius: '8px'
-                  }}>
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '4px',
-                      background: moodColors[mood.mood as keyof typeof moodColors] || '#ccc',
-                      flexShrink: 0
-                    }}></div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: '600', fontSize: '0.95rem' }}>
-                        {t[mood.mood as keyof typeof t] as string}
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                        <AnimatedScore value={mood.count} /> (<AnimatedScore value={mood.percentage} suffix="%" />)
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Dream Keywords: Emotion & Symbols */}
-        {stats.topTags.length > 0 && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{ color: '#5A8449', marginBottom: '1.5rem' }}>
-              {language === 'ko' ? '꿈의 핵심 요소' : 'Dream Essence'}
-            </h2>
-
-            {/* Primary Emotion */}
-            {stats.topTags[0] && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.85rem', color: '#7FB069', fontWeight: '600', marginBottom: '0.5rem' }}>
-                  {language === 'ko' ? '대표 감정' : 'Primary Emotion'}
-                </div>
-                <div
-                  style={{
-                    padding: '1rem 1.5rem',
-                    background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%)',
-                    borderRadius: '12px',
-                    display: 'inline-block',
-                    border: '2px solid #ec407a'
-                  }}
-                >
-                  <span style={{ fontWeight: '700', color: '#c2185b', fontSize: '1.1rem' }}>
-                    {stats.topTags[0].tag}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Important Symbols */}
-            {stats.topTags.slice(1, 3).length > 0 && (
-              <div>
-                <div style={{ fontSize: '0.85rem', color: '#7FB069', fontWeight: '600', marginBottom: '0.5rem' }}>
-                  {language === 'ko' ? '중요 상징' : 'Key Symbols'}
-                </div>
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem'
-                }}>
-                  {stats.topTags.slice(1, 3).map((tag, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        padding: '0.75rem 1.25rem',
-                        background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
-                        borderRadius: '20px',
-                        display: 'inline-block',
-                        border: '2px solid #7FB069'
-                      }}
-                    >
-                      <span style={{ fontWeight: '600', color: '#5A8449' }}>
-                        {tag.tag}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* AI Pattern Analysis */}
-        {stats.aiPatternAnalysis && (
-          <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)' }}>
-            <h2 style={{
-              color: '#5A8449',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              <span>✨</span>
-              {t.yourDreamStory}
-            </h2>
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.05) 100%)',
-              borderRadius: '16px',
-              padding: '1.5rem',
-              border: '2px solid rgba(127, 176, 105, 0.2)',
-              lineHeight: 1.8,
-              whiteSpace: 'pre-wrap',
-              color: '#2c3e50',
-              fontSize: '0.95rem'
-            }}>
-              {stats.aiPatternAnalysis}
-            </div>
-            <p style={{
-              marginTop: '0.75rem',
-              fontSize: '0.8rem',
-              color: '#999',
-              textAlign: 'right',
-              fontStyle: 'italic'
-            }}>
-              {language === 'ko' ? '🤖 AI가 분석한 당신의 꿈 패턴' : '🤖 AI-analyzed dream patterns'}
+          {/* Title */}
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#3d6044', marginBottom: 4, margin: '0 0 4px 0' }}>
+              {ko ? '나의 패턴 발견하기' : 'Discover your patterns'}
+            </h1>
+            <p style={{ fontSize: 13, color: '#8ca693', margin: 0 }}>
+              {ko ? '최근 기록에서 발견한 객관적 인사이트' : 'Objective insights from your recent logs.'}
             </p>
           </div>
-        )}
 
-        {/* Close Button */}
-        <div style={{ padding: '0 clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem)', textAlign: 'center' }}>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(0, 0, 0, 0.06)',
-              color: 'rgba(0, 0, 0, 0.6)',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              padding: '1rem 3rem',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              fontSize: '1.1rem',
-              fontWeight: '600',
-              fontFamily: 'inherit',
-              transition: 'all 0.2s',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.06)';
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
-            }}
-          >
-            {t.close}
-          </button>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+              <div style={{ width: 40, height: 40, border: '3px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'di-spin 1s linear infinite' }} />
+            </div>
+          ) : (
+            <>
+              {/* ── Activity Overview (3-col) ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                <div style={{ background: '#f0f5f2', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#3d6044', marginBottom: 2 }}>{stats?.totalDreams ?? 0}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '전체 기록' : 'Total Logs'}</div>
+                </div>
+                <div style={{ background: '#f0f5f2', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#3d6044', marginBottom: 2 }}>{stats?.thisWeek ?? 0}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '이번 주' : 'This Week'}</div>
+                </div>
+                <div style={{ background: '#f0f5f2', border: '1px solid #dbece0', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2, color: '#d6a848' }}>
+                    <ActivityIcon size={16} />
+                    <span style={{ fontSize: 22, fontWeight: 700 }}>{stats?.currentStreak ?? 0}</span>
+                  </div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '연속 기록' : 'Day Streak'}</div>
+                </div>
+              </div>
+
+              {/* ── 1. 감정 패턴 (Waking Mind) ── */}
+              <section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                  <span style={{ color: '#d6a848', display: 'flex' }}><SunIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                    {ko ? '감정 패턴' : 'The Waking Mind'}
+                  </h3>
+                </div>
+                <div style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {!stats?.moodPatterns.length ? (
+                    <p style={{ textAlign: 'center', color: '#8ca693', fontSize: 13, padding: '16px 0', margin: 0 }}>
+                      {ko ? '데이터가 충분하지 않습니다' : 'Not enough data yet'}
+                    </p>
+                  ) : stats.moodPatterns.map(({ mood, count, trend }, idx) => {
+                    const { color, bg } = getMoodStyle(mood);
+                    return (
+                      <div key={idx} className="di-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: 12, transition: 'background 0.15s' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {trend === 'down' ? <ArrowDownRightIcon size={15} /> : <ArrowUpRightIcon size={15} />}
+                          </div>
+                          <span style={{ fontWeight: 700, color: '#3d6044', fontSize: 14, textTransform: 'capitalize' }}>{mood}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          {trend === 'up' && <span style={{ fontSize: 9, fontWeight: 700, color: '#7ea886', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending</span>}
+                          <div style={{ padding: '3px 10px', background: 'white', border: '1px solid #e8efe9', borderRadius: 99, fontSize: 11, fontWeight: 700, color: '#8ca693' }}>{count}x</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* ── 2. 드림 패턴 (Sleeping Mind) ── */}
+              <section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                  <span style={{ color: '#7ea886', display: 'flex' }}><MoonIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                    {ko ? '드림 패턴' : 'The Sleeping Mind'}
+                  </h3>
+                </div>
+                <div style={{ background: '#ebf2ed', border: '1px solid #c6dfce', borderRadius: 20, padding: 20 }}>
+                  {!stats?.dreamSymbols.length ? (
+                    <p style={{ textAlign: 'center', color: '#8ca693', fontSize: 13, margin: 0 }}>
+                      {ko ? '꿈 기록이 더 필요합니다' : 'Record more dreams to see symbols'}
+                    </p>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      {stats.dreamSymbols.map(({ keyword, category, count, trend }, idx) => {
+                        const { Icon, display } = getSymbolInfo(keyword, category);
+                        return (
+                          <div key={idx} className="di-symbol-card" style={{ background: 'white', border: '1px solid rgba(198,223,206,0.5)', borderRadius: 16, padding: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'border-color 0.15s' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#8ca693' }}>
+                                <Icon size={14} />
+                                <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{display}</span>
+                              </div>
+                              <span style={{ color: trend === 'up' ? '#7ea886' : trend === 'down' ? '#d6a848' : '#a4b8a9', display: 'flex' }}>
+                                {trend === 'up' && <TrendingUpIcon size={13} />}
+                                {trend === 'down' && <TrendingDownIcon size={13} />}
+                                {trend === 'flat' && <MinusIcon size={13} />}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: '#3d6044', marginBottom: 4, textTransform: 'capitalize' }}>{keyword}</div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: '#a4b8a9' }}>{count} {ko ? '번 등장' : 'appearances'}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* ── 3. Recent Sentiment ── */}
+              <section>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                  <span style={{ color: '#8ca693', display: 'flex' }}><ActivityIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                    {ko ? '최근 감정 스펙트럼' : 'Recent Sentiment'}
+                  </h3>
+                </div>
+                <div style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 20 }}>
+                  <div style={{ height: 16, width: '100%', borderRadius: 99, overflow: 'hidden', marginBottom: 16, display: 'flex', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
+                    <div style={{ width: `${stats?.sentimentBalance.positive ?? 0}%`, background: '#7ea886', transition: 'width 0.8s ease' }} />
+                    <div style={{ width: `${stats?.sentimentBalance.neutral ?? 0}%`, background: '#b8d6c0', transition: 'width 0.8s ease' }} />
+                    <div style={{ width: `${stats?.sentimentBalance.negative ?? 0}%`, background: '#e2ceb5', transition: 'width 0.8s ease' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                    {[
+                      { color: '#7ea886', label: ko ? '안정' : 'Calm', pct: stats?.sentimentBalance.positive ?? 0, textColor: '#5c8065' },
+                      { color: '#b8d6c0', label: ko ? '활동' : 'Active', pct: stats?.sentimentBalance.neutral ?? 0, textColor: '#8ca693' },
+                      { color: '#e2ceb5', label: ko ? '무거움' : 'Heavy', pct: stats?.sentimentBalance.negative ?? 0, textColor: '#a49682' },
+                    ].map(({ color, label, pct, textColor }) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: textColor }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                        {label}{pct > 0 ? ` (${pct}%)` : ''}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* ── Bottom CTA ── */}
+              <section style={{ position: 'relative', overflow: 'hidden', background: '#3d6044', borderRadius: 20, padding: 24, color: 'white', textAlign: 'center', boxShadow: '0 4px 16px rgba(61,96,68,0.3)' }}>
+                <div style={{ position: 'absolute', top: 0, right: 0, width: 128, height: 128, background: '#5c8065', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(50%,-50%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', bottom: 0, left: 0, width: 160, height: 160, background: '#2c4a32', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(-33%,33%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {isPremium ? (
+                    <>
+                      <div style={{ marginBottom: 12, color: '#e8ce90', display: 'flex' }}><SparklesIcon size={24} /></div>
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: 'white', margin: '0 0 8px 0' }}>
+                        {ko ? '월간 리뷰' : 'Monthly Review'}
+                      </h3>
+                      <p style={{ fontSize: 13, color: '#b8d6c0', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
+                        {ko
+                          ? '이번 달 꿈 패턴의 AI 심층 분석과 아키타입을 확인하세요.'
+                          : 'See AI deep analysis and archetypes from this month\'s dream patterns.'}
+                      </p>
+                      <button
+                        className="di-cta-btn"
+                        onClick={() => { onClose(); onOpenMonthlyReview?.(); }}
+                        style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
+                      >
+                        {ko ? '월간 리뷰 바로가기' : 'Go to Monthly Review'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ marginBottom: 12, color: '#e8ce90', display: 'flex' }}><SparklesIcon size={24} /></div>
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: 'white', margin: '0 0 8px 0' }}>
+                        {ko ? '이 패턴들이 의미하는 것은?' : 'What do these patterns mean?'}
+                      </h3>
+                      <p style={{ fontSize: 13, color: '#b8d6c0', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
+                        {ko
+                          ? '월간 리뷰에서 AI 심층 분석, 아키타입 발견, 숨겨진 연결고리를 확인하세요.'
+                          : 'Unlock deep AI synthesis, discovered archetypes, and hidden connections in your Monthly Review.'}
+                      </p>
+                      <button
+                        className="di-cta-btn"
+                        onClick={() => { window.location.href = '/pricing'; }}
+                        style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
+                      >
+                        <span style={{ display: 'flex' }}><LockIcon size={13} /></span>
+                        {ko ? '프리미엄 인사이트 열기' : 'Unlock Premium Insights'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </div>
     </div>

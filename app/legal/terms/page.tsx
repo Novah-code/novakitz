@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'Terms of Service - Novakitz',
-  description: 'Terms of Service for Novakitz dream journaling platform',
+  description: 'Terms of Service for Novakitz inner journaling platform',
 };
 
 export default function TermsPage() {

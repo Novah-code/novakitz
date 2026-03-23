@@ -12,8 +12,6 @@ export default function DreamApp() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -84,18 +82,12 @@ export default function DreamApp() {
         if (session?.user) {
           // Clear URL hash and params after successful auth
           if (window.location.hash || window.location.search) {
-            console.log('Clearing URL hash and search params');
             router.replace('/');
           }
-          await loadUserProfile(session.user.id);
-        } else {
-          setLoading(false);
+          loadUserProfile(session.user.id); // non-blocking
         }
-
-        setInitialLoadComplete(true);
       } catch (error) {
         console.error('Auth initialization error:', error);
-        setLoading(false);
       }
     };
 
@@ -121,7 +113,6 @@ export default function DreamApp() {
         console.log('User logged out');
         setUserProfile(null);
         setShowProfileForm(false);
-        setLoading(false); // 로그아웃 시에만 로딩 false
       }
     });
 
@@ -151,11 +142,10 @@ export default function DreamApp() {
           console.log('Profile complete');
           setShowProfileForm(false);
         }
-        setLoading(false); // 프로필 로드 완료 후 로딩 종료
       } else {
         // No profile exists - wait a moment for the DB trigger, then try again
         console.log('No profile found, waiting for trigger or creating one');
-        setTimeout(async () => {
+        setTimeout(async () => { // reduced from 1000ms
           const { data: retryData } = await supabase
             .from('user_profiles')
             .select('*')
@@ -168,19 +158,16 @@ export default function DreamApp() {
             if (!retryData.profile_completed) {
               setShowProfileForm(true);
             }
-            setLoading(false);
           } else {
             console.log('Still no profile, creating manually');
             await createUserProfile(userId);
-            setLoading(false);
           }
-        }, 1000);
+        }, 200);
       }
     } catch (err) {
       console.error('Error loading profile:', err);
       // 오류가 있어도 계속 진행 - 프로필 생성 시도
       await createUserProfile(userId);
-      setLoading(false);
     }
   };
 
@@ -252,17 +239,6 @@ export default function DreamApp() {
     
     console.log('Profile form closed, should show dream journal now');
   };
-
-  if (loading && !initialLoadComplete) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="hero-teacup">🍵</div>
-          <p>Loading your dreams...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show profile form for authenticated users with incomplete profiles
   if (user && showProfileForm) {

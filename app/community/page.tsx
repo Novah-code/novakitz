@@ -280,7 +280,7 @@ export default function CommunityPage() {
                 onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                <span>{language === 'ko' ? '드림 저널' : 'Dream Journal'}</span>
+                <span>{language === 'ko' ? '내면의 기록' : 'Inner Journal'}</span>
               </button>
 
               <button

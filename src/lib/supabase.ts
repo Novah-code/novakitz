@@ -70,8 +70,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
+    detectSessionInUrl: false, // We parse hash tokens manually to avoid Supabase's broken implicit flow handler
+    flowType: 'implicit',
     storage: customStorage,
     storageKey: 'sb-auth-token'
   }

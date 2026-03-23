@@ -157,7 +157,8 @@ Return EXACTLY 3 items and no other text.`;
               parts: [{
                 text: keywordPrompt
               }]
-            }]
+            }],
+            generationConfig: { maxOutputTokens: 200, thinkingConfig: { thinkingBudget: 0 } }
           })
         }
       );
@@ -174,7 +175,7 @@ Return EXACTLY 3 items and no other text.`;
 
       console.log('[extractDreamKeywords] ✅ API call successful, status:', res.status);
       return res;
-    }, { maxRetries: 2, baseDelay: 500, maxDelay: 5000 });
+    }, { maxRetries: 1, baseDelay: 300, maxDelay: 2000 });
 
     const data = await response.json();
     if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
@@ -218,22 +219,53 @@ export async function POST(request: NextRequest) {
   console.log('[POST] API Key Status:', apiKeyStatus);
 
   try {
-    const { dreamText, language = 'en', isPremium = false, dreamId, userId } = await request.json();
+    const { dreamText, prompt, language = 'en', isPremium = false, dreamId, userId, mode = 'dream' } = await request.json();
     console.log('Dream text received:', dreamText);
     console.log('Language:', language);
     console.log('Is Premium:', isPremium);
     console.log('Dream ID:', dreamId);
     console.log('User ID:', userId);
+    console.log('Mode:', mode);
+
+    // monthly mode: use the prompt parameter directly (for monthly report AI synthesis)
+    if (mode === 'monthly') {
+      if (!prompt || prompt.trim().length < 10) {
+        return NextResponse.json({ error: 'Prompt is required for monthly mode' }, { status: 400 });
+      }
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
+      if (!apiKey) {
+        return NextResponse.json({ error: 'API configuration error' }, { status: 500 });
+      }
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } }
+          })
+        }
+      );
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Gemini monthly mode error:', res.status, errText);
+        return NextResponse.json({ error: 'AI service error' }, { status: 502 });
+      }
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      return NextResponse.json({ interpretation: text, analysis: text });
+    }
 
     const trimmedText = dreamText.trim();
-    
+
     if (!dreamText || trimmedText.length < 10) {
       return NextResponse.json(
         { error: 'Dream text must be at least 10 characters long' },
         { status: 400 }
       );
     }
-    
+
     // Check for meaningful content
     const uniqueChars = new Set(trimmedText.replace(/\s/g, '').toLowerCase()).size;
     if (uniqueChars < 3) {
@@ -242,7 +274,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Check for actual words
     const words = trimmedText.split(/\s+/).filter((word: string) => word.length >= 2);
     if (words.length < 2) {
@@ -269,107 +301,88 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create language-specific prompt based on subscription status
-    const wordLimit = isPremium ? '500+ words' : '150-200 words';
-    const detailLevel = isPremium
-      ? 'Provide comprehensive, in-depth noticing with rich psychological observations.'
-      : 'Keep the noticing concise and focused on the most important observations.';
+    // Create language-specific prompt based on mode and subscription status
+    const wordLimit = 'Write 200-250 words total.';
 
-    const analysisPrompt = language === 'ko'
-      ? `당신은 심리학에 기반을 둔 따뜻하고 실질적인 꿈 안내자입니다. 추상적이거나 모호한 표현을 피하고, 실제 상황과 구체적인 감정, 실천 가능한 행동에 집중하세요. 진정한 호기심과 공감으로 이 꿈을 함께 알아차려주세요.
+    const analysisPrompt = mode === 'ego'
+      ? (language === 'ko'
+        ? `당신은 깊이 있는 심리학에 뿌리를 둔 따뜻한 감정 안내자입니다. 인사말 없이 바로 시작하세요.
+'아니마', '아니무스', '그림자', '페르소나' 같은 전문 용어는 절대 사용하지 마세요.
+대신 "마음 깊은 곳", "내면의 목소리", "스스로도 잘 몰랐던 감정", "지금 당신이 진짜 원하는 것" 같은 표현을 쓰세요.
 
-사용자가 키워드로만 입력했을 수도 있고 상세 내용으로 입력했을 수도 있습니다. 어떤 형태든 상관없이 함께 바라봐주세요.
+중요한 원칙:
+- 감정을 좋고 나쁨으로 평가하지 마세요. 불안, 두려움, 무기력함 등 어떤 감정도 고쳐야 할 문제가 아니라 내면의 현상 그 자체로 다루세요.
+- "정말 힘드셨겠어요", "많이 힘드시죠" 같은 과장된 감탄사와 AI식 공감 표현은 피하세요.
+- 담백하고 사실 기반으로 쓰세요. "불안이라는 감정이 있네요. 이럴 땐 ~" 처럼 제3자적 시선을 유지하세요.
+- "이런 감정은 나쁜 게 아니에요"처럼 직접 평가하는 말도 피하세요.
+
+감정 기록: "${dreamText}"
+
+다음 세 가지를 자연스럽게 한 흐름으로, 마크다운 없이 단락 사이에 빈 줄을 넣어 작성하세요.
+
+1. 겉으로 드러난 감정 너머, 마음 깊은 곳에서 실제로 무엇을 원하거나 두려워하는지 담백하게 짚어주세요.
+
+2. 이 감정은 억누르거나 해결하지 않아도 된다는 것, 있는 그대로 느끼는 것 자체가 이미 충분하다는 것을 부드럽게 전달하세요.
+
+3. 오늘 하루를 조금 더 편하게 보낼 수 있는 아주 작고 구체적인 행동 하나를 제안하세요.
+
+어조: 가볍고 담백하게. 과한 공감이나 학술적 무게감 없이. ${wordLimit}`
+        : `You are a warm guide rooted in depth psychology. Start directly without any greeting.
+Never use jargon: no "anima", "animus", "shadow", "persona", or "archetype".
+Use plain language instead: "a deeper part of you", "what your heart actually needs", "something you haven't fully acknowledged yet".
+
+Important principles:
+- Never evaluate emotions as good or bad. Anxiety, fear, numbness — treat every feeling as a neutral inner phenomenon, not a problem to fix.
+- Avoid exaggerated AI-style empathy like "That must have been so hard for you!" Keep a calm, grounded tone.
+- Write in a matter-of-fact way, like a quiet observer: "There's a sense of anxiety here. In moments like this, ~"
+- Avoid statements like "this feeling is totally normal" which still imply judgment.
+
+Mood entry: "${dreamText}"
+
+Write three things as one natural flow. No markdown, blank line between paragraphs.
+
+1. Look beyond the surface feeling — name in plain terms what the deeper part of them might be longing for or quietly carrying.
+
+2. Note that this feeling doesn't need to be solved or suppressed. Simply being with it honestly is already enough.
+
+3. Suggest one very small, specific action to make today a little gentler.
+
+Tone: Calm, grounded, and warm — not effusive. Not academic. ${wordLimit}`)
+      : (language === 'ko'
+        ? `당신은 깊이 있는 심리학에 뿌리를 둔 따뜻한 꿈 안내자입니다. 인사말 없이 바로 시작하세요.
+'아니마', '아니무스', '그림자', '페르소나' 같은 전문 용어는 절대 사용하지 마세요.
+대신 "마음 깊은 곳의 메시지", "스스로도 몰랐던 감정", "내면의 목소리" 같은 표현을 쓰세요.
+
+중요한 원칙:
+- 꿈을 좋고 나쁨으로 평가하지 마세요. 악몽, 불편한 장면, 어두운 감정도 유쾌한 꿈과 동등하게 내면의 현상 그 자체로 다루세요.
+- "정말 무서운 꿈이었겠어요" 같은 과장된 공감 표현은 피하세요. 담백하되 따뜻하게 유지하세요.
+- "나쁜 꿈이 아니에요"처럼 평가하는 말은 피하고, 꿈 속 어떤 내용도 변화시켜야 한다는 뉘앙스 없이 있는 그대로 탐색하세요.
 
 꿈: "${dreamText}"
 
-마크다운 형식 없이 자연스럽고 대화하는 듯한 언어로 작성하세요. 관찰하고 알아차리되 개인적인 느낌으로 - 마치 차를 마시며 의미 있는 대화를 나누는 것처럼.
+마크다운 없이 자연스럽고 대화하듯 작성하세요. 단락 사이에 빈 줄을 넣어 가독성을 높이세요.
 
-${detailLevel}
+꿈 속 핵심 장면이나 감정을 짚고, 그것이 지금 삶에서 무엇을 말하려는지 담백하고 따뜻하게 전달하세요. 마지막에 오늘 실천할 수 있는 작고 구체적인 행동 하나를 제안하세요.
 
-**중요: 구체적이고 실질적으로 해석하세요**
-추상적 표현(예: "통합", "드러나려는 진정한 자아", "원형", "무의식")을 최소화하고, 대신 구체적인 감정과 실제 상황으로 설명하세요:
-- "물은 감정을 나타냄" (X) → "물은 당신이 최근 억누르고 있던 슬픔이나 불안을 나타낼 수 있습니다" (O)
-- "성장을 향한 여정" (X) → "직장에서 새로운 도전을 받아들이거나, 어려운 대화를 시작하는 것" (O)
-- "그림자를 통합" (X) → "최근 억눌러온 분노나 질투심을 인정하는 것" (O)
+어조: 담백하되 따뜻하게. 과한 공감이나 학술적 무게감 없이. ${wordLimit}`
+        : `You are a warm dream guide rooted in depth psychology. Start directly without any greeting.
+Never use jargon: no "anima", "animus", "shadow", "persona", or "archetype".
+Use plain language: "a deeper part of you", "what your mind is quietly working through", "your inner voice".
 
-${isPremium ? `꿈의 상징:
-2-3개의 핵심 상징을 구체적으로 해석하세요. 각 상징이 현실의 어떤 구체적인 상황, 감정, 관계와 연결되는지 명확하게 설명하세요.
-
-구체적 해석 예시:
-- "집이 무너지는 꿈" → "최근 직장이나 가족 관계에서 안정감이 흔들리고 있다고 느끼시나요?"
-- "날아다니는 꿈" → "업무나 학업의 압박에서 벗어나 자유로움을 갈망하고 있을 수 있습니다"
-- "쫓기는 꿈" → "미뤄온 중요한 일이나 피하고 싶은 대화가 있지 않나요?"
-
-이 꿈이 말하는 것:
-이 꿈이 당신의 현재 삶에서 어떤 구체적인 문제나 감정을 다루고 있는지 설명하세요. 막연한 표현 대신:
-- 어떤 구체적인 감정을 느끼고 있나요? (불안, 외로움, 분노, 두려움, 죄책감 등)
-- 어떤 실제 상황과 관련이 있나요? (직장 스트레스, 가족 갈등, 연애 고민, 건강 걱정 등)
-- 무엇이 당신을 불편하게 하거나 고민하게 만드나요?
-
-오늘의 실천:
-매우 구체적이고 즉시 실행 가능한 행동 한 가지를 제안하세요.
-
-좋은 예시:
-- "오늘 저녁 10분 동안 당신이 최근 느낀 불안을 종이에 적어보세요"
-- "내일 점심시간에 신뢰하는 친구에게 전화해서 최근 고민을 이야기해보세요"
-- "이번 주말 30분 동안 당신이 미뤄온 일을 하나만 처리해보세요"
-
-나쁜 예시 (너무 추상적, 사용 금지):
-- "일기를 써보세요"
-- "자신을 돌아보는 시간을 가져보세요"
-- "내면의 목소리에 귀 기울여보세요"
-
-성찰:
-구체적이고 실질적인 질문 하나로 마무리하세요. 막연한 질문이 아닌, 실제 행동이나 선택으로 이어질 수 있는 질문이어야 합니다.` : `주요 상징 1-2개를 구체적으로 해석하세요. 현실의 어떤 구체적인 상황이나 감정과 연결되나요?
-
-핵심 메시지:
-이 꿈이 당신의 삶에서 어떤 구체적인 문제나 감정을 다루고 있는지 설명하세요.
-
-실천:
-매우 구체적이고 즉시 실행 가능한 행동 한 가지를 제안하세요. (예: "오늘 저녁 10분 동안 최근 느낀 불안을 종이에 적어보세요")`}
-
-마지막으로: "이것이 당신에게 어떻게 느껴지나요? 당신 자신의 직관이 의미를 완성합니다."
-
-어조: 따뜻하되 과하게 달콤하지 않게. 심리학적으로 관찰하되 겸손하게. 당신을 진정으로 이해하는 지혜로운 친구처럼. ${wordLimit}`
-      : `You are a warm, thoughtful dream guide grounded in Jungian psychology but you translate deep concepts into everyday language. Notice and observe this dream with genuine curiosity and compassion.
-
-Note: The user may have entered either detailed dream content or just keywords separated by commas. Please notice and reflect on whatever they provided.
+Important principles:
+- Never label dreams or their contents as good or bad. Nightmares, disturbing images, and dark emotions are as valid as pleasant ones — treat all dream content as neutral inner phenomena.
+- Avoid exaggerated empathy like "That must have been so frightening!" Stay warm but grounded.
+- Never imply that anything in a dream needs to change or be fixed. Explore it as it is.
 
 Dream: "${dreamText}"
 
-Write in natural, conversational language without any markdown formatting. Be observant and reflective yet personal - like you're having a meaningful conversation over tea.
+Write in natural, conversational language without any markdown. Add a blank line between paragraphs.
 
-${detailLevel}
+Pick one key image or feeling from the dream, quietly explore what it might be saying about life right now, and end with one small specific action to take today.
 
-Use Jung's framework but in accessible terms:
-- Shadow = parts of ourselves we hide or don't acknowledge
-- Anima/Animus = the inner feminine/masculine, or how we relate to others
-- Self = our whole, authentic nature trying to emerge
-- Individuation = becoming who we're meant to be
-- Collective unconscious = universal human themes and symbols
+Tone: Warm and grounded — not effusive, not cold. ${wordLimit}`);
 
-${isPremium ? `DREAM SYMBOLS:
-Explore 2-3 key symbols looking at both universal meanings (archetypes that appear across cultures) and personal significance. What emotions or life situations might they connect to? Consider if symbols represent hidden parts of yourself, relationships, or your authentic nature trying to emerge.
-
-INNER MESSAGE:
-What might your unconscious be trying to show you? Look for themes of integration - are there conflicting parts seeking balance? Hidden emotions wanting acknowledgment? Your true self nudging you toward growth? Speak to the emotional and psychological truth, not just surface meanings.
-
-TODAY'S PRACTICE:
-Offer ONE concrete, gentle suggestion that helps integrate the dream's insight into daily life. Make it feel doable and specific - a small way to honor what emerged from your unconscious. Could be a reflection practice, a relationship conversation, or a self-care action.
-
-REFLECTION:
-End with one thoughtful question that invites deeper personal exploration, helping bridge the unconscious message to conscious life.` : `KEY SYMBOL:
-Focus on 1-2 key symbols. What might they represent?
-
-CORE MESSAGE:
-What is your unconscious trying to tell you?
-
-TODAY'S PRACTICE:
-Offer one simple suggestion for daily integration.`}
-
-Close with: "How does this feel to you? Your own intuition completes the meaning."
-
-Tone: Warm but not saccharine. Psychologically observant but humble. Like a wise friend who really sees you. ${wordLimit}`;
+    const maxOutputTokens = 1500;
 
     // Start both API calls in parallel for faster response
     const [response, keywords] = await Promise.all([
@@ -386,7 +399,8 @@ Tone: Warm but not saccharine. Psychologically observant but humble. Like a wise
               parts: [{
                 text: analysisPrompt
               }]
-            }]
+            }],
+            generationConfig: { maxOutputTokens, thinkingConfig: { thinkingBudget: 0 } }
           })
         }
       );
@@ -413,7 +427,7 @@ Tone: Warm but not saccharine. Psychologically observant but humble. Like a wise
       }
 
       return res;
-    }, { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 }), // More aggressive retry for main analysis
+    }, { maxRetries: 2, baseDelay: 500, maxDelay: 3000 }),
       extractDreamKeywords(dreamText, language) // Extract structured keywords with sentiment
     ]);
 

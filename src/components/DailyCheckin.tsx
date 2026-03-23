@@ -17,7 +17,7 @@ interface DailyCheckinProps {
   userId: string;
   language: 'en' | 'ko';
   timeOfDay?: 'morning' | 'evening';
-  onCheckInComplete?: () => void;
+  onCheckInComplete?: (mood?: number) => void;
   dreamText?: string;
   dreamId?: string;
   isPremium?: boolean;
@@ -37,7 +37,8 @@ export default function DailyCheckin({
   const [isOpen, setIsOpen] = useState(false);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
   const [mood, setMood] = useState(3);
-  const [energyLevel, setEnergyLevel] = useState(5);
+  const [energyLevel] = useState(5);
+  const [emotionIndex, setEmotionIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
   const [showAffirmations, setShowAffirmations] = useState(true);
@@ -71,11 +72,24 @@ export default function DailyCheckin({
     fetchTodayCheckins();
   }, [userId]);
 
+  const emotionList = [
+    { label: language === 'ko' ? '불안' : 'Anxious',  color: 'rgba(217,210,233,0.7)', borderRadius: '40% 60% 30% 70% / 60% 40% 70% 30%', moodValue: 2 },
+    { label: language === 'ko' ? '두려움' : 'Fear',   color: 'rgba(205,224,230,0.7)', borderRadius: '50% 50% 60% 60% / 40% 40% 70% 70%', moodValue: 1 },
+    { label: language === 'ko' ? '평온' : 'Peaceful', color: 'rgba(181,218,185,0.7)', borderRadius: '50%', moodValue: 4 },
+    { label: language === 'ko' ? '기쁨' : 'Joyful',  color: 'rgba(253,232,181,0.7)', borderRadius: '45% 55% 45% 55% / 65% 55% 45% 35%', moodValue: 5 },
+    { label: language === 'ko' ? '외로움' : 'Lonely', color: 'rgba(214,221,229,0.7)', borderRadius: '50% 50% 40% 40% / 40% 40% 60% 60%', moodValue: 2 },
+    { label: language === 'ko' ? '희망' : 'Hopeful', color: 'rgba(214,241,208,0.7)', borderRadius: '50% 50% 50% 50% / 70% 70% 40% 40%', moodValue: 4 },
+    { label: language === 'ko' ? '분노' : 'Anger',   color: 'rgba(250,209,196,0.7)', borderRadius: '15px 30px 15px 30px', moodValue: 2 },
+    { label: language === 'ko' ? '무기력' : 'Low',   color: 'rgba(226,232,240,0.7)', borderRadius: '16px', moodValue: 1 },
+  ];
+
   const handleSubmit = async () => {
     if (!userId) {
       console.warn('DailyCheckin: No userId provided');
       return;
     }
+    const finalMood = emotionIndex !== null ? emotionList[emotionIndex].moodValue : mood;
+    setMood(finalMood);
 
     try {
       setSubmitting(true);
@@ -96,7 +110,7 @@ export default function DailyCheckin({
             user_id: userId,
             check_date: today,
             time_of_day: timeOfDay,
-            mood,
+            mood: finalMood,
             energy_level: energyLevel
           }
         ])
@@ -123,14 +137,13 @@ export default function DailyCheckin({
 
         // Reset form
         setMood(3);
-        setEnergyLevel(5);
 
         // Update today's checkins - using functional setState
         setTodayCheckins(prev => [...prev, data as CheckinRecord]);
 
         // Call callback if provided
         if (onCheckInComplete) {
-          onCheckInComplete();
+          onCheckInComplete(finalMood);
         }
 
         // Show success message
@@ -151,14 +164,6 @@ export default function DailyCheckin({
     }
   };
 
-  // Mood colors - 5 pastel gradient options from low to high
-  const moodColors = [
-    'linear-gradient(135deg, #E8D5D5 0%, #D4B8B8 100%)', // 1 - dusty rose (low)
-    'linear-gradient(135deg, #F5E6D3 0%, #E8D4BE 100%)', // 2 - warm beige
-    'linear-gradient(135deg, #F0EAD2 0%, #DDD5B8 100%)', // 3 - soft sand (neutral)
-    'linear-gradient(135deg, #D8E2DC 0%, #C5D4CB 100%)', // 4 - sage mist
-    'linear-gradient(135deg, #D4E4D9 0%, #B8D4C2 100%)', // 5 - soft mint (high)
-  ];
 
   const timeLabels = {
     morning: language === 'ko' ? '아침' : 'Morning',
@@ -263,192 +268,69 @@ export default function DailyCheckin({
           />
 
           {/* Modal Content */}
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'white',
-              borderRadius: '20px',
-              padding: '32px 24px',
-              maxWidth: '420px',
-              width: '90%',
-              maxHeight: '85vh',
-              overflowY: 'auto',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-              zIndex: 901
-            }}
-          >
-            {/* Header */}
-            <h2 style={{
-              margin: '0 0 8px 0',
-              fontSize: '1.3rem',
-              fontWeight: 600,
-              color: 'var(--matcha-dark)',
-              fontFamily: "'Georgia', serif"
-            }}>
-              {timeLabels[timeOfDay]} {language === 'ko' ? '체크인' : 'Check-in'}
-            </h2>
-            <p style={{
-              margin: '0 0 24px 0',
-              fontSize: '0.9rem',
-              color: 'rgba(0, 0, 0, 0.6)'
-            }}>
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: '#EAF4EC',
+            borderRadius: 32,
+            padding: '35px 25px 45px',
+            maxWidth: 360,
+            width: '90%',
+            maxHeight: 'calc(100vh - 40px)',
+            overflowY: 'auto',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+            zIndex: 901,
+            textAlign: 'center'
+          }}>
+            <button onClick={() => setIsOpen(false)} style={{position:'absolute',top:20,right:20,width:30,height:30,background:'rgba(0,0,0,0.05)',border:'none',borderRadius:'50%',cursor:'pointer',fontSize:14,color:'#4A5D4E',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+            <p style={{fontSize:16,fontWeight:500,color:'#4A5D4E',margin:'10px 0 40px',letterSpacing:'-0.5px'}}>
               {language === 'ko'
-                ? '현재 기분과 진행 상황을 공유해주세요'
-                : 'Share how you\'re doing and your progress'}
+                ? `오늘 ${timeLabels[timeOfDay]} 기분은 어떤가요?`
+                : `How are you feeling this ${timeLabels[timeOfDay].toLowerCase()}?`}
             </p>
 
-            {/* Mood Selector */}
-            <div style={{ marginBottom: '28px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'rgba(0, 0, 0, 0.7)',
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                {language === 'ko' ? '기분' : 'Mood'}
-              </label>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '12px'
-              }}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setMood(i + 1)}
-                    style={{
-                      padding: '0',
-                      width: '100%',
-                      aspectRatio: '1',
-                      background: moodColors[i],
-                      border: mood === i + 1
-                        ? '3px solid #333'
-                        : '2px solid transparent',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      transform: mood === i + 1 ? 'scale(1.1)' : 'scale(1)',
-                      boxShadow: mood === i + 1
-                        ? '0 4px 12px rgba(0,0,0,0.2)'
-                        : '0 2px 4px rgba(0,0,0,0.1)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (mood !== i + 1) {
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (mood !== i + 1) {
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }
-                    }}
-                  />
-                ))}
-              </div>
+            {/* Emotion pebbles */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:'20px 10px',justifyItems:'center',marginBottom:32}}>
+              {emotionList.map((emo, i) => (
+                <div
+                  key={i}
+                  onClick={() => setEmotionIndex(i)}
+                  style={{
+                    display:'flex',flexDirection:'column',alignItems:'center',gap:10,cursor:'pointer',
+                    transition:'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)',
+                    transform: emotionIndex===i ? 'translateY(-5px) scale(1.05)' : 'translateY(0) scale(1)'
+                  }}
+                >
+                  <div style={{
+                    width: 56,
+                    height: 56,
+                    backgroundColor: emo.color,
+                    borderRadius: emo.borderRadius,
+                    backdropFilter: 'blur(10px)',
+                    border: emotionIndex === i ? '2.5px solid #4A5D4E' : '1px solid rgba(255,255,255,0.8)',
+                    boxShadow: emotionIndex === i
+                      ? '0 6px 16px rgba(0,0,0,0.15)'
+                      : '4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 2px 2px 4px rgba(255,255,255,0.8)',
+                    transition: 'all 0.3s ease',
+                  }} />
+                  <span style={{fontSize:11,color:'#4A5D4E',opacity:0.8,fontWeight:500}}>{emo.label}</span>
+                </div>
+              ))}
             </div>
-
-            {/* Energy Level Selector */}
-            <div style={{ marginBottom: '28px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'rgba(0, 0, 0, 0.7)',
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}>
-                {language === 'ko' ? '에너지 레벨' : 'Energy Level'} ({energyLevel}/10)
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={energyLevel}
-                onChange={(e) => setEnergyLevel(parseInt(e.target.value))}
-                style={{
-                  width: '100%',
-                  height: '6px',
-                  background: 'linear-gradient(90deg, #ff6b6b 0%, #ffd93d 50%, #7FB069 100%)',
-                  borderRadius: '3px',
-                  outline: 'none',
-                  WebkitAppearance: 'slider-horizontal',
-                  cursor: 'pointer'
-                }}
-              />
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: 'rgba(0, 0, 0, 0.4)',
-                marginTop: '8px'
-              }}>
-                <span>{language === 'ko' ? '피곤' : 'Tired'}</span>
-                <span>{language === 'ko' ? '활기찬' : 'Energized'}</span>
-              </div>
-            </div>
-
 
             {/* Buttons */}
-            <div style={{
-              display: 'flex',
-              gap: '12px'
-            }}>
-              <button
-                onClick={() => setIsOpen(false)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  background: 'rgba(127, 176, 105, 0.08)',
-                  color: '#7FB069',
-                  border: '1px solid rgba(127, 176, 105, 0.2)',
-                  borderRadius: '8px',
-                  fontSize: '0.95rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
-                }}
-              >
+            <div style={{display:'flex',gap:10}}>
+              <button onClick={() => setIsOpen(false)} style={{flex:1,padding:'11px',background:'rgba(74,93,78,0.08)',color:'#4A5D4E',border:'1px solid rgba(74,93,78,0.15)',borderRadius:10,fontSize:14,fontWeight:500,cursor:'pointer'}}>
                 {language === 'ko' ? '취소' : 'Cancel'}
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={submitting}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  background: 'rgba(127, 176, 105, 0.08)',
-                  color: '#7FB069',
-                  border: '1px solid rgba(127, 176, 105, 0.2)',
-                  borderRadius: '8px',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  opacity: submitting ? 0.6 : 1,
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  if (!submitting) {
-                    e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
-                }}
+                disabled={submitting || emotionIndex === null}
+                style={{flex:1,padding:'11px',background:emotionIndex!==null?'#4A5D4E':'rgba(74,93,78,0.12)',color:emotionIndex!==null?'white':'#8BA390',border:'none',borderRadius:10,fontSize:14,fontWeight:600,cursor:emotionIndex===null||submitting?'not-allowed':'pointer',transition:'all 0.2s',opacity:submitting?0.7:1}}
               >
-                {submitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '저장' : 'Save')}
+                {submitting ? (language === 'ko' ? '저장 중...' : 'Saving...') : (language === 'ko' ? '기록하기' : 'Save')}
               </button>
             </div>
           </div>
