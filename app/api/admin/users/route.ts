@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Get all subscriptions
     const { data: subscriptions, error: subsError } = await supabase
       .from('user_subscriptions')
-      .select('user_id, status, expires_at, started_at, payment_method, subscription_plans(plan_name, plan_slug)');
+      .select('user_id, status, expires_at, started_at, subscription_plans(plan_name, plan_slug)');
 
     if (subsError) {
       console.error('Subscription fetch error:', subsError);
@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
         planName,
         startedAt: sub?.started_at || null,
         expiresAt,
-        paymentMethod: sub?.payment_method || null
       };
     });
 

@@ -81,8 +81,9 @@ export default function PricingPage() {
 
   const ko = language === 'ko';
 
-  const handleBuy = (plan: 'lifetime' | 'premium' | 'yearly') => {
-    startCheckout(plan, language);
+  const handleBuy = async (plan: 'lifetime' | 'premium' | 'yearly') => {
+    const { message } = await startCheckout(plan, language);
+    if (message) alert(message);
   };
 
   const premiumFeatures = ko ? [

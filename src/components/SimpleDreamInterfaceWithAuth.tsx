@@ -12,6 +12,7 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
 import ProfileSettings from './ProfileSettings';
+import { identify, forgetUser } from '../lib/revenuecat';
 
 // Translations
 const translations = {
@@ -78,6 +79,17 @@ export default function SimpleDreamInterfaceWithAuth() {
   const hasProfileRef = useRef<boolean | null>(null);
 
   const t = translations[language];
+
+  // Keep RevenueCat's identity in step with Supabase auth. Purchases must
+  // attach to the signed-in account, since the webhook maps app_user_id
+  // straight onto user_subscriptions.user_id.
+  useEffect(() => {
+    if (user) {
+      identify(user.id);
+    } else {
+      forgetUser();
+    }
+  }, [user]);
 
   // Check if user has a completed profile
   const checkUserProfile = async (userId: string) => {

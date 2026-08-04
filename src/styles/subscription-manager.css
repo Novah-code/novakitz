@@ -388,3 +388,30 @@
     width: 100%;
   }
 }
+
+/* Restore Purchases — App Store review requires this to be reachable. */
+.restore-section {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.restore-button {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.restore-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.restore-message {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}

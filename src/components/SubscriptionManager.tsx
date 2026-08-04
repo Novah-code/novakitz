@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { getRemainingAIInterpretations } from '../lib/subscription';
 import { User } from '@supabase/supabase-js';
 import PaymentMethodModal from './PaymentMethodModal';
+import { restorePurchases } from '../lib/checkout';
 import '../styles/subscription-manager.css';
 
 const translations = {
@@ -27,7 +28,9 @@ const translations = {
     history: 'History',
     days30: '30 days',
     full: 'Full',
-    detailsToggle: 'Details'
+    detailsToggle: 'Details',
+    restore: 'Restore Purchases',
+    restoring: 'Restoring...'
   },
   ko: {
     planStatus: '플랜 상태',
@@ -48,7 +51,9 @@ const translations = {
     history: '기록',
     days30: '30일',
     full: '전체',
-    detailsToggle: '상세'
+    detailsToggle: '상세',
+    restore: '구매 복원',
+    restoring: '복원 중...'
   }
 };
 
@@ -77,6 +82,8 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const t = translations[language];
 
   const loadSubscriptionData = useCallback(async () => {
@@ -144,6 +151,20 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
       loadSubscriptionData();
     }
   }, [user, loadSubscriptionData]);
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    setRestoreMessage(null);
+    try {
+      const { changed, message } = await restorePurchases(language);
+      setRestoreMessage(message);
+      // The webhook writes the entitlement server-side; re-read rather than
+      // trusting the client's view of it.
+      if (changed) await loadSubscriptionData();
+    } finally {
+      setRestoring(false);
+    }
+  };
 
   const getPlanBadgeColor = (planSlug: string, isLifetime?: boolean): string => {
     if (planSlug === 'premium') {
@@ -330,6 +351,19 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
           )}
         </div>
       )}
+
+      {/* Restore Purchases — required by App Store review for subscription apps */}
+      <div className="restore-section">
+        <button
+          type="button"
+          className="restore-button"
+          onClick={handleRestore}
+          disabled={restoring}
+        >
+          {restoring ? t.restoring : t.restore}
+        </button>
+        {restoreMessage && <p className="restore-message">{restoreMessage}</p>}
+      </div>
 
       {/* Quick Stats */}
       <div className="quick-stats">

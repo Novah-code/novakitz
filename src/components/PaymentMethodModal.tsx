@@ -21,8 +21,12 @@ export default function PaymentMethodModal({
 }: PaymentMethodModalProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
-  const handleCheckout = () => {
-    startCheckout(billingCycle === 'monthly' ? 'premium' : 'yearly', language);
+  const handleCheckout = async () => {
+    const { message } = await startCheckout(
+      billingCycle === 'monthly' ? 'premium' : 'yearly',
+      language
+    );
+    if (message) alert(message);
     onClose();
   };
 

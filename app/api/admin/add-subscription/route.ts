@@ -83,8 +83,7 @@ export async function POST(request: NextRequest) {
           expires_at: expiryDate ? expiryDate.toISOString() : null,
           renewed_at: startDate.toISOString(),
           updated_at: new Date().toISOString(),
-          user_email: userEmail,
-          payment_method: 'manual'
+          user_email: userEmail
         })
         .eq('id', existingSub.id);
 
@@ -112,8 +111,7 @@ export async function POST(request: NextRequest) {
           expires_at: expiryDate ? expiryDate.toISOString() : null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          user_email: userEmail,
-          payment_method: 'manual'
+          user_email: userEmail
         });
 
       if (insertError) {
