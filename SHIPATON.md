@@ -15,29 +15,45 @@ Judging: 2026-10-01 → 10-13 · Winners: 2026-10-21
 | # | Requirement | Status |
 | --- | --- | --- |
 | A1 | First public version live on App Store / Google Play / Samsung Galaxy Store **between Aug 1 and Sep 30, 2026** | ⬜ Not shipped |
-| A2 | ❓ "An app that was already live anywhere before the window does not qualify" — Novakitz has been live on the web since 2025 | 🔴 **UNRESOLVED** |
-| A3 | RevenueCat SDK powers at least one in-app or web purchase | 🟡 Code done, not yet live |
-| A4 | Built for iOS / iPadOS / macOS / Android | 🟡 Capacitor iOS shell ready |
-| A5 | Registered on Devpost | ⬜ |
+| A2 | Pre-existing web app does not disqualify | ✅ **CONFIRMED** — see below |
+| A3 | RevenueCat SDK powers at least one purchase or subscription | 🟡 Code done, not yet live |
+| A4 | **Fully published by the deadline — not still in store review** | ⬜ Drives the Sep 1 submission date |
+| A5 | **Judges in the United States can download and test it** | ⬜ See A5 notes |
+| A6 | Built for iOS / iPadOS / macOS / Android | 🟡 Capacitor iOS shell ready |
+| A7 | Registered on Devpost | ⬜ |
 
-### A2 is the one that can waste the whole eight weeks
+### A2 — resolved
 
-Two rules point in different directions. Rule ① scopes the test to three app
-stores, and by that test Novakitz qualifies — it has never been on any of them.
-Rule ② says "already live **anywhere**", and the web app predates the window.
+Answered by RevenueCat Developer Support (Hussain), 2026-08-04, by email:
 
-This is not resolvable by reading; it needs an organiser's answer, **in writing,
-in a citable place**, because the risk is disqualification at judging (Oct 1–13)
-after all the work is done — not rejection at submission.
+> Based on what you described, Novakitz is eligible. An existing web app does
+> not count as a previously released app for this rule. The restriction is
+> intended to prevent apps already published through an app store from being
+> re-released or ported to another store during the submission window.
+>
+> You can keep the same name, branding, and core idea as your web app.
 
-Ask in **both**:
+**Keep this email.** It is the citation if eligibility is ever queried at
+judging.
 
-- Shipaton Discord — https://discord.com/invite/X95EwqBxQT (fast)
-- Devpost **Discussion** tab (public, timestamped, defensible later)
+### A4 — "fully published" is stricter than "submitted"
 
-Quote both rules by number so the answer cannot be half an answer. Add the
-factual context that the web version has zero revenue and no paying
-subscribers.
+Sitting in App Store review on Sep 30 does not count. Apple review is measured
+in days per round and rejections are normal, so the first submission needs to go
+in around **Sep 1** to absorb two rounds and still leave a buffer.
+
+### A5 — the app has to be testable by a US judge
+
+Two separate things:
+
+1. **US availability.** The App Store territory list must include the United
+   States. It does by default, but confirm it in App Store Connect rather than
+   assuming.
+2. **Judges must get past the front door.** Anything gated behind sign-up needs
+   a way in — the existing guest mode may be enough, otherwise supply demo
+   credentials in the Devpost submission. Note the paid tier is also part of
+   what is being judged: consider App Store promo codes so a judge can see the
+   premium experience without paying. The default UI language should be English.
 
 ---
 
