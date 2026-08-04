@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import PWAInstall from "./pwa-install";
 import UpdateNotification from "../src/components/UpdateNotification";
+import CapacitorBridge from "../src/components/CapacitorBridge";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -154,6 +155,7 @@ export default function RootLayout({
           <div className="particle particle-5"></div>
           <div className="particle particle-6"></div>
         </div>
+        <CapacitorBridge />
         <PWAInstall />
         <UpdateNotification />
         {children}
