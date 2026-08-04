@@ -20,7 +20,7 @@ Judging: 2026-10-01 → 10-13 · Winners: 2026-10-21
 | A4 | **Fully published by the deadline — not still in store review** | ⬜ Drives the Sep 1 submission date |
 | A5 | **Judges in the United States can download and test it** | ⬜ See A5 notes |
 | A6 | Built for iOS / iPadOS / macOS / Android | 🟡 Capacitor iOS shell ready |
-| A7 | Registered on Devpost | ⬜ |
+| A7 | Registered on Devpost | ✅ 2026-08-04 |
 
 ### A2 — resolved
 
