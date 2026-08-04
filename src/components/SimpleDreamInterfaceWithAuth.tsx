@@ -11,7 +11,6 @@ import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
-import LicenseModal from './LicenseModal';
 import ProfileSettings from './ProfileSettings';
 
 // Translations
@@ -69,7 +68,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [isPremium, setIsPremium] = useState(false);
   const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
-  const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -265,10 +263,9 @@ export default function SimpleDreamInterfaceWithAuth() {
           return;
         }
 
-        // Get user subscription with gumroad_product_id
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('id, status, plan_id, expires_at, gumroad_product_id')
+          .select('id, status, plan_id, expires_at')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
@@ -278,9 +275,8 @@ export default function SimpleDreamInterfaceWithAuth() {
           // Check if subscription is not expired
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
-          // Check if it's a lifetime subscription
-          const isLifetimeValue = subscription.gumroad_product_id?.includes('lifetime') ||
-            (subscription.plan_id === premiumPlanId && !subscription.expires_at);
+          // Premium with no expiry date is a lifetime purchase.
+          const isLifetimeValue = subscription.plan_id === premiumPlanId && !subscription.expires_at;
 
           console.log('📋 Subscription details:', {
             subscription_id: subscription.id,
@@ -288,7 +284,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             plan_id: subscription.plan_id,
             premium_plan_id: premiumPlanId,
             expires_at: subscription.expires_at,
-            gumroad_product_id: subscription.gumroad_product_id,
             isExpired,
             isLifetime: isLifetimeValue
           });
@@ -624,14 +619,6 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </span>
                 {language === 'ko' ? '나의 아키타입' : 'My Archetype'}
               </button>
-
-              {/* License key for free users */}
-              {user && !isPremium && !isLifetime && (
-                <button onClick={() => { setMenuOpen(false); setTimeout(() => setShowLicenseModal(true), 150); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#8BA390', fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                  {language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}
-                </button>
-              )}
             </div>
 
             {/* Footer */}
@@ -796,17 +783,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             )}
           </div>
         </div>
-      )}
-
-      {/* License Key Modal */}
-      {user && (
-        <LicenseModal
-          isOpen={showLicenseModal}
-          onClose={() => setShowLicenseModal(false)}
-          userId={user.id}
-          language={language}
-          onSuccess={() => setIsPremium(true)}
-        />
       )}
 
       {/* Profile Settings Modal */}

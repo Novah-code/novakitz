@@ -490,7 +490,7 @@ export default function InnerJournal({ user, onSignOut, showGuestMode = false, o
                 <span className="notice-icon">ℹ️</span>
                 <span className="notice-text">
                   Free plan: Viewing last {userPlanInfo.historyDays} days of dreams.{' '}
-                  <a href="https://gumroad.com/novakitz" target="_blank" rel="noopener noreferrer">
+                  <a href="/pricing">
                     Upgrade to Premium
                   </a>
                   {' '}for full history access.

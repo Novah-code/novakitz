@@ -188,8 +188,6 @@ export interface UserSubscription {
   id?: string
   user_id: string
   plan_id: string
-  gumroad_license_key?: string
-  gumroad_product_id?: string
   status: 'active' | 'inactive' | 'cancelled' | 'expired'
   started_at?: string
   expires_at?: string

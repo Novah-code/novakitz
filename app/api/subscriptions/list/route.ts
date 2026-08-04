@@ -22,8 +22,6 @@ export async function GET(request: NextRequest) {
         id,
         user_id,
         plan_id,
-        gumroad_license_key,
-        gumroad_product_id,
         status,
         started_at,
         expires_at,

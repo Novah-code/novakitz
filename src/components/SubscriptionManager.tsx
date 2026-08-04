@@ -23,22 +23,11 @@ const translations = {
     pricingNote: 'Note: Pricing may increase to $9.99/month in the near future. Lock in the current rate by subscribing now.',
     expires: 'Expires:',
     never: 'Never',
-    license: 'License:',
-    manageSubscription: 'Manage your subscription on Gumroad',
-    visitGumroad: 'Visit Gumroad',
     dreamRecording: 'Dream Recording',
     history: 'History',
     days30: '30 days',
     full: 'Full',
-    detailsToggle: 'Details',
-    haveLicenseKey: 'Have a license key?',
-    enterLicenseKey: 'Enter License Key',
-    licenseKeyPlaceholder: 'Enter your Gumroad license key',
-    activateLicense: 'Activate',
-    activating: 'Activating...',
-    licenseActivated: 'License activated successfully!',
-    licenseError: 'Failed to activate license. Please check your key.',
-    licenseAlreadyUsed: 'This license is already in use by another account.'
+    detailsToggle: 'Details'
   },
   ko: {
     planStatus: '플랜 상태',
@@ -55,22 +44,11 @@ const translations = {
     pricingNote: '참고: 가격이 가까운 미래에 $9.99/월로 인상될 수 있습니다. 현재 요금으로 고정하려면 지금 구독하세요.',
     expires: '만료:',
     never: '무제한',
-    license: '라이선스:',
-    manageSubscription: 'Gumroad에서 구독 관리',
-    visitGumroad: 'Gumroad 방문',
     dreamRecording: '꿈 기록',
     history: '기록',
     days30: '30일',
     full: '전체',
-    detailsToggle: '상세',
-    haveLicenseKey: '라이선스 키가 있으신가요?',
-    enterLicenseKey: '라이선스 키 입력',
-    licenseKeyPlaceholder: 'Gumroad 라이선스 키를 입력하세요',
-    activateLicense: '활성화',
-    activating: '활성화 중...',
-    licenseActivated: '라이선스가 성공적으로 활성화되었습니다!',
-    licenseError: '라이선스 활성화에 실패했습니다. 키를 확인해주세요.',
-    licenseAlreadyUsed: '이 라이선스는 이미 다른 계정에서 사용 중입니다.'
+    detailsToggle: '상세'
   }
 };
 
@@ -84,8 +62,6 @@ interface SubscriptionInfo {
   planName: string;
   isActive: boolean;
   expiresAt?: string;
-  gumroadLicenseKey?: string;
-  gumroadProductId?: string; // novakitz, novakitz_year, or novakitz_lifetime
 }
 
 interface AIUsageInfo {
@@ -101,10 +77,6 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
   const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showLicenseInput, setShowLicenseInput] = useState(false);
-  const [licenseKey, setLicenseKey] = useState('');
-  const [licenseLoading, setLicenseLoading] = useState(false);
-  const [licenseMessage, setLicenseMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const t = translations[language];
 
   const loadSubscriptionData = useCallback(async () => {
@@ -132,18 +104,15 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
         // Check if subscription is not expired
         const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
-        // Determine display name based on product type
-        const productId = subscription.gumroad_product_id || '';
-        const isLifetime = productId.includes('lifetime') || !subscription.expires_at;
+        // Premium with no expiry date is a lifetime purchase.
+        const isLifetime = !subscription.expires_at;
         const displayName = isLifetime ? 'Lifetime' : subscription.subscription_plans.plan_name;
 
         setSubscription({
           planSlug: isExpired ? 'free' : subscription.subscription_plans.plan_slug,
           planName: isExpired ? 'Free' : displayName,
           isActive: !isExpired,
-          expiresAt: subscription.expires_at,
-          gumroadLicenseKey: subscription.gumroad_license_key,
-          gumroadProductId: subscription.gumroad_product_id
+          expiresAt: subscription.expires_at
         });
       } else {
         // Default to free plan
@@ -176,45 +145,6 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
     }
   }, [user, loadSubscriptionData]);
 
-  const handleActivateLicense = async () => {
-    if (!user || !licenseKey.trim()) return;
-
-    setLicenseLoading(true);
-    setLicenseMessage(null);
-
-    try {
-      const response = await fetch('/api/activate-license', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          licenseKey: licenseKey.trim(),
-          userId: user.id,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setLicenseMessage({ type: 'success', text: t.licenseActivated });
-        setLicenseKey('');
-        setShowLicenseInput(false);
-        // Reload subscription data
-        await loadSubscriptionData();
-      } else {
-        const errorText = data.error?.includes('already in use')
-          ? t.licenseAlreadyUsed
-          : t.licenseError;
-        setLicenseMessage({ type: 'error', text: errorText });
-      }
-    } catch {
-      setLicenseMessage({ type: 'error', text: t.licenseError });
-    } finally {
-      setLicenseLoading(false);
-    }
-  };
-
   const getPlanBadgeColor = (planSlug: string, isLifetime?: boolean): string => {
     if (planSlug === 'premium') {
       if (isLifetime) {
@@ -225,8 +155,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
     return '#7FB069'; // Pale green for free
   };
 
-  const isLifetimePlan = subscription?.gumroadProductId?.includes('lifetime') ||
-    (subscription?.planSlug === 'premium' && !subscription?.expiresAt);
+  const isLifetimePlan = subscription?.planSlug === 'premium' && !subscription?.expiresAt;
 
   const getProgressColor = (used: number, limit: number): string => {
     if (limit === -1) return '#7FB069'; // Unlimited - green
@@ -383,86 +312,6 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                 Upgrade to Premium
               </button>
 
-              {/* License Key Input Section */}
-              <div className="license-section" style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
-                {!showLicenseInput ? (
-                  <button
-                    onClick={() => setShowLicenseInput(true)}
-                    className="license-toggle-button"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#6b7280',
-                      fontSize: '0.9rem',
-                      cursor: 'pointer',
-                      textDecoration: 'underline'
-                    }}
-                  >
-                    {t.haveLicenseKey}
-                  </button>
-                ) : (
-                  <div className="license-input-container">
-                    <h5 style={{ marginBottom: '0.75rem', color: '#374151' }}>{t.enterLicenseKey}</h5>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <input
-                        type="text"
-                        value={licenseKey}
-                        onChange={(e) => setLicenseKey(e.target.value)}
-                        placeholder={t.licenseKeyPlaceholder}
-                        style={{
-                          flex: 1,
-                          padding: '0.75rem',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '8px',
-                          fontSize: '0.9rem'
-                        }}
-                        disabled={licenseLoading}
-                      />
-                      <button
-                        onClick={handleActivateLicense}
-                        disabled={licenseLoading || !licenseKey.trim()}
-                        style={{
-                          padding: '0.75rem 1.5rem',
-                          background: licenseLoading ? '#9ca3af' : '#7FB069',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '0.9rem',
-                          cursor: licenseLoading ? 'not-allowed' : 'pointer'
-                        }}
-                      >
-                        {licenseLoading ? t.activating : t.activateLicense}
-                      </button>
-                    </div>
-                    {licenseMessage && (
-                      <p style={{
-                        marginTop: '0.5rem',
-                        fontSize: '0.85rem',
-                        color: licenseMessage.type === 'success' ? '#16a34a' : '#dc2626'
-                      }}>
-                        {licenseMessage.text}
-                      </p>
-                    )}
-                    <button
-                      onClick={() => {
-                        setShowLicenseInput(false);
-                        setLicenseKey('');
-                        setLicenseMessage(null);
-                      }}
-                      style={{
-                        marginTop: '0.5rem',
-                        background: 'none',
-                        border: 'none',
-                        color: '#6b7280',
-                        fontSize: '0.8rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {language === 'ko' ? '취소' : 'Cancel'}
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
@@ -476,27 +325,6 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                     : formatExpiryDate(subscription.expiresAt)
                   }
                 </span>
-              </div>
-              {subscription.gumroadLicenseKey && (
-                <div className="info-row">
-                  <span className="info-label">License:</span>
-                  <span className="info-value license-key">
-                    {subscription.gumroadLicenseKey.substring(0, 8)}...
-                  </span>
-                </div>
-              )}
-              <div className="manage-subscription">
-                <p className="manage-description">
-                  Manage your subscription on Gumroad
-                </p>
-                <a
-                  href="https://novakitz.gumroad.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="manage-button"
-                >
-                  Visit Gumroad
-                </a>
               </div>
             </div>
           )}

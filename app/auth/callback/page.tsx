@@ -58,23 +58,6 @@ export default function AuthCallback() {
             }
           }
 
-          // Check for pending Gumroad purchase and activate if found
-          if (user.email) {
-            try {
-              const res = await fetch('/api/activate-pending', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, email: user.email }),
-              });
-              const result = await res.json();
-              if (result.activated) {
-                console.log('✅ Pending purchase activated:', result.type);
-              }
-            } catch (e) {
-              console.warn('Pending activation check failed (non-critical):', e);
-            }
-          }
-
           router.replace('/');
         } else {
           console.error('No session after exchange');

@@ -1,4 +1,4 @@
--- Subscription and Usage Tracking Tables for Gumroad Integration
+-- Subscription and Usage Tracking Tables
 
 -- Enable extension for UUID functions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -28,10 +28,6 @@ CREATE TABLE IF NOT EXISTS public.user_subscriptions (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     plan_id UUID NOT NULL REFERENCES public.subscription_plans(id),
 
-    -- Gumroad integration fields
-    gumroad_license_key TEXT UNIQUE,
-    gumroad_product_id TEXT,
-
     -- Subscription status
     status TEXT NOT NULL CHECK (status IN ('active', 'inactive', 'cancelled', 'expired')),
 
@@ -55,7 +51,6 @@ CREATE OR REPLACE TRIGGER on_user_subscriptions_updated
 -- Create indexes
 CREATE INDEX user_subscriptions_user_id_idx ON public.user_subscriptions(user_id);
 CREATE INDEX user_subscriptions_status_idx ON public.user_subscriptions(status);
-CREATE INDEX user_subscriptions_gumroad_license_idx ON public.user_subscriptions(gumroad_license_key);
 
 -- 3. AI Usage Tracking Table
 CREATE TABLE IF NOT EXISTS public.ai_usage (

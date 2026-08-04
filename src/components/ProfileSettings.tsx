@@ -882,7 +882,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               {/* Upgrade button for free users */}
               {!isPremium && !isLifetime && (
                 <button
-                  onClick={() => window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank')}
+                  onClick={() => { window.location.href = '/pricing'; }}
                   style={{
                     padding: '14px 20px',
                     background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

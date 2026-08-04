@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { startCheckout } from '../../src/lib/checkout';
 
 // Design tokens
 const G = {
@@ -81,12 +82,7 @@ export default function PricingPage() {
   const ko = language === 'ko';
 
   const handleBuy = (plan: 'lifetime' | 'premium' | 'yearly') => {
-    const urls = {
-      lifetime: process.env.NEXT_PUBLIC_GUMROAD_LIFETIME_URL || 'https://novakitz.gumroad.com/l/novakitz-lifetime',
-      yearly: process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL || 'https://novakitz.gumroad.com/l/novakitz_year',
-      premium: process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz',
-    };
-    window.open(urls[plan], '_blank');
+    startCheckout(plan, language);
   };
 
   const premiumFeatures = ko ? [
@@ -203,7 +199,7 @@ export default function PricingPage() {
         { q: 'Lifetime 이용권은 정말 평생인가요?', a: '네, 단 한 번 결제로 Novakitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.' },
         { q: '환불이 가능한가요?', a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.' },
         { q: 'Premium 월 구독은 언제든 취소 가능한가요?', a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.' },
-        { q: '결제는 어떻게 하나요?', a: 'Gumroad를 통해 안전하게 결제하실 수 있습니다. 신용카드, 페이팔 등 다양한 결제 수단을 지원합니다.' },
+        { q: '결제는 어떻게 하나요?', a: '앱스토어 / 구글플레이 인앱 결제로 안전하게 진행됩니다. 구독 관리와 해지도 스토어 설정에서 하실 수 있습니다.' },
       ],
     },
   ] : [
@@ -225,9 +221,9 @@ export default function PricingPage() {
       title: 'Subscription & Payment',
       items: [
         { q: 'Is the Lifetime plan really forever?', a: 'Yes, with a single payment you can use Premium features for as long as Novakitz exists. All future feature updates are included for free.' },
-        { q: 'Can I get a refund?', a: 'Lifetime access is a digital product with instant license delivery and cannot be refunded. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.' },
+        { q: 'Can I get a refund?', a: 'Refunds for in-app purchases are handled by the App Store or Google Play under their refund policies. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.' },
         { q: 'Can I cancel the Premium monthly subscription anytime?', a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.' },
-        { q: 'How do I pay?', a: 'Payments are securely processed through Gumroad. We support various payment methods including credit cards and PayPal.' },
+        { q: 'How do I pay?', a: 'Payments are handled by the App Store or Google Play as a secure in-app purchase. You can manage or cancel anytime in your store subscription settings.' },
       ],
     },
   ];

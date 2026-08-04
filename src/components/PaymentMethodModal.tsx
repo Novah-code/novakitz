@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { startCheckout } from '../lib/checkout';
 import '../styles/payment-method-modal.css';
 
 interface PaymentMethodModalProps {
@@ -20,14 +21,8 @@ export default function PaymentMethodModal({
 }: PaymentMethodModalProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
 
-  const gumroadMonthlyUrl = process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz';
-  const gumroadYearlyUrl = process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz_year';
-
-  const handleGumroadCheckout = () => {
-    const url = billingCycle === 'monthly' ? gumroadMonthlyUrl : gumroadYearlyUrl;
-    window.open(url, '_blank');
+  const handleCheckout = () => {
+    startCheckout(billingCycle === 'monthly' ? 'premium' : 'yearly', language);
     onClose();
   };
 
@@ -47,7 +42,7 @@ export default function PaymentMethodModal({
         affirmations: 'Daily affirmations',
         noDreamAffirmations: 'Affirmations from recent dreams on no-dream days'
       },
-      paymentMethod: 'Credit Card, PayPal via Gumroad'
+      paymentMethod: 'Secure in-app purchase'
     },
     ko: {
       title: '플랜 선택',
@@ -64,7 +59,7 @@ export default function PaymentMethodModal({
         affirmations: '일일 확언',
         noDreamAffirmations: '꿈 없는 날 최근 꿈 기반 확언'
       },
-      paymentMethod: '신용카드, PayPal (Gumroad)'
+      paymentMethod: '앱 내 결제'
     }
   };
 
@@ -123,7 +118,7 @@ export default function PaymentMethodModal({
             {/* Subscribe Button */}
             <button
               className="payment-submit-btn"
-              onClick={handleGumroadCheckout}
+              onClick={handleCheckout}
             >
               {t.subscribe} - {billingCycle === 'monthly' ? '$4.99/month' : '$49.99/year'}
             </button>
