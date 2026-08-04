@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
+import ReminderSettings from './ReminderSettings';
 
 interface StreakData {
   currentStreak: number;
@@ -752,6 +753,8 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                   {user.email}
                 </p>
               </div>
+
+              <ReminderSettings language={language} />
 
               {/* Delete Account */}
               {!showDeleteConfirm ? (
