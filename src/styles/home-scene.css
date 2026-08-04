@@ -1,9 +1,12 @@
 /*
  * Home hero: a circular window onto an illustrated landscape.
  *
- * The page splits into sky and ground at the vertical centre, and the disc is
- * centred on that same line, so the horizon inside the circle continues the
- * horizon outside it. Keep the two aligned when adjusting sizes.
+ * The field behind the disc is deliberately quiet — a single colour with a
+ * barely-there gradient — so the painted circle is the only thing competing
+ * for attention, and so the UI that sits around it stays readable. An earlier
+ * version split the page into sky and ground to continue the artwork's horizon;
+ * it looked striking but forced the horizon to sit at the exact centre of the
+ * artwork and broke whenever the disc moved off-centre.
  */
 
 .home-scene {
@@ -14,34 +17,20 @@
 }
 
 .home-scene--day {
-  --sky: #5BB0F5;
-  --ground: #5BC24C;
+  --field: #5BB0F5;
+  --field-deep: #4FA4EE;
   --halo: rgba(255, 255, 255, 0.55);
 }
 
 .home-scene--night {
-  --sky: #1B2A5E;
-  --ground: #16351F;
+  --field: #1B2A5E;
+  --field-deep: #141F47;
   --halo: rgba(150, 180, 255, 0.35);
 }
 
-.home-scene__sky,
-.home-scene__ground {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50%;
+.home-scene {
+  background-image: linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
   transition: background-color 900ms ease;
-}
-
-.home-scene__sky {
-  top: 0;
-  background-color: var(--sky);
-}
-
-.home-scene__ground {
-  bottom: 0;
-  background-color: var(--ground);
 }
 
 .home-scene__portal {
@@ -125,8 +114,7 @@
   .home-scene__disc {
     animation: none;
   }
-  .home-scene__sky,
-  .home-scene__ground {
+  .home-scene {
     transition: none;
   }
 }

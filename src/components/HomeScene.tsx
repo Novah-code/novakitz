@@ -35,8 +35,6 @@ export default function HomeScene({
 
   return (
     <div className={`home-scene home-scene--${scene}`}>
-      <div className="home-scene__sky" />
-      <div className="home-scene__ground" />
 
       <button
         type="button"

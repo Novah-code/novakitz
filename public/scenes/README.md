@@ -18,17 +18,17 @@ breaks the screen.
   (`--scene-size` in `home-scene.css`), which is 1260 device pixels on a 3x
   display. 1260 is the true minimum; 1500 leaves room to enlarge the disc later
   without re-exporting.
-- **Horizon at the vertical centre.** The page splits into sky and ground at the
-  middle of the screen and the disc is centred on that line. The illusion only
-  works if the horizon inside the artwork sits at the same height.
+- **Compose freely.** The background behind the disc is a plain field, so the
+  horizon can sit wherever the picture wants it. Just keep the subject away from
+  the very corners — they are outside the circle and will be cropped.
 - **Bleed to the edges.** Do not bake a circular mask or padding into the file —
   the circle is applied in CSS. Fill the whole square.
 
-## Two things to keep in sync
+## One thing to keep in sync
 
-The flat sky and ground colours behind the disc live in
-`src/styles/home-scene.css` as `--sky` and `--ground`. They should match the
-artwork's own sky and grass at the horizon, or the seam becomes visible.
+The field colour behind the disc lives in `src/styles/home-scene.css` as
+`--field` / `--field-deep`. Pick it from the artwork — usually its sky — so the
+disc sits in the composition rather than on top of it.
 
 Night is gated behind `NIGHT_SCENE_READY` in `src/lib/useTimeOfDay.ts`. While it
 is `false` the day scene always shows and the manual toggle is hidden. Flip it
