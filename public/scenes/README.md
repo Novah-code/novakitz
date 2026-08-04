@@ -14,8 +14,10 @@ breaks the screen.
 
 - **Square.** The disc is a perfect circle and the image is `object-fit: cover`,
   so anything not square gets cropped on the long axis.
-- **1200×1200 or larger.** The disc renders up to 420 CSS px, so 1200px covers
-  3x displays with room to spare.
+- **1500×1500 recommended.** The disc is capped at 420 CSS px
+  (`--scene-size` in `home-scene.css`), which is 1260 device pixels on a 3x
+  display. 1260 is the true minimum; 1500 leaves room to enlarge the disc later
+  without re-exporting.
 - **Horizon at the vertical centre.** The page splits into sky and ground at the
   middle of the screen and the disc is centred on that line. The illusion only
   works if the horizon inside the artwork sits at the same height.
