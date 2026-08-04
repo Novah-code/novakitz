@@ -108,6 +108,16 @@ Blocking everything downstream:
 2. Night artwork + app icon (1024×1024, **no alpha channel**)
 3. A2 above
 
+### Apple account setup — order matters
+
+| Step | Note |
+| --- | --- |
+| Apple Developer Program, **Individual** | Organization needs a D-U-N-S number, which alone can run past the deadline. Trade-off: the seller name shown on the App Store is the person's legal name. |
+| Paid Apps agreement | Gates subscription product creation |
+| Tax forms — **W-8BEN** | Filed per withholding agent, so a copy given to another platform does not carry over. Filled in through App Store Connect's interactive flow rather than by uploading a PDF. **Part II is what claims treaty benefits** — skipping it leaves 30% withheld on US royalties. Needs a TIN; a foreign TIN is accepted. |
+| Banking details | |
+| **App Store Small Business Program** | **Opt-in, not automatic.** Drops commission from 30% to 15%. A developer with no prior App Store revenue qualifies immediately. Free, ~5 minutes, and can run in parallel with the agreement steps. Enrol as soon as the account is active — it should be in effect before the first sale. Requires disclosing any associated developer accounts; the $1M proceeds threshold is assessed across all of them. |
+
 ## E. Dates to work backwards from
 
 | Date | Milestone |
