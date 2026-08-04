@@ -47,3 +47,7 @@ secrets/
 # Local env snapshots (never commit)
 .env.local.save
 .env*.save
+
+# TypeScript incremental build cache (generated)
+tsconfig.tsbuildinfo
+*.tsbuildinfo
