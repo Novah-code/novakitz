@@ -6,11 +6,14 @@ import type { NextConfig } from "next";
 const isAppBuild = process.env.BUILD_TARGET === 'app';
 
 const nextConfig: NextConfig = {
+  // Both checks pass cleanly, and a runtime error costs far more once the app
+  // ships through review than it does on the web, where a fix deploys in
+  // minutes. Keep them enforcing.
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // Image optimization settings
   images: {
