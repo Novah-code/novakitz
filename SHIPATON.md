@@ -1,30 +1,82 @@
 # Shipaton 2026 — requirement tracker
 
-Deadline: **2026-09-30, 23:45 PT** (Devpost submission closes)
-Judging: 2026-10-01 → 10-13 · Winners: 2026-10-21
+**Devpost submission closes 2026-09-30, 23:45 PT.** Judging Oct 1–13 · winners Oct 21.
 
-> Compiled from RevenueCat and Devpost sources. The official rules page could
-> not be read directly from this environment, so **verify anything marked ❓
-> against https://revenuecat-shipaton-2026.devpost.com/rules before relying on
-> it.**
+Sources are RevenueCat's site, Devpost, and a direct ruling from RevenueCat
+Developer Support (quoted under §3). The official rules page could not be read
+from the build environment, so verify anything surprising against
+https://revenuecat-shipaton-2026.devpost.com/rules.
 
 ---
 
-## A. Eligibility — miss one and the entry is void
+## 1. Must-have checklist
 
-| # | Requirement | Status |
-| --- | --- | --- |
-| A1 | First public version live on App Store / Google Play / Samsung Galaxy Store **between Aug 1 and Sep 30, 2026** | ⬜ Not shipped |
-| A2 | Pre-existing web app does not disqualify | ✅ **CONFIRMED** — see below |
-| A3 | RevenueCat SDK powers at least one purchase or subscription | 🟡 Code done, not yet live |
-| A4 | **Fully published by the deadline — not still in store review** | ⬜ Drives the Sep 1 submission date |
-| A5 | **Judges in the United States can download and test it** | ⬜ See A5 notes |
-| A6 | Built for iOS / iPadOS / macOS / Android | 🟡 Capacitor iOS shell ready |
-| A7 | Registered on Devpost | ✅ 2026-08-04 |
+Nothing here is optional. A miss on any line means the entry does not count.
 
-### A2 — resolved
+### Ship the app
 
-Answered by RevenueCat Developer Support (Hussain), 2026-08-04, by email:
+- [ ] App **fully published** on the App Store — not still in review on Sep 30
+- [ ] First public store release falls **between Aug 1 and Sep 30, 2026**
+- [ ] **RevenueCat SDK powers at least one real purchase or subscription** — code ✅, needs to be live
+- [ ] App is **available in the United States** storefront
+- [ ] A **US judge can actually use it** — see §4
+
+### Submit on Devpost
+
+- [x] Registered on Devpost *(2026-08-04)*
+- [ ] Store URL (live listing, not TestFlight)
+- [ ] **Demo video** — see §5 for the constraints that fail entries
+- [ ] Screenshots
+- [ ] App icon
+- [ ] Description
+
+### Apple prerequisites — no store release without these
+
+- [ ] Apple Developer Program (Individual)
+- [ ] **Paid Apps agreement** — gates subscription product creation
+- [ ] **W-8BEN** — filed through App Store Connect, Part II claims treaty benefits
+- [ ] Banking details
+- [ ] App Store Connect app record + subscription products
+- [ ] **App Privacy** data-collection disclosure — dreams and email are collected
+- [ ] Privacy policy URL — `app/legal/privacy` exists ✅
+- [x] **Restore Purchases** reachable in-app — required for subscription apps ✅
+- [x] Account deletion — required when accounts can be created ✅
+- [ ] App icon **1024×1024, no alpha channel** — alpha is an automatic rejection
+
+### Easy to forget, costs money
+
+- [ ] **App Store Small Business Program** — opt-in, not automatic. 30% → 15%.
+      Enrol as soon as the developer account is live, before the first sale.
+
+### Only if chasing #BuildInPublic
+
+- [ ] Links to the social accounts used
+- [ ] Links to **specific posts** showing progress over time
+- [ ] Short write-up of how building in public helped
+
+---
+
+## 2. Dates to work backwards from
+
+| Date | Milestone |
+| --- | --- |
+| Aug 11 | Apple account active, Paid Apps signed |
+| Aug 17 | First TestFlight build uploaded — ugly is fine; the point is to surface signing and IAP problems while there is time |
+| Aug 24 | Sandbox purchase verified on a real device |
+| **Sep 1** | **First App Store submission** — assumes ~2 rejection rounds at 3–7 days each |
+| Sep 22 | Live on the App Store |
+| Sep 30 | Devpost submission complete |
+
+"Fully published" is stricter than "submitted": sitting in review on Sep 30 does
+not count. That is what fixes the first submission at Sep 1 rather than late
+September.
+
+---
+
+## 3. Eligibility — resolved
+
+A pre-existing web app does **not** disqualify. RevenueCat Developer Support
+(Hussain), by email, 2026-08-04:
 
 > Based on what you described, Novakitz is eligible. An existing web app does
 > not count as a previously released app for this rule. The restriction is
@@ -33,116 +85,84 @@ Answered by RevenueCat Developer Support (Hussain), 2026-08-04, by email:
 >
 > You can keep the same name, branding, and core idea as your web app.
 
-**Keep this email.** It is the citation if eligibility is ever queried at
-judging.
-
-### A4 — "fully published" is stricter than "submitted"
-
-Sitting in App Store review on Sep 30 does not count. Apple review is measured
-in days per round and rejections are normal, so the first submission needs to go
-in around **Sep 1** to absorb two rounds and still leave a buffer.
-
-### A5 — the app has to be testable by a US judge
-
-Two separate things:
-
-1. **US availability.** The App Store territory list must include the United
-   States. It does by default, but confirm it in App Store Connect rather than
-   assuming.
-2. **Judges must get past the front door.** Anything gated behind sign-up needs
-   a way in — the existing guest mode may be enough, otherwise supply demo
-   credentials in the Devpost submission. Note the paid tier is also part of
-   what is being judged: consider App Store promo codes so a judge can see the
-   premium experience without paying. The default UI language should be English.
+**Keep this email.** It is the citation if eligibility is queried at judging.
 
 ---
 
-## B. Submission artifacts — all due Sep 30
+## 4. Making the app testable by a judge
 
-| # | Item | Notes | Status |
-| --- | --- | --- | --- |
-| B1 | Store URL | Live listing, not TestFlight | ⬜ |
-| B2 | Demo video | **Max 3 minutes**, hosted public (YouTube/Vimeo), link in submission | ⬜ |
-| B3 | Screenshots | ⬜ |
-| B4 | App icon | ⬜ |
-| B5 | Description | ⬜ |
+Two separate problems:
 
-### Video constraints that bite late
+1. **US availability.** The territory list must include the United States. It
+   does by default — confirm rather than assume.
+2. **Getting past the front door.** Most of the app is behind sign-in
+   (`handleGuestAction` gates history, calendar, insights, monthly report), so a
+   judge who does not sign up sees very little. Either widen the guest
+   experience or supply demo credentials in the submission.
+3. **Seeing the paid tier.** Premium is part of what is judged and a judge will
+   not buy it. Simplest route: create a demo account and grant it premium
+   through the existing `app/api/admin/add-subscription` route, then include
+   those credentials. App Store promo codes also work.
 
-- **Must show the app running on the target device.** A browser recording of
-  the web app does not satisfy this — record from a real iPhone.
+Default UI language is already English ✅.
+
+---
+
+## 5. Demo video — the constraints that fail entries
+
+- **Maximum three minutes.** Short enough to need a script.
+- **Must show the app running on the target device.** A browser recording of the
+  web app does not satisfy this — record from a real iPhone.
+- **Hosted publicly** (YouTube, Vimeo) with the link in the submission.
 - **No copyrighted music, trademarks, or protected material.** A calm wellness
-  app is exactly the kind that reaches for a pretty licensed track. Use
-  genuinely royalty-free audio or none.
-- Three minutes is short. Script it rather than improvising.
+  app is exactly the kind that reaches for a licensed track.
 
 ---
 
-## C. Award categories
+## 6. Award categories
 
-Nine categories, $700k+. Relevant fits for Novakitz:
+Nine categories, $700k+. Where Novakitz actually fits:
 
-| Award | Fit | What it needs |
+| Award | Fit | Needs |
 | --- | --- | --- |
 | **Peace Prize** (mental health) | 🟢 Strong — dream journalling, inner reflection | The product as-is |
-| **Design Award** | 🟢 Strong — the landscape redesign targets this | Finished day/night home screen |
-| **#BuildInPublic** | 🟡 Possible — **but only if started now** | See below |
+| **Design Award** | 🟢 Strong — the landscape home screen targets this | Finished day/night scene |
+| #BuildInPublic | 🟡 Only if posting starts now — cannot be back-filled in September | §1 |
 | AI | 🟡 Gemini-backed dream analysis | Nothing extra |
-| HAMM (revenue) | 🔴 Weak — needs real revenue in ~6 weeks | — |
+| HAMM (revenue) | 🔴 Needs real revenue in ~6 weeks | — |
 | Grand Prize | 🟡 | — |
 
-### C1. #BuildInPublic cannot be back-filled
-
-This is the item that is easy to miss and **impossible to fix in September.**
-It is judged on a development journey shared publicly over time, and submission
-requires:
-
-- links to the social accounts used
-- links to **specific posts** where progress was shared
-- a short write-up of how building in public helped the app
-
-A single post in late September does not read as a journey. If this category is
-wanted, posting starts **this week** — the Capacitor migration, dropping Gumroad
-for RevenueCat, and the home redesign are all natural material.
+Peace Prize and Design Award are the realistic targets, and both are extensions
+of work already underway.
 
 ---
 
-## D. Current state
+## 7. Build status
 
-Shipped on `claude/revenue-hackathon-pwa-app-r6w9jo`:
+On `claude/revenue-hackathon-pwa-app-r6w9jo`:
 
-- ✅ Capacitor shell — static export, API stays on Vercel
+- ✅ Capacitor shell — static export, API routes stay on Vercel
 - ✅ Gumroad and Toss removed
-- ✅ RevenueCat: purchase, restore, webhook → `user_subscriptions`
-- ✅ Home screen landscape scene (day; night gated behind `NIGHT_SCENE_READY`)
+- ✅ RevenueCat — purchase, restore, webhook → `user_subscriptions`
+- ✅ Local notifications — daily ritual reminders (also the guideline 4.2 answer)
+- ✅ TypeScript and ESLint enforced at build
+- 🟡 Home landscape scene — structure done, waiting on artwork; night gated
+  behind `NIGHT_SCENE_READY`
 
-Blocking everything downstream:
+Waiting on:
 
-1. **Apple Developer enrolment** → then **Paid Apps agreement + banking/tax
-   (W-8BEN)**. Until that agreement is signed, subscription products cannot be
-   created, so none of the RevenueCat work can be verified.
-2. Night artwork + app icon (1024×1024, **no alpha channel**)
-3. A2 above
+1. **Apple Developer enrolment → Paid Apps agreement.** Until signed, no
+   subscription products exist, so none of the RevenueCat work can be verified.
+2. Day artwork → `public/scenes/scene-day.png` (see that folder's README)
+3. Night artwork, app icon
 
-### Apple account setup — order matters
+### Values the code expects
 
-| Step | Note |
-| --- | --- |
-| Apple Developer Program, **Individual** | Organization needs a D-U-N-S number, which alone can run past the deadline. Trade-off: the seller name shown on the App Store is the person's legal name. |
-| Paid Apps agreement | Gates subscription product creation |
-| Tax forms — **W-8BEN** | Filed per withholding agent, so a copy given to another platform does not carry over. Filled in through App Store Connect's interactive flow rather than by uploading a PDF. **Part II is what claims treaty benefits** — skipping it leaves 30% withheld on US royalties. Needs a TIN; a foreign TIN is accepted. |
-| Banking details | |
-| **App Store Small Business Program** | **Opt-in, not automatic.** Drops commission from 30% to 15%. A developer with no prior App Store revenue qualifies immediately. Free, ~5 minutes, and can run in parallel with the agreement steps. Enrol as soon as the account is active — it should be in effect before the first sale. Requires disclosing any associated developer accounts; the $1M proceeds threshold is assessed across all of them. |
-
-## E. Dates to work backwards from
-
-| Date | Milestone |
-| --- | --- |
-| Aug 11 | Apple account active, Paid Apps signed |
-| Aug 17 | First TestFlight build uploaded — ugly is fine, the point is to surface signing and IAP problems early |
-| Aug 24 | Sandbox purchase verified on a real device |
-| **Sep 1** | **First App Store submission** — assumes ~2 rejection rounds at 3–7 days each |
-| Sep 22 | Live on the App Store |
-| Sep 30 | Devpost submission complete |
-
-Submitting to Apple in late September is not a plan.
+| Thing | Value | Defined in |
+| --- | --- | --- |
+| Bundle ID | `shop.novakitz.app` | `capacitor.config.ts` |
+| Entitlement | `premium` | `src/lib/revenuecat.ts` |
+| Packages | `$rc_monthly`, `$rc_annual`, `$rc_lifetime` | `src/lib/revenuecat.ts` |
+| Webhook URL | `https://www.novakitz.shop/api/revenuecat-webhook` | — |
+| `REVENUECAT_WEBHOOK_SECRET` | Vercel env — server-side | webhook route |
+| `NEXT_PUBLIC_REVENUECAT_IOS_KEY` | **Mac `.env.local`** — baked into the app bundle at build, so Vercel alone is not enough | `src/lib/revenuecat.ts` |
