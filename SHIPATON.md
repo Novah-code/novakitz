@@ -160,7 +160,7 @@ Waiting on:
 
 | Thing | Value | Defined in |
 | --- | --- | --- |
-| Bundle ID | `shop.novakitz.app` | `capacitor.config.ts` |
+| Bundle ID | `com.novakitz.app` | `capacitor.config.ts` |
 | Entitlement | `premium` | `src/lib/revenuecat.ts` |
 | Packages | `$rc_monthly`, `$rc_annual`, `$rc_lifetime` | `src/lib/revenuecat.ts` |
 | Webhook URL | `https://www.novakitz.shop/api/revenuecat-webhook` | — |
