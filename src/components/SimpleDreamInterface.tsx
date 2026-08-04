@@ -12,6 +12,7 @@ import StreakPopup from './StreakPopup';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
+import HomeScene from './HomeScene';
 import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
@@ -4037,24 +4038,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             return null;
           })()}
           {!showInput && !showResponse && !showHistory && (
-            <div style={{position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10}}>
-            <div
-              className="dream-orb flex items-center justify-center fade-in"
-              onMouseDown={handleOrbMouseDown}
-              onMouseUp={handleOrbMouseUp}
-              onMouseLeave={handleOrbMouseLeave}
-              onTouchStart={handleOrbMouseDown}
-              onTouchEnd={handleOrbMouseUp}
-              style={{cursor: 'pointer'}}
-            >
-              <div className="orb-motion">
-                <div className="smoke-base"></div>
-                <div className="smoke-layer-1"></div>
-                <div className="smoke-layer-2"></div>
-                <div className="smoke-layer-3"></div>
-              </div>
-            </div>
-            </div>
+            <HomeScene
+              onPressStart={handleOrbMouseDown}
+              onPressEnd={handleOrbMouseUp}
+              onPressCancel={handleOrbMouseLeave}
+              label={language === 'ko' ? '꿈 기록하기' : 'Record a dream'}
+            />
           )}
 
 
