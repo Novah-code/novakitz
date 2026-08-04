@@ -53,6 +53,14 @@ export async function configureRevenueCat(): Promise<boolean> {
     return false;
   }
 
+  // A Test Store key left in a release build breaks real purchases, and it is
+  // an easy thing to forget after a development cycle. Refuse to configure
+  // rather than shipping an app that takes payments into a sandbox.
+  if (key.startsWith('test_') && process.env.NODE_ENV === 'production') {
+    console.error('[RevenueCat] Test Store key in a production build; purchases disabled.');
+    return false;
+  }
+
   try {
     const { Purchases, LOG_LEVEL } = await sdk();
     await Purchases.setLogLevel({

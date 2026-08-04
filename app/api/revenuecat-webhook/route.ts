@@ -15,6 +15,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const PREMIUM_ENTITLEMENT = 'premium';
 
+// App User IDs are Supabase user ids. Anything else is anonymous.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Access begins or continues.
 const GRANTING_EVENTS = new Set([
   'INITIAL_PURCHASE',
@@ -77,6 +80,15 @@ export async function POST(request: NextRequest) {
   const userId = event.app_user_id ?? event.original_app_user_id;
   if (!userId) {
     return NextResponse.json({ error: 'Missing app_user_id' }, { status: 400 });
+  }
+
+  // A purchase made before the buyer signed in carries RevenueCat's anonymous
+  // id ($RCAnonymousID:...), which is not a Supabase user and cannot be granted
+  // anything. Acknowledge it rather than 500ing, or RevenueCat retries forever
+  // on an event that can never succeed.
+  if (!UUID.test(userId)) {
+    console.warn('[RevenueCat] Ignoring event for non-Supabase app_user_id:', userId);
+    return NextResponse.json({ received: true, ignored: 'anonymous app_user_id' });
   }
 
   const grants = GRANTING_EVENTS.has(event.type);

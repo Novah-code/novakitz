@@ -43,6 +43,23 @@ Nothing here is optional. A miss on any line means the entry does not count.
 - [x] Account deletion — required when accounts can be created ✅
 - [ ] App icon **1024×1024, no alpha channel** — alpha is an automatic rejection
 
+### Release mechanics — from RevenueCat's pre-launch checklist
+
+- [ ] **Store description discloses auto-renewing subscription details** — Apple
+      requires this in the description text itself
+- [ ] **Ship the platform key, never a Test Store key** (`test_…`). A Test Store
+      key in a release build breaks real purchases. The SDK wrapper now refuses
+      to configure if it sees one in a production build.
+- [ ] **Release manually, then wait ~24h** before announcing. New in-app
+      purchase products can take a day to propagate across the App Store.
+- [ ] Consider a **phased rollout** so a bad build can be halted partway
+- [ ] After the first-ever release, **verify a real purchase works** — in-app
+      purchases do not function in production until the app has actually been
+      released, so this cannot be checked beforehand. Only sandbox can.
+
+That last point moves the effective deadline: the app has to be live with
+enough slack left to release, wait a day, and confirm purchases work.
+
 ### Easy to forget, costs money
 
 - [ ] **App Store Small Business Program** — opt-in, not automatic. 30% → 15%.

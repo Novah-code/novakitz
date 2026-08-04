@@ -1,5 +1,6 @@
 'use client';
 
+import { supabase } from './supabase';
 import { isNative, purchase, restore } from './revenuecat';
 
 export type PlanId = 'premium' | 'yearly' | 'lifetime';
@@ -9,6 +10,7 @@ type Lang = 'en' | 'ko';
 const copy = {
   en: {
     webOnly: 'Subscriptions are purchased in the Novakitz app. Download it to upgrade.',
+    signInFirst: 'Please sign in first so your subscription is attached to your account.',
     unavailable: 'The store is not reachable right now. Please try again shortly.',
     purchased: 'Welcome to Premium.',
     restored: 'Your purchase has been restored.',
@@ -16,12 +18,19 @@ const copy = {
   },
   ko: {
     webOnly: '구독은 Novakitz 앱에서 진행됩니다. 앱을 설치한 뒤 업그레이드해 주세요.',
+    signInFirst: '구독이 계정에 연결되도록 먼저 로그인해 주세요.',
     unavailable: '지금은 스토어에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.',
     purchased: '프리미엄이 활성화되었습니다.',
     restored: '구매 내역을 복원했습니다.',
     nothingToRestore: '이 계정에서 이전 구매 내역을 찾지 못했습니다.',
   },
 } satisfies Record<Lang, Record<string, string>>;
+
+
+async function isSignedIn(): Promise<boolean> {
+  const { data } = await supabase.auth.getSession();
+  return Boolean(data.session?.user);
+}
 
 export interface CheckoutResult {
   /** True when entitlements changed and the caller should refresh subscription state. */
@@ -46,6 +55,13 @@ export async function startCheckout(plan: PlanId, language: Lang = 'en'): Promis
     return { changed: false, message: t.webOnly };
   }
 
+  // Without a signed-in user the purchase attaches to RevenueCat's anonymous
+  // id, and the webhook then has no Supabase user to grant the entitlement to.
+  // The pricing page is public, so this is reachable.
+  if (!(await isSignedIn())) {
+    return { changed: false, message: t.signInFirst };
+  }
+
   const outcome = await purchase(plan);
   switch (outcome.status) {
     case 'purchased':
@@ -65,6 +81,10 @@ export async function restorePurchases(language: Lang = 'en'): Promise<CheckoutR
 
   if (!isNative()) {
     return { changed: false, message: t.webOnly };
+  }
+
+  if (!(await isSignedIn())) {
+    return { changed: false, message: t.signInFirst };
   }
 
   const outcome = await restore();
