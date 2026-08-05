@@ -146,11 +146,26 @@ Fill in, because leaving them blank forfeits the category:
 Optional, cheap to write: HAMM (monetisation model), Grand Prize (post-launch
 growth — there will be little), Build in Public (only if posting).
 
+Also worth entering:
+
+- [ ] **Influencer Award → Productivity** (Christopher Lawley). Only one
+      influencer category may be entered, but that does not affect Peace Prize
+      or Design Award, so this costs a paragraph and nothing else.
+
+  The fit is real rather than a stretch: `MorningRitual`, `DailyCheckin`,
+  `AffirmationsDisplay`, the `daily_intentions` table and streaks make this a
+  daily-ritual product, and dream capture is the input to that loop rather than
+  the whole app. Lead the pitch with the routine — check in, set today's
+  intentions, close the day with a reflection — and present the dream as where
+  the intentions come from (`daily_intentions.dream_id` is literally that
+  relationship). Leading with Jungian dream interpretation reads as the wrong
+  category. `app/pricing/page.tsx` already carries the right framing: "the first
+  five minutes decide your day".
+
 Leave blank — not applicable: Catvertising (RevenueCat Ads), Best Game, Ship
 Kotlin Everywhere, Most Viral (Noise), Best App for Galaxy, Idea to Income
 (Replit), Keep Them Coming Back (OneSignal), Growth Loop (Layers), Funnel Vision
-(Stripe), Next Gen (students), Influencer Award (no category fits a dream
-journal).
+(Stripe), Next Gen (students).
 
 **Keep Them Coming Back** requires OneSignal specifically. Reminders here are
 local notifications, which need no server and already answer guideline 4.2 —
