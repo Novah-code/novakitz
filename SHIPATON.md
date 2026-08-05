@@ -125,9 +125,46 @@ Default UI language is already English ✅.
 
 ---
 
+## 4b. Devpost submission form
+
+Most fields are per-award and can be left blank. Required:
+
+- [ ] 1024×1024 uncropped app icon attached
+- [ ] Screenshot attached **without device frames** — no phone mockups
+- [ ] "First version released Aug 1–Sep 30, 2026?" → Yes
+- [ ] App type → iOS
+- [ ] **RevenueCat project ID** — from Project Settings, available today
+- [ ] RevenueCat/sponsor employee? → No
+- [ ] Published iOS App Store URL
+- [ ] Promo code for premium — optional, but see the video note below
+
+Fill in, because leaving them blank forfeits the category:
+
+- [ ] **Peace Prize** — how the app benefits individuals or society
+- [ ] **Design Award** — which visual and interaction details judges should look at
+
+Optional, cheap to write: HAMM (monetisation model), Grand Prize (post-launch
+growth — there will be little), Build in Public (only if posting).
+
+Leave blank — not applicable: Catvertising (RevenueCat Ads), Best Game, Ship
+Kotlin Everywhere, Most Viral (Noise), Best App for Galaxy, Idea to Income
+(Replit), Keep Them Coming Back (OneSignal), Growth Loop (Layers), Funnel Vision
+(Stripe), Next Gen (students), Influencer Award (no category fits a dream
+journal).
+
+**Keep Them Coming Back** requires OneSignal specifically. Reminders here are
+local notifications, which need no server and already answer guideline 4.2 —
+not worth re-plumbing for one category.
+
+---
+
 ## 5. Demo video — the constraints that fail entries
 
 - **Maximum three minutes.** Short enough to need a script.
+- **Premium has to appear inside those three minutes.** The submission form
+  warns that judges are not required to redeem a promo code, so the paid tier
+  cannot be left for them to find on their own. Budget the script accordingly —
+  spending two minutes on free features leaves no room for what is being judged.
 - **Must show the app running on the target device.** A browser recording of the
   web app does not satisfy this — record from a real iPhone.
 - **Hosted publicly** (YouTube, Vimeo) with the link in the submission.
