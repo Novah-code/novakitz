@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { startCheckout } from '../lib/checkout';
+import Toast, { ToastType } from './Toast';
 import '../styles/payment-method-modal.css';
 
 interface PaymentMethodModalProps {
@@ -20,14 +21,20 @@ export default function PaymentMethodModal({
   userEmail
 }: PaymentMethodModalProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   const handleCheckout = async () => {
-    const { message } = await startCheckout(
+    const { changed, message } = await startCheckout(
       billingCycle === 'monthly' ? 'premium' : 'yearly',
       language
     );
-    if (message) alert(message);
-    onClose();
+    // Keep the modal open on failure so the message has somewhere to show and
+    // the user can retry without reopening it.
+    if (changed) {
+      onClose();
+      return;
+    }
+    if (message) setToast({ message, type: 'error' });
   };
 
   const translations = {
@@ -129,6 +136,10 @@ export default function PaymentMethodModal({
           </div>
         </div>
       </div>
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }

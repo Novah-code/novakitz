@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { startCheckout } from '../../src/lib/checkout';
+import Toast, { ToastType } from '../../src/components/Toast';
 
 // Design tokens
 const G = {
@@ -73,6 +74,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export default function PricingPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
@@ -82,8 +84,8 @@ export default function PricingPage() {
   const ko = language === 'ko';
 
   const handleBuy = async (plan: 'lifetime' | 'premium' | 'yearly') => {
-    const { message } = await startCheckout(plan, language);
-    if (message) alert(message);
+    const { changed, message } = await startCheckout(plan, language);
+    if (message) setToast({ message, type: changed ? 'success' : 'info' });
   };
 
   const premiumFeatures = ko ? [
@@ -483,6 +485,10 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }

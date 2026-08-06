@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import Toast, { ToastType } from './Toast';
 
 interface Intention {
   intention_1: string;
@@ -32,6 +33,9 @@ export default function EveningReflection({
   onReflectionComplete
 }: EveningReflectionProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  const showToast = (message: string, type: ToastType) => setToast({ message, type });
   const [hasReflectedToday, setHasReflectedToday] = useState(false);
   const [intentions, setIntentions] = useState<Intention | null>(null);
   const [achieved, setAchieved] = useState({
@@ -112,7 +116,7 @@ export default function EveningReflection({
 
       if (error) {
         console.error('Error saving reflection:', error);
-        alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving reflection');
+        showToast(language === 'ko' ? '저장 중 오류 발생' : 'Error saving reflection', 'error');
       } else if (data) {
         console.log('Reflection saved:', data);
         setHasReflectedToday(true);
@@ -129,13 +133,13 @@ export default function EveningReflection({
         }
 
         // Show success message
-        alert(language === 'ko'
+        showToast(language === 'ko'
           ? '오늘의 성찰이 완료되었습니다. 좋은 꿈 꾸세요! 🌙'
-          : 'Reflection complete! Sweet dreams! 🌙');
+          : 'Reflection complete! Sweet dreams! 🌙', 'success');
       }
     } catch (error) {
       console.error('Exception saving reflection:', error);
-      alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving reflection');
+      showToast(language === 'ko' ? '저장 중 오류 발생' : 'Error saving reflection', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -503,6 +507,10 @@ export default function EveningReflection({
             </div>
           </div>
         </>
+      )}
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
     </>
   );
