@@ -60,6 +60,18 @@ Nothing here is optional. A miss on any line means the entry does not count.
 That last point moves the effective deadline: the app has to be live with
 enough slack left to release, wait a day, and confirm purchases work.
 
+### Infrastructure that must not go down
+
+- [ ] **Upgrade Supabase to Pro.** The free tier pauses a project after ~7 days
+      of low activity, and Supabase has already flagged this one as scheduled
+      for pausing. Everything runs on it — auth, dreams, subscriptions — so a
+      pause is a total outage, and the three moments it could land are all
+      unrecoverable: during App Store review (guaranteed rejection), during
+      judging Oct 1–13, or after the first sale, when the RevenueCat webhook
+      would be unable to write the entitlement someone just paid for. Pro also
+      adds daily backups, which an app about to hold real user data needs.
+      **Must be done before the Sep 1 submission at the latest.**
+
 ### Easy to forget, costs money
 
 - [ ] **App Store Small Business Program** — opt-in, not automatic. 30% → 15%.
