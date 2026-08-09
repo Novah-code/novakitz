@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { supportsSpeechRecognition } from '../lib/platform';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
 
@@ -386,6 +387,10 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [egoFreeText, setEgoFreeText] = useState('');
   const [isRecordingScene, setIsRecordingScene] = useState(false);
   const [isRecordingEgo, setIsRecordingEgo] = useState(false);
+
+  // iOS WKWebView has no Web Speech API, so in the Capacitor app these buttons
+  // would render and do nothing. Hide them rather than ship a dead control.
+  const canUseVoice = supportsSpeechRecognition();
   const sceneRecognitionRef = useRef<any>(null);
   const egoRecognitionRef = useRef<any>(null);
 
@@ -960,6 +965,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               onFocus={e => { e.target.style.borderColor = '#7AB382'; }}
               onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.9)'; }}
             />
+            {canUseVoice && (
             <button
               type="button"
               onClick={() => {
@@ -987,6 +993,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 </svg>
               )}
             </button>
+            )}
           </div>
 
           <button
@@ -1144,6 +1151,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               rows={4}
               style={{ width: '100%', borderRadius: 14, border: '1.5px solid rgba(122,179,130,0.3)', background: 'rgba(255,255,255,0.7)', padding: '14px 16px', paddingBottom: '44px', fontSize: 14, lineHeight: 1.7, color: '#4A5D4E', resize: 'none', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
             />
+            {canUseVoice && (
             <button
               type="button"
               onClick={() => {
@@ -1171,6 +1179,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 </svg>
               )}
             </button>
+            )}
           </div>
           <button
             onClick={handleFinishEgo}

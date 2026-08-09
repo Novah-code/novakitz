@@ -2,6 +2,7 @@
 
 import { Capacitor } from '@capacitor/core';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
+import { isNative } from './platform';
 
 /**
  * RevenueCat access, guarded so the web build never touches the native SDK.
@@ -23,9 +24,7 @@ export const PACKAGE_IDS = {
 
 export type PlanId = keyof typeof PACKAGE_IDS;
 
-export function isNative(): boolean {
-  return Capacitor.isNativePlatform();
-}
+export { isNative };
 
 function apiKey(): string | undefined {
   return Capacitor.getPlatform() === 'ios'

@@ -128,7 +128,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   userScalable: false,
   themeColor: "#e5f4e6",
-  colorScheme: "light"
+  colorScheme: "light",
+  // Lets the page extend under the notch and home indicator, which the
+  // full-bleed home screen needs. Without it iOS reports every
+  // env(safe-area-inset-*) as 0, so the insets used below do nothing.
+  viewportFit: "cover"
 };
 
 export default function RootLayout({

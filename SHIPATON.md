@@ -225,6 +225,36 @@ Waiting on:
 2. Day artwork → `public/scenes/scene-day.png` (see that folder's README)
 3. Night artwork, app icon
 
+### First iOS build
+
+Once Xcode has finished installing:
+
+```bash
+xcode-select --install        # command line tools
+sudo gem install cocoapods    # Capacitor iOS depends on it
+
+git pull && npm install
+npx cap add ios               # one time — generates ios/
+npm run ios                   # build → sync → Info.plist → open Xcode
+```
+
+`npm run ios` runs `scripts/prepare-ios.sh`, which writes the Info.plist usage
+strings. Re-running `cap add ios` regenerates that file, so never edit it by
+hand — add keys to the script instead.
+
+In Xcode, before the first run:
+
+| Where | What |
+| --- | --- |
+| Signing & Capabilities | Tick **Automatically manage signing**, pick the team |
+| Signing & Capabilities | Bundle Identifier reads `com.novakitz.app` |
+| General → Minimum Deployments | iOS 14 or later (Capacitor 8's floor) |
+| App icon | `App/Assets.xcassets/AppIcon` — 1024×1024, **no alpha channel** |
+
+`NEXT_PUBLIC_REVENUECAT_IOS_KEY` has to be in `.env.local` **on the Mac** before
+`npm run ios`: the key is inlined into the bundle at build time, so setting it
+only in Vercel leaves the app without it.
+
 ### Values the code expects
 
 | Thing | Value | Defined in |

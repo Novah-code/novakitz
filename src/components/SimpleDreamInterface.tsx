@@ -16,6 +16,7 @@ import HomeScene from './HomeScene';
 import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
+import { supportsSpeechRecognition } from '../lib/platform';
 import ConfirmDialog from './ConfirmDialog';
 
 // Lazy load heavy components that are not needed on initial render
@@ -250,6 +251,10 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [isRecording, setIsRecording] = useState(false);
+  // iOS WKWebView has no Web Speech API, so in the Capacitor app the voice
+  // controls would render and do nothing. Hide them rather than ship a dead
+  // control that a reviewer might tap.
+  const canUseVoice = supportsSpeechRecognition();
   const [showVoiceGuide, setShowVoiceGuide] = useState(false);
   const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -4112,6 +4117,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       style={{ paddingBottom: '44px' }}
                     />
                     {/* Voice recording button */}
+                    {canUseVoice && (
                     <button
                       type="button"
                       onClick={() => {
@@ -4151,6 +4157,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         </svg>
                       )}
                     </button>
+                    )}
                   </div>
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
                     {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? t.charactersReady : ''}
@@ -5508,7 +5515,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         </main>
 
         {/* Voice Guide Popup */}
-        {showVoiceGuide && (
+        {showVoiceGuide && canUseVoice && (
           <div className="modal-overlay" onClick={() => setShowVoiceGuide(false)}>
             <div className="modal-content voice-guide-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">

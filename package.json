@@ -11,7 +11,8 @@
     "prebuild": "bash scripts/security-check.sh",
     "build:app": "bash scripts/build-app.sh",
     "sync:app": "npm run build:app && npx cap sync",
-    "ios": "npm run sync:app && npx cap open ios",
+    "prepare:ios": "bash scripts/prepare-ios.sh",
+    "ios": "npm run sync:app && npm run prepare:ios && npx cap open ios",
     "android": "npm run sync:app && npx cap open android"
   },
   "dependencies": {
