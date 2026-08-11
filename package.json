@@ -16,6 +16,7 @@
     "android": "npm run sync:app && npx cap open android"
   },
   "dependencies": {
+    "@capacitor-community/apple-sign-in": "^7.1.0",
     "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor/android": "^8.5.0",
     "@capacitor/core": "^8.5.0",
