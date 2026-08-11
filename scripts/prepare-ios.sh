@@ -35,4 +35,12 @@ echo "==> Writing Info.plist usage strings"
 set_string NSPhotoLibraryUsageDescription \
   "Novakitz uses your photo library so you can set a profile picture and attach images to your dream entries."
 
+# Both are required to dictate a dream: iOS refuses to start recognition without
+# them and terminates the app if the microphone opens with either missing.
+set_string NSMicrophoneUsageDescription \
+  "Novakitz uses the microphone so you can speak a dream instead of typing it."
+
+set_string NSSpeechRecognitionUsageDescription \
+  "Novakitz converts your spoken dream into text so you can save it. The recording is transcribed on your device and is never uploaded."
+
 echo "==> Info.plist ready"

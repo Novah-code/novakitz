@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { supportsSpeechRecognition } from '../lib/platform';
+import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
 
@@ -388,40 +388,26 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [isRecordingScene, setIsRecordingScene] = useState(false);
   const [isRecordingEgo, setIsRecordingEgo] = useState(false);
 
-  // iOS WKWebView has no Web Speech API, so in the Capacitor app these buttons
-  // would render and do nothing. Hide them rather than ship a dead control.
-  const canUseVoice = supportsSpeechRecognition();
-  const sceneRecognitionRef = useRef<any>(null);
-  const egoRecognitionRef = useRef<any>(null);
+  const canUseVoice = speechSupported();
+  const sceneRecognitionRef = useRef<SpeechSession | null>(null);
+  const egoRecognitionRef = useRef<SpeechSession | null>(null);
 
-  const startSceneVoice = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return alert(language === 'ko' ? '이 브라우저는 음성 인식을 지원하지 않습니다.' : 'Voice recognition not supported in this browser.');
-    const r = new SR();
-    r.continuous = false;
-    r.interimResults = false;
-    r.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-    r.onresult = (e: any) => { setSceneText(e.results[0][0].transcript); setIsRecordingScene(false); };
-    r.onerror = () => setIsRecordingScene(false);
-    r.onend = () => setIsRecordingScene(false);
-    sceneRecognitionRef.current = r;
+  const startSceneVoice = async () => {
     setIsRecordingScene(true);
-    r.start();
+    sceneRecognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setSceneText(text),
+      onEnd: () => setIsRecordingScene(false),
+    });
   };
 
-  const startEgoVoice = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return alert(language === 'ko' ? '이 브라우저는 음성 인식을 지원하지 않습니다.' : 'Voice recognition not supported in this browser.');
-    const r = new SR();
-    r.continuous = false;
-    r.interimResults = false;
-    r.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-    r.onresult = (e: any) => { setEgoFreeText(e.results[0][0].transcript); setIsRecordingEgo(false); };
-    r.onerror = () => setIsRecordingEgo(false);
-    r.onend = () => setIsRecordingEgo(false);
-    egoRecognitionRef.current = r;
+  const startEgoVoice = async () => {
     setIsRecordingEgo(true);
-    r.start();
+    egoRecognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setEgoFreeText(text),
+      onEnd: () => setIsRecordingEgo(false),
+    });
   };
 
   useEffect(() => {
@@ -969,7 +955,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             <button
               type="button"
               onClick={() => {
-                if (isRecordingScene) { sceneRecognitionRef.current?.abort(); setIsRecordingScene(false); }
+                if (isRecordingScene) { sceneRecognitionRef.current?.stop(); }
                 else startSceneVoice();
               }}
               style={{
@@ -1155,7 +1141,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             <button
               type="button"
               onClick={() => {
-                if (isRecordingEgo) { egoRecognitionRef.current?.abort(); setIsRecordingEgo(false); }
+                if (isRecordingEgo) { egoRecognitionRef.current?.stop(); }
                 else startEgoVoice();
               }}
               style={{

@@ -16,7 +16,7 @@ import HomeScene from './HomeScene';
 import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
-import { supportsSpeechRecognition } from '../lib/platform';
+import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
 
 // Lazy load heavy components that are not needed on initial render
@@ -254,7 +254,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   // iOS WKWebView has no Web Speech API, so in the Capacitor app the voice
   // controls would render and do nothing. Hide them rather than ship a dead
   // control that a reviewer might tap.
-  const canUseVoice = supportsSpeechRecognition();
+  const canUseVoice = speechSupported();
   const [showVoiceGuide, setShowVoiceGuide] = useState(false);
   const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -301,7 +301,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [dreamRefreshTrigger, setDreamRefreshTrigger] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const smokeTurbulenceRef = useRef<SVGFETurbulenceElement | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechSession | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const emotionList = [
@@ -725,35 +725,6 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
   }, []);
 
-  // Initialize speech recognition
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-        
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setDreamText(transcript);
-          setIsRecording(false);
-        };
-        
-        recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
-          setIsRecording(false);
-        };
-        
-        recognition.onend = () => {
-          setIsRecording(false);
-        };
-        
-        recognitionRef.current = recognition;
-      }
-    }
-  }, [language]);
 
   // Preload matcha images
   useEffect(() => {
@@ -1192,14 +1163,14 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setShowQuickArchetypeQuiz(false);
   };
 
-  const startVoiceRecording = () => {
-    if (recognitionRef.current) {
-      setIsRecording(true);
-      setShowInput(true);
-      recognitionRef.current.start();
-    } else {
-      alert('Voice recognition is not supported in this browser.');
-    }
+  const startVoiceRecording = async () => {
+    setIsRecording(true);
+    setShowInput(true);
+    recognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setDreamText(text),
+      onEnd: () => setIsRecording(false),
+    });
   };
 
   const handleOrbMouseDown = () => {
@@ -1218,10 +1189,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       setShowEmotionModal(true);
     } else if (isRecording) {
       // User released during active voice recording - stop it
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-      setIsRecording(false);
+      recognitionRef.current?.stop();
     }
   };
 
@@ -1231,9 +1199,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       longPressTimerRef.current = null;
     }
     // Also cancel any active voice recording if user leaves
-    if (isRecording && recognitionRef.current) {
-      recognitionRef.current.abort();
-      setIsRecording(false);
+    if (isRecording) {
+      recognitionRef.current?.stop();
     }
   };
 
@@ -4122,7 +4089,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       type="button"
                       onClick={() => {
                         if (isRecording) {
-                          recognitionRef.current?.abort();
+                          recognitionRef.current?.stop();
                           setIsRecording(false);
                         } else {
                           startVoiceRecording();
