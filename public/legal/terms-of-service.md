@@ -218,8 +218,8 @@ Our failure to enforce any right or provision of these Terms will not be conside
 ## 22. Contact Information
 
 For questions about these Terms, please contact us at:
-- Email: contact@novakitz.shop
-- Website: www.novakitz.shop
+- Email: contact@novakitz.com
+- Website: www.novakitz.com
 
 ## 23. Language
 
@@ -447,8 +447,8 @@ Novakitz는 대한민국에서 운영됩니다.
 ## 22. 연락처 정보
 
 본 약관에 대한 질문이 있으시면 다음으로 연락해 주십시오:
-- 이메일: contact@novakitz.shop
-- 웹사이트: www.novakitz.shop
+- 이메일: contact@novakitz.com
+- 웹사이트: www.novakitz.com
 
 ## 23. 언어
 

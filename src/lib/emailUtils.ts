@@ -71,7 +71,7 @@ export function generateDynamicSubject(
 
 // Generate unsubscribe link
 export function getUnsubscribeLink(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://novakitz.shop';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://novakitz.com';
   return `${baseUrl}/unsubscribe`;
 }
 

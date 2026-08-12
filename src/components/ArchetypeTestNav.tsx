@@ -226,7 +226,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
                     <circle cx="17.5" cy="6.5" r="1.5"></circle>
                   </svg>
                 </a>
-                <a href="mailto:contact@novakitz.shop"
+                <a href="mailto:contact@novakitz.com"
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(127,176,105,0.1)', color: '#7fb069', textDecoration: 'none' }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="2" y="4" width="20" height="16" rx="2"></rect>

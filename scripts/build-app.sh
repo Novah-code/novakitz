@@ -17,7 +17,7 @@ OUT="$ROOT/.appbuild"
 
 # Where the packaged app sends its /api/* calls. Override to point a debug
 # build at a preview deployment or a local `next dev`.
-: "${NEXT_PUBLIC_API_BASE:=https://www.novakitz.shop}"
+: "${NEXT_PUBLIC_API_BASE:=https://www.novakitz.com}"
 export NEXT_PUBLIC_API_BASE
 export BUILD_TARGET=app
 

@@ -28,7 +28,7 @@ export default function Footer() {
                 <h4>Connect</h4>
                 <a href="https://twitter.com/novadream_ai" target="_blank">Twitter</a>
                 <a href="https://instagram.com/novadream.ai" target="_blank">Instagram</a>
-                <a href="mailto:contact@novakitz.shop">Contact</a>
+                <a href="mailto:contact@novakitz.com">Contact</a>
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Novakitz Pricing - Premium Inner Journal Plans",
     description: "Unlock AI-powered dream analysis with Novakitz Premium. Start free or go lifetime!",
-    url: "https://www.novakitz.shop/pricing",
+    url: "https://www.novakitz.com/pricing",
     images: [
       {
         url: "/og-image.png",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     images: ["/og-image.png"],
   },
   alternates: {
-    canonical: "https://www.novakitz.shop/pricing",
+    canonical: "https://www.novakitz.com/pricing",
   },
 };
 

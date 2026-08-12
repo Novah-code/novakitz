@@ -274,6 +274,6 @@ only in Vercel leaves the app without it.
 | Bundle ID | `com.novakitz.app` | `capacitor.config.ts` |
 | Entitlement | `premium` | `src/lib/revenuecat.ts` |
 | Packages | `$rc_monthly`, `$rc_annual`, `$rc_lifetime` | `src/lib/revenuecat.ts` |
-| Webhook URL | `https://www.novakitz.shop/api/revenuecat-webhook` | — |
+| Webhook URL | `https://www.novakitz.com/api/revenuecat-webhook` | — |
 | `REVENUECAT_WEBHOOK_SECRET` | Vercel env — server-side | webhook route |
 | `NEXT_PUBLIC_REVENUECAT_IOS_KEY` | **Mac `.env.local`** — baked into the app bundle at build, so Vercel alone is not enough | `src/lib/revenuecat.ts` |
