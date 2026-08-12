@@ -1626,8 +1626,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         const canAnalyze = await canAnalyzeDream(user.id);
         if (!canAnalyze.allowed) {
           const limitMessage = language === 'ko'
-            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). 프리미엄으로 업그레이드하면 무제한 해석이 가능합니다.`
-            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Premium for unlimited interpretations.`;
+            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). Pro로 업그레이드하면 무제한 해석이 가능합니다.`
+            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Pro for unlimited interpretations.`;
 
           setDreamResponse(limitMessage);
           // Still save the dream without analysis

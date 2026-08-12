@@ -660,7 +660,7 @@ export default function ArchetypeResult() {
           </div>
           {/* End of Blurred Content Wrapper */}
 
-          {/* Premium Upselling */}
+          {/* Pro Upselling */}
           <div style={{
             background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
             borderRadius: '16px',
@@ -711,7 +711,7 @@ export default function ArchetypeResult() {
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
               }}
             >
-              {language === 'ko' ? 'Novakitz Premium 알아보기' : 'Learn About Novakitz Premium'}
+              {language === 'ko' ? 'Novakitz Pro 알아보기' : 'Learn About Novakitz Pro'}
             </button>
           </div>
 

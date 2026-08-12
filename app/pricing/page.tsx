@@ -83,7 +83,7 @@ export default function PricingPage() {
 
   const ko = language === 'ko';
 
-  const handleBuy = async (plan: 'lifetime' | 'premium' | 'yearly') => {
+  const handleBuy = async (plan: 'premium' | 'yearly') => {
     const { changed, message } = await startCheckout(plan, language);
     if (message) setToast({ message, type: changed ? 'success' : 'info' });
   };
@@ -105,31 +105,19 @@ export default function PricingPage() {
   ];
 
   const yearlyFeatures = ko ? [
-    'Premium의 모든 기능 포함',
+    'Pro의 모든 기능 포함',
     '연간 결제로 30% 절약',
     '무제한 꿈 & 감정 기반 무의식 분석',
     '무제한 꿈 기록 및 전체 히스토리',
     '맞춤 확언 제공',
     '월간 드림 리뷰 & 아키타입 타임라인',
   ] : [
-    'Everything in Premium',
+    'Everything in Pro',
     'Save 30% with annual billing',
     'Unlimited dream & emotion-based unconscious analysis',
     'Unlimited dreams & full history',
     'Personalized affirmations',
     'Monthly dream review & archetype timeline',
-  ];
-
-  const lifetimeFeatures = ko ? [
-    'Premium의 모든 기능',
-    '꿈과 감정 기반 무의식 분석 평생 무제한',
-    '모든 미래 기능 평생 무료',
-    'Product Hunt 론칭 특가',
-  ] : [
-    'All Premium features',
-    'Lifetime unlimited dream & emotion analysis',
-    'All future features free forever',
-    'Product Hunt launch special',
   ];
 
   const whyCards = [
@@ -199,9 +187,8 @@ export default function PricingPage() {
     {
       title: '구독 및 결제',
       items: [
-        { q: 'Lifetime 이용권은 정말 평생인가요?', a: '네, 단 한 번 결제로 Novakitz 서비스가 종료되지 않는 한 평생 Premium 기능을 사용하실 수 있습니다. 모든 미래 기능 업데이트도 무료로 제공됩니다.' },
-        { q: '환불이 가능한가요?', a: 'Lifetime 이용권은 즉시 라이선스 키가 발급되는 디지털 상품으로 환불이 불가능합니다. 먼저 무료 플랜(월 7회 AI 해석)으로 서비스를 충분히 체험해보신 후 구매를 결정해주세요.' },
-        { q: 'Premium 월 구독은 언제든 취소 가능한가요?', a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Premium 기능을 계속 사용하실 수 있습니다.' },
+        { q: '환불이 가능한가요?', a: '인앱 결제 환불은 App Store 정책에 따라 처리됩니다. 먼저 무료 플랜(월 7회 AI 해석)으로 충분히 체험해보신 후 구매를 결정해주세요.' },
+        { q: 'Pro 월 구독은 언제든 취소 가능한가요?', a: '네, 언제든지 구독을 취소하실 수 있습니다. 취소 후에도 다음 결제일까지는 Pro 기능을 계속 사용하실 수 있습니다.' },
         { q: '결제는 어떻게 하나요?', a: '앱스토어 / 구글플레이 인앱 결제로 안전하게 진행됩니다. 구독 관리와 해지도 스토어 설정에서 하실 수 있습니다.' },
       ],
     },
@@ -223,9 +210,8 @@ export default function PricingPage() {
     {
       title: 'Subscription & Payment',
       items: [
-        { q: 'Is the Lifetime plan really forever?', a: 'Yes, with a single payment you can use Premium features for as long as Novakitz exists. All future feature updates are included for free.' },
         { q: 'Can I get a refund?', a: 'Refunds for in-app purchases are handled by the App Store or Google Play under their refund policies. Please try the Free plan (7 AI interpretations/month) first to make sure Novakitz works for you.' },
-        { q: 'Can I cancel the Premium monthly subscription anytime?', a: 'Yes, you can cancel anytime. After cancellation, you can continue using Premium features until the next billing date.' },
+        { q: 'Can I cancel the Pro monthly subscription anytime?', a: 'Yes, you can cancel anytime. After cancellation, you can continue using Pro features until the next billing date.' },
         { q: 'How do I pay?', a: 'Payments are handled by the App Store or Google Play as a secure in-app purchase. You can manage or cancel anytime in your store subscription settings.' },
       ],
     },
@@ -283,9 +269,9 @@ export default function PricingPage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24, alignItems: 'stretch' }}>
 
-            {/* Premium */}
+            {/* Pro */}
             <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Premium</h3>
+              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Pro</h3>
               <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
@@ -308,7 +294,7 @@ export default function PricingPage() {
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(122,179,130,0.12)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.4)'; }}
               >
-                {ko ? 'Premium 시작하기' : 'Start Premium'}
+                {ko ? 'Pro 시작하기' : 'Start Pro'}
               </button>
             </div>
 
@@ -349,55 +335,6 @@ export default function PricingPage() {
               </button>
             </div>
 
-            {/* Lifetime */}
-            <div style={{ ...panel, background: 'linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(217,210,233,0.3) 100%)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: 'white', letterSpacing: 1, borderRadius: '12px 24px 12px 24px', background: G.gold, boxShadow: '0 4px 10px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}>
-                LIMITED 50 SPOTS
-              </div>
-              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Lifetime</h3>
-              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 20px' }}>{ko ? '평생 이용권' : 'Lifetime access'}</p>
-
-              {/* Tier box */}
-              <div style={{ background: 'rgba(255,255,255,0.6)', borderRadius: 16, padding: 16, marginBottom: 14, border: '1px solid rgba(255,255,255,0.9)' }}>
-                {[
-                  { label: ko ? '슈퍼 얼리버드' : 'Super Early Bird', price: '$99', badge: 'SOLD OUT', badgeBg: G.textLight, dim: true },
-                  { label: ko ? '얼리 빌리버' : 'Early Believer', price: '$129', badge: 'NOW', badgeBg: G.gold, dim: false },
-                  { label: ko ? '스탠다드' : 'Standard', price: '$159', badge: 'NEXT', badgeBg: G.textLight, dim: true },
-                ].map((tier, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', opacity: tier.dim ? 0.45 : 1, textDecoration: tier.dim && i === 0 ? 'line-through' : 'none', fontSize: 13, borderBottom: i < 2 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
-                    <span style={{ color: i === 1 ? G.green : G.textBase, fontWeight: i === 1 ? 700 : 400 }}>{tier.label}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ ...M, fontSize: 9, padding: '2px 6px', borderRadius: 6, background: tier.badgeBg, color: 'white' }}>{tier.badge}</span>
-                      <span style={{ fontWeight: i === 1 ? 700 : 400, fontSize: i === 1 ? 16 : 13 }}>{tier.price}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <p style={{ fontSize: 12, color: G.green, fontWeight: 700, textAlign: 'center', margin: '0 0 24px' }}>
-                {ko ? '평생 $5.99/월 절약' : 'Save $5.99/month forever'}
-              </p>
-
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
-                {lifetimeFeatures.map((f, i) => (
-                  <li key={i} style={{ fontSize: 14, color: G.textDark, fontWeight: i === 0 ? 700 : 400, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
-                    <Check color={G.gold} />{f}
-                  </li>
-                ))}
-              </ul>
-
-              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
-                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
-              </p>
-              <button
-                onClick={() => handleBuy('lifetime')}
-                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: G.textDark, border: `1px solid ${G.textDark}`, color: 'white', boxShadow: '0 6px 15px rgba(58,74,62,0.3)', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
-              >
-                {ko ? 'Lifetime 시작하기' : 'Start Lifetime'}
-              </button>
-            </div>
           </div>
         </div>
 

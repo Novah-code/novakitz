@@ -140,7 +140,7 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
             <div className="upgrade-prompt">
               <p>Need more interpretations?</p>
               <a href="/pricing" rel="noopener noreferrer">
-                Upgrade to Premium →
+                Upgrade to Pro →
               </a>
             </div>
           )}

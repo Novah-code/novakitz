@@ -15,15 +15,15 @@ Novakitz helps users record dreams, get AI-powered Jungian analysis, discover th
 - Archetype test: included
 - Tarot reading: included (limited)
 
-### Premium Plan (프리미엄) — $49.99/year or $5.99/month
+### Pro Plan — $49.99/year or $5.99/month
 - AI dream interpretations: 200 per month (거의 무제한)
 - Dream recording: unlimited
 - Full dream history (no limit)
 - All features fully unlocked
 - Priority AI analysis
 
-### How to Subscribe (Premium)
-- Premium is purchased in the app (App Store / Google Play in-app purchase)
+### How to Subscribe (Pro)
+- Pro is purchased in the app (App Store / Google Play in-app purchase)
 - Monthly and yearly plans are shown on the Pricing page
 - Purchases restore automatically when signing in on a new device
 

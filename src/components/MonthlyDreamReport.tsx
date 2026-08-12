@@ -461,7 +461,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
             <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, #dbece0)' }} />
             <span style={{ fontSize: 9, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>
-              {language === 'ko' ? '프리미엄 인사이트' : 'Premium Insights'}
+              {language === 'ko' ? 'Pro 인사이트' : 'Pro Insights'}
             </span>
             <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, #dbece0)' }} />
           </div>
@@ -533,7 +533,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                         <IconKey size={13} color="#7ea886" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
                       </div>
                     </div>
                   )}
@@ -577,7 +577,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
                       <IconKey size={13} color="#7ea886" />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
                     </div>
                   </div>
                 )}
@@ -606,7 +606,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ background: 'rgba(61,96,68,0.7)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.2)' }}>
                         <IconKey size={13} color="#e8ce90" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90' }}>{language === 'ko' ? '프리미엄 전용' : 'Premium only'}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
                       </div>
                     </div>
                   )}
@@ -619,7 +619,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
               <div style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 20, padding: '24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                 <div style={{ marginBottom: 10, color: '#7ea886', display: 'flex', justifyContent: 'center' }}><IconSparkles size={24} color="#7ea886" /></div>
                 <h3 style={{ fontSize: 15, fontWeight: 800, color: '#3d6044', marginBottom: 6 }}>
-                  {language === 'ko' ? '프리미엄으로 잠금 해제' : 'Unlock with Premium'}
+                  {language === 'ko' ? 'Pro로 잠금 해제' : 'Unlock with Pro'}
                 </h3>
                 <p style={{ fontSize: 12, color: '#8ca693', lineHeight: 1.6, marginBottom: 16, maxWidth: 260, margin: '0 auto 16px' }}>
                   {language === 'ko'
@@ -627,7 +627,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                     : 'Access AI analysis, archetype discovery, and your personalized next-month guide'}
                 </p>
                 <button onClick={() => window.location.href = '/pricing'} style={{ padding: '12px 28px', background: '#7ea886', color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(126,168,134,0.35)' }}>
-                  {language === 'ko' ? '프리미엄 시작하기' : 'Unlock Premium'}
+                  {language === 'ko' ? 'Pro 시작하기' : 'Unlock Pro'}
                 </button>
               </div>
             )}

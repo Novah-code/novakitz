@@ -11,16 +11,16 @@ import '../styles/subscription-manager.css';
 const translations = {
   en: {
     planStatus: 'Plan Status',
-    upgradeToP: 'Upgrade to Premium',
+    upgradeToP: 'Upgrade to Pro',
     perMonth: '/month',
     unlimitedRecording: 'Unlimited dream recording, but limited AI interpretations',
     unlimitedBoth: 'Unlimited dream recording and AI interpretations',
     aiInterpretations: 'AI Interpretations This Month',
     unlimited: 'Unlimited',
-    reachedLimit: "You've reached your monthly limit. Upgrade to Premium for unlimited interpretations.",
+    reachedLimit: "You've reached your monthly limit. Upgrade to Pro for unlimited interpretations.",
     freePlanTitle: 'Free Plan Includes:',
-    premiumPlanTitle: 'Premium Plan Includes:',
-    upgradeToPremium: 'Upgrade to Premium',
+    premiumPlanTitle: 'Pro Plan Includes:',
+    upgradeToPremium: 'Upgrade to Pro',
     pricingNote: 'Note: Pricing may increase to $9.99/month in the near future. Lock in the current rate by subscribing now.',
     expires: 'Expires:',
     never: 'Never',
@@ -34,16 +34,16 @@ const translations = {
   },
   ko: {
     planStatus: '플랜 상태',
-    upgradeToP: '프리미엄 업그레이드',
+    upgradeToP: 'Pro 업그레이드',
     perMonth: '/월',
     unlimitedRecording: '무제한 꿈 기록, 제한된 AI 해석',
     unlimitedBoth: '무제한 꿈 기록 및 AI 해석',
     aiInterpretations: '이 달의 AI 해석',
     unlimited: '무제한',
-    reachedLimit: '월간 한도에 도달했습니다. 무제한 해석을 위해 프리미엄으로 업그레이드하세요.',
+    reachedLimit: '월간 한도에 도달했습니다. 무제한 해석을 위해 Pro로 업그레이드하세요.',
     freePlanTitle: '무료 플랜 포함:',
-    premiumPlanTitle: '프리미엄 플랜 포함:',
-    upgradeToPremium: '프리미엄 업그레이드',
+    premiumPlanTitle: 'Pro 플랜 포함:',
+    upgradeToPremium: 'Pro 업그레이드',
     pricingNote: '참고: 가격이 가까운 미래에 $9.99/월로 인상될 수 있습니다. 현재 요금으로 고정하려면 지금 구독하세요.',
     expires: '만료:',
     never: '무제한',
@@ -214,7 +214,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
               className="plan-badge"
               style={{ backgroundColor: getPlanBadgeColor(subscription.planSlug, isLifetimePlan) }}
             >
-              {isLifetimePlan ? '💎 Lifetime' : subscription.planSlug === 'premium' ? '👑 Premium' : subscription.planName}
+              {isLifetimePlan ? '💎 Lifetime' : subscription.planSlug === 'premium' ? '👑 Pro' : subscription.planName}
             </span>
             {subscription.planSlug === 'premium' && subscription.isActive && (
               <span className="active-indicator">Active</span>
@@ -279,7 +279,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
 
         {aiUsage.used >= aiUsage.limit && aiUsage.limit !== -1 && (
           <div className="limit-reached-message">
-            You've reached your monthly limit. Upgrade to Premium for unlimited interpretations.
+            You've reached your monthly limit. Upgrade to Pro for unlimited interpretations.
           </div>
         )}
       </div>
@@ -301,7 +301,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
 
           {subscription.planSlug === 'premium' && (
             <div className="plan-limits">
-              <h5>Premium Plan Includes:</h5>
+              <h5>Pro Plan Includes:</h5>
               <ul>
                 <li>📝 Unlimited dream recording</li>
                 <li>🤖 Unlimited AI interpretations</li>
@@ -315,7 +315,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
 
           {subscription.planSlug === 'free' && (
             <div className="upgrade-section">
-              <h5>Upgrade to Premium</h5>
+              <h5>Upgrade to Pro</h5>
               <p className="upgrade-price">$4.99 / month</p>
               <p className="upgrade-description">
                 Unlock unlimited AI dream interpretations and full history access
@@ -330,7 +330,7 @@ export default function SubscriptionManager({ user, language = 'en' }: Subscript
                 className="upgrade-button"
                 style={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                Upgrade to Premium
+                Upgrade to Pro
               </button>
 
             </div>
