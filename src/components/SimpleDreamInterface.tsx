@@ -2041,8 +2041,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         .nova-logo {
           position: fixed;
-          top: 20px;
-          left: 20px;
+          top: calc(env(safe-area-inset-top, 0px) + 12px);
+          left: calc(env(safe-area-inset-left, 0px) + 20px);
           width: 50px;
           height: 50px;
           z-index: 1000;
@@ -3826,8 +3826,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         /* Mobile responsive styles */
         @media (max-width: 768px) {
           .nova-logo {
-            top: 15px;
-            left: 15px;
+            top: calc(env(safe-area-inset-top, 0px) + 10px);
+            left: calc(env(safe-area-inset-left, 0px) + 15px);
             width: 45px;
             height: 45px;
             border-radius: 14px;

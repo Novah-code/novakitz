@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { isNative } from '../lib/platform';
 
 interface UpdateNotificationProps {}
 
@@ -9,6 +10,9 @@ export default function UpdateNotification({}: UpdateNotificationProps = {}) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
+    // Updates ship through the App Store in the native app.
+    if (isNative()) return;
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'SW_UPDATED') {

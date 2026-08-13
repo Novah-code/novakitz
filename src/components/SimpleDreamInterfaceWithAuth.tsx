@@ -450,8 +450,8 @@ export default function SimpleDreamInterfaceWithAuth() {
         onClick={() => setMenuOpen(!menuOpen)}
         style={{
           position: 'fixed',
-          top: '20px',
-          right: '20px',
+          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 20px)',
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
