@@ -32,13 +32,17 @@ Nothing here is optional. A miss on any line means the entry does not count.
 
 ### Apple prerequisites — no store release without these
 
-- [ ] Apple Developer Program (Individual)
-- [ ] **Paid Apps agreement** — gates subscription product creation
-- [ ] **W-8BEN** — filed through App Store Connect, Part II claims treaty benefits
-- [ ] Banking details
-- [ ] App Store Connect app record + subscription products
-- [ ] **App Privacy** data-collection disclosure — dreams and email are collected
-- [ ] Privacy policy URL — `app/legal/privacy` exists ✅
+- [x] Apple Developer Program (Individual) *(2026-08-11)*
+- [x] **Paid Apps agreement** — Active
+- [x] **W-8BEN** — filed. Part II left blank on purpose: App Store income is
+      business profits, not royalties, so there is no US withholding to treat away
+- [x] Banking details
+- [x] App Store Connect app record — bundle `com.novakitz.app`, English (UK)
+- [ ] **Subscription products** — 2 of them, see §8. Nothing in RevenueCat can be
+      verified until these exist
+- [x] **App Privacy** data-collection disclosure
+- [x] Pricing and Availability — US included, Mac and Vision Pro unticked
+- [x] Privacy policy URL — `app/legal/privacy` exists ✅
 - [x] **Restore Purchases** reachable in-app — required for subscription apps ✅
 - [x] Account deletion — required when accounts can be created ✅
 - [ ] App icon **1024×1024, no alpha channel** — alpha is an automatic rejection
@@ -62,20 +66,25 @@ enough slack left to release, wait a day, and confirm purchases work.
 
 ### Infrastructure that must not go down
 
-- [ ] **Upgrade Supabase to Pro.** The free tier pauses a project after ~7 days
-      of low activity, and Supabase has already flagged this one as scheduled
-      for pausing. Everything runs on it — auth, dreams, subscriptions — so a
-      pause is a total outage, and the three moments it could land are all
-      unrecoverable: during App Store review (guaranteed rejection), during
-      judging Oct 1–13, or after the first sale, when the RevenueCat webhook
-      would be unable to write the entitlement someone just paid for. Pro also
-      adds daily backups, which an app about to hold real user data needs.
-      **Must be done before the Sep 1 submission at the latest.**
+- [x] **Supabase must not auto-pause.** The free tier pauses a project after
+      ~7 days of low activity, and everything runs on it — auth, dreams,
+      subscriptions — so a pause is a total outage. The three moments it could
+      land are all unrecoverable: during App Store review, during judging
+      Oct 1–13, or after the first sale, when the RevenueCat webhook would be
+      unable to write the entitlement someone just paid for.
+
+      Solved for $0 with a daily keepalive rather than a Pro upgrade:
+      `app/api/keepalive/route.ts` plus the `0 6 * * *` cron in `vercel.json`.
+      A Pro upgrade would also buy daily backups; worth revisiting once the app
+      holds real users, but it is not a launch blocker.
 
 ### Easy to forget, costs money
 
-- [ ] **App Store Small Business Program** — opt-in, not automatic. 30% → 15%.
-      Enrol as soon as the developer account is live, before the first sale.
+- [x] **App Store Small Business Program** — enrolled. 30% → 15%.
+- [ ] **EU DSA trader declaration** — deferred. Required to distribute in the EU,
+      and it publishes name and contact details on the listing. Not needed for
+      the US storefront the hackathon is judged on, so it can wait until after
+      launch; revisit before opening EU territories.
 
 ### Only if chasing #BuildInPublic
 
@@ -89,8 +98,9 @@ enough slack left to release, wait a day, and confirm purchases work.
 
 | Date | Milestone |
 | --- | --- |
-| Aug 11 | Apple account active, Paid Apps signed |
-| Aug 17 | First TestFlight build uploaded — ugly is fine; the point is to surface signing and IAP problems while there is time |
+| Aug 11 | ✅ Apple account active, Paid Apps signed |
+| Aug 18 | ✅ App runs on the simulator |
+| Aug 20 | First TestFlight build uploaded — ugly is fine; the point is to surface signing and IAP problems while there is time. *Slipped from Aug 17; the simulator run took its place* |
 | Aug 24 | Sandbox purchase verified on a real device |
 | **Sep 1** | **First App Store submission** — assumes ~2 rejection rounds at 3–7 days each |
 | Sep 22 | Live on the App Store |
@@ -230,25 +240,33 @@ On `claude/revenue-hackathon-pwa-app-r6w9jo`:
 - 🟡 Home landscape scene — structure done, waiting on artwork; night gated
   behind `NIGHT_SCENE_READY`
 
+- ✅ Runs on the iOS simulator, native chrome corrected for the safe area
+
 Waiting on:
 
-1. **Apple Developer enrolment → Paid Apps agreement.** Until signed, no
-   subscription products exist, so none of the RevenueCat work can be verified.
+1. **Subscription products + RevenueCat dashboard wiring.** The code is written
+   but nothing in it has been exercised against a real product yet. This is the
+   critical path — see §8.
 2. Day artwork → `public/scenes/scene-day.png` (see that folder's README)
 3. Night artwork, app icon
+4. Sign in with Apple — required by guideline 4.8 because Google sign-in is
+   offered. Needs an App ID capability, a Service ID, a `.p8` key, and
+   `com.novakitz.app` in Supabase's Authorized Client IDs. Code is in
+   `src/lib/appleAuth.ts` and untested.
 
 ### First iOS build
 
 Once Xcode has finished installing:
 
-```bash
-xcode-select --install        # command line tools
-sudo gem install cocoapods    # Capacitor iOS depends on it
+Done once on 2026-08-18. Day to day it is one command:
 
-git pull && npm install
-npx cap add ios               # one time — generates ios/
+```bash
+git pull origin claude/revenue-hackathon-pwa-app-r6w9jo
 npm run ios                   # build → sync → Info.plist → open Xcode
 ```
+
+`npm run ios` already chains `build:app` and `cap sync`, so running those
+separately is redundant.
 
 `npm run ios` runs `scripts/prepare-ios.sh`, which writes the Info.plist usage
 strings. Re-running `cap add ios` regenerates that file, so never edit it by
@@ -260,7 +278,7 @@ In Xcode, before the first run:
 | --- | --- |
 | Signing & Capabilities | Tick **Automatically manage signing**, pick the team |
 | Signing & Capabilities | Bundle Identifier reads `com.novakitz.app` |
-| General → Minimum Deployments | iOS 14 or later (Capacitor 8's floor) |
+| General → Minimum Deployments | iOS 15 — the lowest Xcode 26 offers |
 | App icon | `App/Assets.xcassets/AppIcon` — 1024×1024, **no alpha channel** |
 
 `NEXT_PUBLIC_REVENUECAT_IOS_KEY` has to be in `.env.local` **on the Mac** before
@@ -273,7 +291,71 @@ only in Vercel leaves the app without it.
 | --- | --- | --- |
 | Bundle ID | `com.novakitz.app` | `capacitor.config.ts` |
 | Entitlement | `premium` | `src/lib/revenuecat.ts` |
-| Packages | `$rc_monthly`, `$rc_annual`, `$rc_lifetime` | `src/lib/revenuecat.ts` |
+| Packages | `$rc_monthly`, `$rc_annual` | `src/lib/revenuecat.ts` |
 | Webhook URL | `https://www.novakitz.com/api/revenuecat-webhook` | — |
 | `REVENUECAT_WEBHOOK_SECRET` | Vercel env — server-side | webhook route |
 | `NEXT_PUBLIC_REVENUECAT_IOS_KEY` | **Mac `.env.local`** — baked into the app bundle at build, so Vercel alone is not enough | `src/lib/revenuecat.ts` |
+
+---
+
+## 8. Subscription setup — the exact values
+
+Everything below has to match across three places: App Store Connect,
+RevenueCat, and `src/lib/revenuecat.ts`. A typo in any one of them shows up as
+"no products available" at runtime with nothing in the logs to explain it.
+
+### App Store Connect → Subscriptions
+
+One subscription group holding both products, so a subscriber moving between
+them upgrades rather than double-pays.
+
+| | |
+| --- | --- |
+| Subscription Group | `Novakitz Pro` |
+| Group display name | Pro |
+
+| Product | Product ID | Duration | Price |
+| --- | --- | --- | --- |
+| Monthly | `novakitz.premium.monthly` | 1 month | $4.99 |
+| Yearly | `novakitz.premium.yearly` | 1 year | $49.99 |
+
+The IDs keep the word `premium` even though the tier is called **Pro**. Product
+IDs are permanent and invisible to users; the entitlement in code is already
+`premium`, and keeping them aligned is worth more than a tidier string. What the
+user sees is the display name, which is Pro everywhere.
+
+Each product also needs a localised display name, a description, and a review
+screenshot before it will leave "Missing Metadata".
+
+### RevenueCat dashboard
+
+| Step | Value |
+| --- | --- |
+| Entitlement | `premium` |
+| Offering | `default`, marked Current |
+| Package → Monthly | `$rc_monthly` → `novakitz.premium.monthly` |
+| Package → Annual | `$rc_annual` → `novakitz.premium.yearly` |
+| App Store Connect API key | needed for RevenueCat to read subscription status |
+| In-App Purchase Key (`.p8`) | required for server notifications |
+| Webhook | `https://www.novakitz.com/api/revenuecat-webhook` |
+
+### Keys, and where each one goes
+
+| Key | Goes to | Why there |
+| --- | --- | --- |
+| `NEXT_PUBLIC_REVENUECAT_IOS_KEY` | **Mac `.env.local`** | Inlined into the bundle at build time. Setting it only in Vercel ships an app with no key |
+| `REVENUECAT_WEBHOOK_SECRET` | **Vercel** | Server-side; authenticates the webhook |
+| `CRON_SECRET` | **Vercel** | Guards the keepalive route |
+
+The public SDK key starts `appl_`. A key starting `test_` is a Test Store key —
+the wrapper refuses to configure with one in a production build, on purpose.
+
+### Verifying it worked
+
+In order, because each step depends on the one before:
+
+1. Products leave "Missing Metadata" in App Store Connect
+2. RevenueCat's Offerings tab shows both packages without a warning triangle
+3. The app's pricing screen lists two real prices rather than falling back
+4. A sandbox purchase on a real device grants `premium`
+5. `user_subscriptions` gains the row — this proves the webhook, not the SDK
