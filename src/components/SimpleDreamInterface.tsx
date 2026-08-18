@@ -4005,16 +4005,16 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         <main className="w-full max-w-xl mx-auto z-10 text-center" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
 
-          {(() => {
-            console.log('SimpleDreamInterface render:', { showInput, showResponse, showHistory });
-            return null;
-          })()}
           {!showInput && !showResponse && !showHistory && (
             <HomeScene
               onPressStart={handleOrbMouseDown}
               onPressEnd={handleOrbMouseUp}
               onPressCancel={handleOrbMouseLeave}
-              label={language === 'ko' ? '꿈 기록하기' : 'Record a dream'}
+              label={
+                language === 'ko'
+                  ? '오늘 기분 고르기. 길게 누르면 꿈 기록'
+                  : 'Check in with today’s mood. Press and hold to record a dream'
+              }
             />
           )}
 
