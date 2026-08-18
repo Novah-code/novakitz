@@ -359,3 +359,41 @@ In order, because each step depends on the one before:
 3. The app's pricing screen lists two real prices rather than falling back
 4. A sandbox purchase on a real device grants `premium`
 5. `user_subscriptions` gains the row — this proves the webhook, not the SDK
+
+---
+
+## 9. After launch — shadow work
+
+Decided in principle, deliberately not built before Sep 30. Recorded here so
+the design work is not lost.
+
+**Why it fits.** The app is already Jungian — the archetype test and the
+archetype journey timeline. Shadow is the concept that is missing rather than
+one that would be bolted on.
+
+**The differentiator.** Every shadow work app and journal on the market hands
+out a fixed list of prompts. Novakitz already holds the raw material a prompt
+would need: months of mood check-ins and the dreams attached to them. A prompt
+grounded in the user's own record — "eleven of the last twenty-one days were
+marked anxious, six of them Mondays" — is something a fixed list cannot do.
+`checkins`, `dreams` and `daily_intentions` already carry this.
+
+**Evening, not morning.** The core loop is five minutes after waking. Shadow
+work is slow, heavy and inward; it belongs beside `evening_reflections`, which
+already exists, and the evening reminder, which already fires.
+
+**Safety is part of the feature, not a wrapper.** It touches shame, repressed
+memory and trauma. An unguarded model asking someone to confront childhood
+material can do real harm to someone in crisis, and Apple reviews mental-health
+functionality more closely than the rest. At minimum: graded intensity that
+starts gentle, an always-available exit, crisis-signal detection routed to
+real resources, and plain language that this is not therapy. This is the part
+that cannot be rushed, and the reason it is not a two-week feature.
+
+**ASO.** "shadow work" carries far more search volume than "dream journal".
+Add it to the keywords field when the feature ships — not before, because
+metadata has to match functionality (guideline 2.3.7). Keywords can be changed
+without an app update.
+
+**Timing.** Judging runs Oct 1–13. An update landing in that window shows a
+live product rather than one abandoned at launch.
