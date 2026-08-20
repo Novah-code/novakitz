@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: "Pricing - Novakitz Pro Plans",
-  description: "Choose your Novakitz plan: Free (7 AI interpretations/month) or Pro. Unlock unlimited dream analysis and Jungian insights.",
+  description: "Choose your Novakitz plan: Free (7 AI interpretations a month) or Pro (200 a month). Morning mood check-ins, dream interpretation, and Jungian insight.",
   keywords: [
     "Novakitz pricing", "inner journal subscription", "AI dream analysis pricing",
     "premium dream interpretation", "lifetime inner journal"

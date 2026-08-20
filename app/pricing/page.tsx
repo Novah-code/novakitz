@@ -89,14 +89,14 @@ export default function PricingPage() {
   };
 
   const premiumFeatures = ko ? [
-    '무제한 꿈 & 감정 기반 무의식 분석',
+    '월 200회 AI 해석 — 꿈과 감정 기반',
     '무제한 꿈 기록 및 전체 히스토리',
     '맞춤 확언 제공',
     '월간 드림 리뷰 & 꿈 패턴 분석',
     '개인 아키타입 여정 타임라인',
     '모든 미래 기능 무료 업데이트',
   ] : [
-    'Unlimited dream & emotion-based unconscious analysis',
+    '200 AI interpretations a month — dreams and moods',
     'Unlimited dreams & full history',
     'Personalized affirmations',
     'Monthly dream review & pattern analysis',
@@ -107,14 +107,14 @@ export default function PricingPage() {
   const yearlyFeatures = ko ? [
     'Pro의 모든 기능 포함',
     '연간 결제로 30% 절약',
-    '무제한 꿈 & 감정 기반 무의식 분석',
+    '월 200회 AI 해석 — 꿈과 감정 기반',
     '무제한 꿈 기록 및 전체 히스토리',
     '맞춤 확언 제공',
     '월간 드림 리뷰 & 아키타입 타임라인',
   ] : [
     'Everything in Pro',
     'Save 30% with annual billing',
-    'Unlimited dream & emotion-based unconscious analysis',
+    '200 AI interpretations a month — dreams and moods',
     'Unlimited dreams & full history',
     'Personalized affirmations',
     'Monthly dream review & archetype timeline',

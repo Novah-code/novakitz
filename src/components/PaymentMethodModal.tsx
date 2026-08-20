@@ -42,10 +42,10 @@ export default function PaymentMethodModal({
       title: 'Choose Your Plan',
       monthly: 'Monthly',
       yearly: 'Yearly',
-      yearlyDiscount: '17% Off',
+      yearlyDiscount: '30% Off',
       subscribe: 'Subscribe Now',
       features: {
-        unlimited: 'Unlimited AI interpretations',
+        unlimited: '200 AI interpretations a month',
         history: 'Full dream history',
         patterns: 'Advanced pattern analysis',
         report: 'Monthly insights report',
@@ -59,10 +59,10 @@ export default function PaymentMethodModal({
       title: '플랜 선택',
       monthly: '월간',
       yearly: '연간',
-      yearlyDiscount: '17% 할인',
+      yearlyDiscount: '30% 할인',
       subscribe: '구독하기',
       features: {
-        unlimited: '무제한 AI 해석',
+        unlimited: '월 200회 AI 해석',
         history: '무제한 꿈 기록',
         patterns: '고급 패턴 분석',
         report: '월간 인사이트 리포트',
@@ -103,7 +103,7 @@ export default function PaymentMethodModal({
                 onClick={() => setBillingCycle('monthly')}
               >
                 <div className="cycle-name">{t.monthly}</div>
-                <div className="cycle-price">$4.99/month</div>
+                <div className="cycle-price">$5.99/month</div>
               </button>
               <button
                 className={`cycle-option ${billingCycle === 'yearly' ? 'active' : ''}`}
@@ -131,7 +131,7 @@ export default function PaymentMethodModal({
               className="payment-submit-btn"
               onClick={handleCheckout}
             >
-              {t.subscribe} - {billingCycle === 'monthly' ? '$4.99/month' : '$49.99/year'}
+              {t.subscribe} - {billingCycle === 'monthly' ? '$5.99/month' : '$49.99/year'}
             </button>
           </div>
         </div>

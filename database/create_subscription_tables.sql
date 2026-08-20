@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
 INSERT INTO public.subscription_plans (plan_name, plan_slug, price_cents, ai_interpretations_per_month, history_days, description)
 VALUES
     ('Free', 'free', NULL, 7, 999999, 'Unlimited dream recording, 7 AI interpretations per month, unlimited history'),
-    ('Premium', 'premium', 499, 999999, 999999, '$4.99/month - Unlimited AI interpretations and full history')
+    ('Premium', 'premium', 599, 200, 999999, '$5.99/month - 200 AI interpretations per month and full history')
 ON CONFLICT (plan_slug) DO NOTHING;
 
 -- 2. User Subscriptions Table
