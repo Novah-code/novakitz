@@ -19,6 +19,7 @@ import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
+import { EMOTIONS, emotionLabel } from '../lib/emotions';
 
 // Lazy load heavy components that are not needed on initial render
 const APIMonitoringDashboard = dynamic(() => import('./APIMonitoringDashboard'), { ssr: false });
@@ -307,16 +308,15 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const recognitionRef = useRef<SpeechSession | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const emotionList = [
-    { label: language === 'ko' ? '불안' : 'Anxious',  color: 'rgba(217,210,233,0.7)', borderRadius: '40% 60% 30% 70% / 60% 40% 70% 30%', moodValue: 2 },
-    { label: language === 'ko' ? '두려움' : 'Fear',   color: 'rgba(205,224,230,0.7)', borderRadius: '50% 50% 60% 60% / 40% 40% 70% 70%', moodValue: 1 },
-    { label: language === 'ko' ? '평온' : 'Peaceful', color: 'rgba(181,218,185,0.7)', borderRadius: '50%', moodValue: 4 },
-    { label: language === 'ko' ? '기쁨' : 'Joyful',  color: 'rgba(253,232,181,0.7)', borderRadius: '45% 55% 45% 55% / 65% 55% 45% 35%', moodValue: 5 },
-    { label: language === 'ko' ? '외로움' : 'Lonely', color: 'rgba(214,221,229,0.7)', borderRadius: '50% 50% 40% 40% / 40% 40% 60% 60%', moodValue: 2 },
-    { label: language === 'ko' ? '희망' : 'Hopeful', color: 'rgba(214,241,208,0.7)', borderRadius: '50% 50% 50% 50% / 70% 70% 40% 40%', moodValue: 4 },
-    { label: language === 'ko' ? '분노' : 'Anger',   color: 'rgba(250,209,196,0.7)', borderRadius: '15px 30px 15px 30px', moodValue: 2 },
-    { label: language === 'ko' ? '무기력' : 'Low',   color: 'rgba(226,232,240,0.7)', borderRadius: '16px', moodValue: 1 },
-  ];
+  // Colours and shapes live in src/lib/emotions.ts so the month calendar fills
+  // a day with the exact pebble that was chosen, rather than a copy that drifts.
+  const emotionList = EMOTIONS.map((e) => ({
+    key: e.key,
+    label: emotionLabel(e, language),
+    color: e.color,
+    borderRadius: e.borderRadius,
+    moodValue: e.moodValue,
+  }));
 
   const handleEmotionSelect = async (idx: number) => {
     const emotion = emotionList[idx];
@@ -341,6 +341,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         check_date: today,
         time_of_day: timeOfDay,
         mood: emotion.moodValue,
+        // mood alone cannot identify the pebble — anxious, lonely and anger all
+        // store 2 — so the key is what the calendar colours a day from.
+        emotion: emotion.key,
         energy_level: 5,
       }]);
       setStreakRefresh((n) => n + 1);
