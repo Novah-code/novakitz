@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { startCheckout } from '../lib/checkout';
+import Toast, { ToastType } from './Toast';
 import '../styles/payment-method-modal.css';
 
 interface PaymentMethodModalProps {
@@ -19,16 +21,20 @@ export default function PaymentMethodModal({
   userEmail
 }: PaymentMethodModalProps) {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
-  const gumroadMonthlyUrl = process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz';
-  const gumroadYearlyUrl = process.env.NEXT_PUBLIC_GUMROAD_YEARLY_URL ||
-    'https://novakitz.gumroad.com/l/novakitz_year';
-
-  const handleGumroadCheckout = () => {
-    const url = billingCycle === 'monthly' ? gumroadMonthlyUrl : gumroadYearlyUrl;
-    window.open(url, '_blank');
-    onClose();
+  const handleCheckout = async () => {
+    const { changed, message } = await startCheckout(
+      billingCycle === 'monthly' ? 'premium' : 'yearly',
+      language
+    );
+    // Keep the modal open on failure so the message has somewhere to show and
+    // the user can retry without reopening it.
+    if (changed) {
+      onClose();
+      return;
+    }
+    if (message) setToast({ message, type: 'error' });
   };
 
   const translations = {
@@ -36,10 +42,10 @@ export default function PaymentMethodModal({
       title: 'Choose Your Plan',
       monthly: 'Monthly',
       yearly: 'Yearly',
-      yearlyDiscount: '17% Off',
+      yearlyDiscount: '30% Off',
       subscribe: 'Subscribe Now',
       features: {
-        unlimited: 'Unlimited AI interpretations',
+        unlimited: '200 AI interpretations a month',
         history: 'Full dream history',
         patterns: 'Advanced pattern analysis',
         report: 'Monthly insights report',
@@ -47,16 +53,16 @@ export default function PaymentMethodModal({
         affirmations: 'Daily affirmations',
         noDreamAffirmations: 'Affirmations from recent dreams on no-dream days'
       },
-      paymentMethod: 'Credit Card, PayPal via Gumroad'
+      paymentMethod: 'Secure in-app purchase'
     },
     ko: {
       title: '플랜 선택',
       monthly: '월간',
       yearly: '연간',
-      yearlyDiscount: '17% 할인',
+      yearlyDiscount: '30% 할인',
       subscribe: '구독하기',
       features: {
-        unlimited: '무제한 AI 해석',
+        unlimited: '월 200회 AI 해석',
         history: '무제한 꿈 기록',
         patterns: '고급 패턴 분석',
         report: '월간 인사이트 리포트',
@@ -64,7 +70,7 @@ export default function PaymentMethodModal({
         affirmations: '일일 확언',
         noDreamAffirmations: '꿈 없는 날 최근 꿈 기반 확언'
       },
-      paymentMethod: '신용카드, PayPal (Gumroad)'
+      paymentMethod: '앱 내 결제'
     }
   };
 
@@ -97,7 +103,7 @@ export default function PaymentMethodModal({
                 onClick={() => setBillingCycle('monthly')}
               >
                 <div className="cycle-name">{t.monthly}</div>
-                <div className="cycle-price">$4.99/month</div>
+                <div className="cycle-price">$5.99/month</div>
               </button>
               <button
                 className={`cycle-option ${billingCycle === 'yearly' ? 'active' : ''}`}
@@ -123,13 +129,17 @@ export default function PaymentMethodModal({
             {/* Subscribe Button */}
             <button
               className="payment-submit-btn"
-              onClick={handleGumroadCheckout}
+              onClick={handleCheckout}
             >
-              {t.subscribe} - {billingCycle === 'monthly' ? '$4.99/month' : '$49.99/year'}
+              {t.subscribe} - {billingCycle === 'monthly' ? '$5.99/month' : '$49.99/year'}
             </button>
           </div>
         </div>
       </div>
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
     </div>
   );
 }

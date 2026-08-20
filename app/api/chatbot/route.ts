@@ -15,18 +15,17 @@ Novakitz helps users record dreams, get AI-powered Jungian analysis, discover th
 - Archetype test: included
 - Tarot reading: included (limited)
 
-### Premium Plan (프리미엄) — $49.99/year or $5.99/month
+### Pro Plan — $49.99/year or $5.99/month
 - AI dream interpretations: 200 per month (거의 무제한)
 - Dream recording: unlimited
 - Full dream history (no limit)
 - All features fully unlocked
 - Priority AI analysis
 
-### How to Subscribe (Premium)
-- Payment via Gumroad (secure checkout)
-- Monthly plan ($5.99/mo): https://novakitz.gumroad.com/l/novakitz
-- Yearly plan ($49.99/yr): https://novakitz.gumroad.com/l/novakitz_year
-- After purchase, enter your license key in Settings → Subscription to activate
+### How to Subscribe (Pro)
+- Pro is purchased in the app (App Store / Google Play in-app purchase)
+- Monthly and yearly plans are shown on the Pricing page
+- Purchases restore automatically when signing in on a new device
 
 ## FAQ
 
@@ -39,9 +38,6 @@ A: Carl Jung's psychology focuses on archetypes and the unconscious. Our AI anal
 **Q: What is the Archetype Test?**
 A: A personality test based on Carl Jung's 12 archetypes (Hero, Sage, Explorer, etc.). It analyzes your answers to discover your dominant archetype and share a personalized report.
 
-**Q: How do I enter a license key?**
-A: After purchasing on Gumroad, go to Profile → Subscription and enter the license key you received by email. Premium activates immediately.
-
 **Q: Why are my affirmations not showing?**
 A: Affirmations are generated from your dream text. Save a dream first, then check the Daily Affirmations section.
 
@@ -49,7 +45,7 @@ A: Affirmations are generated from your dream text. Save a dream first, then che
 A: Dream recording works offline. AI analysis requires an internet connection.
 
 **Q: How do I cancel my subscription?**
-A: Contact Gumroad directly (gumroad.com) or email support. Your premium access continues until the subscription period ends.
+A: Manage or cancel it in your App Store or Google Play subscription settings. Your premium access continues until the current period ends.
 
 **Q: Is my data private?**
 A: Yes. Dreams are stored securely in your personal account. We do not share your data with third parties.
@@ -63,10 +59,9 @@ A: On the login screen, tap "Forgot password" to reset via email.
 ## Response Guidelines
 - Be warm, concise, and helpful
 - Detect and respond in the same language as the user (Korean or English)
-- For payment/subscription questions, always provide the Gumroad links as plain URLs so users can tap them
+- For payment/subscription questions, point users to the Pricing page or their store subscription settings
 - If unsure about something, suggest contacting support
-- Keep responses brief (2-4 sentences max unless detailed explanation needed)
-- Always include the actual URL when mentioning purchase links`;
+- Keep responses brief (2-4 sentences max unless detailed explanation needed)`;
 
 export async function POST(request: NextRequest) {
   try {

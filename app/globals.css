@@ -92,12 +92,14 @@ body {
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* iOS Safari 전용 상태바 수정 */
-@supports (-webkit-touch-callout: none) {
-  body {
-    padding-top: max(env(safe-area-inset-top), 44px) !important;
-  }
-}
+/*
+ * The 44px floor that used to live here was a stand-in for the status bar,
+ * needed only because viewport-fit=cover was missing and the inset always
+ * resolved to 0. With it set in app/layout.tsx the real value comes through,
+ * and a hardcoded floor would now push content down on every device that
+ * reports a smaller inset — including the Capacitor WebView, which matches
+ * this same -webkit-touch-callout query.
+ */
 
 /* 상태바 영역 배경색 강제 적용 */
 html {

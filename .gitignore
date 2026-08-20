@@ -1,5 +1,7 @@
 node_modules
 .next
+.appbuild
+out/
 .env
 .env.local
 .env.production
@@ -41,3 +43,11 @@ secrets/
 # OS specific
 .AppleDouble
 .LSOverride
+
+# Local env snapshots (never commit)
+.env.local.save
+.env*.save
+
+# TypeScript incremental build cache (generated)
+tsconfig.tsbuildinfo
+*.tsbuildinfo

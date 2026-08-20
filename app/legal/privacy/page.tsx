@@ -37,11 +37,11 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-600">
-          <Link href="/legal/terms" className="text-[#7CB892] hover:underline mx-2">
+          <Link href="/legal/terms/" className="text-[#7CB892] hover:underline mx-2">
             Terms of Service
           </Link>
           |
-          <Link href="/legal/refund" className="text-[#7CB892] hover:underline mx-2">
+          <Link href="/legal/refund/" className="text-[#7CB892] hover:underline mx-2">
             Refund Policy
           </Link>
         </div>

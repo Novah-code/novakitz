@@ -459,11 +459,11 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                       </p>
                       <button
                         className="di-cta-btn"
-                        onClick={() => { window.location.href = '/pricing'; }}
+                        onClick={() => { window.location.href = '/pricing/'; }}
                         style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
                       >
                         <span style={{ display: 'flex' }}><LockIcon size={13} /></span>
-                        {ko ? '프리미엄 인사이트 열기' : 'Unlock Premium Insights'}
+                        {ko ? 'Pro 인사이트 열기' : 'Unlock Pro Insights'}
                       </button>
                     </>
                   )}

@@ -4,7 +4,6 @@
 ALTER TABLE public.user_profiles
 ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'free' CHECK (subscription_status IN ('free', 'premium', 'cancelled')),
 ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP WITH TIME ZONE,
-ADD COLUMN IF NOT EXISTS gumroad_license_key TEXT UNIQUE,
 ADD COLUMN IF NOT EXISTS last_ai_reset_date DATE DEFAULT CURRENT_DATE;
 
 -- Create index for quick lookup

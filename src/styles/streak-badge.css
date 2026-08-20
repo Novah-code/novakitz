@@ -1,0 +1,66 @@
+/*
+ * Streak pill, top centre of the home screen.
+ *
+ * Centred rather than in a corner because both corners are already taken — the
+ * logo on the left, the menu on the right — and because the point of the badge
+ * is to be seen rather than to be tidy.
+ */
+
+.streak-badge {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: #fff;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.streak-badge:active {
+  transform: translateX(-50%) scale(0.96);
+}
+
+/* Today is done — the streak is safe, so it is lit. */
+.streak-badge.is-done {
+  opacity: 1;
+}
+
+/*
+ * Today is not done yet. Held back rather than hidden: the number still has to
+ * be readable for the streak to be worth protecting, but it should look like
+ * something waiting to be finished.
+ */
+.streak-badge.is-open {
+  opacity: 0.72;
+  border-style: dashed;
+}
+
+.streak-badge__flame {
+  font-size: 15px;
+}
+
+.streak-badge__count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .streak-badge {
+    transition: none;
+  }
+}

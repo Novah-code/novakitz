@@ -63,7 +63,7 @@ export default function ArchetypeResult() {
   const loadResult = async () => {
     const answersStr = localStorage.getItem('guest_quiz_answers');
     if (!answersStr) {
-      router.push('/archetype-test');
+      router.push('/archetype-test/');
       return;
     }
 
@@ -167,7 +167,7 @@ export default function ArchetypeResult() {
     localStorage.removeItem('guest_quiz_answers');
     localStorage.removeItem('guest_result_id');
     localStorage.removeItem('archetype_unlocked');
-    router.push('/archetype-test');
+    router.push('/archetype-test/');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -660,7 +660,7 @@ export default function ArchetypeResult() {
           </div>
           {/* End of Blurred Content Wrapper */}
 
-          {/* Premium Upselling */}
+          {/* Pro Upselling */}
           <div style={{
             background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
             borderRadius: '16px',
@@ -689,7 +689,7 @@ export default function ArchetypeResult() {
               }
             </p>
             <button
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => window.location.href = '/pricing/'}
               style={{
                 padding: '14px 28px',
                 background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
@@ -711,7 +711,7 @@ export default function ArchetypeResult() {
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
               }}
             >
-              {language === 'ko' ? 'Novakitz Premium 알아보기' : 'Learn About Novakitz Premium'}
+              {language === 'ko' ? 'Novakitz Pro 알아보기' : 'Learn About Novakitz Pro'}
             </button>
           </div>
 

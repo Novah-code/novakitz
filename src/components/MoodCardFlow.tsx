@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
 
@@ -386,37 +387,27 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [egoFreeText, setEgoFreeText] = useState('');
   const [isRecordingScene, setIsRecordingScene] = useState(false);
   const [isRecordingEgo, setIsRecordingEgo] = useState(false);
-  const sceneRecognitionRef = useRef<any>(null);
-  const egoRecognitionRef = useRef<any>(null);
 
-  const startSceneVoice = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return alert(language === 'ko' ? '이 브라우저는 음성 인식을 지원하지 않습니다.' : 'Voice recognition not supported in this browser.');
-    const r = new SR();
-    r.continuous = false;
-    r.interimResults = false;
-    r.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-    r.onresult = (e: any) => { setSceneText(e.results[0][0].transcript); setIsRecordingScene(false); };
-    r.onerror = () => setIsRecordingScene(false);
-    r.onend = () => setIsRecordingScene(false);
-    sceneRecognitionRef.current = r;
+  const canUseVoice = speechSupported();
+  const sceneRecognitionRef = useRef<SpeechSession | null>(null);
+  const egoRecognitionRef = useRef<SpeechSession | null>(null);
+
+  const startSceneVoice = async () => {
     setIsRecordingScene(true);
-    r.start();
+    sceneRecognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setSceneText(text),
+      onEnd: () => setIsRecordingScene(false),
+    });
   };
 
-  const startEgoVoice = () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return alert(language === 'ko' ? '이 브라우저는 음성 인식을 지원하지 않습니다.' : 'Voice recognition not supported in this browser.');
-    const r = new SR();
-    r.continuous = false;
-    r.interimResults = false;
-    r.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-    r.onresult = (e: any) => { setEgoFreeText(e.results[0][0].transcript); setIsRecordingEgo(false); };
-    r.onerror = () => setIsRecordingEgo(false);
-    r.onend = () => setIsRecordingEgo(false);
-    egoRecognitionRef.current = r;
+  const startEgoVoice = async () => {
     setIsRecordingEgo(true);
-    r.start();
+    egoRecognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setEgoFreeText(text),
+      onEnd: () => setIsRecordingEgo(false),
+    });
   };
 
   useEffect(() => {
@@ -960,10 +951,11 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               onFocus={e => { e.target.style.borderColor = '#7AB382'; }}
               onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.9)'; }}
             />
+            {canUseVoice && (
             <button
               type="button"
               onClick={() => {
-                if (isRecordingScene) { sceneRecognitionRef.current?.abort(); setIsRecordingScene(false); }
+                if (isRecordingScene) { sceneRecognitionRef.current?.stop(); }
                 else startSceneVoice();
               }}
               style={{
@@ -987,6 +979,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 </svg>
               )}
             </button>
+            )}
           </div>
 
           <button
@@ -1144,10 +1137,11 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               rows={4}
               style={{ width: '100%', borderRadius: 14, border: '1.5px solid rgba(122,179,130,0.3)', background: 'rgba(255,255,255,0.7)', padding: '14px 16px', paddingBottom: '44px', fontSize: 14, lineHeight: 1.7, color: '#4A5D4E', resize: 'none', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
             />
+            {canUseVoice && (
             <button
               type="button"
               onClick={() => {
-                if (isRecordingEgo) { egoRecognitionRef.current?.abort(); setIsRecordingEgo(false); }
+                if (isRecordingEgo) { egoRecognitionRef.current?.stop(); }
                 else startEgoVoice();
               }}
               style={{
@@ -1171,6 +1165,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 </svg>
               )}
             </button>
+            )}
           </div>
           <button
             onClick={handleFinishEgo}
@@ -1331,7 +1326,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           {usageLimitReached && (
             <div style={{ background: 'rgba(244,196,80,0.15)', border: '1px solid rgba(244,196,80,0.4)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: '#856404', fontWeight: 600, marginBottom: 4 }}>{isKo ? '이번 달 해석 횟수를 모두 사용했어요' : 'Monthly analysis limit reached'}</div>
-              <div style={{ fontSize: 12, color: '#856404' }}>{isKo ? '프리미엄으로 업그레이드하면 무제한 해석이 가능해요' : 'Upgrade to Premium for unlimited analyses'}</div>
+              <div style={{ fontSize: 12, color: '#856404' }}>{isKo ? 'Pro로 업그레이드하면 무제한 해석이 가능해요' : 'Upgrade to Pro for unlimited analyses'}</div>
             </div>
           )}
 

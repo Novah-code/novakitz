@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import AffirmationsDisplay from './AffirmationsDisplay';
+import Toast, { ToastType } from './Toast';
 
 interface CheckinRecord {
   id: string;
@@ -41,6 +42,9 @@ export default function DailyCheckin({
   const [emotionIndex, setEmotionIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [todayCheckins, setTodayCheckins] = useState<CheckinRecord[]>([]);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+  const showToast = (message: string, type: ToastType) => setToast({ message, type });
   const [showAffirmations, setShowAffirmations] = useState(true);
 
   useEffect(() => {
@@ -127,9 +131,9 @@ export default function DailyCheckin({
           hint: error.hint,
           fullError: error
         });
-        alert(language === 'ko'
+        showToast(language === 'ko'
           ? `저장 중 오류 발생: ${error.message}`
-          : `Error saving check-in: ${error.message}`);
+          : `Error saving check-in: ${error.message}`, 'error');
       } else if (data) {
         console.log('DailyCheckin: Successfully saved:', data);
         setHasCheckedInToday(true);
@@ -147,18 +151,18 @@ export default function DailyCheckin({
         }
 
         // Show success message
-        alert(language === 'ko'
+        showToast(language === 'ko'
           ? '체크인이 완료되었습니다! 좋은 하루 보내세요!'
-          : 'Check-in complete! Have a great day!');
+          : 'Check-in complete! Have a great day!', 'success');
       } else {
         console.warn('DailyCheckin: No error but no data returned');
-        alert(language === 'ko' ? '저장 중 오류 발생' : 'Error saving check-in');
+        showToast(language === 'ko' ? '저장 중 오류 발생' : 'Error saving check-in', 'error');
       }
     } catch (error) {
       console.error('DailyCheckin: Exception during submit:', error);
-      alert(language === 'ko'
+      showToast(language === 'ko'
         ? `저장 중 오류 발생: ${error instanceof Error ? error.message : 'Unknown error'}`
-        : `Error saving check-in: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        : `Error saving check-in: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -335,6 +339,10 @@ export default function DailyCheckin({
             </div>
           </div>
         </>
+      )}
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
     </>
   );

@@ -1,11 +1,11 @@
 # Novakitz - AI Dream Journal
-# https://www.novakitz.shop
+# https://www.novakitz.com
 
 User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://www.novakitz.shop/sitemap.xml
+Sitemap: https://www.novakitz.com/sitemap.xml
 
 # Disallow admin/api routes
 Disallow: /api/

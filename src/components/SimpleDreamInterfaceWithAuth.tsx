@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -11,8 +12,8 @@ import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import AIUsageWidget from './AIUsageWidget';
-import LicenseModal from './LicenseModal';
 import ProfileSettings from './ProfileSettings';
+import { identify, forgetUser } from '../lib/revenuecat';
 
 // Translations
 const translations = {
@@ -55,6 +56,7 @@ const translations = {
 };
 
 export default function SimpleDreamInterfaceWithAuth() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -69,7 +71,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [isPremium, setIsPremium] = useState(false);
   const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
-  const [showLicenseModal, setShowLicenseModal] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -80,6 +81,17 @@ export default function SimpleDreamInterfaceWithAuth() {
   const hasProfileRef = useRef<boolean | null>(null);
 
   const t = translations[language];
+
+  // Keep RevenueCat's identity in step with Supabase auth. Purchases must
+  // attach to the signed-in account, since the webhook maps app_user_id
+  // straight onto user_subscriptions.user_id.
+  useEffect(() => {
+    if (user) {
+      identify(user.id);
+    } else {
+      forgetUser();
+    }
+  }, [user]);
 
   // Check if user has a completed profile
   const checkUserProfile = async (userId: string) => {
@@ -265,10 +277,9 @@ export default function SimpleDreamInterfaceWithAuth() {
           return;
         }
 
-        // Get user subscription with gumroad_product_id
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('id, status, plan_id, expires_at, gumroad_product_id')
+          .select('id, status, plan_id, expires_at')
           .eq('user_id', user.id)
           .eq('status', 'active')
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
@@ -278,9 +289,8 @@ export default function SimpleDreamInterfaceWithAuth() {
           // Check if subscription is not expired
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
-          // Check if it's a lifetime subscription
-          const isLifetimeValue = subscription.gumroad_product_id?.includes('lifetime') ||
-            (subscription.plan_id === premiumPlanId && !subscription.expires_at);
+          // Premium with no expiry date is a lifetime purchase.
+          const isLifetimeValue = subscription.plan_id === premiumPlanId && !subscription.expires_at;
 
           console.log('📋 Subscription details:', {
             subscription_id: subscription.id,
@@ -288,7 +298,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             plan_id: subscription.plan_id,
             premium_plan_id: premiumPlanId,
             expires_at: subscription.expires_at,
-            gumroad_product_id: subscription.gumroad_product_id,
             isExpired,
             isLifetime: isLifetimeValue
           });
@@ -443,8 +452,8 @@ export default function SimpleDreamInterfaceWithAuth() {
         onClick={() => setMenuOpen(!menuOpen)}
         style={{
           position: 'fixed',
-          top: '20px',
-          right: '20px',
+          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 20px)',
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -608,7 +617,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               })()}
 
               {/* Pricing */}
-              <button onClick={() => { window.location.href = '/pricing'; }}
+              <button onClick={() => { router.push('/pricing/'); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -617,21 +626,13 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               {/* My Archetype */}
-              <button onClick={() => { window.location.href = '/archetype-test'; }}
+              <button onClick={() => { router.push('/archetype-test/'); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 </span>
                 {language === 'ko' ? '나의 아키타입' : 'My Archetype'}
               </button>
-
-              {/* License key for free users */}
-              {user && !isPremium && !isLifetime && (
-                <button onClick={() => { setMenuOpen(false); setTimeout(() => setShowLicenseModal(true), 150); }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#8BA390', fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                  {language === 'ko' ? '라이선스 키 입력' : 'Enter License Key'}
-                </button>
-              )}
             </div>
 
             {/* Footer */}
@@ -661,7 +662,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                   style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                 </a>
-                <a href="mailto:contact@novakitz.shop"
+                <a href="mailto:contact@novakitz.com"
                   style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 </a>
@@ -796,17 +797,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             )}
           </div>
         </div>
-      )}
-
-      {/* License Key Modal */}
-      {user && (
-        <LicenseModal
-          isOpen={showLicenseModal}
-          onClose={() => setShowLicenseModal(false)}
-          userId={user.id}
-          language={language}
-          onSuccess={() => setIsPremium(true)}
-        />
       )}
 
       {/* Profile Settings Modal */}

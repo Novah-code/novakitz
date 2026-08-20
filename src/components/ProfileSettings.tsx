@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
+import ReminderSettings from './ReminderSettings';
 
 interface StreakData {
   currentStreak: number;
@@ -130,7 +131,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     email: language === 'ko' ? '이메일' : 'Email',
     plan: language === 'ko' ? '현재 플랜' : 'Current Plan',
     freePlan: language === 'ko' ? '무료' : 'Free',
-    premiumPlan: 'Premium',
+    premiumPlan: 'Pro',
     lifetimePlan: 'Lifetime',
     logout: language === 'ko' ? '로그아웃' : 'Sign out',
     deleteAccount: language === 'ko' ? '계정 삭제' : 'Delete Account',
@@ -753,6 +754,8 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 </p>
               </div>
 
+              <ReminderSettings language={language} />
+
               {/* Delete Account */}
               {!showDeleteConfirm ? (
                 <button
@@ -872,7 +875,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                       {isLifetime
                         ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
                         : isPremium
-                          ? (language === 'ko' ? '프리미엄 이용 중' : 'Premium access')
+                          ? (language === 'ko' ? 'Pro 이용 중' : 'Pro access')
                           : (language === 'ko' ? '무료 플랜' : 'Free plan')}
                     </p>
                   </div>
@@ -882,7 +885,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               {/* Upgrade button for free users */}
               {!isPremium && !isLifetime && (
                 <button
-                  onClick={() => window.open(process.env.NEXT_PUBLIC_GUMROAD_MONTHLY_URL || 'https://novakitz.gumroad.com/l/novakitz', '_blank')}
+                  onClick={() => { window.location.href = '/pricing/'; }}
                   style={{
                     padding: '14px 20px',
                     background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
@@ -895,7 +898,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                     transition: 'all 0.2s',
                   }}
                 >
-                  {language === 'ko' ? 'Premium 업그레이드' : 'Upgrade to Premium'}
+                  {language === 'ko' ? 'Pro 업그레이드' : 'Upgrade to Pro'}
                 </button>
               )}
             </div>

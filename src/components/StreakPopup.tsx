@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { loadStreak, nextMilestone } from '../lib/streak';
 
 interface StreakPopupProps {
   user: User;
@@ -12,6 +12,7 @@ interface StreakPopupProps {
 
 interface StreakData {
   currentStreak: number;
+  totalDays: number;
   weekDays: {
     day: string;
     date: string;
@@ -22,18 +23,20 @@ interface StreakData {
 const translations = {
   en: {
     title: 'Your streak',
+    totalDays: (n: number) => `${n} morning${n === 1 ? '' : 's'} in total`,
     days: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
     share: 'Share',
     close: 'Close',
-    shareMessage: (streak: number) => `I've been recording my dreams for ${streak} day${streak > 1 ? 's' : ''} straight!`,
+    shareMessage: (streak: number) => `${streak} morning${streak > 1 ? 's' : ''} in a row with Novakitz.`,
     linkCopied: 'Link copied!'
   },
   ko: {
     title: 'Your streak',
+    totalDays: (n: number) => `누적 ${n}일`,
     days: ['일', '월', '화', '수', '목', '금', '토'],
     share: 'Share',
     close: 'Close',
-    shareMessage: (streak: number) => `나는 연속 ${streak}일 꿈을 기록했어요!`,
+    shareMessage: (streak: number) => `연속 ${streak}일 아침을 기록했어요.`,
     linkCopied: '링크가 복사되었어요!'
   }
 };
@@ -44,142 +47,21 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
   const [loading, setLoading] = useState(true);
   const [showCopied, setShowCopied] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadStreakData = useCallback(async () => {
-    try {
-      console.log('Loading streak data for user:', user.id);
-
-      // Fetch ALL dreams to calculate streak properly
-      const { data: dreamsData, error } = await supabase
-        .from('dreams')
-        .select('created_at, date')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
-      }
-
-      console.log('Dreams fetched:', dreamsData?.length || 0);
-      console.log('Dream data sample:', dreamsData?.slice(0, 2));
-
-      // Get unique dates with dreams - use created_at for reliable date extraction
-      const dreamDates = new Set(
-        dreamsData?.map(d => {
-          // Parse created_at timestamp and get local date (YYYY-MM-DD)
-          const dateObj = new Date(d.created_at);
-          const year = dateObj.getFullYear();
-          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const day = String(dateObj.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }) || []
-      );
-
-      console.log('Dream dates (unique):', Array.from(dreamDates));
-
-      // Calculate current streak using local dates
-      let currentStreak = 0;
-
-      // Get today's date in YYYY-MM-DD format (local time)
-      const getTodayString = () => {
-        const date = new Date();
-        return date.getFullYear() + '-' +
-               String(date.getMonth() + 1).padStart(2, '0') + '-' +
-               String(date.getDate()).padStart(2, '0');
-      };
-
-      // Get yesterday's date in YYYY-MM-DD format (local time)
-      const getYesterdayString = () => {
-        const date = new Date();
-        date.setDate(date.getDate() - 1);
-        return date.getFullYear() + '-' +
-               String(date.getMonth() + 1).padStart(2, '0') + '-' +
-               String(date.getDate()).padStart(2, '0');
-      };
-
-      const todayString = getTodayString();
-      const yesterdayString = getYesterdayString();
-
-      console.log('Today:', todayString);
-      console.log('Yesterday:', yesterdayString);
-      console.log('Has dream today?:', dreamDates.has(todayString));
-      console.log('Has dream yesterday?:', dreamDates.has(yesterdayString));
-
-      if (dreamDates.has(todayString) || dreamDates.has(yesterdayString)) {
-        currentStreak = 1;
-        const startDate = dreamDates.has(todayString) ? todayString : yesterdayString;
-
-        console.log('Streak started from:', startDate);
-
-        // Parse the start date and go backwards
-        const [year, month, day] = startDate.split('-').map(Number);
-        const baseDate = new Date(year, month - 1, day);
-
-        for (let i = 1; i < 365; i++) { // Check up to 1 year back
-          const checkDate = new Date(baseDate);
-          checkDate.setDate(checkDate.getDate() - i);
-          const checkDateString = checkDate.getFullYear() + '-' +
-            String(checkDate.getMonth() + 1).padStart(2, '0') + '-' +
-            String(checkDate.getDate()).padStart(2, '0');
-
-          if (dreamDates.has(checkDateString)) {
-            currentStreak++;
-          } else {
-            console.log('Streak broken at:', checkDateString);
-            break;
-          }
-        }
-      }
-
-      console.log('Final streak:', currentStreak);
-
-      // Build week days array (last 7 days, starting from today going back)
-      const weekDays = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-
-        const dayIndex = date.getDay();
-        const dateString = date.getFullYear() + '-' +
-          String(date.getMonth() + 1).padStart(2, '0') + '-' +
-          String(date.getDate()).padStart(2, '0');
-
-        weekDays.push({
-          day: t.days[dayIndex],
-          date: dateString,
-          completed: dreamDates.has(dateString)
-        });
-      }
-
-      console.log('Week days:', weekDays);
-
-      console.log('Streak calculated:', currentStreak);
-      console.log('Week days:', weekDays);
-
-      setStreakData({
-        currentStreak,
-        weekDays
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error('Error loading streak data:', error);
-      // Set empty streak data on error instead of staying in loading state
-      setStreakData({
-        currentStreak: 0,
-        weekDays: Array(7).fill(null).map((_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          return {
-            day: t.days[date.getDay()],
-            date: date.toDateString(),
-            completed: false
-          };
-        })
-      });
-      setLoading(false);
-    }
-  }, [user.id]);
+    // Counting lives in src/lib/streak.ts so the badge on the home screen and
+    // this popup can never disagree about what a streak is.
+    const streak = await loadStreak(user.id);
+    setStreakData({
+      currentStreak: streak.current,
+      totalDays: streak.total,
+      weekDays: streak.week.map((d) => ({
+        day: t.days[new Date(d.date + 'T00:00:00').getDay()],
+        date: d.date,
+        completed: d.completed,
+      })),
+    });
+    setLoading(false);
+  }, [user.id, t.days]);
 
   useEffect(() => {
     loadStreakData();
@@ -331,6 +213,20 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           {t.title}
         </h2>
 
+        {/*
+          Lifetime total, under the streak rather than instead of it. The streak
+          is what a missed day costs; this is what it cannot take away, so a
+          broken streak does not read as starting from nothing.
+        */}
+        <p style={{
+          margin: '-1.5rem 0 1.5rem 0',
+          fontSize: '0.85rem',
+          color: '#8FAF83',
+          textAlign: 'center'
+        }}>
+          {t.totalDays(streakData.totalDays)}
+        </p>
+
         {/* Streak Circle */}
         <div style={{
           display: 'flex',
@@ -371,7 +267,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                 stroke="#7FB069"
                 strokeWidth="8"
                 strokeLinecap="round"
-                strokeDasharray={`${(streakData.currentStreak / 7) * 339} 339`}
+                strokeDasharray={`${Math.min(streakData.currentStreak / nextMilestone(streakData.currentStreak), 1) * 339} 339`}
                 style={{ transition: 'stroke-dasharray 0.5s ease' }}
               />
             </svg>
@@ -389,6 +285,9 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
                 lineHeight: 1
               }}>
                 {streakData.currentStreak}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#8FAF83', marginTop: 4 }}>
+                / {nextMilestone(streakData.currentStreak)}
               </div>
             </div>
           </div>

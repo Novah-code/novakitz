@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { signInWithApple, isAppleSignInCancelled } from '../lib/appleAuth';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -10,11 +11,27 @@ interface AuthProps {
 // Note: onAuthSuccess is kept for API compatibility but actual auth state
 // is handled by Supabase's onAuthStateChange in the parent component
 export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<'google' | 'apple' | null>(null);
   const [message, setMessage] = useState('');
 
+  const handleAppleSignIn = async () => {
+    setLoading('apple');
+    setMessage('');
+
+    try {
+      await signInWithApple();
+    } catch (error: unknown) {
+      if (!isAppleSignInCancelled(error)) {
+        console.error('Apple 로그인 오류:', error);
+        const detail = (error as { message?: string })?.message ?? '';
+        setMessage(`로그인 중 오류가 발생했습니다: ${detail}`);
+      }
+      setLoading(null);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setLoading('google');
     setMessage('');
 
     try {
@@ -34,17 +51,67 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
     } catch (error: any) {
       console.error('Google 로그인 오류:', error);
       setMessage(`로그인 중 오류가 발생했습니다: ${error.message}`);
-      setLoading(false);
+      setLoading(null);
     }
   };
 
   return (
     <div style={{ width: '100%' }}>
+      {/*
+        Apple first, and styled to Apple's guidelines. Guideline 4.8 requires it
+        to be offered at least as prominently as the other option.
+      */}
+      <button
+        type="button"
+        onClick={handleAppleSignIn}
+        disabled={loading !== null}
+        style={{
+          width: '100%',
+          padding: '14px 20px',
+          marginBottom: '10px',
+          background: '#000',
+          border: 'none',
+          borderRadius: '14px',
+          fontSize: '0.95rem',
+          fontWeight: '500',
+          color: '#fff',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          opacity: loading && loading !== 'apple' ? 0.6 : 1,
+          transition: 'opacity 0.2s ease',
+          fontFamily: "'Roboto', -apple-system, sans-serif"
+        }}
+      >
+        {loading === 'apple' ? (
+          <>
+            <div style={{
+              width: '18px',
+              height: '18px',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderTopColor: '#fff',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <span>Connecting...</span>
+          </>
+        ) : (
+          <>
+            <svg width="17" height="17" viewBox="0 0 384 512" fill="#fff" aria-hidden="true">
+              <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+            </svg>
+            <span>Continue with Apple</span>
+          </>
+        )}
+      </button>
+
       {/* Google Sign In Button - Matcha Theme */}
       <button
         type="button"
         onClick={handleGoogleSignIn}
-        disabled={loading}
+        disabled={loading !== null}
         style={{
           width: '100%',
           padding: '14px 20px',
@@ -78,7 +145,7 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
           e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.1)';
         }}
       >
-        {loading ? (
+        {loading === 'google' ? (
           <>
             <div style={{
               width: '18px',

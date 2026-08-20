@@ -67,7 +67,7 @@ export default function SharedArchetypeResult() {
 
   const handleTakeTest = () => {
     // Navigate to archetype test landing page
-    router.push('/archetype-test');
+    router.push('/archetype-test/');
   };
 
   if (loading) {
@@ -129,7 +129,7 @@ export default function SharedArchetypeResult() {
                 : 'The link may have expired or is invalid'}
             </p>
             <button
-              onClick={() => router.push('/archetype-test')}
+              onClick={() => router.push('/archetype-test/')}
               style={{
                 padding: '12px 24px',
                 background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

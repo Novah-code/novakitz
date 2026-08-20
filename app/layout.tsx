@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import PWAInstall from "./pwa-install";
 import UpdateNotification from "../src/components/UpdateNotification";
+import CapacitorBridge from "../src/components/CapacitorBridge";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,7 +23,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.novakitz.shop'),
+  metadataBase: new URL('https://www.novakitz.com'),
   verification: {
     google: 'SvyOB5oGhTT8D7TUzeOLkpMP2s04Jg0DIkXb66GgHQo',
   },
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     alternateLocale: "ko_KR",
-    url: "https://www.novakitz.shop",
+    url: "https://www.novakitz.com",
     siteName: "Novakitz",
     title: "Novakitz - AI Inner Journal & Jungian Analysis",
     description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track dreams, uncover archetypes, and grow.",
@@ -85,10 +86,10 @@ export const metadata: Metadata = {
   },
   // 정식 URL (중복 콘텐츠 방지)
   alternates: {
-    canonical: "https://www.novakitz.shop",
+    canonical: "https://www.novakitz.com",
     languages: {
-      'en-US': 'https://www.novakitz.shop',
-      'ko-KR': 'https://www.novakitz.shop',
+      'en-US': 'https://www.novakitz.com',
+      'ko-KR': 'https://www.novakitz.com',
     },
   },
   manifest: "/manifest.json",
@@ -127,7 +128,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   userScalable: false,
   themeColor: "#e5f4e6",
-  colorScheme: "light"
+  colorScheme: "light",
+  // Lets the page extend under the notch and home indicator, which the
+  // full-bleed home screen needs. Without it iOS reports every
+  // env(safe-area-inset-*) as 0, so the insets used below do nothing.
+  viewportFit: "cover"
 };
 
 export default function RootLayout({
@@ -154,6 +159,7 @@ export default function RootLayout({
           <div className="particle particle-5"></div>
           <div className="particle particle-6"></div>
         </div>
+        <CapacitorBridge />
         <PWAInstall />
         <UpdateNotification />
         {children}

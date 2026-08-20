@@ -30,7 +30,6 @@ export default function PremiumPromptModal({
     }
   };
 
-  // Removed gumroad URLs - using PaymentMethodModal instead
 
   useEffect(() => {
     if (!user) {

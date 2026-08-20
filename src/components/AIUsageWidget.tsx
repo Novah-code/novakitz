@@ -139,8 +139,8 @@ export default function AIUsageWidget({ user, onLimitReached }: AIUsageWidgetPro
           {!isPremium && usage.remaining <= 3 && (
             <div className="upgrade-prompt">
               <p>Need more interpretations?</p>
-              <a href="/pricing" rel="noopener noreferrer">
-                Upgrade to Premium →
+              <a href="/pricing/" rel="noopener noreferrer">
+                Upgrade to Pro →
               </a>
             </div>
           )}

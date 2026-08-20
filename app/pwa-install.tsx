@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { isNative } from '../src/lib/platform';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -17,6 +18,14 @@ export default function PWAInstall() {
   const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Already installed as a real app; nothing here applies. A Capacitor
+    // WebView does not report display-mode: standalone, so the check below
+    // would otherwise leave the install button showing inside the app.
+    if (isNative()) {
+      setShowInstallButton(false);
+      return;
+    }
+
     // Check if app is already installed (running in standalone mode)
     const checkStandalone = () => {
       return window.matchMedia('(display-mode: standalone)').matches || 

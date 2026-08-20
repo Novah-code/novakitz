@@ -209,7 +209,7 @@ function handleWelcome(): KakaoSkillResponse {
 function handleCardDraw(user: KakaoUser): KakaoSkillResponse {
   const today = new Date().toISOString().split('T')[0];
   const card = CARDS[seedHash(`${user.id}-${today}`) % CARDS.length];
-  const baseUrl = 'https://www.novakitz.shop';
+  const baseUrl = 'https://www.novakitz.com';
 
   return buildResponse([
     textCard(
@@ -236,7 +236,7 @@ function handleGroupCardDraw(botGroupKey: string): KakaoSkillResponse {
 }
 
 function handleArchetypeTest(user: KakaoUser): KakaoSkillResponse {
-  const baseUrl = 'https://www.novakitz.shop';
+  const baseUrl = 'https://www.novakitz.com';
 
   return buildResponse([
     textCard(
@@ -248,7 +248,7 @@ function handleArchetypeTest(user: KakaoUser): KakaoSkillResponse {
 }
 
 function handleDreamRecord(user: KakaoUser): KakaoSkillResponse {
-  const baseUrl = 'https://www.novakitz.shop';
+  const baseUrl = 'https://www.novakitz.com';
 
   return buildResponse([
     textCard(
@@ -261,7 +261,7 @@ function handleDreamRecord(user: KakaoUser): KakaoSkillResponse {
 
 function handleHelp(): KakaoSkillResponse {
   return buildResponse(
-    [text('📋 Novakitz 챗봇 메뉴\n\n🃏 오늘의 카드 — 오늘 나를 위한 카드\n🧠 아키타입 테스트 — 내 무의식 원형 발견\n🌙 꿈 기록 — AI 꿈 해몽\n\n더 궁금한 점은 novakitz.shop을 방문해주세요.')],
+    [text('📋 Novakitz 챗봇 메뉴\n\n🃏 오늘의 카드 — 오늘 나를 위한 카드\n🧠 아키타입 테스트 — 내 무의식 원형 발견\n🌙 꿈 기록 — AI 꿈 해몽\n\n더 궁금한 점은 novakitz.com을 방문해주세요.')],
     [
       { action: 'message', label: '🃏 오늘의 카드', messageText: '오늘의 카드' },
       { action: 'message', label: '🧠 아키타입 테스트', messageText: '아키타입 테스트' },

@@ -39,12 +39,12 @@ export default function ArchetypeTestLanding() {
     localStorage.removeItem('guest_result_id');
     // Save language preference
     localStorage.setItem('test_language', language);
-    router.push('/archetype-test/guest-dream');
+    router.push('/archetype-test/guest-dream/');
   };
 
   const goToProfileTest = () => {
     // If logged in, check if they have enough dreams for profile
-    router.push('/profile');
+    router.push('/profile/');
   };
 
   if (loading) {

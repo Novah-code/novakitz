@@ -9,13 +9,17 @@ import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '.
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
+import StreakBadge from './StreakBadge';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
+import HomeScene from './HomeScene';
 import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
+import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
+import { EMOTIONS, emotionLabel } from '../lib/emotions';
 
 // Lazy load heavy components that are not needed on initial render
 const APIMonitoringDashboard = dynamic(() => import('./APIMonitoringDashboard'), { ssr: false });
@@ -245,10 +249,16 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
   const [showStreakPopup, setShowStreakPopup] = useState(false);
+  // Bumped whenever the ritual is completed so the badge recounts without a reload.
+  const [streakRefresh, setStreakRefresh] = useState(0);
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [isRecording, setIsRecording] = useState(false);
+  // iOS WKWebView has no Web Speech API, so in the Capacitor app the voice
+  // controls would render and do nothing. Hide them rather than ship a dead
+  // control that a reviewer might tap.
+  const canUseVoice = speechSupported();
   const [showVoiceGuide, setShowVoiceGuide] = useState(false);
   const [hasSeenVoiceGuide, setHasSeenVoiceGuide] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -295,19 +305,18 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [dreamRefreshTrigger, setDreamRefreshTrigger] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
   const smokeTurbulenceRef = useRef<SVGFETurbulenceElement | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechSession | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const emotionList = [
-    { label: language === 'ko' ? '불안' : 'Anxious',  color: 'rgba(217,210,233,0.7)', borderRadius: '40% 60% 30% 70% / 60% 40% 70% 30%', moodValue: 2 },
-    { label: language === 'ko' ? '두려움' : 'Fear',   color: 'rgba(205,224,230,0.7)', borderRadius: '50% 50% 60% 60% / 40% 40% 70% 70%', moodValue: 1 },
-    { label: language === 'ko' ? '평온' : 'Peaceful', color: 'rgba(181,218,185,0.7)', borderRadius: '50%', moodValue: 4 },
-    { label: language === 'ko' ? '기쁨' : 'Joyful',  color: 'rgba(253,232,181,0.7)', borderRadius: '45% 55% 45% 55% / 65% 55% 45% 35%', moodValue: 5 },
-    { label: language === 'ko' ? '외로움' : 'Lonely', color: 'rgba(214,221,229,0.7)', borderRadius: '50% 50% 40% 40% / 40% 40% 60% 60%', moodValue: 2 },
-    { label: language === 'ko' ? '희망' : 'Hopeful', color: 'rgba(214,241,208,0.7)', borderRadius: '50% 50% 50% 50% / 70% 70% 40% 40%', moodValue: 4 },
-    { label: language === 'ko' ? '분노' : 'Anger',   color: 'rgba(250,209,196,0.7)', borderRadius: '15px 30px 15px 30px', moodValue: 2 },
-    { label: language === 'ko' ? '무기력' : 'Low',   color: 'rgba(226,232,240,0.7)', borderRadius: '16px', moodValue: 1 },
-  ];
+  // Colours and shapes live in src/lib/emotions.ts so the month calendar fills
+  // a day with the exact pebble that was chosen, rather than a copy that drifts.
+  const emotionList = EMOTIONS.map((e) => ({
+    key: e.key,
+    label: emotionLabel(e, language),
+    color: e.color,
+    borderRadius: e.borderRadius,
+    moodValue: e.moodValue,
+  }));
 
   const handleEmotionSelect = async (idx: number) => {
     const emotion = emotionList[idx];
@@ -316,16 +325,28 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setShowMoodCardFlow(true);
     if (!user) return; // guest: just show card
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const currentHour = new Date().getHours();
-      const timeOfDay = currentHour < 12 ? 'morning' : 'evening';
+      const now = new Date();
+      // Local date, not toISOString(). A check-in at 8am in Seoul is 23:00 UTC
+      // the day before, so the UTC date would file the morning ritual under
+      // yesterday and quietly break the streak everywhere east of London.
+      const today =
+        now.getFullYear() +
+        '-' +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(now.getDate()).padStart(2, '0');
+      const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
       await supabase.from('checkins').insert([{
         user_id: user.id,
         check_date: today,
         time_of_day: timeOfDay,
         mood: emotion.moodValue,
+        // mood alone cannot identify the pebble — anxious, lonely and anger all
+        // store 2 — so the key is what the calendar colours a day from.
+        emotion: emotion.key,
         energy_level: 5,
       }]);
+      setStreakRefresh((n) => n + 1);
     } catch (e) {
       console.error('Emotion save error:', e);
     }
@@ -719,35 +740,6 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     }
   }, []);
 
-  // Initialize speech recognition
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = language === 'ko' ? 'ko-KR' : 'en-US';
-        
-        recognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          setDreamText(transcript);
-          setIsRecording(false);
-        };
-        
-        recognition.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error);
-          setIsRecording(false);
-        };
-        
-        recognition.onend = () => {
-          setIsRecording(false);
-        };
-        
-        recognitionRef.current = recognition;
-      }
-    }
-  }, [language]);
 
   // Preload matcha images
   useEffect(() => {
@@ -1025,6 +1017,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         checkAndAwardBadges(user.id);
       }, 2000); // Increased delay to 2 seconds to ensure DB is updated
       // Show streak popup after dream is saved
+      setStreakRefresh((n) => n + 1);
       setShowStreakPopup(true);
 
       // Check if this is the first dream and trigger quiz
@@ -1186,14 +1179,14 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setShowQuickArchetypeQuiz(false);
   };
 
-  const startVoiceRecording = () => {
-    if (recognitionRef.current) {
-      setIsRecording(true);
-      setShowInput(true);
-      recognitionRef.current.start();
-    } else {
-      alert('Voice recognition is not supported in this browser.');
-    }
+  const startVoiceRecording = async () => {
+    setIsRecording(true);
+    setShowInput(true);
+    recognitionRef.current = await startListening({
+      language,
+      onResult: (text) => setDreamText(text),
+      onEnd: () => setIsRecording(false),
+    });
   };
 
   const handleOrbMouseDown = () => {
@@ -1212,10 +1205,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       setShowEmotionModal(true);
     } else if (isRecording) {
       // User released during active voice recording - stop it
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-      setIsRecording(false);
+      recognitionRef.current?.stop();
     }
   };
 
@@ -1225,9 +1215,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       longPressTimerRef.current = null;
     }
     // Also cancel any active voice recording if user leaves
-    if (isRecording && recognitionRef.current) {
-      recognitionRef.current.abort();
-      setIsRecording(false);
+    if (isRecording) {
+      recognitionRef.current?.stop();
     }
   };
 
@@ -1653,8 +1642,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         const canAnalyze = await canAnalyzeDream(user.id);
         if (!canAnalyze.allowed) {
           const limitMessage = language === 'ko'
-            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). 프리미엄으로 업그레이드하면 무제한 해석이 가능합니다.`
-            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Premium for unlimited interpretations.`;
+            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). Pro로 업그레이드하면 무제한 해석이 가능합니다.`
+            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Pro for unlimited interpretations.`;
 
           setDreamResponse(limitMessage);
           // Still save the dream without analysis
@@ -2068,8 +2057,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         .nova-logo {
           position: fixed;
-          top: 20px;
-          left: 20px;
+          top: calc(env(safe-area-inset-top, 0px) + 12px);
+          left: calc(env(safe-area-inset-left, 0px) + 20px);
           width: 50px;
           height: 50px;
           z-index: 1000;
@@ -3853,8 +3842,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         /* Mobile responsive styles */
         @media (max-width: 768px) {
           .nova-logo {
-            top: 15px;
-            left: 15px;
+            top: calc(env(safe-area-inset-top, 0px) + 10px);
+            left: calc(env(safe-area-inset-left, 0px) + 15px);
             width: 45px;
             height: 45px;
             border-radius: 14px;
@@ -4032,29 +4021,26 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         <main className="w-full max-w-xl mx-auto z-10 text-center" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
 
-          {(() => {
-            console.log('SimpleDreamInterface render:', { showInput, showResponse, showHistory });
-            return null;
-          })()}
+          {!showInput && !showResponse && !showHistory && user && (
+            <StreakBadge
+              userId={user.id}
+              language={language}
+              onClick={() => setShowStreakPopup(true)}
+              refreshKey={streakRefresh}
+            />
+          )}
+
           {!showInput && !showResponse && !showHistory && (
-            <div style={{position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10}}>
-            <div
-              className="dream-orb flex items-center justify-center fade-in"
-              onMouseDown={handleOrbMouseDown}
-              onMouseUp={handleOrbMouseUp}
-              onMouseLeave={handleOrbMouseLeave}
-              onTouchStart={handleOrbMouseDown}
-              onTouchEnd={handleOrbMouseUp}
-              style={{cursor: 'pointer'}}
-            >
-              <div className="orb-motion">
-                <div className="smoke-base"></div>
-                <div className="smoke-layer-1"></div>
-                <div className="smoke-layer-2"></div>
-                <div className="smoke-layer-3"></div>
-              </div>
-            </div>
-            </div>
+            <HomeScene
+              onPressStart={handleOrbMouseDown}
+              onPressEnd={handleOrbMouseUp}
+              onPressCancel={handleOrbMouseLeave}
+              label={
+                language === 'ko'
+                  ? '오늘 기분 고르기. 길게 누르면 꿈 기록'
+                  : 'Check in with today’s mood. Press and hold to record a dream'
+              }
+            />
           )}
 
 
@@ -4123,11 +4109,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       style={{ paddingBottom: '44px' }}
                     />
                     {/* Voice recording button */}
+                    {canUseVoice && (
                     <button
                       type="button"
                       onClick={() => {
                         if (isRecording) {
-                          recognitionRef.current?.abort();
+                          recognitionRef.current?.stop();
                           setIsRecording(false);
                         } else {
                           startVoiceRecording();
@@ -4162,6 +4149,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                         </svg>
                       )}
                     </button>
+                    )}
                   </div>
                   <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
                     {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? t.charactersReady : ''}
@@ -4257,6 +4245,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setDreamImagePreview('');
 
                       // Show streak popup directly (same as regular dream recording)
+                      setStreakRefresh((n) => n + 1);
                       setShowStreakPopup(true);
                     }}
                     style={{
@@ -5519,7 +5508,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         </main>
 
         {/* Voice Guide Popup */}
-        {showVoiceGuide && (
+        {showVoiceGuide && canUseVoice && (
           <div className="modal-overlay" onClick={() => setShowVoiceGuide(false)}>
             <div className="modal-content voice-guide-modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">

@@ -130,7 +130,7 @@ export async function canAnalyzeDream(userId: string): Promise<{
         limit: limit,
         message: isPremium
           ? `You've reached your monthly AI interpretation limit (${limit}/month). The limit resets next month.`
-          : `You've reached your monthly AI interpretation limit (${limit}/month). Upgrade to Premium for 200 interpretations per month.`
+          : `You've reached your monthly AI interpretation limit (${limit}/month). Upgrade to Pro for 200 interpretations per month.`
       };
     }
   } catch (error) {
@@ -303,7 +303,7 @@ export async function getUserPlanInfo(userId: string): Promise<{
 
     return {
       planSlug: plan.planSlug,
-      planName: plan.planSlug === 'premium' ? 'Premium' : 'Free',
+      planName: plan.planSlug === 'premium' ? 'Pro' : 'Free',
       aiInterpretationsPerMonth: plan.aiInterpretationsPerMonth,
       historyDays: plan.historyDays,
       isUnlimited: plan.historyDays === 999999
