@@ -9,6 +9,7 @@ import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '.
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
+import StreakBadge from './StreakBadge';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
@@ -247,6 +248,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
   const [showStreakPopup, setShowStreakPopup] = useState(false);
+  // Bumped whenever the ritual is completed so the badge recounts without a reload.
+  const [streakRefresh, setStreakRefresh] = useState(0);
   const [newTag, setNewTag] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
@@ -322,9 +325,17 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     setShowMoodCardFlow(true);
     if (!user) return; // guest: just show card
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const currentHour = new Date().getHours();
-      const timeOfDay = currentHour < 12 ? 'morning' : 'evening';
+      const now = new Date();
+      // Local date, not toISOString(). A check-in at 8am in Seoul is 23:00 UTC
+      // the day before, so the UTC date would file the morning ritual under
+      // yesterday and quietly break the streak everywhere east of London.
+      const today =
+        now.getFullYear() +
+        '-' +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(now.getDate()).padStart(2, '0');
+      const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
       await supabase.from('checkins').insert([{
         user_id: user.id,
         check_date: today,
@@ -332,6 +343,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         mood: emotion.moodValue,
         energy_level: 5,
       }]);
+      setStreakRefresh((n) => n + 1);
     } catch (e) {
       console.error('Emotion save error:', e);
     }
@@ -1002,6 +1014,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         checkAndAwardBadges(user.id);
       }, 2000); // Increased delay to 2 seconds to ensure DB is updated
       // Show streak popup after dream is saved
+      setStreakRefresh((n) => n + 1);
       setShowStreakPopup(true);
 
       // Check if this is the first dream and trigger quiz
@@ -4005,6 +4018,15 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         
         <main className="w-full max-w-xl mx-auto z-10 text-center" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
 
+          {!showInput && !showResponse && !showHistory && user && (
+            <StreakBadge
+              userId={user.id}
+              language={language}
+              onClick={() => setShowStreakPopup(true)}
+              refreshKey={streakRefresh}
+            />
+          )}
+
           {!showInput && !showResponse && !showHistory && (
             <HomeScene
               onPressStart={handleOrbMouseDown}
@@ -4220,6 +4242,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       setDreamImagePreview('');
 
                       // Show streak popup directly (same as regular dream recording)
+                      setStreakRefresh((n) => n + 1);
                       setShowStreakPopup(true);
                     }}
                     style={{
