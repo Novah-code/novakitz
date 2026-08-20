@@ -316,13 +316,22 @@ them upgrades rather than double-pays.
 
 | Product | Product ID | Duration | Price |
 | --- | --- | --- | --- |
-| Monthly | `novakitz.premium.monthly` | 1 month | $4.99 |
+| Monthly | `novakitz.pro.monthly` | 1 month | $5.99 |
 | Yearly | `novakitz.premium.yearly` | 1 year | $49.99 |
 
-The IDs keep the word `premium` even though the tier is called **Pro**. Product
-IDs are permanent and invisible to users; the entitlement in code is already
-`premium`, and keeping them aligned is worth more than a tidier string. What the
-user sees is the display name, which is Pro everywhere.
+The two ids do not match, and that is fine. `novakitz.premium.monthly` was
+created, deleted, and is therefore burned — App Store Connect reserves a product
+id permanently, even after deletion. Renaming the yearly product for symmetry
+would burn its id too, to fix something no user can see.
+
+Product ids are permanent and invisible to users. The entitlement in code stays
+`premium` regardless — that name is in `src/lib/revenuecat.ts` and has nothing to
+do with these. What the user sees is the display name, which is Pro everywhere.
+
+Nothing in the app references a product id. `src/lib/revenuecat.ts` resolves
+purchases through RevenueCat's package identifiers (`$rc_monthly`, `$rc_annual`),
+so a product id can be changed in App Store Connect and RevenueCat without
+touching code.
 
 Each product also needs a localised display name, a description, and a review
 screenshot before it will leave "Missing Metadata".
@@ -333,7 +342,7 @@ screenshot before it will leave "Missing Metadata".
 | --- | --- |
 | Entitlement | `premium` |
 | Offering | `default`, marked Current |
-| Package → Monthly | `$rc_monthly` → `novakitz.premium.monthly` |
+| Package → Monthly | `$rc_monthly` → `novakitz.pro.monthly` |
 | Package → Annual | `$rc_annual` → `novakitz.premium.yearly` |
 | App Store Connect API key | needed for RevenueCat to read subscription status |
 | In-App Purchase Key (`.p8`) | required for server notifications |
