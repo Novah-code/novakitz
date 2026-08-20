@@ -29,6 +29,13 @@ export interface Streak {
   total: number;
   /** Whether the ritual has already been done today. */
   doneToday: boolean;
+  /**
+   * Missed days inside the current streak that were forgiven — one per calendar
+   * month. Surfaced rather than hidden: a streak that survives a gap silently
+   * reads as a bug, and the allowance only changes behaviour if people know
+   * they have it.
+   */
+  forgiven: number;
   /** The last seven days, oldest first. */
   week: StreakDay[];
 }
@@ -54,6 +61,7 @@ export const emptyStreak = (): Streak => ({
   current: 0,
   total: 0,
   doneToday: false,
+  forgiven: 0,
   week: Array.from({ length: 7 }, (_, i) => ({ date: daysAgo(6 - i), completed: false })),
 });
 
@@ -87,28 +95,46 @@ export async function loadStreak(userId: string): Promise<Streak> {
   const today = daysAgo(0);
   const doneToday = dates.has(today);
 
-  // An unfinished today does not break a streak — it is still in progress, and
-  // showing yesterday's count is the whole point of the mechanic. Anchor on
-  // today when it is done, otherwise on yesterday.
-  let current = 0;
-  const anchor = doneToday ? 0 : dates.has(daysAgo(1)) ? 1 : -1;
-  if (anchor >= 0) {
-    current = 1;
-    // No fixed ceiling — a streak should be able to run as long as the person
-    // does. The bound is dates.size because a streak cannot be longer than the
-    // number of days ever completed, which also guarantees this terminates.
-    for (let i = anchor + 1; i <= dates.size; i++) {
-      if (!dates.has(daysAgo(i))) break;
+  // Today being unfinished is not a miss — it is still in progress, and showing
+  // the count while it is open is the whole point. So the walk starts at
+  // yesterday and today only adds to the total once it is actually done.
+  //
+  // One missed day per calendar month is forgiven. Without that, a single
+  // missed morning takes a sixty-day streak to zero, and that is the moment
+  // people stop altogether rather than start again — which is the opposite of
+  // what a gentle morning app should do to someone who overslept once.
+  let current = doneToday ? 1 : 0;
+  const forgivenMonths = new Set<string>();
+
+  // Terminates regardless of data: `current` can never exceed dates.size, and
+  // forgiven days are at most one per month, so this bound is never binding on
+  // a real streak.
+  const limit = dates.size * 2 + 10;
+  for (let i = 1; i <= limit; i++) {
+    const day = daysAgo(i);
+    if (dates.has(day)) {
       current++;
+      continue;
     }
+    const month = day.slice(0, 7);
+    if (!forgivenMonths.has(month)) {
+      forgivenMonths.add(month);
+      continue;
+    }
+    break;
   }
+
+  // A streak of nothing is not a streak; without this a brand new user whose
+  // first missed day is forgiven would show a streak of zero that still claims
+  // to have spent its grace.
+  if (current === 0) forgivenMonths.clear();
 
   const week: StreakDay[] = Array.from({ length: 7 }, (_, i) => {
     const date = daysAgo(6 - i);
     return { date, completed: dates.has(date) };
   });
 
-  return { current, total: dates.size, doneToday, week };
+  return { current, total: dates.size, doneToday, forgiven: forgivenMonths.size, week };
 }
 
 /**
