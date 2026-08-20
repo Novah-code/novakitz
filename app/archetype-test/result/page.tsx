@@ -63,7 +63,7 @@ export default function ArchetypeResult() {
   const loadResult = async () => {
     const answersStr = localStorage.getItem('guest_quiz_answers');
     if (!answersStr) {
-      router.push('/archetype-test');
+      router.push('/archetype-test/');
       return;
     }
 
@@ -167,7 +167,7 @@ export default function ArchetypeResult() {
     localStorage.removeItem('guest_quiz_answers');
     localStorage.removeItem('guest_result_id');
     localStorage.removeItem('archetype_unlocked');
-    router.push('/archetype-test');
+    router.push('/archetype-test/');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -689,7 +689,7 @@ export default function ArchetypeResult() {
               }
             </p>
             <button
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => window.location.href = '/pricing/'}
               style={{
                 padding: '14px 28px',
                 background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

@@ -414,7 +414,7 @@ export default function PricingPage() {
 
         {/* Footer links */}
         <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid rgba(122,179,130,0.2)' }}>
-          {[['Terms', '/legal/terms'], ['Privacy', '/legal/privacy'], ['Refund', '/legal/refund']].map(([label, href], i) => (
+          {[['Terms', '/legal/terms/'], ['Privacy', '/legal/privacy/'], ['Refund', '/legal/refund/']].map(([label, href], i) => (
             <span key={i}>
               {i > 0 && <span style={{ fontSize: 11, color: G.textLight, margin: '0 4px' }}>·</span>}
               <a href={href} style={{ fontSize: 11, color: G.textLight, textDecoration: 'none', margin: '0 6px' }}>{label}</a>

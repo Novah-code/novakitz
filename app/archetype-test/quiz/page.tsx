@@ -17,7 +17,7 @@ export default function ArchetypeQuiz() {
     // Check if guest dream was saved
     const guestDream = localStorage.getItem('guest_dream');
     if (!guestDream) {
-      router.push('/archetype-test');
+      router.push('/archetype-test/');
     }
 
     // Load language from localStorage
@@ -57,7 +57,7 @@ export default function ArchetypeQuiz() {
 
     if (isLastQuestion) {
       // Go to results
-      router.push('/archetype-test/result');
+      router.push('/archetype-test/result/');
     } else {
       // Next question
       setCurrentQuestion(currentQuestion + 1);

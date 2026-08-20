@@ -124,7 +124,7 @@ export default function UnconsciousProfilePage() {
             아키타입 테스트를 완료하면 나만의 무의식 프로파일이 생성됩니다.
           </p>
           <button
-            onClick={() => router.push('/archetype-test')}
+            onClick={() => router.push('/archetype-test/')}
             style={{
               padding: '12px 24px',
               background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

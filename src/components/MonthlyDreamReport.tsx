@@ -626,7 +626,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                     ? 'AI 월간 분석, 아키타입 발견, 다음 달 가이드를 모두 확인하세요'
                     : 'Access AI analysis, archetype discovery, and your personalized next-month guide'}
                 </p>
-                <button onClick={() => window.location.href = '/pricing'} style={{ padding: '12px 28px', background: '#7ea886', color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(126,168,134,0.35)' }}>
+                <button onClick={() => window.location.href = '/pricing/'} style={{ padding: '12px 28px', background: '#7ea886', color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(126,168,134,0.35)' }}>
                   {language === 'ko' ? 'Pro 시작하기' : 'Unlock Pro'}
                 </button>
               </div>

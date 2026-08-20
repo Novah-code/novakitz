@@ -885,7 +885,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               {/* Upgrade button for free users */}
               {!isPremium && !isLifetime && (
                 <button
-                  onClick={() => { window.location.href = '/pricing'; }}
+                  onClick={() => { window.location.href = '/pricing/'; }}
                   style={{
                     padding: '14px 20px',
                     background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

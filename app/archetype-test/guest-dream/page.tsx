@@ -87,7 +87,7 @@ export default function GuestDreamRecording() {
 
     // Move to quiz
     setTimeout(() => {
-      router.push('/archetype-test/quiz');
+      router.push('/archetype-test/quiz/');
     }, 500);
   };
 
@@ -98,7 +98,7 @@ export default function GuestDreamRecording() {
       timestamp: new Date().toISOString(),
       skipped: true
     }));
-    router.push('/archetype-test/quiz');
+    router.push('/archetype-test/quiz/');
   };
 
   if (loading) {
