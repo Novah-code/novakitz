@@ -285,9 +285,6 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
-                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
-              </p>
               <button
                 onClick={() => handleBuy('premium')}
                 style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: 'rgba(255,255,255,0.4)', border: `1px solid ${G.green}`, color: G.green, transition: 'background 0.2s' }}
@@ -322,9 +319,6 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <p style={{ textAlign: 'center', fontSize: 11, color: G.textLight, margin: '0 0 8px' }}>
-                * {ko ? '가입한 이메일과 동일한 결제 이메일을 입력해주세요' : 'Use the same email for both payment and sign-up'}
-              </p>
               <button
                 onClick={() => handleBuy('yearly')}
                 style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: G.green, border: `1px solid ${G.green}`, color: 'white', boxShadow: '0 6px 15px rgba(122,179,130,0.3)', transition: 'all 0.2s' }}
