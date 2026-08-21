@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../../src/lib/platform';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { startCheckout } from '../../src/lib/checkout';
@@ -87,6 +88,20 @@ export default function PricingPage() {
     const { changed, message } = await startCheckout(plan, language);
     if (message) setToast({ message, type: changed ? 'success' : 'info' });
   };
+
+  // The free allowance was only mentioned inside an FAQ answer, so the page
+  // showed two paid plans and nothing to compare them against. Apple expects
+  // subscription terms to be legible, and a paywall that hides what free gets
+  // you is the kind of thing people resent after paying.
+  const freeFeatures = ko ? [
+    '월 7회 AI 해석',
+    '무제한 꿈 기록 및 전체 히스토리',
+    '매일 아침 감정 체크인',
+  ] : [
+    '7 AI interpretations a month',
+    'Unlimited dreams & full history',
+    'Daily morning mood check-in',
+  ];
 
   const premiumFeatures = ko ? [
     '월 200회 AI 해석 — 꿈과 감정 기반',
@@ -268,6 +283,32 @@ export default function PricingPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24, alignItems: 'stretch' }}>
+
+            {/* Free */}
+            <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column', opacity: 0.92 }}>
+              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Free</h3>
+              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '가입만 하면' : 'Just sign up'}</p>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 42, fontWeight: 700, color: G.textLight, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  $0
+                </div>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
+                {freeFeatures.map((f, i) => (
+                  <li key={i} style={{ fontSize: 14, color: G.textDark, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                    <Check />{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => goTo('/')}
+                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: 'transparent', border: `1px solid ${G.textLight}`, color: G.textLight, transition: 'background 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.03)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                {ko ? '무료로 시작하기' : 'Start free'}
+              </button>
+            </div>
 
             {/* Pro */}
             <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>

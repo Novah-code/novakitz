@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkQuota } from '../../../src/lib/subscriptionServer';
 
 // API 모니터링을 위한 로깅
 interface APIMetrics {
@@ -219,13 +220,29 @@ export async function POST(request: NextRequest) {
   console.log('[POST] API Key Status:', apiKeyStatus);
 
   try {
-    const { dreamText, prompt, language = 'en', isPremium = false, dreamId, userId, mode = 'dream' } = await request.json();
+    // `isPremium` used to be read off the body here and never used for
+    // anything. A client's own claim about what it has paid for is not evidence,
+    // so it is gone rather than wired up — the quota check below asks the
+    // database instead.
+    const { dreamText, prompt, language = 'en', dreamId, userId, mode = 'dream' } = await request.json();
     console.log('Dream text received:', dreamText);
     console.log('Language:', language);
-    console.log('Is Premium:', isPremium);
     console.log('Dream ID:', dreamId);
     console.log('User ID:', userId);
     console.log('Mode:', mode);
+
+    // The monthly limit was enforced only in the browser, so calling this route
+    // directly bypassed it. Guests are left alone here: they have no row to
+    // count against, and gating them is a product decision rather than a fix.
+    if (mode === 'dream' && userId) {
+      const quota = await checkQuota(userId);
+      if (!quota.allowed) {
+        return NextResponse.json(
+          { error: 'Monthly interpretation limit reached', used: quota.used, limit: quota.limit },
+          { status: 429 }
+        );
+      }
+    }
 
     // monthly mode: use the prompt parameter directly (for monthly report AI synthesis)
     if (mode === 'monthly') {

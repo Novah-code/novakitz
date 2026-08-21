@@ -20,6 +20,7 @@ import Toast, { ToastType } from './Toast';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
 import { EMOTIONS, emotionLabel } from '../lib/emotions';
+import { goTo } from '../lib/platform';
 
 // Lazy load heavy components that are not needed on initial render
 const APIMonitoringDashboard = dynamic(() => import('./APIMonitoringDashboard'), { ssr: false });
@@ -213,6 +214,9 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
+  // True when the response on screen is the monthly-limit notice rather than an
+  // interpretation, so the upgrade button is only offered where it makes sense.
+  const [limitReached, setLimitReached] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
   const [showInput, setShowInput] = useState(false);
   const [dreamText, setDreamText] = useState('');
@@ -1641,11 +1645,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       if (user) {
         const canAnalyze = await canAnalyzeDream(user.id);
         if (!canAnalyze.allowed) {
+          // Not "unlimited" — Pro is capped at 200 a month. That is a reading
+          // every morning and then some, which is the promise worth making.
           const limitMessage = language === 'ko'
-            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). Pro로 업그레이드하면 무제한 해석이 가능합니다.`
-            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Upgrade to Pro for unlimited interpretations.`;
+            ? `이번 달 AI 해석 한도에 도달했습니다 (${canAnalyze.limit}회/월). Pro는 매일 해석을 받을 수 있습니다 — 월 200회.`
+            : `You've reached your monthly AI interpretation limit (${canAnalyze.limit}/month). Pro gives you a daily interpretation — 200 a month.`;
 
           setDreamResponse(limitMessage);
+          setLimitReached(true);
           // Still save the dream without analysis
           const noAnalysisMsg = language === 'ko'
             ? '한도 초과로 인해 AI 분석 없이 저장되었습니다.'
@@ -1662,6 +1669,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
         console.log(`AI interpretations remaining: ${canAnalyze.remaining}/${canAnalyze.limit}`);
       }
+
+      setLimitReached(false);
 
       // Generate dreamId before analysis for pattern extraction
       const tempDreamId = Date.now().toString();
@@ -5479,6 +5488,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   </div>
                   <div className="modal-actions" style={{padding: '20px 24px', borderTop: '1px solid #e5e7eb', background: '#f9f9f9', display: 'flex', gap: '12px', justifyContent: 'center'}}>
+                    {/*
+                      The monthly limit notice used to be text with nowhere to go,
+                      which put a dead end at the one moment someone is most
+                      willing to pay. Only shown for that notice — an ordinary
+                      interpretation should not be interrupted with a sales button.
+                    */}
+                    {limitReached && (
+                      <button
+                        onClick={() => goTo('/pricing/')}
+                        className="btn-primary"
+                        style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
+                      >
+                        {language === 'ko' ? 'Pro 보기' : 'See Pro'}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setShowResponse(false);
