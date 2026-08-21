@@ -185,16 +185,6 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
         </div>
       )}
 
-      <p style={{
-        marginTop: '0.75rem',
-        fontSize: '0.7rem',
-        color: 'var(--sage, #6b8e63)',
-        textAlign: 'center',
-        lineHeight: '1.4'
-      }}>
-        Your dreams are private and secure
-      </p>
-
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
