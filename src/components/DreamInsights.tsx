@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../lib/platform';
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
@@ -459,7 +460,7 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                       </p>
                       <button
                         className="di-cta-btn"
-                        onClick={() => { window.location.href = '/pricing/'; }}
+                        onClick={() => { goTo('/pricing/'); }}
                         style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
                       >
                         <span style={{ display: 'flex' }}><LockIcon size={13} /></span>
