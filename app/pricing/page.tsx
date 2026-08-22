@@ -93,46 +93,47 @@ export default function PricingPage() {
   // showed two paid plans and nothing to compare them against. Apple expects
   // subscription terms to be legible, and a paywall that hides what free gets
   // you is the kind of thing people resent after paying.
+  // Only what each tier actually gets. The Pro list used to carry three lines
+  // that free accounts also receive — history, affirmations, and an "archetype
+  // journey timeline" that does not exist as a feature at all. A paywall that
+  // promises what the free tier already gives is both dishonest and the kind of
+  // mismatch review looks for.
+  //
+  // Pro's cap is 200 interpretations a month, which is a reading every morning
+  // and then some. Said as "daily" rather than as the number: it is true, it is
+  // the shape of the habit, and it does not read as a limit being negotiated.
   const freeFeatures = ko ? [
     '월 7회 AI 해석',
-    '무제한 꿈 기록 및 전체 히스토리',
+    '전체 히스토리 보관',
     '매일 아침 감정 체크인',
   ] : [
     '7 AI interpretations a month',
-    'Unlimited dreams & full history',
+    'Full history',
     'Daily morning mood check-in',
   ];
 
   const premiumFeatures = ko ? [
-    '월 200회 AI 해석 — 꿈과 감정 기반',
-    '무제한 꿈 기록 및 전체 히스토리',
-    '맞춤 확언 제공',
-    '월간 드림 리뷰 & 꿈 패턴 분석',
-    '개인 아키타입 여정 타임라인',
-    '모든 미래 기능 무료 업데이트',
+    '무료의 모든 기능 포함',
+    '매일 받는 AI 해석 — 꿈과 감정',
+    '월간 드림 리뷰 & 패턴 분석',
+    '앞으로 추가되는 기능 무료',
   ] : [
-    '200 AI interpretations a month — dreams and moods',
-    'Unlimited dreams & full history',
-    'Personalized affirmations',
+    'Everything in Free',
+    'A daily AI interpretation — dreams and moods',
     'Monthly dream review & pattern analysis',
-    'Personal archetype journey timeline',
     'All future updates free',
   ];
 
   const yearlyFeatures = ko ? [
     'Pro의 모든 기능 포함',
     '연간 결제로 30% 절약',
-    '월 200회 AI 해석 — 꿈과 감정 기반',
-    '무제한 꿈 기록 및 전체 히스토리',
-    '맞춤 확언 제공',
-    '월간 드림 리뷰 & 아키타입 타임라인',
+    '매일 받는 AI 해석 — 꿈과 감정',
+    '월간 드림 리뷰 & 패턴 분석',
   ] : [
     'Everything in Pro',
     'Save 30% with annual billing',
-    '200 AI interpretations a month — dreams and moods',
-    'Unlimited dreams & full history',
-    'Personalized affirmations',
-    'Monthly dream review & archetype timeline',
+    'A daily AI interpretation — dreams and moods',
+    'Monthly dream review & pattern analysis',
   ];
 
   const whyCards = [

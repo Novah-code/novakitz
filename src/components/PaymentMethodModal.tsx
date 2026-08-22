@@ -45,7 +45,7 @@ export default function PaymentMethodModal({
       yearlyDiscount: '30% Off',
       subscribe: 'Subscribe Now',
       features: {
-        unlimited: '200 AI interpretations a month',
+        daily: 'A daily AI interpretation',
         history: 'Full dream history',
         patterns: 'Advanced pattern analysis',
         report: 'Monthly insights report',
@@ -62,8 +62,8 @@ export default function PaymentMethodModal({
       yearlyDiscount: '30% 할인',
       subscribe: '구독하기',
       features: {
-        unlimited: '월 200회 AI 해석',
-        history: '무제한 꿈 기록',
+        daily: '매일 받는 AI 해석',
+        history: '전체 히스토리 보관',
         patterns: '고급 패턴 분석',
         report: '월간 인사이트 리포트',
         export: 'PDF 내보내기',
@@ -117,7 +117,7 @@ export default function PaymentMethodModal({
 
             {/* Features */}
             <ul className="payment-features">
-              <li>{t.features.unlimited}</li>
+              <li>{t.features.daily}</li>
               <li>{t.features.history}</li>
               <li>{t.features.patterns}</li>
               <li>{t.features.report}</li>

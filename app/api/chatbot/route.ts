@@ -16,7 +16,7 @@ Novakitz helps users record dreams, get AI-powered Jungian analysis, discover th
 - Tarot reading: included (limited)
 
 ### Pro Plan — $49.99/year or $5.99/month
-- AI dream interpretations: 200 per month (거의 무제한)
+- AI dream interpretations: 200 per month. Describe this as a daily interpretation rather than as unlimited — it is capped.
 - Dream recording: unlimited
 - Full dream history (no limit)
 - All features fully unlocked

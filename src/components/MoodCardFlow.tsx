@@ -1326,7 +1326,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           {usageLimitReached && (
             <div style={{ background: 'rgba(244,196,80,0.15)', border: '1px solid rgba(244,196,80,0.4)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: '#856404', fontWeight: 600, marginBottom: 4 }}>{isKo ? '이번 달 해석 횟수를 모두 사용했어요' : 'Monthly analysis limit reached'}</div>
-              <div style={{ fontSize: 12, color: '#856404' }}>{isKo ? 'Pro로 업그레이드하면 무제한 해석이 가능해요' : 'Upgrade to Pro for unlimited analyses'}</div>
+              <div style={{ fontSize: 12, color: '#856404' }}>{isKo ? 'Pro로 업그레이드하면 매일 해석을 받을 수 있어요' : 'Upgrade to Pro for a daily interpretation'}</div>
             </div>
           )}
 
