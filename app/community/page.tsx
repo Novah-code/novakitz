@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../../src/lib/platform';
 import { useState, useEffect } from 'react';
 import { supabase } from '../../src/lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -315,7 +316,7 @@ export default function CommunityPage() {
 
               {/* Apricot Garden - temporarily hidden
               <button
-                onClick={() => { window.location.href = '/community/'; setMenuOpen(false); }}
+                onClick={() => { goTo('/community/'); setMenuOpen(false); }}
                 style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
@@ -326,7 +327,7 @@ export default function CommunityPage() {
               */}
 
               <button
-                onClick={() => { window.location.href = '/pricing/'; setMenuOpen(false); }}
+                onClick={() => { goTo('/pricing/'); setMenuOpen(false); }}
                 style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
@@ -336,7 +337,7 @@ export default function CommunityPage() {
               </button>
 
               <button
-                onClick={() => { window.location.href = '/archetype-test/'; setMenuOpen(false); }}
+                onClick={() => { goTo('/archetype-test/'); setMenuOpen(false); }}
                 style={{ padding: '1rem 2rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', color: 'var(--matcha-dark)', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'background 0.2s', fontFamily: 'inherit' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'none'}

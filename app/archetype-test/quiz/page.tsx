@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../../../src/lib/platform';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ARCHETYPE_QUIZ_QUESTIONS, getQuizProgress } from '../../../src/lib/archetypeQuiz';
@@ -17,7 +18,7 @@ export default function ArchetypeQuiz() {
     // Check if guest dream was saved
     const guestDream = localStorage.getItem('guest_dream');
     if (!guestDream) {
-      router.push('/archetype-test/');
+      goTo('/archetype-test/');
     }
 
     // Load language from localStorage
@@ -57,7 +58,7 @@ export default function ArchetypeQuiz() {
 
     if (isLastQuestion) {
       // Go to results
-      router.push('/archetype-test/result/');
+      goTo('/archetype-test/result/');
     } else {
       // Next question
       setCurrentQuestion(currentQuestion + 1);

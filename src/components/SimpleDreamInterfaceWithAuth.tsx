@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { goTo } from '../lib/platform';
 import { useState, useEffect, useRef } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
@@ -56,7 +56,6 @@ const translations = {
 };
 
 export default function SimpleDreamInterfaceWithAuth() {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -617,7 +616,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               })()}
 
               {/* Pricing */}
-              <button onClick={() => { router.push('/pricing/'); }}
+              <button onClick={() => { goTo('/pricing/'); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -626,7 +625,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               </button>
 
               {/* My Archetype */}
-              <button onClick={() => { router.push('/archetype-test/'); }}
+              <button onClick={() => { goTo('/archetype-test/'); }}
                 style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>

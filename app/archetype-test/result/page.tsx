@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../../../src/lib/platform';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { calculateArchetypeFromQuiz } from '../../../src/lib/archetypeQuiz';
@@ -63,7 +64,7 @@ export default function ArchetypeResult() {
   const loadResult = async () => {
     const answersStr = localStorage.getItem('guest_quiz_answers');
     if (!answersStr) {
-      router.push('/archetype-test/');
+      goTo('/archetype-test/');
       return;
     }
 
@@ -167,7 +168,7 @@ export default function ArchetypeResult() {
     localStorage.removeItem('guest_quiz_answers');
     localStorage.removeItem('guest_result_id');
     localStorage.removeItem('archetype_unlocked');
-    router.push('/archetype-test/');
+    goTo('/archetype-test/');
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -689,7 +690,7 @@ export default function ArchetypeResult() {
               }
             </p>
             <button
-              onClick={() => window.location.href = '/pricing/'}
+              onClick={() => goTo('/pricing/')}
               style={{
                 padding: '14px 28px',
                 background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',

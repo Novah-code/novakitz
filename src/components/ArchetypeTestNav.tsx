@@ -1,5 +1,6 @@
 'use client';
 
+import { goTo } from '../lib/platform';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -165,7 +166,7 @@ export default function ArchetypeTestNav({ language, onLanguageChange, isLoggedI
               </button>
 
               {/* Pricing */}
-              <button onClick={() => { router.push('/pricing/'); setMenuOpen(false); }} style={navBtnStyle}
+              <button onClick={() => { goTo('/pricing/'); setMenuOpen(false); }} style={navBtnStyle}
                 onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(122,179,130,0.1)'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
                 <span style={iconSpanStyle}>
