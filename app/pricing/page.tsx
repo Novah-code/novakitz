@@ -102,12 +102,17 @@ export default function PricingPage() {
   // Pro's cap is 200 interpretations a month, which is a reading every morning
   // and then some. Said as "daily" rather than as the number: it is true, it is
   // the shape of the habit, and it does not read as a limit being negotiated.
+  // Affirmations sit here rather than under Pro because every account gets
+  // them — three, generated from the dream or mood just recorded. Real enough
+  // to be worth naming, just not a reason to upgrade.
   const freeFeatures = ko ? [
     '월 7회 AI 해석',
+    '맞춤 확언 제공',
     '전체 히스토리 보관',
     '매일 아침 감정 체크인',
   ] : [
     '7 AI interpretations a month',
+    'Personalized affirmations',
     'Full history',
     'Daily morning mood check-in',
   ];
