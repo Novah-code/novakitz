@@ -506,9 +506,14 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      minHeight: '100vh',
+      minHeight: '100dvh',
       background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+      // 100vh spans the whole screen, status bar included, so a centred card
+      // tall enough to fill it puts its heading under the clock. The insets
+      // resolve to 0 on the web, where this reads as plain 2rem padding.
       padding: '2rem',
+      paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))',
+      paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
       fontFamily: preferredLanguage === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
     }}>
       <div style={{
@@ -520,7 +525,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         background: 'rgba(255, 255, 255, 0.85)',
         border: '2px solid rgba(127, 176, 105, 0.3)',
         boxShadow: '0 8px 32px rgba(127, 176, 105, 0.2), 0 2px 8px rgba(0, 0, 0, 0.05)',
-        maxHeight: '90vh',
+        maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 4rem)',
         overflowY: 'auto'
       }}>
         <style>{`
