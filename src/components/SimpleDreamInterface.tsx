@@ -340,7 +340,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         '-' +
         String(now.getDate()).padStart(2, '0');
       const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
-      await supabase.from('checkins').insert([{
+      // Upsert, not insert: checkins is unique on (user_id, check_date,
+      // time_of_day), so checking in a second time the same morning came back
+      // 409 and the mood was quietly dropped — along with the day's streak.
+      // Checking in again is a correction, so the later choice wins.
+      await supabase.from('checkins').upsert({
         user_id: user.id,
         check_date: today,
         time_of_day: timeOfDay,
@@ -349,7 +353,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         // store 2 — so the key is what the calendar colours a day from.
         emotion: emotion.key,
         energy_level: 5,
-      }]);
+      }, { onConflict: 'user_id,check_date,time_of_day' });
       setStreakRefresh((n) => n + 1);
     } catch (e) {
       console.error('Emotion save error:', e);
