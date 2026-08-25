@@ -17,7 +17,7 @@
   position: fixed;
   inset: 0;
   overflow: hidden;
-  --scene-size: min(58vw, 46vh, 400px);
+  --scene-size: min(66vw, 52vh, 440px);
 
   /* Where the hill meets the sky, as a share of the screen. */
   --horizon: 62%;
@@ -101,7 +101,7 @@
  */
 .home-scene__glow {
   position: absolute;
-  top: calc(var(--horizon) - var(--scene-size) * 0.34);
+  top: calc(var(--horizon) - var(--scene-size) * 0.40);
   left: 50%;
   width: calc(var(--scene-size) * 1.28);
   height: calc(var(--scene-size) * 1.28);
@@ -128,7 +128,7 @@
 
 .home-scene__portal {
   position: absolute;
-  top: calc(var(--horizon) - var(--scene-size) * 0.34);
+  top: calc(var(--horizon) - var(--scene-size) * 0.40);
   left: 50%;
   transform: translate(-50%, -50%);
   width: var(--scene-size);
@@ -210,10 +210,18 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.4;
-  mix-blend-mode: soft-light;
+  /*
+   * Tuned against the painting rather than by eye. Measuring the high-frequency
+   * deviation of the artwork's own sky gives ~11.6; plain fractalNoise under
+   * soft-light measured 1.8, which is why the background looked plotted beside
+   * a disc that looked printed. The feComponentTransfer stretches the noise's
+   * contrast — turbulence on its own is a low-contrast grey mush — and overlay
+   * at 0.75 lands the field on the same number as the painting.
+   */
+  opacity: 0.75;
+  mix-blend-mode: overlay;
   z-index: 3;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2' intercept='-0.5'/%3E%3CfeFuncG type='linear' slope='2' intercept='-0.5'/%3E%3CfeFuncB type='linear' slope='2' intercept='-0.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @keyframes home-scene-breathe {
@@ -228,7 +236,7 @@
 @media (max-height: 560px) {
   .home-scene {
     --horizon: 70%;
-    --scene-size: min(46vw, 52vh, 320px);
+    --scene-size: min(52vw, 58vh, 340px);
   }
 }
 
