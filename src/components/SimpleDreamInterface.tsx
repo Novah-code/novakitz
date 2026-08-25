@@ -4040,19 +4040,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
       <div className="w-full" style={{height: 'var(--app-height)', minHeight: 'var(--app-height)', position: 'relative'}}>
 
-        
-        {/* novakitz Logo */}
-        <div className="nova-logo" onClick={() => setShowHistory(true)}>
-          <div className="logo-dots">
-            <div className="logo-dot dot-1"></div>
-            <div className="logo-dot dot-2"></div>
-            <div className="logo-dot dot-3"></div>
-            <div className="logo-dot dot-4"></div>
-            <div className="logo-dot dot-5"></div>
-            <div className="logo-dot dot-6"></div>
-          </div>
-        </div>
-        
+        {/*
+          * The dot logo used to sit here as a second, unlabelled way into
+          * History. The menu already has History with its name on it, so this
+          * was a mystery button competing with the disc for the corner of a
+          * screen that is meant to hold one thing.
+          */}
+
         <main className="w-full max-w-xl mx-auto z-10 text-center" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, margin: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
 
           {!showInput && !showResponse && !showHistory && user && (

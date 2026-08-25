@@ -93,14 +93,30 @@ export default function SimpleDreamInterfaceWithAuth() {
   }, [user]);
 
   // Check if user has a completed profile
+  /*
+   * Does this account already have a profile?
+   *
+   * Only a definite "no row, or a row with nothing in it" should send someone
+   * to Profile Setup. Every other outcome — the query timing out, an error,
+   * an exception — used to return false as well, which meant a slow morning
+   * put established accounts through a five-step form for a profile they had
+   * already filled in. "We could not tell" is not the same answer as "you are
+   * new", and guessing wrong in that direction is much worse: a returning user
+   * is asked to invent a nickname the database will reject as taken, while a
+   * genuinely new user who slips past simply gets a less personal reading
+   * until they fill it in from Profile.
+   *
+   * Three seconds was also short for a cold connection on mobile data, which
+   * is exactly when this runs — first launch of the morning.
+   */
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.warn('Profile query timeout - returning false (show profile form)');
-          resolve(false);
-        }, 3000);
+          console.warn('Profile query timed out; assuming the profile exists rather than re-asking.');
+          resolve(true);
+        }, 10000);
       });
 
       const queryPromise = (async (): Promise<boolean> => {
@@ -113,10 +129,11 @@ export default function SimpleDreamInterfaceWithAuth() {
 
           console.log('Profile query result - data:', data, 'error:', error);
 
-          // Error code PGRST116 = no matching record (new user, no profile)
+          // Error code PGRST116 = no matching record (new user, no profile).
+          // Anything else is a failed lookup, not evidence of a missing profile.
           if (error && error.code !== 'PGRST116') {
-            console.error('Error checking profile:', error);
-            return false;
+            console.error('Could not check profile; assuming it exists:', error);
+            return true;
           }
 
           if (data) {
@@ -137,9 +154,8 @@ export default function SimpleDreamInterfaceWithAuth() {
 
           return false;
         } catch (queryError) {
-          console.error('Exception in queryPromise:', queryError);
-          // Return false on error to show profile form (safer for new users)
-          return false;
+          console.error('Could not check profile; assuming it exists:', queryError);
+          return true;
         }
       })();
 
@@ -147,9 +163,8 @@ export default function SimpleDreamInterfaceWithAuth() {
       console.log('checkUserProfile final result:', result);
       return result;
     } catch (error) {
-      console.error('Error checking profile:', error);
-      // Return false on error to show profile form (safer for new users)
-      return false;
+      console.error('Could not check profile; assuming it exists:', error);
+      return true;
     }
   };
 
@@ -539,12 +554,14 @@ export default function SimpleDreamInterfaceWithAuth() {
           }}>
             <style>{`@keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }`}</style>
 
-            {/* Header: close button only */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexShrink: 0 }}>
-              <button onClick={() => setMenuOpen(false)} style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E', boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
+            {/*
+              * Room for the hamburger, which is fixed above this panel and
+              * turns into an X while the menu is open. The drawer used to carry
+              * a second close button of its own, directly under that one — two
+              * X's stacked in the same corner, both doing the same thing. The
+              * one that stays is the one you already pressed to get here.
+              */}
+            <div style={{ height: 44, flexShrink: 0 }} />
 
             {/* Profile button - original style, only for logged in users */}
             {user && (
