@@ -20,13 +20,22 @@ interface UserProfileFormProps {
   onCancel?: () => void;
 }
 
+/*
+ * These go into the interpretation prompt, which is the only reason to ask.
+ *
+ * The list used to be a hobby survey — Gaming, Fashion, Beauty, Cooking,
+ * Sports — eighteen chips on the first screen after sign-up, most of which
+ * tell a reading nothing. What is left is the part of a life a dream tends to
+ * be about: work, people, health, what someone makes, and how they already
+ * think about their inner life.
+ */
 const INTEREST_OPTIONS = {
-  en: ['Psychology', 'Self-development', 'Meditation', 'Yoga', 'Reading', 'Movies',
-       'Music', 'Travel', 'Cooking', 'Sports', 'Arts', 'Writing',
-       'Gaming', 'Technology', 'Nature', 'Animals', 'Fashion', 'Beauty'],
-  ko: ['심리학', '자기계발', '명상', '요가', '독서', '영화',
-       '음악', '여행', '요리', '운동', '예술', '글쓰기',
-       '게임', '기술', '자연', '동물', '패션', '뷰티']
+  en: ['Psychology', 'Self-development', 'Meditation', 'Spirituality',
+       'Reading', 'Writing', 'Art', 'Music',
+       'Nature', 'Relationships', 'Career', 'Health'],
+  ko: ['심리학', '자기계발', '명상', '영성',
+       '독서', '글쓰기', '예술', '음악',
+       '자연', '관계', '커리어', '건강']
 };
 
 const OCCUPATION_OPTIONS = {
@@ -246,7 +255,12 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
   const t = translations[preferredLanguage];
 
-  // Validate nickname: 영문, 숫자, 한글만 허용, 공백 제외, 3-20자
+  // Validate nickname: English letters and numbers only, no spaces, 3-20 chars.
+  //
+  // Hangul used to be allowed here while ProfileSettings, which edits the same
+  // field later, rejected it — so a name accepted at sign-up could not be saved
+  // again afterwards. The app ships to English-speaking users and nicknames are
+  // public on shared profiles, so both screens take the same set now.
   const validateNickname = (nickname: string): { isValid: boolean; error: string } => {
     // 공백 확인
     if (nickname.includes(' ')) {
@@ -261,10 +275,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       return { isValid: false, error: preferredLanguage === 'ko' ? '최대 20자 이내입니다' : 'Maximum 20 characters' };
     }
 
-    // 영문, 숫자, 한글만 허용
-    const validPattern = /^[a-zA-Z0-9가-힣]+$/;
+    const validPattern = /^[a-zA-Z0-9]+$/;
     if (!validPattern.test(nickname)) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '영문, 숫자, 한글만 사용 가능합니다' : 'Only English, numbers, and Korean allowed' };
+      return { isValid: false, error: preferredLanguage === 'ko' ? '영문과 숫자만 사용 가능합니다' : 'Only English letters and numbers allowed' };
     }
 
     return { isValid: true, error: '' };
