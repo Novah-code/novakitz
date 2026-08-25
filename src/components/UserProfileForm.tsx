@@ -277,7 +277,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
 
     const validPattern = /^[a-zA-Z0-9]+$/;
     if (!validPattern.test(nickname)) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '영문과 숫자만 사용 가능합니다' : 'Only English letters and numbers allowed' };
+      // Says what is excluded rather than what is allowed. "영문과 숫자만" reads as
+      // a requirement for both, which sent people looking for a digit to add.
+      return { isValid: false, error: preferredLanguage === 'ko' ? '공백과 특수문자는 쓸 수 없어요' : 'No spaces or special characters' };
     }
 
     return { isValid: true, error: '' };

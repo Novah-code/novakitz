@@ -21,6 +21,7 @@ import { speechSupported, startListening, type SpeechSession } from '../lib/spee
 import ConfirmDialog from './ConfirmDialog';
 import { EMOTIONS, emotionLabel } from '../lib/emotions';
 import { goTo } from '../lib/platform';
+import { authHeader } from '../lib/authHeader';
 
 // Lazy load heavy components that are not needed on initial render
 const APIMonitoringDashboard = dynamic(() => import('./APIMonitoringDashboard'), { ssr: false });
@@ -1292,20 +1293,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
       const analysisPromise = (async () => {
         console.log('Fetching dream analysis from API...');
-        console.log('📤 Sending isPremium:', isPremium);
         const fetchStart = Date.now();
+        // Resolved once, outside the retry callback, so all five attempts carry
+        // the same token rather than re-reading the session on each retry.
+        const authHeaders = await authHeader();
         const response = await retryApiCall(() =>
           fetch('/api/analyze-dream', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              ...authHeaders,
             },
             body: JSON.stringify({
               dreamText: dreamText,
               language: language,
-              isPremium: isPremium,
-              dreamId: dreamId,
-              userId: userId
+              dreamId: dreamId
             })
           }),
           5, // 5 retries
@@ -1475,6 +1477,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(await authHeader()),
         },
         body: JSON.stringify({
           dreamText: prompt,

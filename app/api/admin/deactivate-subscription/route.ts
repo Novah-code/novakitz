@@ -1,28 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateAdmin, denied } from '../../../../src/lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Admin email - only this email can access
-const ADMIN_EMAIL = 'jeongnewna@gmail.com';
-
+// Deletes someone's subscription. Same forgeable check as add-subscription had.
 export async function POST(request: NextRequest) {
+  if (!(await authenticateAdmin(request))) return denied();
+
   try {
-    // Verify admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { userId, adminEmail } = await request.json();
-
-    // Verify admin email
-    if (adminEmail !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { userId } = await request.json();
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });

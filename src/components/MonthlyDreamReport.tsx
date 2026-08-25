@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { supabase, Dream } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { getUserPlanInfo } from '../lib/subscription';
+import { authHeader } from '../lib/authHeader';
 
 interface MonthlyReportProps {
   user: User | null;
@@ -201,7 +202,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
 
       const response = await fetch('/api/analyze-dream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
         body: JSON.stringify({ prompt, dreamText: prompt, mode: 'monthly' }),
       });
 

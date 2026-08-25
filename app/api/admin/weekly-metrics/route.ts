@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateAdmin, denied } from '../../../../src/lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
@@ -31,6 +32,8 @@ function getWeekRange(weeksAgo: number): { start: Date; end: Date } {
 const EXCLUDED_EMAILS = ['jeongnewna@gmail.com', 'nanazzang2025@gmail.com'];
 
 export async function GET(request: Request) {
+  if (!(await authenticateAdmin(request))) return denied();
+
   try {
     const { searchParams } = new URL(request.url);
     const weeksCount = parseInt(searchParams.get('weeks') || '8');

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateAdmin, denied } from '../../../../src/lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
@@ -7,6 +8,10 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function GET(request: NextRequest) {
+  // This returns every account's email, nickname and subscription state. It
+  // had no check at all, so the whole user list was one URL away.
+  if (!(await authenticateAdmin(request))) return denied();
+
   try {
     // Get all users
     const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers();
