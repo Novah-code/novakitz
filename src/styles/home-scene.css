@@ -67,9 +67,12 @@
  * The field.
  *
  * Wider than the screen on both sides so the arc reads as one long, shallow
- * curve rather than a dome — the horizon should bend, not bulge. It is drawn
- * over the disc, and takes no pointer events so the disc underneath still
- * receives the press.
+ * curve rather than a dome — the horizon should bend, not bulge.
+ *
+ * It sits behind the disc, which rests on the horizon rather than sinking
+ * through it. An earlier version drew the field on top and hid the disc's
+ * foot; that cropped the painting, and the painting is the one thing on this
+ * screen that should be whole.
  */
 .home-scene__ground {
   position: absolute;
@@ -85,7 +88,7 @@
     var(--field-far) 100%
   );
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
 }
 
 /*
@@ -101,7 +104,7 @@
  */
 .home-scene__glow {
   position: absolute;
-  top: calc(var(--horizon) - var(--scene-size) * 0.40);
+  top: calc(var(--horizon) - var(--scene-size) * 0.5);
   left: 50%;
   width: calc(var(--scene-size) * 1.28);
   height: calc(var(--scene-size) * 1.28);
@@ -114,7 +117,7 @@
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .home-scene--night .home-scene__glow {
@@ -128,7 +131,7 @@
 
 .home-scene__portal {
   position: absolute;
-  top: calc(var(--horizon) - var(--scene-size) * 0.40);
+  top: calc(var(--horizon) - var(--scene-size) * 0.5);
   left: 50%;
   transform: translate(-50%, -50%);
   width: var(--scene-size);
@@ -139,7 +142,7 @@
   cursor: pointer;
   border-radius: 50%;
   -webkit-tap-highlight-color: transparent;
-  z-index: 1;
+  z-index: 2;
 }
 
 .home-scene__disc {
