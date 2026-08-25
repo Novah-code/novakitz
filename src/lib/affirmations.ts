@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { authHeader } from './authHeader';
 
 export interface Affirmation {
   id: string;
@@ -35,9 +36,9 @@ export async function generateAffirmationsFromDream(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(await authHeader()),
       },
       body: JSON.stringify({
-        userId,
         dreamText,
         language
       })
@@ -287,9 +288,9 @@ export async function generateAffirmationsFromRecentDreams(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(await authHeader()),
       },
       body: JSON.stringify({
-        userId,
         language,
         useRecentDreams: true
       })

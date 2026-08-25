@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../src/lib/supabase';
+import { authHeader } from '../../src/lib/authHeader';
 import { User } from '@supabase/supabase-js';
 
 interface Subscription {
@@ -142,7 +143,7 @@ export default function AdminDashboard() {
 
   const loadUsers = async () => {
     try {
-      const response = await fetch('/api/admin/users');
+      const response = await fetch('/api/admin/users', { headers: await authHeader() });
       const data = await response.json();
       if (data.users) {
         setAllUsers(data.users);
@@ -180,12 +181,9 @@ export default function AdminDashboard() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer admin'
+            ...(await authHeader()),
           },
-          body: JSON.stringify({
-            userId,
-            adminEmail: user?.email
-          })
+          body: JSON.stringify({ userId })
         });
 
         const data = await response.json();
@@ -202,13 +200,9 @@ export default function AdminDashboard() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer admin'
+            ...(await authHeader()),
           },
-          body: JSON.stringify({
-            userEmail,
-            planType: plan,
-            adminEmail: user?.email
-          })
+          body: JSON.stringify({ userEmail, planType: plan })
         });
 
         const data = await response.json();
@@ -242,7 +236,7 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const response = await fetch('/api/subscriptions/list');
+      const response = await fetch('/api/subscriptions/list', { headers: await authHeader() });
       const data = await response.json();
 
       if (data.error) {
@@ -311,12 +305,11 @@ export default function AdminDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin'
+          ...(await authHeader()),
         },
         body: JSON.stringify({
           userEmail: manualEmail.trim(),
           planType: manualPlan,
-          adminEmail: user?.email
         })
       });
 

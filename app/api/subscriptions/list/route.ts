@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateAdmin, denied } from '../../../../src/lib/apiAuth';
 
 export async function GET(request: NextRequest) {
+  // Every subscription row, with user ids and billing dates. Previously open.
+  if (!(await authenticateAdmin(request))) return denied();
+
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

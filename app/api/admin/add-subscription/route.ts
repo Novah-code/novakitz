@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateAdmin, denied } from '../../../../src/lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Admin email - only this email can access
-const ADMIN_EMAIL = 'jeongnewna@gmail.com';
-
+/*
+ * This route grants a paid subscription, so it was the most valuable thing in
+ * the app to call without permission — and it could be. The old check read
+ * `adminEmail` out of the request body and compared it to a constant, and
+ * accepted any Authorization header so long as one was present. Both values
+ * belong to whoever is calling. Identity now comes from a verified token.
+ */
 export async function POST(request: NextRequest) {
+  if (!(await authenticateAdmin(request))) return denied();
+
   try {
-    // Verify admin
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { userEmail, planType, adminEmail } = await request.json();
-
-    // Verify admin email
-    if (adminEmail !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { userEmail, planType } = await request.json();
 
     if (!userEmail || !planType) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

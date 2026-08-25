@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
+import { authHeader } from '../lib/authHeader';
 
 interface MoodCardFlowProps {
   selectedEmotion: string;
@@ -477,11 +478,10 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
 
         const res = await fetch('/api/analyze-dream', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
           body: JSON.stringify({
             dreamText: dreamTextForAnalysis,
             language,
-            isPremium: true,
           }),
         });
         if (!res.ok) return null;
@@ -541,8 +541,8 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
         : egoFreeText;
       const res = await fetch('/api/analyze-dream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dreamText: dreamTextForApi, language, isPremium: true, mode: 'ego' }),
+        headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
+        body: JSON.stringify({ dreamText: dreamTextForApi, language, mode: 'ego' }),
       });
       const data = await res.json();
       if (res.ok && data.analysis) {

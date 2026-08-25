@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserPlan } from '../../../src/lib/subscription';
+import { authenticate, denied } from '../../../src/lib/apiAuth';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+/*
+ * Affirmations are a Gemini call, and this route had no auth of any kind — the
+ * body said who you were and the route believed it. It is also the AI output
+ * people actually see every morning, so it was both the most reachable and the
+ * most worth reaching. Signing in is required now; identity comes from the
+ * token.
+ */
 export async function POST(request: NextRequest) {
-  try {
-    const { userId, dreamText, language = 'en', useRecentDreams = false } = await request.json();
+  const authed = await authenticate(request);
+  if (!authed) return denied();
+  const userId = authed.id;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'userId is required' },
-        { status: 400 }
-      );
-    }
+  try {
+    const { dreamText, language = 'en', useRecentDreams = false } = await request.json();
 
     let finalDreamText = dreamText;
     let affirmationCount = 1;

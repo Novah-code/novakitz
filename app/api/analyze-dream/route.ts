@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkQuota } from '../../../src/lib/subscriptionServer';
+import { authenticate } from '../../../src/lib/apiAuth';
 
 // API 모니터링을 위한 로깅
 interface APIMetrics {
@@ -224,12 +225,21 @@ export async function POST(request: NextRequest) {
     // anything. A client's own claim about what it has paid for is not evidence,
     // so it is gone rather than wired up — the quota check below asks the
     // database instead.
-    const { dreamText, prompt, language = 'en', dreamId, userId, mode = 'dream' } = await request.json();
-    console.log('Dream text received:', dreamText);
+    const { dreamText, prompt, language = 'en', dreamId, mode = 'dream' } = await request.json();
     console.log('Language:', language);
-    console.log('Dream ID:', dreamId);
-    console.log('User ID:', userId);
     console.log('Mode:', mode);
+
+    /*
+     * Who this is comes from the access token, never from the body.
+     *
+     * The quota check below was already correct, but it counted against
+     * whatever `userId` the caller typed. A fresh UUID per request was
+     * therefore always a first-of-the-month user, and the free allowance meant
+     * nothing. Signing in is still optional — guests get a reading — but a
+     * claim to be a particular account now has to be proven.
+     */
+    const authed = await authenticate(request);
+    const userId = authed?.id ?? null;
 
     // The monthly limit was enforced only in the browser, so calling this route
     // directly bypassed it. Guests are left alone here: they have no row to
@@ -467,10 +477,14 @@ Tone: Warm and grounded — not effusive, not cold. ${wordLimit}`);
       if (dreamId && userId) {
         fetch(`${request.nextUrl.origin}/api/extract-patterns`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            // Forwarded so that route can verify the same person, rather than
+            // trusting a user id in the body the way both routes used to.
+            authorization: request.headers.get('authorization') ?? '',
+          },
           body: JSON.stringify({
             dreamId,
-            userId,
             dreamText,
             interpretation: analysisText
           })

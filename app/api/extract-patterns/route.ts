@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authenticate, denied } from '../../../src/lib/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
@@ -10,13 +11,23 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * 꿈 텍스트에서 패턴 추출 (상징, 감정, 아키타입 힌트)
  * POST /api/extract-patterns
  */
+/*
+ * Only analyze-dream calls this, server to server, but it is a public URL on a
+ * public deployment and it spends a Gemini call — so being reachable without a
+ * token made it a free API for anyone who found it. analyze-dream forwards the
+ * caller's own token, and the row is written for whoever that token belongs to.
+ */
 export async function POST(request: NextRequest) {
-  try {
-    const { dreamId, dreamText, interpretation, userId } = await request.json();
+  const authed = await authenticate(request);
+  if (!authed) return denied();
+  const userId = authed.id;
 
-    if (!dreamId || !dreamText || !userId) {
+  try {
+    const { dreamId, dreamText, interpretation } = await request.json();
+
+    if (!dreamId || !dreamText) {
       return NextResponse.json(
-        { error: 'dreamId, dreamText, userId are required' },
+        { error: 'dreamId and dreamText are required' },
         { status: 400 }
       );
     }
