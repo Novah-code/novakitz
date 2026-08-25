@@ -26,6 +26,11 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
         const detail = (error as { message?: string })?.message ?? '';
         setMessage(`로그인 중 오류가 발생했습니다: ${detail}`);
       }
+    } finally {
+      // Cleared on success too. The parent unmounts this component moments
+      // later, so the button barely returns to rest — but if anything upstream
+      // fails to notice the new session, a stuck spinner with no error is the
+      // worst thing to leave someone looking at.
       setLoading(null);
     }
   };
