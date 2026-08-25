@@ -36,6 +36,8 @@ export default function HomeScene({
   return (
     <div className={`home-scene home-scene--${scene}`}>
 
+      <div className="home-scene__glow" aria-hidden="true" />
+
       <button
         type="button"
         className="home-scene__portal"
@@ -59,6 +61,16 @@ export default function HomeScene({
           )}
         </span>
       </button>
+
+      {/*
+        * The hill, drawn after the disc so it covers its foot.
+        *
+        * That overlap is the whole composition: the disc stops being a picture
+        * hung on a wall and becomes something rising behind the field. It also
+        * means the bottom of the artwork is never seen, which is why the
+        * painting leaves that band empty.
+        */}
+      <div className="home-scene__ground" aria-hidden="true" />
 
       {canToggle && (
         <button
