@@ -73,6 +73,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  /*
+   * iOS puts its own long-press menu on any image — Share, Save to Photos,
+   * Copy. The disc's own gesture is a long press, so the two fired together
+   * and the system sheet won, leaving the dream form reachable only by
+   * dismissing it first. Turning off the callout and the drag interaction
+   * hands the gesture back to the app.
+   */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .home-scene__toggle {
