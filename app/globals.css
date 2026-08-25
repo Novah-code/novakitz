@@ -73,6 +73,19 @@ html[lang="ko"] * {
     --glass-border: rgba(168, 213, 168, 0.3);
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
+
+    /*
+     * The strip the system owns at each end, and what is left for us.
+     *
+     * body carries these as padding, so a full-screen child must ask for
+     * --app-height, not 100dvh. Asking for 100dvh inside a padded body makes
+     * the document taller than the screen by exactly the insets — which on a
+     * phone showed up as a pale band under the scene and a violent rubber-band
+     * bounce on the way to it.
+     */
+    --safe-top: max(env(safe-area-inset-top, 0px), 20px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --app-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
 }
 
 * {
@@ -88,8 +101,21 @@ body {
     min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
     position: relative;
-    padding-top: max(env(safe-area-inset-top), 20px) !important;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: var(--safe-top) !important;
+    padding-bottom: var(--safe-bottom);
+}
+
+/*
+ * No rubber band.
+ *
+ * The home scene is position: fixed, so when the document scrolled even a
+ * little the scene stayed put while everything around it moved, and iOS's
+ * elastic overscroll turned that into shaking. Anything that genuinely needs
+ * to scroll does it inside its own container, which is unaffected by this.
+ */
+html,
+body {
+    overscroll-behavior: none;
 }
 
 /*

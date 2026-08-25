@@ -2036,7 +2036,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
+    <div style={{ position: 'relative', minHeight: 'var(--app-height)', background: '#e8f5e8' }}>
       {/* Dream Background Gallery */}
       {backgroundImages.length > 0 && (
         <DreamBackgroundGallery
@@ -4017,7 +4017,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
       `}</style>
 
-      <div className="w-full" style={{height: '100dvh', minHeight: '100dvh', position: 'relative'}}>
+      <div className="w-full" style={{height: 'var(--app-height)', minHeight: 'var(--app-height)', position: 'relative'}}>
 
         
         {/* novakitz Logo */}

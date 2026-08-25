@@ -50,8 +50,32 @@
   border-style: dashed;
 }
 
-.streak-badge__flame {
-  font-size: 15px;
+/*
+ * A pebble, not a flame.
+ *
+ * The emoji borrowed a language the app does not speak — burning, losing,
+ * being on fire — in a place meant to feel like putting one stone down each
+ * morning. This is the same silhouette the emotion pebbles wear, so the badge
+ * reads as a count of mornings rather than a threat.
+ */
+.streak-badge__pebble {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 40% 60% 30% 70% / 60% 40% 70% 30%;
+  transition: background-color 300ms ease, border-color 300ms ease;
+}
+
+/* Done: the stone is placed. */
+.is-done .streak-badge__pebble {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+}
+
+/* Not yet: the space for it is there, waiting. */
+.is-open .streak-badge__pebble {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.85);
 }
 
 .streak-badge__count {

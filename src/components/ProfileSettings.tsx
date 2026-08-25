@@ -5,15 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import ReminderSettings from './ReminderSettings';
-
-interface StreakData {
-  currentStreak: number;
-  weekDays: {
-    day: string;
-    date: string;
-    completed: boolean;
-  }[];
-}
+import { loadStreak, nextMilestone, type Streak } from '../lib/streak';
 
 interface ProfileSettingsProps {
   user: User;
@@ -43,73 +35,27 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const [deleting, setDeleting] = useState(false);
 
   // Streak states
-  const [streakData, setStreakData] = useState<StreakData | null>(null);
+  const [streakData, setStreakData] = useState<Streak | null>(null);
   const [streakLoading, setStreakLoading] = useState(false);
 
   const dayNames = language === 'ko'
     ? ['일', '월', '화', '수', '목', '금', '토']
     : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
+  /*
+   * This tab used to count the streak itself, from dreams only, while the badge
+   * on the home screen counted dreams and check-ins through src/lib/streak.ts.
+   * Two counts of the same thing meant the badge could read 1 while this read 0
+   * — which looked like the streak had failed to save. There is one count now.
+   */
   const loadStreakData = useCallback(async () => {
     setStreakLoading(true);
     try {
-      const { data: dreamsData } = await supabase
-        .from('dreams')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      const dreamDates = new Set(
-        dreamsData?.map(d => {
-          const dateObj = new Date(d.created_at);
-          return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
-        }) || []
-      );
-
-      let currentStreak = 0;
-      const today = new Date();
-      const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayString = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-
-      if (dreamDates.has(todayString) || dreamDates.has(yesterdayString)) {
-        currentStreak = 1;
-        const startDate = dreamDates.has(todayString) ? todayString : yesterdayString;
-        const [year, month, day] = startDate.split('-').map(Number);
-        const baseDate = new Date(year, month - 1, day);
-
-        for (let i = 1; i < 365; i++) {
-          const checkDate = new Date(baseDate);
-          checkDate.setDate(checkDate.getDate() - i);
-          const checkDateString = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-          if (dreamDates.has(checkDateString)) {
-            currentStreak++;
-          } else {
-            break;
-          }
-        }
-      }
-
-      const weekDays = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        weekDays.push({
-          day: dayNames[date.getDay()],
-          date: dateString,
-          completed: dreamDates.has(dateString)
-        });
-      }
-
-      setStreakData({ currentStreak, weekDays });
-    } catch (error) {
-      console.error('Error loading streak:', error);
+      setStreakData(await loadStreak(user.id));
     } finally {
       setStreakLoading(false);
     }
-  }, [user.id, dayNames]);
+  }, [user.id]);
 
   useEffect(() => {
     if (activeTab === 'streak' && !streakData) {
@@ -757,6 +703,42 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
 
               <ReminderSettings language={language} />
 
+              {/*
+                * Sign out.
+                *
+                * The only other one is in the sidebar, and the sidebar collapses
+                * to a row of tabs on a phone with that button set to
+                * display: none — so on the device the app actually ships to,
+                * there was no way to sign out at all. Here it sits with the
+                * other account actions, at every width.
+                */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '12px 16px',
+                  background: 'transparent',
+                  border: '1px solid #e5e5e5',
+                  borderRadius: '8px',
+                  fontSize: '15px',
+                  color: '#666',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  width: 'fit-content',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#f7f7f7'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                {t.logout}
+              </button>
+
               {/* Delete Account */}
               {!showDeleteConfirm ? (
                 <button
@@ -935,7 +917,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                         stroke="#7FB069"
                         strokeWidth="8"
                         strokeLinecap="round"
-                        strokeDasharray={`${(streakData.currentStreak / 7) * 339.3} 339.3`}
+                        strokeDasharray={`${Math.min(streakData.current / nextMilestone(streakData.current), 1) * 339.3} 339.3`}
                         transform="rotate(-90 60 60)"
                       />
                     </svg>
@@ -948,9 +930,32 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                       fontWeight: '600',
                       color: '#333',
                     }}>
-                      {streakData.currentStreak}
+                      {streakData.current}
                     </div>
                   </div>
+
+                  {/*
+                    * The ring aims at the next round number rather than a fixed
+                    * seven, so it still has somewhere to go after the first week.
+                    */}
+                  <p style={{ fontSize: '13px', color: '#888', margin: '-12px 0 0' }}>
+                    {language === 'ko'
+                      ? `다음 ${nextMilestone(streakData.current)}일까지 · 총 ${streakData.total}일`
+                      : `${nextMilestone(streakData.current)} days next · ${streakData.total} days in total`}
+                  </p>
+
+                  {/*
+                    * One missed day a month is forgiven, and saying so is the
+                    * point — a streak that quietly survives a gap reads as a bug,
+                    * and the allowance only calms anyone who knows it exists.
+                    */}
+                  {streakData.forgiven > 0 && (
+                    <p style={{ fontSize: '12px', color: '#A8A8A8', margin: '-16px 0 0' }}>
+                      {language === 'ko'
+                        ? '이번 달 하루는 쉬어도 이어집니다'
+                        : 'One missed day a month is forgiven'}
+                    </p>
+                  )}
 
                   {/* Week Days */}
                   <div style={{
@@ -958,15 +963,21 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                     gap: '12px',
                     justifyContent: 'center',
                   }}>
-                    {streakData.weekDays.map((day, index) => (
-                      <div key={index} style={{ textAlign: 'center' }}>
+                    {streakData.week.map((day) => (
+                      <div key={day.date} style={{ textAlign: 'center' }}>
                         <div style={{
                           fontSize: '12px',
                           color: day.completed ? '#7FB069' : '#999',
                           marginBottom: '8px',
                           fontWeight: day.completed ? '600' : '400',
                         }}>
-                          {day.day}
+                          {/* Parsed as local parts — new Date('YYYY-MM-DD') is UTC midnight
+                              and lands on the previous day west of Greenwich. */}
+                          {dayNames[new Date(
+                            Number(day.date.slice(0, 4)),
+                            Number(day.date.slice(5, 7)) - 1,
+                            Number(day.date.slice(8, 10))
+                          ).getDay()]}
                         </div>
                         <div style={{
                           width: '36px',
