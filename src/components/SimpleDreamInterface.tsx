@@ -373,11 +373,27 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       if (user) {
         // Load from Supabase if logged in
         try {
+          /*
+           * A ceiling, not pagination.
+           *
+           * This one genuinely needs the whole row: the list splits `content`
+           * into the dream and its interpretation, and `image` feeds both the
+           * background gallery and the edit and delete paths. What it should
+           * not do is grow without limit — `image` holds a base64 data URL
+           * whenever a storage upload failed, so a long-running account could
+           * pull tens of megabytes on every launch.
+           *
+           * 200 is far past the heaviest account today (42 recorded days) and
+           * changes nothing anyone can currently see. Splitting the image out
+           * of the list is the real fix and is worth doing carefully, after
+           * the submission rather than a week before it.
+           */
           const { data, error } = await supabase
             .from('dreams')
             .select('*')
             .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(200);
 
           if (error) {
             console.error('Error loading from Supabase:', error);

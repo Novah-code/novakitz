@@ -1,7 +1,7 @@
 'use client';
 
 import { goTo } from '../lib/platform';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
@@ -78,6 +78,20 @@ export default function SimpleDreamInterfaceWithAuth() {
 
   // Ref to track hasProfile without causing useEffect re-runs
   const hasProfileRef = useRef<boolean | null>(null);
+
+  /*
+   * Keep the same person the same object.
+   *
+   * Supabase hands back a freshly built User on every auth event — a token
+   * refresh, a tab regaining focus, a second SIGNED_IN — even when nothing
+   * about the account changed. Passing that straight to setUser gives every
+   * effect keyed on `user` a new identity to react to, which is why one
+   * sign-in showed up in the log as three subscription lookups and three full
+   * dream loads. Same id, same object, and those effects go quiet.
+   */
+  const setUserStable = useCallback((next: User | null) => {
+    setUser((prev) => (prev?.id === next?.id ? prev : next));
+  }, []);
 
   const t = translations[language];
 
@@ -220,7 +234,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
             if (!error && data.session && !cancelled) {
               console.log('setSession success, user:', data.session.user.id);
-              setUser(data.session.user);
+              setUserStable(data.session.user);
               setCheckingProfile(true);
               const profileExists = await checkUserProfile(data.session.user.id);
               if (cancelled) return;
@@ -240,7 +254,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
         const currentUser = session?.user ?? null;
         console.log('Stored session user:', currentUser?.id ?? 'null');
-        setUser(currentUser);
+        setUserStable(currentUser);
 
         if (currentUser && hasProfileRef.current === null) {
           setCheckingProfile(true);
@@ -270,10 +284,10 @@ export default function SimpleDreamInterfaceWithAuth() {
       console.log('Auth event:', event, '| user:', session?.user?.id ?? 'null');
 
       if (event === 'TOKEN_REFRESHED') {
-        if (!cancelled) setUser(session?.user ?? null);
+        if (!cancelled) setUserStable(session?.user ?? null);
       } else if (event === 'SIGNED_OUT') {
         if (cancelled) return;
-        setUser(null);
+        setUserStable(null);
         hasProfileRef.current = null;
         setHasProfile(null);
         setCheckingProfile(false);
@@ -285,7 +299,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         // was a session that existed while the app still showed the sign-in
         // screen, with its spinner running forever.
         if (cancelled || !session?.user) return;
-        setUser(session.user);
+        setUserStable(session.user);
         setIsGuestMode(false);
         if (hasProfileRef.current === null) {
           setCheckingProfile(true);
@@ -392,9 +406,17 @@ export default function SimpleDreamInterfaceWithAuth() {
       }
 
       try {
+        /*
+         * The calendar needs a dot on a day and a title to tap — it does not
+         * need what was written. `select('*')` pulled every dream's full text
+         * *and* its interpretation, plus the image column, which holds a base64
+         * data URL whenever a storage upload failed. That is megabytes of
+         * payload to draw a grid of dots, downloaded again on every launch.
+         * The one dream someone actually opens fetches its own text below.
+         */
         const { data, error } = await supabase
           .from('dreams')
-          .select('*')
+          .select('id, title, tags, mood, date, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
@@ -410,6 +432,26 @@ export default function SimpleDreamInterfaceWithAuth() {
 
     loadDreams();
   }, [user]);
+
+  /**
+   * Open one dream from the calendar, fetching the text the list left behind.
+   *
+   * Shown immediately with what the calendar already has, so the modal never
+   * waits on the network; the body fills in when it arrives.
+   */
+  const openCalendarDream = async (dream: any) => {
+    setCalendarSelectedDream(dream);
+    const { data } = await supabase
+      .from('dreams')
+      .select('content')
+      .eq('id', dream.id)
+      .maybeSingle();
+    if (data) {
+      setCalendarSelectedDream((current: any) =>
+        current?.id === dream.id ? { ...current, content: data.content } : current
+      );
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -798,7 +840,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                     {selectedDreams.map(dream => (
                       <button
                         key={dream.id}
-                        onClick={() => setCalendarSelectedDream(dream)}
+                        onClick={() => openCalendarDream(dream)}
                         style={{
                           padding: '12px 16px',
                           background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)',
