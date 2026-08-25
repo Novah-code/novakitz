@@ -33,6 +33,32 @@ const nextConfig: NextConfig = {
   compress: true,
   // PoweredBy header removal for security
   poweredByHeader: false,
+  // The app runs from capacitor://localhost and calls the API on this
+  // deployment, which makes every request cross-origin. Without these the
+  // preflight came back 204 with no allow-origin header and the browser threw
+  // the call away — dream analysis, affirmations, everything, silently.
+  //
+  // Only the shell's own origin is allowed, so this does not open the API to
+  // arbitrary websites. An Android build would need https://localhost adding.
+  ...(isAppBuild
+    ? {}
+    : {
+        async headers() {
+          return [
+            {
+              source: '/api/:path*',
+              headers: [
+                { key: 'Access-Control-Allow-Origin', value: 'capacitor://localhost' },
+                { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
+                { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+                { key: 'Access-Control-Max-Age', value: '86400' },
+                // Responses differ by origin, so caches must not share them.
+                { key: 'Vary', value: 'Origin' },
+              ],
+            },
+          ];
+        },
+      }),
   ...(isAppBuild
     ? {
         output: 'export' as const,

@@ -49,9 +49,7 @@ export default function StreakBadge({ userId, language, onClick, refreshKey = 0 
       onClick={onClick}
       aria-label={label}
     >
-      <span className="streak-badge__flame" aria-hidden="true">
-        {streak.doneToday ? '🔥' : '○'}
-      </span>
+      <span className="streak-badge__pebble" aria-hidden="true" />
       <span className="streak-badge__count">{streak.current}</span>
     </button>
   );

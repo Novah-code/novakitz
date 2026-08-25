@@ -340,7 +340,11 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         '-' +
         String(now.getDate()).padStart(2, '0');
       const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
-      await supabase.from('checkins').insert([{
+      // Upsert, not insert: checkins is unique on (user_id, check_date,
+      // time_of_day), so checking in a second time the same morning came back
+      // 409 and the mood was quietly dropped — along with the day's streak.
+      // Checking in again is a correction, so the later choice wins.
+      await supabase.from('checkins').upsert({
         user_id: user.id,
         check_date: today,
         time_of_day: timeOfDay,
@@ -349,7 +353,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         // store 2 — so the key is what the calendar colours a day from.
         emotion: emotion.key,
         energy_level: 5,
-      }]);
+      }, { onConflict: 'user_id,check_date,time_of_day' });
       setStreakRefresh((n) => n + 1);
     } catch (e) {
       console.error('Emotion save error:', e);
@@ -2032,7 +2036,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: '#e8f5e8' }}>
+    <div style={{ position: 'relative', minHeight: 'var(--app-height)', background: '#e8f5e8' }}>
       {/* Dream Background Gallery */}
       {backgroundImages.length > 0 && (
         <DreamBackgroundGallery
@@ -2467,6 +2471,24 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           box-sizing: border-box;
         }
         
+        /*
+         * The mic sits inside the field, so the field has to be what it is
+         * positioned against. It used to be measured from a full-width wrapper
+         * while the textarea itself was inset by 32px of margin, which left the
+         * button hanging over the edge of the box instead of in it. The inset
+         * moves to the wrapper and the textarea simply fills it.
+         */
+        .dream-input-shell {
+          position: relative;
+          margin: 0 32px;
+        }
+
+        .dream-input-shell .dream-input {
+          width: 100%;
+          margin: 0;
+          display: block;
+        }
+
         .dream-input::placeholder {
           color: #94a3b8;
         }
@@ -4013,7 +4035,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
       `}</style>
 
-      <div className="w-full" style={{height: '100dvh', minHeight: '100dvh', position: 'relative'}}>
+      <div className="w-full" style={{height: 'var(--app-height)', minHeight: 'var(--app-height)', position: 'relative'}}>
 
         
         {/* novakitz Logo */}
@@ -4106,7 +4128,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   )}
 
 
-                  <div style={{ position: 'relative' }}>
+                  <div className="dream-input-shell">
                     <textarea
                       className="dream-input"
                       value={dreamText}
@@ -4165,119 +4187,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                 </div>
                 <div className="modal-actions" style={{display: 'flex', gap: '12px'}}>
-                  <button
-                    onClick={async () => {
-                      // Close the input modal immediately
-                      setShowInput(false);
-
-                      // Save "no dream" marker to Supabase for calendar display
-                      if (user) {
-                        try {
-                          const now = new Date();
-                          const todayStart = new Date(now);
-                          todayStart.setHours(0, 0, 0, 0);
-                          const todayEnd = new Date(now);
-                          todayEnd.setHours(23, 59, 59, 999);
-
-                          // Check if there's already a "no dream" entry for today
-                          const { data: existingNoDream } = await supabase
-                            .from('dreams')
-                            .select('id')
-                            .eq('user_id', user.id)
-                            .contains('tags', [language === 'ko' ? '꿈안꿈' : 'no-dream'])
-                            .gte('created_at', todayStart.toISOString())
-                            .lte('created_at', todayEnd.toISOString())
-                            .limit(1);
-
-                          // Only insert if no "no dream" entry exists for today
-                          if (!existingNoDream || existingNoDream.length === 0) {
-                            await supabase
-                              .from('dreams')
-                              .insert([{
-                                user_id: user.id,
-                                title: language === 'ko' ? '꿈 안 꿈' : 'No Dream',
-                                content: language === 'ko' ? '오늘은 꿈을 꾸지 않았습니다.' : 'I did not have any dream today.',
-                                mood: 'peaceful',
-                                tags: [language === 'ko' ? '꿈안꿈' : 'no-dream'],
-                                date: now.toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                }),
-                                time: now.toLocaleTimeString('en-US', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }),
-                                created_at: now.toISOString()
-                              }]);
-                            console.log('No dream marker saved to calendar with date:', now);
-                          } else {
-                            console.log('No dream entry already exists for today, skipping insert');
-                          }
-
-                          // Generate affirmations from recent dreams for all users
-                          // Free users get 1 affirmation, premium users get 3
-                          console.log('🔍 [NO DREAM AFFIRMATION] Starting affirmation generation');
-                          const { generateAffirmationsFromRecentDreams, saveAffirmations } = await import('../lib/affirmations');
-
-                          console.log('📤 [NO DREAM AFFIRMATION] Calling generateAffirmationsFromRecentDreams');
-                          const affirmations = await generateAffirmationsFromRecentDreams(user.id, language);
-                          console.log('✅ [NO DREAM AFFIRMATION] Response received:', {
-                            affirmationsCount: affirmations?.length || 0,
-                            affirmations
-                          });
-
-                          if (affirmations && affirmations.length > 0) {
-                            // Determine check-in time based on current hour (morning or evening only to match DailyCheckin)
-                            const currentHour = now.getHours();
-                            const checkInTime: 'morning' | 'evening' = currentHour < 12 ? 'morning' : 'evening';
-
-                            console.log('💾 [NO DREAM AFFIRMATION] Saving affirmations:', {
-                              checkInTime,
-                              count: affirmations.length
-                            });
-                            await saveAffirmations(user.id, affirmations, checkInTime, undefined, language);
-                            console.log(`✨ [NO DREAM AFFIRMATION] Generated and saved ${affirmations.length} affirmations from recent dreams`);
-                          } else {
-                            console.warn('⚠️ [NO DREAM AFFIRMATION] No affirmations returned from API');
-                          }
-                        } catch (error) {
-                          console.error('Error saving no dream marker:', error);
-                        }
-                      }
-
-                      // Reset form
-                      setDreamText('');
-                      setDreamTitle('');
-                      setDreamDate(new Date());
-                      setDreamImage(null);
-                      setDreamImagePreview('');
-
-                      // Show streak popup directly (same as regular dream recording)
-                      setStreakRefresh((n) => n + 1);
-                      setShowStreakPopup(true);
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      background: 'rgba(127, 176, 105, 0.08)',
-                      color: '#7FB069',
-                      border: '1px solid rgba(127, 176, 105, 0.2)',
-                      borderRadius: '8px',
-                      fontSize: '0.9rem',
-                      fontWeight: '500',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(127, 176, 105, 0.08)';
-                    }}
-                  >
-                    {language === 'ko' ? '꿈 안 꿈' : 'No dream'}
-                  </button>
                   <button
                     onClick={handleSubmitDream}
                     disabled={!dreamText.trim() || dreamText.trim().length < 10 || isLoading}

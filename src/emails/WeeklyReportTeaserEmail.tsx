@@ -40,9 +40,9 @@ export const WeeklyReportTeaserEmail = ({
       locked: '🔒 Pro 전용',
       upgradeMessage: '전체 분석을 보려면 Pro로 업그레이드하세요',
       benefits: [
-        '월 200회 AI 꿈 해석',
+        '매일 받는 AI 꿈 해석',
         '월간 패턴 리포트',
-        '무제한 꿈 기록 보관',
+        '전체 히스토리 보관',
         '융 아키타입 분석',
       ],
       cta: 'Pro 알아보기',
@@ -61,9 +61,9 @@ export const WeeklyReportTeaserEmail = ({
       locked: '🔒 Pro Only',
       upgradeMessage: 'Upgrade to Pro to view the full analysis',
       benefits: [
-        '200 AI interpretations per month',
+        'A daily AI dream interpretation',
         'Monthly pattern reports',
-        'Unlimited dream history',
+        'Full dream history',
         'Jungian archetype analysis',
       ],
       cta: 'Learn About Pro',

@@ -238,8 +238,26 @@ export default function SimpleDreamInterfaceWithAuth() {
         hasProfileRef.current = null;
         setHasProfile(null);
         setCheckingProfile(false);
+      } else if (event === 'SIGNED_IN') {
+        // Apple's native sheet signs in without leaving the page, so unlike
+        // Google's redirect there is no remount for setupAuth() to catch. This
+        // event used to be dropped on the assumption that setupAuth() covered
+        // it — true only for a sign-in that happens before mount. The result
+        // was a session that existed while the app still showed the sign-in
+        // screen, with its spinner running forever.
+        if (cancelled || !session?.user) return;
+        setUser(session.user);
+        setIsGuestMode(false);
+        if (hasProfileRef.current === null) {
+          setCheckingProfile(true);
+          const profileExists = await checkUserProfile(session.user.id);
+          if (cancelled) return;
+          hasProfileRef.current = profileExists;
+          setHasProfile(profileExists);
+          setCheckingProfile(false);
+        }
       }
-      // INITIAL_SESSION and SIGNED_IN are handled by setupAuth() above
+      // INITIAL_SESSION is handled by setupAuth() above
     });
 
     return () => {
