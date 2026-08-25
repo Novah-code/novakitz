@@ -277,7 +277,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
 
     const validPattern = /^[a-zA-Z0-9]+$/;
     if (!validPattern.test(nickname)) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '영문과 숫자만 사용 가능합니다' : 'Only English letters and numbers allowed' };
+      // Says what is excluded rather than what is allowed. "영문과 숫자만" reads as
+      // a requirement for both, which sent people looking for a digit to add.
+      return { isValid: false, error: preferredLanguage === 'ko' ? '한글, 공백, 특수문자는 쓸 수 없어요' : 'No spaces, symbols, or non-English characters' };
     }
 
     return { isValid: true, error: '' };
@@ -738,11 +740,21 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
                   transition: 'border-color 0.3s'
                 }}
               />
-              {nicknameError && (
-                <div style={{ color: '#d32f2f', fontSize: '12px', marginTop: '6px', fontWeight: '500' }}>
-                  {nicknameError}
-                </div>
-              )}
+              {/*
+                * The rule stands under the field before anyone types, not only
+                * after they get it wrong. It is the first form in the app and
+                * the error alone left people guessing at what was required.
+                */}
+              <div style={{
+                color: nicknameError ? '#d32f2f' : 'rgba(90, 132, 73, 0.75)',
+                fontSize: '12px',
+                marginTop: '6px',
+                fontWeight: nicknameError ? '500' : '400',
+              }}>
+                {nicknameError || (preferredLanguage === 'ko'
+                  ? '영문 3~20자. 숫자는 넣어도 되고 안 넣어도 돼요'
+                  : 'Letters, 3–20 characters. Numbers optional')}
+              </div>
             </div>
           )}
 
