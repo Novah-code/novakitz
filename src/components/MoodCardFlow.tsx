@@ -625,55 +625,23 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   };
 
   // ── Abstract card visual (gradient + floating shapes)
-  const CardVisual = ({ blurred }: { blurred: boolean }) => (
-    <div style={{
-      width: '200px',
-      height: '290px',
-      borderRadius: '20px',
-      background: `linear-gradient(145deg, ${card.from} 0%, ${card.mid} 50%, ${card.to} 100%)`,
-      position: 'relative',
-      overflow: 'hidden',
-      boxShadow: blurred
-        ? '0 16px 40px rgba(0,0,0,0.12)'
-        : '0 20px 50px rgba(0,0,0,0.18)',
-      border: '1px solid rgba(255,255,255,0.8)',
-      flexShrink: 0,
-    }}>
-      {/* Unique arcana art */}
-      <svg width="100%" height="100%" viewBox="0 0 200 290" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
-        {arcanaArtChildren(arcanaId)}
-      </svg>
-
-      {/* Blur overlay */}
-      {blurred && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          background: 'rgba(234,244,236,0.35)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          gap: '10px',
-        }}>
-          <div style={{ fontSize: '32px', opacity: 0.5 }}>🔒</div>
-          <div style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '3px', color: '#4A5D4E', opacity: 0.7 }}>UNCONSCIOUS</div>
-        </div>
-      )}
-
-      {/* Card info (revealed only) */}
-      {!blurred && (
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          padding: '30px 16px 16px',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)',
-        }}>
-          <div style={{ fontFamily: 'monospace', fontSize: '9px', color: '#7AB382', letterSpacing: '1px', marginBottom: '4px' }}>{card.arcana}</div>
-          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '2px' }}>{card.name}</div>
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.75)', fontWeight: 300 }}>{card.kr}</div>
-        </div>
-      )}
-    </div>
-  );
+  /*
+   * The locked card is gone.
+   *
+   * It was only ever rendered blurred — CardVisual was called in exactly one
+   * place, always with blurred=true — so the artwork behind it, twenty
+   * hand-drawn arcana, was never once shown to anyone. What people actually
+   * got was a large rectangle carrying a padlock and the word UNCONSCIOUS,
+   * sitting above the two buttons that are the real point of this screen.
+   *
+   * It also rendered wrong on the device. The overlay put backdrop-filter over
+   * a sibling SVG, which iOS composites unreliably: dark cards came out washed
+   * grey with a hard band through them while bright ones happened to survive.
+   * That is the "broken image" — no image was ever involved.
+   *
+   * The arcana still chooses the affirmation and the saved title, so what goes
+   * is a locked door with nothing behind it.
+   */
 
   // ==============================
   // STEP: blurred card
@@ -690,18 +658,14 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     }}>
       <Container onClose={onClose}>
         <div onClick={e => e.stopPropagation()} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <p style={{ fontSize: '14px', color: '#8BA390', marginBottom: '6px', fontFamily: 'monospace', letterSpacing: '1px' }}>
-            Hidden Signal
+          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '6px', textAlign: 'center', lineHeight: 1.5 }}>
+            {isKo ? `'${selectedEmotion}' 기록했어요` : `'${selectedEmotion}' is saved`}
           </p>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '24px', textAlign: 'center', lineHeight: 1.5 }}>
-            {isKo
-              ? `'${selectedEmotion}' 이면에 숨겨진 오늘의 카드`
-              : `Today's card behind '${selectedEmotion}'`}
+          <p style={{ fontSize: '14px', color: '#8BA390', marginBottom: '4px', textAlign: 'center', lineHeight: 1.5 }}>
+            {isKo ? '아침은 여기까지면 충분해요.' : 'That is enough for a morning.'}
           </p>
 
-          <CardVisual blurred />
-
-          <div style={{ marginTop: '32px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <div style={{ marginTop: '24px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
             {/* Button 1: Dream recording */}
             <button
               onClick={() => { setIsEgoMode(false); setStep('record-place'); }}
