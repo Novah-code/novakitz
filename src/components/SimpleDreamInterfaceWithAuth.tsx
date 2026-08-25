@@ -136,22 +136,46 @@ export default function SimpleDreamInterfaceWithAuth() {
             return true;
           }
 
+          /*
+           * A row at all is an answer.
+           *
+           * Nothing creates one automatically — no signup trigger writes to
+           * this table — so a row exists only because someone finished the
+           * form or explicitly chose to set it up later. Requiring a name or
+           * profile_completed on top of that meant "set this up later" was not
+           * actually later: the form came back on the next launch, every time.
+           */
           if (data) {
-            // Accept: profile_completed=true OR has any name data (existing user)
-            if (
-              data.profile_completed === true ||
-              data.profile_completed === 'true' ||
-              data.full_name ||
-              data.display_name
-            ) {
-              console.log('Profile exists - returning true');
-              return true;
-            }
-            console.log('Profile row exists but incomplete');
-          } else {
-            console.log('No profile data found - new user');
+            console.log('Profile row exists - not asking again');
+            return true;
+          }
+          /*
+           * No profile row — but that is not the same as a new account.
+           *
+           * Rows have gone missing (an abandoned setup, a save that failed),
+           * and the person on the other side of that has months of mornings in
+           * the app and no interest in filling in a birth date again. So
+           * before treating anyone as new, ask whether they have ever used it.
+           *
+           * Having done anything at all is proof enough. The row is written on
+           * the way past so this costs one extra pair of queries once, ever,
+           * and never on the path a real new user takes.
+           */
+          const [dreams, checkins] = await Promise.all([
+            supabase.from('dreams').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+            supabase.from('checkins').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+          ]);
+          const used = (dreams.count ?? 0) > 0 || (checkins.count ?? 0) > 0;
+
+          if (used) {
+            console.log('No profile row, but this account has history - not a new user');
+            await supabase
+              .from('user_profiles')
+              .upsert({ user_id: userId, profile_completed: false }, { onConflict: 'user_id' });
+            return true;
           }
 
+          console.log('No profile row and no history - new user');
           return false;
         } catch (queryError) {
           console.error('Could not check profile; assuming it exists:', queryError);
