@@ -1,7 +1,7 @@
 'use client';
 
 import { goTo } from '../lib/platform';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Auth from './Auth';
@@ -79,6 +79,20 @@ export default function SimpleDreamInterfaceWithAuth() {
   // Ref to track hasProfile without causing useEffect re-runs
   const hasProfileRef = useRef<boolean | null>(null);
 
+  /*
+   * Keep the same person the same object.
+   *
+   * Supabase hands back a freshly built User on every auth event — a token
+   * refresh, a tab regaining focus, a second SIGNED_IN — even when nothing
+   * about the account changed. Passing that straight to setUser gives every
+   * effect keyed on `user` a new identity to react to, which is why one
+   * sign-in showed up in the log as three subscription lookups and three full
+   * dream loads. Same id, same object, and those effects go quiet.
+   */
+  const setUserStable = useCallback((next: User | null) => {
+    setUser((prev) => (prev?.id === next?.id ? prev : next));
+  }, []);
+
   const t = translations[language];
 
   // Keep RevenueCat's identity in step with Supabase auth. Purchases must
@@ -93,14 +107,30 @@ export default function SimpleDreamInterfaceWithAuth() {
   }, [user]);
 
   // Check if user has a completed profile
+  /*
+   * Does this account already have a profile?
+   *
+   * Only a definite "no row, or a row with nothing in it" should send someone
+   * to Profile Setup. Every other outcome — the query timing out, an error,
+   * an exception — used to return false as well, which meant a slow morning
+   * put established accounts through a five-step form for a profile they had
+   * already filled in. "We could not tell" is not the same answer as "you are
+   * new", and guessing wrong in that direction is much worse: a returning user
+   * is asked to invent a nickname the database will reject as taken, while a
+   * genuinely new user who slips past simply gets a less personal reading
+   * until they fill it in from Profile.
+   *
+   * Three seconds was also short for a cold connection on mobile data, which
+   * is exactly when this runs — first launch of the morning.
+   */
   const checkUserProfile = async (userId: string) => {
     console.log('checkUserProfile called for userId:', userId);
     try {
       const timeoutPromise = new Promise<boolean>((resolve) => {
         setTimeout(() => {
-          console.warn('Profile query timeout - returning false (show profile form)');
-          resolve(false);
-        }, 3000);
+          console.warn('Profile query timed out; assuming the profile exists rather than re-asking.');
+          resolve(true);
+        }, 10000);
       });
 
       const queryPromise = (async (): Promise<boolean> => {
@@ -113,33 +143,57 @@ export default function SimpleDreamInterfaceWithAuth() {
 
           console.log('Profile query result - data:', data, 'error:', error);
 
-          // Error code PGRST116 = no matching record (new user, no profile)
+          // Error code PGRST116 = no matching record (new user, no profile).
+          // Anything else is a failed lookup, not evidence of a missing profile.
           if (error && error.code !== 'PGRST116') {
-            console.error('Error checking profile:', error);
-            return false;
+            console.error('Could not check profile; assuming it exists:', error);
+            return true;
           }
 
+          /*
+           * A row at all is an answer.
+           *
+           * Nothing creates one automatically — no signup trigger writes to
+           * this table — so a row exists only because someone finished the
+           * form or explicitly chose to set it up later. Requiring a name or
+           * profile_completed on top of that meant "set this up later" was not
+           * actually later: the form came back on the next launch, every time.
+           */
           if (data) {
-            // Accept: profile_completed=true OR has any name data (existing user)
-            if (
-              data.profile_completed === true ||
-              data.profile_completed === 'true' ||
-              data.full_name ||
-              data.display_name
-            ) {
-              console.log('Profile exists - returning true');
-              return true;
-            }
-            console.log('Profile row exists but incomplete');
-          } else {
-            console.log('No profile data found - new user');
+            console.log('Profile row exists - not asking again');
+            return true;
+          }
+          /*
+           * No profile row — but that is not the same as a new account.
+           *
+           * Rows have gone missing (an abandoned setup, a save that failed),
+           * and the person on the other side of that has months of mornings in
+           * the app and no interest in filling in a birth date again. So
+           * before treating anyone as new, ask whether they have ever used it.
+           *
+           * Having done anything at all is proof enough. The row is written on
+           * the way past so this costs one extra pair of queries once, ever,
+           * and never on the path a real new user takes.
+           */
+          const [dreams, checkins] = await Promise.all([
+            supabase.from('dreams').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+            supabase.from('checkins').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+          ]);
+          const used = (dreams.count ?? 0) > 0 || (checkins.count ?? 0) > 0;
+
+          if (used) {
+            console.log('No profile row, but this account has history - not a new user');
+            await supabase
+              .from('user_profiles')
+              .upsert({ user_id: userId, profile_completed: false }, { onConflict: 'user_id' });
+            return true;
           }
 
+          console.log('No profile row and no history - new user');
           return false;
         } catch (queryError) {
-          console.error('Exception in queryPromise:', queryError);
-          // Return false on error to show profile form (safer for new users)
-          return false;
+          console.error('Could not check profile; assuming it exists:', queryError);
+          return true;
         }
       })();
 
@@ -147,9 +201,8 @@ export default function SimpleDreamInterfaceWithAuth() {
       console.log('checkUserProfile final result:', result);
       return result;
     } catch (error) {
-      console.error('Error checking profile:', error);
-      // Return false on error to show profile form (safer for new users)
-      return false;
+      console.error('Could not check profile; assuming it exists:', error);
+      return true;
     }
   };
 
@@ -181,7 +234,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
             if (!error && data.session && !cancelled) {
               console.log('setSession success, user:', data.session.user.id);
-              setUser(data.session.user);
+              setUserStable(data.session.user);
               setCheckingProfile(true);
               const profileExists = await checkUserProfile(data.session.user.id);
               if (cancelled) return;
@@ -201,7 +254,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
         const currentUser = session?.user ?? null;
         console.log('Stored session user:', currentUser?.id ?? 'null');
-        setUser(currentUser);
+        setUserStable(currentUser);
 
         if (currentUser && hasProfileRef.current === null) {
           setCheckingProfile(true);
@@ -231,10 +284,10 @@ export default function SimpleDreamInterfaceWithAuth() {
       console.log('Auth event:', event, '| user:', session?.user?.id ?? 'null');
 
       if (event === 'TOKEN_REFRESHED') {
-        if (!cancelled) setUser(session?.user ?? null);
+        if (!cancelled) setUserStable(session?.user ?? null);
       } else if (event === 'SIGNED_OUT') {
         if (cancelled) return;
-        setUser(null);
+        setUserStable(null);
         hasProfileRef.current = null;
         setHasProfile(null);
         setCheckingProfile(false);
@@ -246,7 +299,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         // was a session that existed while the app still showed the sign-in
         // screen, with its spinner running forever.
         if (cancelled || !session?.user) return;
-        setUser(session.user);
+        setUserStable(session.user);
         setIsGuestMode(false);
         if (hasProfileRef.current === null) {
           setCheckingProfile(true);
@@ -353,9 +406,17 @@ export default function SimpleDreamInterfaceWithAuth() {
       }
 
       try {
+        /*
+         * The calendar needs a dot on a day and a title to tap — it does not
+         * need what was written. `select('*')` pulled every dream's full text
+         * *and* its interpretation, plus the image column, which holds a base64
+         * data URL whenever a storage upload failed. That is megabytes of
+         * payload to draw a grid of dots, downloaded again on every launch.
+         * The one dream someone actually opens fetches its own text below.
+         */
         const { data, error } = await supabase
           .from('dreams')
-          .select('*')
+          .select('id, title, tags, mood, date, created_at')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
@@ -371,6 +432,26 @@ export default function SimpleDreamInterfaceWithAuth() {
 
     loadDreams();
   }, [user]);
+
+  /**
+   * Open one dream from the calendar, fetching the text the list left behind.
+   *
+   * Shown immediately with what the calendar already has, so the modal never
+   * waits on the network; the body fills in when it arrives.
+   */
+  const openCalendarDream = async (dream: any) => {
+    setCalendarSelectedDream(dream);
+    const { data } = await supabase
+      .from('dreams')
+      .select('content')
+      .eq('id', dream.id)
+      .maybeSingle();
+    if (data) {
+      setCalendarSelectedDream((current: any) =>
+        current?.id === dream.id ? { ...current, content: data.content } : current
+      );
+    }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -539,12 +620,14 @@ export default function SimpleDreamInterfaceWithAuth() {
           }}>
             <style>{`@keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }`}</style>
 
-            {/* Header: close button only */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexShrink: 0 }}>
-              <button onClick={() => setMenuOpen(false)} style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E', boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.5)', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
+            {/*
+              * Room for the hamburger, which is fixed above this panel and
+              * turns into an X while the menu is open. The drawer used to carry
+              * a second close button of its own, directly under that one — two
+              * X's stacked in the same corner, both doing the same thing. The
+              * one that stays is the one you already pressed to get here.
+              */}
+            <div style={{ height: 44, flexShrink: 0 }} />
 
             {/* Profile button - original style, only for logged in users */}
             {user && (
@@ -757,7 +840,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                     {selectedDreams.map(dream => (
                       <button
                         key={dream.id}
-                        onClick={() => setCalendarSelectedDream(dream)}
+                        onClick={() => openCalendarDream(dream)}
                         style={{
                           padding: '12px 16px',
                           background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)',

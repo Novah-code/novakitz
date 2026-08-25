@@ -173,6 +173,7 @@ const translations = {
     // Buttons
     next: 'Next',
     skip: 'Skip',
+    skipAll: 'Set this up later',
     back: 'Back',
     complete: 'Complete',
     saving: 'Saving...',
@@ -221,6 +222,7 @@ const translations = {
     // Buttons
     next: '다음',
     skip: '건너뛰기',
+    skipAll: '나중에 설정하기',
     back: '이전',
     complete: '완료',
     saving: '저장 중...',
@@ -416,6 +418,37 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       setCurrentStep(currentStep + 1);
     } else {
       handleSubmit();
+    }
+  };
+
+  /**
+   * Leave the whole thing for later.
+   *
+   * Steps 1 and 2 were mandatory — a birth date and a nickname before the app
+   * would open at all — and the per-step Skip only appeared from step 3. There
+   * was no way past them, so anyone who did not want to answer was simply
+   * stuck, and so was anyone whose profile row went missing. App Review is in
+   * that position too, on the first screen after signing in, and 5.1.1(v) does
+   * not allow requiring personal information the app does not need to run.
+   *
+   * This writes the row, empty, so the question counts as answered and is not
+   * asked again on every launch. Everything in it can be filled in later from
+   * Profile, which is where it was always editable.
+   */
+  const handleSkipAll = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({ user_id: user.id, profile_completed: false }, { onConflict: 'user_id' });
+      if (error) throw error;
+      if (onComplete) onComplete();
+    } catch (err: any) {
+      console.error('Skip profile error:', err);
+      setError(err.message || 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -900,6 +933,30 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
             {loading ? t.saving : (currentStep === totalSteps ? t.complete : t.next)}
           </button>
         </div>
+
+        {/*
+          * A way out, on every step. Quiet rather than hidden: this is the
+          * first screen after signing in, and nothing behind it needs a birth
+          * date to work.
+          */}
+        <button
+          onClick={handleSkipAll}
+          disabled={loading}
+          style={{
+            display: 'block',
+            margin: '14px auto 0',
+            padding: '6px 10px',
+            background: 'none',
+            border: 'none',
+            color: 'rgba(90, 132, 73, 0.7)',
+            fontSize: '13px',
+            textDecoration: 'underline',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1,
+          }}
+        >
+          {t.skipAll}
+        </button>
       </div>
     </div>
   );

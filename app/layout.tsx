@@ -3,7 +3,6 @@ import { Inter, Roboto } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import PWAInstall from "./pwa-install";
 import UpdateNotification from "../src/components/UpdateNotification";
 import CapacitorBridge from "../src/components/CapacitorBridge";
 
@@ -160,7 +159,6 @@ export default function RootLayout({
           <div className="particle particle-6"></div>
         </div>
         <CapacitorBridge />
-        <PWAInstall />
         <UpdateNotification />
         {children}
         <Analytics />
