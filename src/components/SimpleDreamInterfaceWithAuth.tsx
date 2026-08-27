@@ -974,34 +974,13 @@ export default function SimpleDreamInterfaceWithAuth() {
               ✕
             </button>
 
-            {/* Friendly Welcome Message */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h2 style={{
-                fontSize: '1.4rem',
-                fontWeight: '600',
-                color: 'var(--matcha-dark)',
-                marginBottom: '0.75rem',
-                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Georgia', serif",
-                letterSpacing: language === 'ko' ? '0' : '0.5px'
-              }}>
-                {language === 'ko'
-                  ? '꿈을 Brew 하고 싶으신가요?'
-                  : 'Want to brew your dreams?'}
-              </h2>
-              <p style={{
-                fontSize: '0.8rem',
-                color: 'var(--matcha-green)',
-                fontWeight: '500',
-                background: 'rgba(127, 176, 105, 0.1)',
-                padding: '6px 12px',
-                borderRadius: '20px',
-                display: 'inline-block'
-              }}>
-                {language === 'ko'
-                  ? 'Free: 월 7회 AI 분석'
-                  : 'Free: 7 AI analyses/month'}
-              </p>
-            </div>
+            {/*
+              The sales pitch that used to sit here — a headline asking whether
+              you wanted to brew your dreams, and a badge counting the free
+              allowance — is gone. Someone who has opened a sign-in panel has
+              already decided; what they need is the shortest way to being
+              inside, not another round of persuasion.
+            */}
 
             {/* Google Sign In Button */}
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
