@@ -11,8 +11,91 @@ interface AuthProps {
 // Note: onAuthSuccess is kept for API compatibility but actual auth state
 // is handled by Supabase's onAuthStateChange in the parent component
 export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
-  const [loading, setLoading] = useState<'google' | 'apple' | null>(null);
+  const [loading, setLoading] = useState<'google' | 'apple' | 'email' | null>(null);
   const [message, setMessage] = useState('');
+
+  /*
+   * Email and password, under the two social buttons.
+   *
+   * Until now those two were the only way in, which meant anyone unwilling to
+   * attach a Google or Apple account to a dream journal simply could not have
+   * one — a sharper objection here than in most apps, given what people write
+   * in it. It also left App Review with a single door: if Sign in with Apple
+   * failed for them, there was no second way to open the app at all, and no
+   * shared login we could hand over.
+   *
+   * Collapsed by default so Apple stays the most prominent option, as
+   * guideline 4.8 asks, but named on a visible button rather than hidden.
+   */
+  const [showEmail, setShowEmail] = useState(false);
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [notice, setNotice] = useState('');
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage('');
+    setNotice('');
+
+    if (!email.trim() || !password) {
+      setMessage('Enter your email and password.');
+      return;
+    }
+    if (mode === 'signup' && password.length < 6) {
+      setMessage('Passwords need at least 6 characters.');
+      return;
+    }
+
+    setLoading('email');
+    try {
+      if (mode === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+        });
+        if (error) throw error;
+        // With email confirmation switched on in Supabase, the account exists
+        // but there is no session yet. Saying so beats a screen that appears
+        // to have done nothing.
+        if (!data.session) {
+          setNotice('Check your email to confirm the account, then sign in.');
+          setMode('signin');
+          setPassword('');
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (error) throw error;
+      }
+      // On success the parent's auth listener takes over and unmounts this.
+    } catch (error: unknown) {
+      const raw = (error as { message?: string })?.message ?? '';
+      setMessage(
+        /invalid login/i.test(raw)
+          ? 'That email and password do not match an account.'
+          : /already registered/i.test(raw)
+            ? 'There is already an account with that email. Sign in instead.'
+            : raw || 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const fieldStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 14px',
+    borderRadius: '12px',
+    border: '1px solid rgba(127, 176, 105, 0.3)',
+    background: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '0.95rem',
+    color: '#334155',
+    outline: 'none',
+    fontFamily: "'Roboto', -apple-system, sans-serif",
+  };
 
   const handleAppleSignIn = async () => {
     setLoading('apple');
@@ -22,9 +105,9 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
       await signInWithApple();
     } catch (error: unknown) {
       if (!isAppleSignInCancelled(error)) {
-        console.error('Apple 로그인 오류:', error);
+        console.error('Apple sign-in failed:', error);
         const detail = (error as { message?: string })?.message ?? '';
-        setMessage(`로그인 중 오류가 발생했습니다: ${detail}`);
+        setMessage(`Could not sign in with Apple: ${detail}`);
       }
     } finally {
       // Cleared on success too. The parent unmounts this component moments
@@ -54,8 +137,8 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
       if (error) throw error;
       // 성공시 Google 페이지로 리다이렉트됨
     } catch (error: any) {
-      console.error('Google 로그인 오류:', error);
-      setMessage(`로그인 중 오류가 발생했습니다: ${error.message}`);
+      console.error('Google sign-in failed:', error);
+      setMessage(`Could not sign in with Google: ${error.message}`);
       setLoading(null);
     }
   };
@@ -175,6 +258,103 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
           </>
         )}
       </button>
+
+      {/* ── Email ───────────────────────────────────────────────── */}
+      {!showEmail ? (
+        <button
+          type="button"
+          onClick={() => { setShowEmail(true); setMessage(''); }}
+          disabled={loading !== null}
+          style={{
+            width: '100%',
+            marginTop: '10px',
+            padding: '12px 20px',
+            background: 'transparent',
+            border: 'none',
+            fontSize: '0.9rem',
+            color: 'var(--matcha-dark, #4a6741)',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            textDecoration: 'underline',
+            fontFamily: "'Roboto', -apple-system, sans-serif",
+          }}
+        >
+          Continue with email
+        </button>
+      ) : (
+        <form onSubmit={handleEmailSubmit} style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            style={fieldStyle}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={mode === 'signup' ? 'Password — at least 6 characters' : 'Password'}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            style={fieldStyle}
+          />
+          <button
+            type="submit"
+            disabled={loading !== null}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              background: 'var(--matcha-green, #7FB069)',
+              border: 'none',
+              borderRadius: '14px',
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: '#fff',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading && loading !== 'email' ? 0.6 : 1,
+              fontFamily: "'Roboto', -apple-system, sans-serif",
+            }}
+          >
+            {loading === 'email'
+              ? 'Just a moment...'
+              : mode === 'signup' ? 'Create account' : 'Sign in'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setMessage(''); setNotice(''); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '0.85rem',
+              color: 'var(--matcha-dark, #4a6741)',
+              cursor: 'pointer',
+              padding: '2px',
+              fontFamily: "'Roboto', -apple-system, sans-serif",
+            }}
+          >
+            {mode === 'signup'
+              ? 'Already have an account? Sign in'
+              : 'New here? Create an account'}
+          </button>
+        </form>
+      )}
+
+      {notice && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '10px 12px',
+          background: 'rgba(127, 176, 105, 0.12)',
+          borderRadius: '10px',
+          color: 'var(--matcha-dark, #4a6741)',
+          fontSize: '0.85rem',
+          textAlign: 'center'
+        }}>
+          {notice}
+        </div>
+      )}
 
       {message && (
         <div style={{
