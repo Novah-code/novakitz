@@ -821,17 +821,25 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Calendar Modal */}
       {showCalendar && user && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '700px', width: '92%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
-            <button
-              onClick={() => {
-                setShowCalendar(false);
-                setCalendarSelectedDate(null);
-              }}
-              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              ✕
-            </button>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>{t.calendar}</h2>
+          {/*
+            * No white card around the calendar any more. The sheet brings its
+            * own paper, its own shadow and its own month title, so wrapping it
+            * put a card inside a card and printed the word "Calendar" directly
+            * above the word "August".
+            */}
+          <div style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowCalendar(false);
+                  setCalendarSelectedDate(null);
+                }}
+                aria-label={language === 'ko' ? '닫기' : 'Close'}
+                style={{ background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: '#5C7061', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              >
+                ✕
+              </button>
+            </div>
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}
@@ -857,7 +865,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               if (selectedDreams.length === 0) return null;
 
               return (
-                <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(127, 176, 105, 0.2)', paddingTop: '1.5rem' }}>
+                <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '1rem' }}>
                     {new Date(calendarSelectedDate).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
