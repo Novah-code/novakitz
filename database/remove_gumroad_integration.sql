@@ -24,9 +24,15 @@ ALTER TABLE public.user_profiles
     DROP COLUMN IF EXISTS gumroad_license_key;
 
 -- Added by the abandoned Toss Payments experiment; never used in production.
+--
+-- payment_method carries a DEFAULT of 'gumroad'. The RevenueCat webhook does
+-- not write that column, so every subscription it creates is stamped 'gumroad'
+-- by the default — which is how the first real sandbox purchase, made through
+-- Apple, ended up labelled as a Gumroad payment.
 ALTER TABLE public.user_subscriptions
     DROP COLUMN IF EXISTS toss_payment_key,
     DROP COLUMN IF EXISTS toss_order_id,
+    DROP COLUMN IF EXISTS toss_payment_data,
     DROP COLUMN IF EXISTS payment_method;
 
 COMMIT;
