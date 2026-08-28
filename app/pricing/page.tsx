@@ -76,6 +76,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [purchased, setPurchased] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
@@ -84,23 +85,26 @@ export default function PricingPage() {
 
   const ko = language === 'ko';
 
+  /*
+   * A purchase deserves a moment, not a toast.
+   *
+   * A corner toast for three seconds is what this had, and for the one
+   * transaction where money changed hands it was too small to notice — people
+   * were left on the paywall they had just paid on, wondering. Apple raises
+   * its own receipt alert first, but that one is generic and says nothing
+   * about what the app now does differently.
+   *
+   * So the success case gets a panel that names what just became available
+   * and one way onward. The toast stays for everything else, where it is the
+   * right size.
+   */
   const handleBuy = async (plan: 'premium' | 'yearly') => {
     const { changed, message } = await startCheckout(plan, language);
-    if (message) setToast({ message, type: changed ? 'success' : 'info' });
-
-    /*
-     * Leave the paywall once it has been paid.
-     *
-     * A successful purchase used to raise a toast in the corner for three
-     * seconds and nothing else, so someone who had just subscribed was left
-     * looking at the same page, with the same "Start Pro" button, asking
-     * whether it had worked. The pause is long enough to read the toast and
-     * short enough not to feel stuck; what they bought is in the app, not
-     * here.
-     */
     if (changed) {
-      setTimeout(() => goTo('/'), 1400);
+      setPurchased(true);
+      return;
     }
+    if (message) setToast({ message, type: 'info' });
   };
 
   // The free allowance was only mentioned inside an FAQ answer, so the page
@@ -477,6 +481,83 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+
+      {purchased && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            background: 'rgba(232,243,234,0.72)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+          }}
+        >
+          <div
+            style={{
+              ...panel,
+              background: 'rgba(255,255,255,0.85)',
+              maxWidth: 380,
+              width: '100%',
+              padding: '40px 32px',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                margin: '0 auto 20px',
+                borderRadius: '50%',
+                background: `linear-gradient(135deg, ${G.green} 0%, #5C8D63 100%)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                fontSize: 26,
+                boxShadow: '0 6px 18px rgba(122,179,130,0.35)',
+              }}
+              aria-hidden="true"
+            >
+              ✓
+            </div>
+
+            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: G.textDark, letterSpacing: '-0.01em' }}>
+              {ko ? 'Pro가 시작되었습니다' : 'Welcome to Pro'}
+            </h2>
+
+            <p style={{ margin: '12px 0 24px', fontSize: 14, lineHeight: 1.6, color: G.textBase }}>
+              {ko
+                ? '이제 매일 아침 해석을 받고, 매달 꿈 리뷰를 볼 수 있어요.'
+                : 'A reading every morning, and a monthly review of your dreams.'}
+            </p>
+
+            <button
+              onClick={() => goTo('/')}
+              style={{
+                width: '100%',
+                padding: '15px 20px',
+                borderRadius: 999,
+                border: 'none',
+                cursor: 'pointer',
+                background: `linear-gradient(135deg, ${G.green} 0%, #5C8D63 100%)`,
+                color: '#fff',
+                fontSize: 15,
+                fontWeight: 600,
+                boxShadow: '0 6px 18px rgba(122,179,130,0.3)',
+              }}
+            >
+              {ko ? '시작하기' : 'Start your morning'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
