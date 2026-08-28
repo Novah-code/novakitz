@@ -332,6 +332,7 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
+              marginBottom: '10px',
               transition: 'all 0.2s ease',
               boxShadow: '0 2px 8px rgba(127, 176, 105, 0.1)',
               fontFamily: "'Roboto', -apple-system, sans-serif"
@@ -376,25 +377,58 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
           </button>
 
 
-        <button
-          type="button"
-          onClick={() => { setShowEmail(true); setMessage(''); setNotice(''); }}
-          disabled={loading !== null}
-          style={{
-            width: '100%',
-            marginTop: '12px',
-            padding: '12px 20px',
-            background: 'transparent',
-            border: 'none',
-            fontSize: '0.9rem',
-            color: 'var(--matcha-dark, #4a6741)',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            textDecoration: 'underline',
-            fontFamily: "'Roboto', -apple-system, sans-serif",
-          }}
-        >
-          Continue with email
-        </button>
+        {/*
+          The email door, as two named buttons rather than one.
+
+          It was a single underlined "Continue with email" link, which read as a
+          footnote beside two full-width buttons and left the stack looking
+          unfinished — and it hid the distinction that actually matters here.
+          Whether you are arriving for the first time or coming back is the one
+          thing you already know when you reach this panel, and it decided which
+          form you got only after a second screen.
+
+          Side by side rather than stacked: four full-width rows would make the
+          third option look as weighty as Apple, which guideline 4.8 does not
+          allow. Same height, radius and type as the two above, so the whole
+          stack measures out on one grid.
+        */}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          {([
+            ['Sign up', 'signup'],
+            ['Sign in', 'signin'],
+          ] as const).map(([label, target]) => (
+            <button
+              key={target}
+              type="button"
+              onClick={() => { setShowEmail(true); setMode(target); setMessage(''); setNotice(''); }}
+              disabled={loading !== null}
+              style={{
+                flex: 1,
+                padding: '14px 12px',
+                background: 'rgba(127, 176, 105, 0.12)',
+                border: '1px solid rgba(127, 176, 105, 0.2)',
+                borderRadius: '14px',
+                fontSize: '0.95rem',
+                fontWeight: '500',
+                color: 'var(--matcha-dark, #4a6741)',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s ease',
+                fontFamily: "'Roboto', -apple-system, sans-serif",
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         </>
       )}
 
