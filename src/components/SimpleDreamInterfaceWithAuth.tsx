@@ -641,6 +641,31 @@ export default function SimpleDreamInterfaceWithAuth() {
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </div>
+
+                {/*
+                  * Say that the subscription is on.
+                  *
+                  * `isPremium` was computed here and handed only to
+                  * DreamInsights and ProfileSettings, so after paying the menu
+                  * looked exactly as it had before and the only proof was three
+                  * taps away under Profile → Subscription. Someone who has just
+                  * paid should be able to see it where they already are.
+                  */}
+                {isPremium && (
+                  <span style={{
+                    marginLeft: 8,
+                    padding: '3px 9px',
+                    borderRadius: 999,
+                    background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)',
+                    color: '#fff',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    boxShadow: '0 2px 6px rgba(122,179,130,0.35)',
+                  }}>
+                    {isLifetime ? 'LIFETIME' : 'PRO'}
+                  </span>
+                )}
               </button>
             )}
 

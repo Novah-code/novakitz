@@ -87,6 +87,20 @@ export default function PricingPage() {
   const handleBuy = async (plan: 'premium' | 'yearly') => {
     const { changed, message } = await startCheckout(plan, language);
     if (message) setToast({ message, type: changed ? 'success' : 'info' });
+
+    /*
+     * Leave the paywall once it has been paid.
+     *
+     * A successful purchase used to raise a toast in the corner for three
+     * seconds and nothing else, so someone who had just subscribed was left
+     * looking at the same page, with the same "Start Pro" button, asking
+     * whether it had worked. The pause is long enough to read the toast and
+     * short enough not to feel stuck; what they bought is in the app, not
+     * here.
+     */
+    if (changed) {
+      setTimeout(() => goTo('/'), 1400);
+    }
   };
 
   // The free allowance was only mentioned inside an FAQ answer, so the page
