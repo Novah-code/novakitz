@@ -1199,15 +1199,26 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           paddingTop: 28,
         }}>
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 220, height: 160, background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)', filter: 'blur(20px)', zIndex: 0 }} />
+          {/*
+            The card is its colour, and nothing else.
+
+            It used to have a dark ellipse floating in the middle under a 2px
+            blur, which is what made this look like a photograph that had
+            failed to load — the one thing on the screen that seemed broken.
+            Nothing was loading; it was a decoration.
+
+            Twenty arcana, twenty palettes, so the card still changes with the
+            reading. `arcanaArtChildren` further up draws real artwork for each
+            of them and is still unused; that is a separate decision, recorded
+            in POST_LAUNCH.
+          */}
           <div style={{
             width: 100, height: 135, borderRadius: 22,
             background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`,
             border: '2px solid rgba(255,255,255,0.85)',
             boxShadow: `10px 10px 25px rgba(74,93,78,0.12), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 8px rgba(255,255,255,1), inset -3px -3px 10px ${card.from}55`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 1,
-          }}>
-            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, #1E293B 0%, #4A5D4E 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.88 }} />
-          </div>
+            overflow: 'hidden', zIndex: 1,
+          }} />
           <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#7AB382', fontWeight: 700, opacity: 0.9, textAlign: 'center', zIndex: 1 }}>
             {card.arcana} · {card.name.toUpperCase()}
           </div>
