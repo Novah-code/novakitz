@@ -141,7 +141,7 @@ const translations = {
     of: 'of',
 
     // Step titles
-    step2Title: 'Your Nickname',
+    step2Title: 'What should we call you?',
     ageTitle: 'One more, if you like',
 
     // Step 1
@@ -154,7 +154,7 @@ const translations = {
     detectingLocation: 'Detecting your location...',
 
     // Step 2
-    name: 'Nickname',
+    name: 'Your name',
     namePlaceholder: 'Enter a unique nickname',
 
     // Step 3
@@ -173,7 +173,6 @@ const translations = {
 
     // Validation
     fillRequired: 'Please fill in all required fields',
-    nicknameTaken: 'This nickname is already taken. Please choose another one.',
     checkingNickname: 'Checking availability...'
   },
   ko: {
@@ -183,7 +182,7 @@ const translations = {
     of: '/',
 
     // Step titles
-    step2Title: '닉네임',
+    step2Title: '어떻게 불러드릴까요?',
     ageTitle: '하나만 더, 원하신다면',
 
     // Step 1
@@ -196,7 +195,7 @@ const translations = {
     detectingLocation: '위치를 감지하는 중...',
 
     // Step 2
-    name: '닉네임',
+    name: '이름',
     namePlaceholder: '고유한 닉네임을 입력하세요',
 
     // Step 3
@@ -215,7 +214,6 @@ const translations = {
 
     // Validation
     fillRequired: '필수 항목을 모두 입력해주세요',
-    nicknameTaken: '이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.',
     checkingNickname: '사용 가능 여부 확인 중...'
   }
 };
@@ -272,31 +270,36 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   });
   const t = translations[preferredLanguage];
 
-  // Validate nickname: English letters and numbers only, no spaces, 3-20 chars.
-  //
-  // Hangul used to be allowed here while ProfileSettings, which edits the same
-  // field later, rejected it — so a name accepted at sign-up could not be saved
-  // again afterwards. The app ships to English-speaking users and nicknames are
-  // public on shared profiles, so both screens take the same set now.
+  /*
+   * It is a name now, not a handle.
+   *
+   * It used to be a unique nickname: no spaces, no duplicates, at least three
+   * characters — the rules of a username, applied to the one field that shows
+   * up as "by ___" on someone's card. Nothing needs it to be unique. Two people
+   * called Anna are two people called Anna.
+   *
+   * So the uniqueness check is gone and spaces are allowed, because names have
+   * them. Letters only, and Latin ones: this field appears on shared profiles
+   * and the app ships to English-speaking markets.
+   *
+   * ProfileSettings edits the same field and keeps an identical copy of these
+   * rules. They have drifted apart once already — Hangul was accepted here and
+   * rejected there, so a name you signed up with could not be saved again — so
+   * the two must be changed together.
+   */
   const validateNickname = (nickname: string): { isValid: boolean; error: string } => {
-    // 공백 확인
-    if (nickname.includes(' ')) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '공백은 사용할 수 없습니다' : 'Spaces are not allowed' };
+    const trimmed = nickname.trim();
+
+    if (trimmed.length < 2) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '두 글자 이상 적어주세요' : 'At least two letters' };
+    }
+    if (trimmed.length > 20) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '스무 글자까지 됩니다' : 'Up to twenty letters' };
     }
 
-    // 길이 확인
-    if (nickname.length < 3) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '최소 3자 이상입니다' : 'Minimum 3 characters' };
-    }
-    if (nickname.length > 20) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '최대 20자 이내입니다' : 'Maximum 20 characters' };
-    }
-
-    const validPattern = /^[a-zA-Z0-9]+$/;
-    if (!validPattern.test(nickname)) {
-      // Says what is excluded rather than what is allowed. "영문과 숫자만" reads as
-      // a requirement for both, which sent people looking for a digit to add.
-      return { isValid: false, error: preferredLanguage === 'ko' ? '공백과 특수문자는 쓸 수 없어요' : 'No spaces or special characters' };
+    // Letters and the spaces between them. Names have spaces; handles did not.
+    if (!/^[a-zA-Z]+(?: [a-zA-Z]+)*$/.test(trimmed)) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '영문으로 적어주세요' : 'Letters only, please' };
     }
 
     return { isValid: true, error: '' };
@@ -362,26 +365,9 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         return;
       }
 
-      setLoading(true);
-      try {
-        const { data, error: queryError } = await supabase
-          .from('nicknames')
-          .select('id')
-          .eq('nickname', fullName)
-          .maybeSingle();
-
-        if (queryError) throw queryError;
-
-        if (data) {
-          setError(t.nicknameTaken);
-          setLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Error checking nickname:', err);
-      } finally {
-        setLoading(false);
-      }
+      // No uniqueness check. Two people called Anna are two people called Anna,
+      // and being told your own name is taken is a strange thing to read on the
+      // first screen of an app.
     }
 
     // Step 2 is age, and it is skippable. Nothing to validate.

@@ -85,22 +85,23 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     days: language === 'ko' ? '일' : 'days',
   };
 
+  // Must stay identical to validateNickname in UserProfileForm — see the note
+  // there. The two drifted apart once and made a signed-up name unsaveable.
   const validateUsername = (name: string): { isValid: boolean; error: string } => {
-    if (name.includes(' ')) {
-      return { isValid: false, error: language === 'ko' ? '공백은 사용할 수 없습니다' : 'Spaces are not allowed' };
+    const trimmed = name.trim();
+
+    if (trimmed.length < 2) {
+      return { isValid: false, error: language === 'ko' ? '두 글자 이상 적어주세요' : 'At least two letters' };
     }
-    if (name.length < 3) {
-      return { isValid: false, error: language === 'ko' ? '최소 3자 이상입니다' : 'Minimum 3 characters' };
+    if (trimmed.length > 20) {
+      return { isValid: false, error: language === 'ko' ? '스무 글자까지 됩니다' : 'Up to twenty letters' };
     }
-    if (name.length > 20) {
-      return { isValid: false, error: language === 'ko' ? '최대 20자 이내입니다' : 'Maximum 20 characters' };
+
+    // Letters and the spaces between them. Names have spaces; handles did not.
+    if (!/^[a-zA-Z]+(?: [a-zA-Z]+)*$/.test(trimmed)) {
+      return { isValid: false, error: language === 'ko' ? '영문으로 적어주세요' : 'Letters only, please' };
     }
-    // Only allow English letters and numbers
-    const validPattern = /^[a-zA-Z0-9]+$/;
-    if (!validPattern.test(name)) {
-      // Matches UserProfileForm — states the exclusion, not a requirement for both.
-      return { isValid: false, error: language === 'ko' ? '공백과 특수문자는 쓸 수 없어요' : 'No spaces or special characters' };
-    }
+
     return { isValid: true, error: '' };
   };
 
