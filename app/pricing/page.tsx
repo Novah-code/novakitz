@@ -5,29 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { startCheckout } from '../../src/lib/checkout';
 import Toast, { ToastType } from '../../src/components/Toast';
-
-// Design tokens
-const G = {
-  bgMain: '#E8F3EA',
-  glass: 'rgba(255,255,255,0.5)',
-  glassHover: 'rgba(255,255,255,0.75)',
-  glassBorder: 'rgba(255,255,255,0.8)',
-  textDark: '#3A4A3E',
-  textBase: '#5C7061',
-  textLight: '#8BA390',
-  green: '#7AB382',
-  gold: '#D4A33B',
-  pink: '#D67A6B',
-};
-
-const panel = {
-  background: G.glass,
-  backdropFilter: 'blur(24px)',
-  WebkitBackdropFilter: 'blur(24px)',
-  border: `1px solid ${G.glassBorder}`,
-  borderRadius: 32,
-  boxShadow: '0 10px 40px rgba(0,0,0,0.03), inset 2px 2px 10px rgba(255,255,255,0.5)',
-} as React.CSSProperties;
+import FAQItem from '../../src/components/FAQItem';
+import { G, panel } from '../../src/lib/uiTokens';
 
 function Check({ color = G.green }: { color?: string }) {
   return (
@@ -35,40 +14,6 @@ function Check({ color = G.green }: { color?: string }) {
       stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
     </svg>
-  );
-}
-
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{
-      marginBottom: 12,
-      background: open ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
-      border: `1px solid ${open ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)'}`,
-      borderRadius: 16, overflow: 'hidden',
-      transition: 'all 0.3s ease',
-      boxShadow: open ? '0 10px 20px rgba(0,0,0,0.02)' : 'none',
-    }}>
-      <button onClick={() => setOpen(!open)} style={{
-        width: '100%', padding: '20px 24px', background: 'none', border: 'none',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        cursor: 'pointer', textAlign: 'left',
-      }}>
-        <span style={{ fontSize: 15, fontWeight: 500, color: G.textDark, paddingRight: '1rem' }}>{q}</span>
-        <span style={{
-          fontFamily: 'monospace', fontSize: 20, color: G.green, flexShrink: 0,
-          transition: 'transform 0.3s', display: 'inline-block',
-          transform: open ? 'rotate(45deg)' : 'none',
-        }}>+</span>
-      </button>
-      <div style={{
-        maxHeight: open ? 400 : 0, overflow: 'hidden',
-        transition: 'max-height 0.3s ease',
-        padding: open ? '0 24px 20px' : '0 24px 0',
-      }}>
-        <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: G.textBase, whiteSpace: 'pre-line' }}>{a}</p>
-      </div>
-    </div>
   );
 }
 

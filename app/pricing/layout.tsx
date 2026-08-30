@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: "Choose your Novakitz plan: Free gives 7 AI interpretations a month, Pro gives one every day. Morning mood check-ins, dream interpretation, and Jungian insight.",
   keywords: [
     "Novakitz pricing", "inner journal subscription", "AI dream analysis pricing",
-    "premium dream interpretation", "lifetime inner journal"
+    "premium dream interpretation", "morning ritual app"
   ],
   openGraph: {
     title: "Novakitz Pricing - Pro Inner Journal Plans",

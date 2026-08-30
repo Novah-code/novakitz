@@ -62,7 +62,7 @@ Refunds will NOT be provided for:
 ### 3.1 Refund Request Process
 To request a refund:
 
-1. **Email Us**: Send an email to contact@novakitz.com
+1. **Email Us**: Send an email to hello@novakitz.com
 2. **Include Information**:
    - Your account email address
    - Purchase date and transaction ID
@@ -92,7 +92,7 @@ Once approved by Gumroad:
 You can cancel your subscription at any time:
 - **Through Your Account**: Use the subscription management page
 - **Through Gumroad**: Manage your subscription directly on Gumroad
-- **Email Us**: Contact contact@novakitz.com
+- **Email Us**: Contact hello@novakitz.com
 
 ### 4.2 Effect of Cancellation
 When you cancel:
@@ -142,7 +142,7 @@ In rare cases, we may consider refunds outside our standard policy for:
 - Death of the account holder (documentation required)
 - Natural disasters or extraordinary circumstances
 
-Please contact us at contact@novakitz.com to discuss your situation.
+Please contact us at hello@novakitz.com to discuss your situation.
 
 ### 7.2 Case-by-Case Review
 Each special circumstance request is reviewed individually. Approval is at our sole discretion and does not set a precedent for future requests.
@@ -200,7 +200,7 @@ In addition to our refund policy, you may have rights under consumer protection 
 Our policy aims to meet or exceed these requirements, but local laws may provide additional protections.
 
 ### 11.2 Exercising Legal Rights
-To exercise rights under local consumer protection laws, contact us at contact@novakitz.com with:
+To exercise rights under local consumer protection laws, contact us at hello@novakitz.com with:
 - Your location
 - Relevant law or regulation
 - Nature of your request
@@ -216,7 +216,7 @@ After a refund is processed:
 
 ### 12.2 Account Deletion
 If you want to delete your account after a refund:
-- Contact contact@novakitz.com
+- Contact hello@novakitz.com
 - Your data will be deleted according to our Privacy Policy
 - Deletion is permanent and cannot be undone
 
@@ -259,7 +259,7 @@ Changes to this policy do not retroactively affect existing subscriptions. The p
 
 For refund requests or questions about this policy:
 
-**Email**: contact@novakitz.com
+**Email**: hello@novakitz.com
 **Subject Line**: "Refund Request - [Your Email]"
 **Website**: www.novakitz.com
 
@@ -370,7 +370,7 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 ### 3.1 환불 요청 절차
 환불을 요청하려면:
 
-1. **이메일 보내기**: contact@novakitz.com으로 이메일 전송
+1. **이메일 보내기**: hello@novakitz.com으로 이메일 전송
 2. **정보 포함**:
    - 계정 이메일 주소
    - 구매 날짜 및 거래 ID
@@ -397,7 +397,7 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 언제든지 구독을 취소할 수 있습니다:
 - **계정을 통해**: 구독 관리 페이지 사용
 - **Gumroad를 통해**: Gumroad에서 직접 구독 관리
-- **이메일 보내기**: contact@novakitz.com에 문의
+- **이메일 보내기**: hello@novakitz.com에 문의
 
 ### 4.2 취소 효과
 취소 시:
@@ -447,7 +447,7 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 - 계정 소유자의 사망(문서 필요)
 - 자연재해 또는 특별한 상황
 
-귀하의 상황을 논의하려면 contact@novakitz.com으로 연락해 주십시오.
+귀하의 상황을 논의하려면 hello@novakitz.com으로 연락해 주십시오.
 
 ### 7.2 사례별 검토
 각 특별한 상황 요청은 개별적으로 검토됩니다. 승인은 당사의 단독 재량에 따르며 향후 요청에 대한 선례가 되지 않습니다.
@@ -456,7 +456,7 @@ This Refund Policy is part of our Terms of Service and should be read in conjunc
 
 환불 요청 또는 본 정책에 대한 질문:
 
-**이메일**: contact@novakitz.com
+**이메일**: hello@novakitz.com
 **제목**: "환불 요청 - [귀하의 이메일]"
 **웹사이트**: www.novakitz.com
 

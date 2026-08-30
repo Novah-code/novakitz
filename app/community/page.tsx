@@ -480,7 +480,7 @@ export default function CommunityPage() {
                   </svg>
                 </a>
                 <a
-                  href="mailto:contact@novakitz.com"
+                  href="mailto:hello@novakitz.com"
                   style={{
                     display: 'flex',
                     alignItems: 'center',

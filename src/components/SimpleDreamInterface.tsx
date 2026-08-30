@@ -5911,7 +5911,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               letterSpacing: '-0.5px',
               fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
             }}>
-              {language === 'ko' ? '오늘 아침 기분은 어떤가요?' : 'How are you feeling this morning?'}
+              {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
 
             <div style={{
