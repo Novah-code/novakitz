@@ -821,17 +821,25 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Calendar Modal */}
       {showCalendar && user && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '700px', width: '92%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
-            <button
-              onClick={() => {
-                setShowCalendar(false);
-                setCalendarSelectedDate(null);
-              }}
-              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              ✕
-            </button>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--matcha-dark)', margin: '0 0 1.5rem 0' }}>{t.calendar}</h2>
+          {/*
+            * No white card around the calendar any more. The sheet brings its
+            * own paper, its own shadow and its own month title, so wrapping it
+            * put a card inside a card and printed the word "Calendar" directly
+            * above the word "August".
+            */}
+          <div style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowCalendar(false);
+                  setCalendarSelectedDate(null);
+                }}
+                aria-label={language === 'ko' ? '닫기' : 'Close'}
+                style={{ background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: '#5C7061', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              >
+                ✕
+              </button>
+            </div>
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}
@@ -857,7 +865,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               if (selectedDreams.length === 0) return null;
 
               return (
-                <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(127, 176, 105, 0.2)', paddingTop: '1.5rem' }}>
+                <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '1rem' }}>
                     {new Date(calendarSelectedDate).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
@@ -940,65 +948,72 @@ export default function SimpleDreamInterfaceWithAuth() {
         />
       )}
 
-      {/* Auth Modal for Guest Users - Friendly Brew Prompt */}
+      {/* Auth Modal for Guest Users */}
       {isGuestMode && !user && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          zIndex: 10001,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px'
-        }}>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderRadius: '24px',
-            padding: 'clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 3vw, 2rem)',
-            maxWidth: '380px',
-            width: '92%',
-            boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
-            position: 'relative',
-            textAlign: 'center',
-            border: '1px solid rgba(127, 176, 105, 0.2)'
-          }}>
+        <div
+          onClick={() => setIsGuestMode(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.4)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            zIndex: 10001,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            padding: '20px'
+          }}
+        >
+          {/*
+            The close button used to be pinned inside the card's top-right
+            corner, where it sat on top of the Apple button's label. Outside the
+            card it cannot collide with anything, and the backdrop closes the
+            panel too — which matters now that "Maybe later" is gone. That line
+            was a third way to say no on a panel someone opened themselves.
+          */}
+          <div style={{ width: '92%', maxWidth: '380px', display: 'flex', justifyContent: 'flex-end' }}>
             <button
               onClick={() => setIsGuestMode(false)}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
               style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'rgba(127, 176, 105, 0.1)',
+                background: 'rgba(255, 255, 255, 0.9)',
                 border: 'none',
                 borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                fontSize: '16px',
+                width: '34px',
+                height: '34px',
+                fontSize: '17px',
                 cursor: 'pointer',
                 color: 'var(--matcha-dark)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
+                justifyContent: 'center'
               }}
             >
               ✕
             </button>
+          </div>
 
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '24px',
+              padding: 'clamp(1.5rem, 4vw, 2rem)',
+              maxWidth: '380px',
+              width: '92%',
+              boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
+              textAlign: 'center',
+              border: '1px solid rgba(127, 176, 105, 0.2)'
+            }}
+          >
             {/*
               The sales pitch that used to sit here — a headline asking whether
               you wanted to brew your dreams, and a badge counting the free
@@ -1006,33 +1021,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               already decided; what they need is the shortest way to being
               inside, not another round of persuasion.
             */}
-
-            {/* Google Sign In Button */}
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
-
-            {/* Maybe Later */}
-            <button
-              onClick={() => setIsGuestMode(false)}
-              style={{
-                marginTop: '1rem',
-                padding: '8px 20px',
-                background: 'none',
-                border: 'none',
-                color: 'var(--sage)',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                transition: 'color 0.2s',
-                fontFamily: 'inherit'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--matcha-dark)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--sage)';
-              }}
-            >
-              {language === 'ko' ? '나중에 할게요' : 'Maybe later'}
-            </button>
           </div>
         </div>
       )}
