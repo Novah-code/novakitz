@@ -272,7 +272,7 @@ export default function PricingPage() {
         {/* ── Header ── */}
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <span style={{ ...M, fontSize: 11, letterSpacing: 2, color: G.green, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
-            The OS for your subconscious
+            {ko ? '1분 아침 리추얼' : 'A 1-minute morning ritual'}
           </span>
           <h1 style={{ ...S, fontSize: 'clamp(36px,6vw,48px)', fontWeight: 700, color: G.textDark, margin: '0 0 40px', letterSpacing: -0.5 }}>
             {ko ? '요금제' : 'Pricing'}
