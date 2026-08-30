@@ -148,6 +148,28 @@ affirmationCount = 3;   // 플랜을 조회한 뒤 무조건 덮어씀
 
 ---
 
+## 6-2. 계정 삭제가 데이터만 지웁니다
+
+`ProfileSettings.tsx`의 `handleDeleteAccount`는 `dreams`, `user_profiles`,
+`nicknames`, `community_posts`, `community_likes`, `user_subscriptions`에서 행을
+지우고 로그아웃시킵니다. **`auth.users`의 계정 자체는 남습니다.**
+
+지금 못 고치는 이유는 권한입니다. 사용자를 실제로 지우려면
+`supabase.auth.admin.deleteUser`가 필요하고 그건 service role 키를 씁니다 —
+브라우저에서 부를 수 없습니다. 서버 라우트(`/api/account/delete`)를 새로 만들고
+`apiAuth.ts`로 본인 확인을 한 뒤 지우는 게 맞는 구조인데, 제출 이틀 전에 새 라우트를
+넣고 실기기 검증까지 하기에는 위험이 큽니다.
+
+**심사에는 아마 걸리지 않습니다.** 가이드라인 5.1.1(v)가 요구하는 건 앱 안에서 계정
+삭제를 *시작*할 수 있어야 한다는 것이고 그 버튼과 흐름은 있습니다. 다만 삭제를
+요청한 사람의 계정이 남아 있는 건 그 자체로 맞지 않고, 그 이메일로 다시 로그인하면 빈
+앱이 열립니다. `/support` 페이지의 문구는 실제 동작대로 — "꿈, 프로필, 커뮤니티 글,
+구독 기록을 지웁니다" — 적어뒀습니다.
+
+출시 직후 첫 작업으로 잡는 게 맞습니다.
+
+---
+
 ## 7. 프로필 화면 디자인
 
 `src/components/ProfileSettings.tsx`. 기능은 고쳤지만(스트릭 중복 계산 제거,
