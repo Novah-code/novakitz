@@ -253,8 +253,23 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
 
-  // Language state (must be first to use in translations)
-  const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(profile?.preferred_language as 'en' | 'ko' || 'en');
+  /*
+   * Language state (must be first to use in translations).
+   *
+   * Order of authority: what this account already chose, then what the app is
+   * currently showing (saved by the toggle), then the phone. The IP lookup
+   * below no longer gets a say — see the note on it.
+   */
+  const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ko'>(() => {
+    const fromProfile = profile?.preferred_language as 'en' | 'ko' | undefined;
+    if (fromProfile) return fromProfile;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
+      if (saved) return saved;
+      if (navigator.language?.toLowerCase().startsWith('ko')) return 'ko';
+    }
+    return 'en';
+  });
   const t = translations[preferredLanguage];
 
   // Validate nickname: English letters and numbers only, no spaces, 3-20 chars.
@@ -314,12 +329,15 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         const response = await fetch('/api/get-location');
         const data: LocationData = await response.json();
 
+        /*
+         * Country and city only. This used to set the language too, which meant
+         * an English phone sitting in Korea had its language flipped to Korean
+         * halfway through signing up — the network overruling the device, and
+         * sometimes the person's own toggle. The language is decided above now,
+         * from the phone, before this request has even returned.
+         */
         setCountryCode(data.country_code);
         setCountryName(data.country_name);
-
-        if (data.country_code === 'KR') {
-          setPreferredLanguage('ko');
-        }
       } catch (error) {
         console.error('Error fetching location:', error);
       } finally {

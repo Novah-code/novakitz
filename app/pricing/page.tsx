@@ -76,8 +76,9 @@ export default function PricingPage() {
   }, []);
 
   useEffect(() => {
+    // Same order as the app: a saved choice first, then the phone.
     const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
-    if (saved) setLanguage(saved);
+    setLanguage(saved ?? (navigator.language?.toLowerCase().startsWith('ko') ? 'ko' : 'en'));
   }, []);
 
   const ko = language === 'ko';

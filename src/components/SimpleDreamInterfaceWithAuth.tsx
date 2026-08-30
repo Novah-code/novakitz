@@ -206,9 +206,27 @@ export default function SimpleDreamInterfaceWithAuth() {
   };
 
   useEffect(() => {
-    // Load preferred language
+    /*
+     * Language on first launch follows the phone, not the network.
+     *
+     * It used to default to English for everyone and only reach Korean later,
+     * from inside the profile form, by sending the request IP to ipapi.co and
+     * checking whether the country came back KR. So a Korean speaker opened
+     * the app to an English screen, and the fix for that was a round trip to a
+     * third party — which is also the reason the App Privacy questionnaire has
+     * to declare Coarse Location.
+     *
+     * `navigator.language` is instant, offline, and more accurate: a Korean
+     * speaker abroad still gets Korean, because it follows the phone rather
+     * than the address the request came from.
+     *
+     * A saved choice still wins. Someone who has used the toggle has said what
+     * they want, and the system should not overrule that on the next launch.
+     */
     const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
-    if (savedLanguage) setLanguage(savedLanguage);
+    const deviceLanguage = typeof navigator !== 'undefined'
+      && navigator.language?.toLowerCase().startsWith('ko') ? 'ko' : 'en';
+    setLanguage(savedLanguage ?? deviceLanguage);
 
     let cancelled = false;
 
