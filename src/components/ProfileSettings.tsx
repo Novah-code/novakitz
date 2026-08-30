@@ -15,12 +15,11 @@ interface ProfileSettingsProps {
   onSave?: () => void;
   streak?: number;
   isPremium?: boolean;
-  isLifetime?: boolean;
 }
 
 type TabType = 'profile' | 'account' | 'subscription' | 'streak';
 
-export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false, isLifetime = false }: ProfileSettingsProps) {
+export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false }: ProfileSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
@@ -79,7 +78,6 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     plan: language === 'ko' ? '현재 플랜' : 'Current Plan',
     freePlan: language === 'ko' ? '무료' : 'Free',
     premiumPlan: 'Pro',
-    lifetimePlan: 'Lifetime',
     logout: language === 'ko' ? '로그아웃' : 'Sign out',
     deleteAccount: language === 'ko' ? '계정 삭제' : 'Delete Account',
     deleteConfirm: language === 'ko' ? '정말 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.' : 'Are you sure you want to delete your account? This action cannot be undone.',
@@ -821,15 +819,13 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Current Plan */}
               <div style={{
-                border: isLifetime ? '1px solid #E91E63' : isPremium ? '1px solid #7FB069' : '1px solid #e5e5e5',
+                border: isPremium ? '1px solid #7FB069' : '1px solid #e5e5e5',
                 borderRadius: '8px',
                 padding: '16px',
                 position: 'relative',
-                background: isLifetime
-                  ? 'linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(255, 218, 233, 0.1) 100%)'
-                  : isPremium
-                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.05) 0%, rgba(144, 238, 144, 0.05) 100%)'
-                    : 'transparent',
+                background: isPremium
+                  ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.05) 0%, rgba(144, 238, 144, 0.05) 100%)'
+                  : 'transparent',
               }}>
                 <label style={{
                   position: 'absolute',
@@ -844,30 +840,28 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ fontSize: '1.5rem' }}>
-                    {isLifetime ? '💎' : isPremium ? '👑' : '✨'}
+                    {isPremium ? '👑' : '✨'}
                   </span>
                   <div>
                     <p style={{
                       fontSize: '16px',
                       fontWeight: '600',
-                      color: isLifetime ? '#E91E63' : isPremium ? '#7FB069' : '#111',
+                      color: isPremium ? '#7FB069' : '#111',
                       margin: 0
                     }}>
-                      {isLifetime ? t.lifetimePlan : isPremium ? t.premiumPlan : t.freePlan}
+                      {isPremium ? t.premiumPlan : t.freePlan}
                     </p>
                     <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0 0' }}>
-                      {isLifetime
-                        ? (language === 'ko' ? '평생 이용권' : 'Lifetime access')
-                        : isPremium
-                          ? (language === 'ko' ? 'Pro 이용 중' : 'Pro access')
-                          : (language === 'ko' ? '무료 플랜' : 'Free plan')}
+                      {isPremium
+                        ? (language === 'ko' ? 'Pro 이용 중' : 'Pro access')
+                        : (language === 'ko' ? '무료 플랜' : 'Free plan')}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Upgrade button for free users */}
-              {!isPremium && !isLifetime && (
+              {!isPremium && (
                 <button
                   onClick={() => { goTo('/pricing/'); }}
                   style={{

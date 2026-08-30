@@ -15,11 +15,17 @@ import { isNative } from './platform';
 /** Entitlement identifier configured in the RevenueCat dashboard. */
 export const PREMIUM_ENTITLEMENT = 'premium';
 
-/** Package identifiers to look for inside the current offering. */
+/**
+ * Package identifiers to look for inside the current offering.
+ *
+ * `$rc_lifetime` was here too, and there is no lifetime product — the plan was
+ * taken off the paywall and never existed in App Store Connect. Asking for a
+ * package that cannot be returned is harmless but it kept the idea alive in
+ * the types, which is how a removed plan ends up on a badge.
+ */
 export const PACKAGE_IDS = {
   premium: '$rc_monthly',
   yearly: '$rc_annual',
-  lifetime: '$rc_lifetime',
 } as const;
 
 export type PlanId = keyof typeof PACKAGE_IDS;
