@@ -49,6 +49,34 @@ const arcanaCards: Record<string, ArcanaCard> = {
   'ARCANA.20': { name: 'The Horizon',   kr: '지평선 / 완전한 수용',         arcana: 'ARCANA.20', theme: 4, from: '#C0D8E8', mid: '#D8E8F0', to: '#F0F4F8' },
 };
 
+/*
+ * The soft core inside the card, in the card's own colours.
+ *
+ * It used to be one fixed dark green on all twenty. That reads as designed on
+ * The Oasis, which is where it was chosen, and as a stain everywhere else —
+ * muddy over The Spark's orange, invisible on The Void and The Seed, a grey
+ * smear on The Ascent's pale yellow.
+ *
+ * So the core takes the card's own hue and pushes its brightness the way that
+ * will show: darker on a light card, lighter on a dark one. Picking straight
+ * from the palette was not enough — the three stops of an arcana sit close
+ * together by design, so a core made of `from` on a pale card was a shape you
+ * had to look for. This shifts past the palette while staying its colour.
+ */
+function shade(hex: string, amount: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v =>
+    Math.round(amount < 0 ? v * (1 + amount) : v + (255 - v) * amount)
+  );
+  return '#' + ch.map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function cardCore(card: ArcanaCard): string {
+  const n = parseInt(card.mid.slice(1), 16);
+  const luma = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+  return luma > 140 ? shade(card.from, -0.42) : shade(card.to, 0.5);
+}
+
 const arcanaAffirmations: Record<string, { ko: string; en: string }> = {
   'ARCANA.01': { ko: '아무것도 느끼지 못하는 것 또한 마음의 방어입니다.\n오늘은 그저 고요히 쉬어도 괜찮습니다.', en: "Feeling nothing is also a form of self-protection.\nIt's okay to simply rest today." },
   'ARCANA.02': { ko: '혼란 속에서도 당신은 길을 찾아가고 있습니다.\n지금 이 자리에 멈춰 숨을 고르세요.', en: 'Even in confusion, you are finding your way.\nPause here and breathe.' },
@@ -1206,7 +1234,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             boxShadow: `10px 10px 25px rgba(74,93,78,0.12), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 8px rgba(255,255,255,1), inset -3px -3px 10px ${card.from}55`,
             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 1,
           }}>
-            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, #1E293B 0%, #4A5D4E 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.88 }} />
+            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
           </div>
           <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#7AB382', fontWeight: 700, opacity: 0.9, textAlign: 'center', zIndex: 1 }}>
             {card.arcana} · {card.name.toUpperCase()}
@@ -1430,7 +1458,7 @@ export function MoodCardJournalView({
         <div style={{ width: '100%', height: '38%', position: 'relative', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 12, background: `radial-gradient(circle at 50% 100%, ${card.from}55 0%, transparent 70%)`, borderBottom: '1px solid rgba(255,255,255,0.5)', paddingTop: 28 }}>
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 220, height: 160, background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)', filter: 'blur(20px)', zIndex: 0 }} />
           <div style={{ width: 100, height: 135, borderRadius: 22, background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`, border: '2px solid rgba(255,255,255,0.85)', boxShadow: `10px 10px 25px rgba(74,93,78,0.12), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 8px rgba(255,255,255,1), inset -3px -3px 10px ${card.from}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 1 }}>
-            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, #1E293B 0%, #4A5D4E 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.88 }} />
+            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
           </div>
           <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#7AB382', fontWeight: 700, opacity: 0.9, textAlign: 'center', zIndex: 1 }}>{card.arcana} · {card.name.toUpperCase()}</div>
         </div>
