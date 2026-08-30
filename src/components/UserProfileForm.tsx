@@ -141,11 +141,8 @@ const translations = {
     of: 'of',
 
     // Step titles
-    step1Title: 'Basic Information',
     step2Title: 'Your Nickname',
-    step3Title: 'Your Occupation',
-    step4Title: 'Your Interests',
-    step5Title: 'Dream Goals',
+    ageTitle: 'One more, if you like',
 
     // Step 1
     dateOfBirth: 'Date of Birth',
@@ -161,14 +158,10 @@ const translations = {
     namePlaceholder: 'Enter a unique nickname',
 
     // Step 3
-    occupation: 'Occupation',
-    selectOccupation: 'Select your occupation',
 
     // Step 4
-    interestsDesc: 'Select interests that help us understand your dreams better',
 
     // Step 5
-    dreamGoalsDesc: 'What do you hope to gain from dream interpretation?',
 
     // Buttons
     next: 'Next',
@@ -190,11 +183,8 @@ const translations = {
     of: '/',
 
     // Step titles
-    step1Title: '기본 정보',
     step2Title: '닉네임',
-    step3Title: '직업',
-    step4Title: '관심사',
-    step5Title: '꿈 목표',
+    ageTitle: '하나만 더, 원하신다면',
 
     // Step 1
     dateOfBirth: '생년월일',
@@ -210,14 +200,10 @@ const translations = {
     namePlaceholder: '고유한 닉네임을 입력하세요',
 
     // Step 3
-    occupation: '직업',
-    selectOccupation: '직업을 선택하세요',
 
     // Step 4
-    interestsDesc: '꿈을 더 잘 이해하는 데 도움이 될 관심사를 선택하세요',
 
     // Step 5
-    dreamGoalsDesc: '꿈 해석을 통해 무엇을 얻고 싶으신가요?',
 
     // Buttons
     next: '다음',
@@ -251,7 +237,21 @@ const monthOptions = [
 
 export default function UserProfileForm({ user, profile, onComplete }: UserProfileFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
+  /*
+   * Two steps, and only the first is required.
+   *
+   * This asked five: birth date, nickname, occupation, interests, dream goals
+   * — a wall of questions between signing up and seeing the app. Of everything
+   * it collected, exactly one value is read anywhere that matters: the nickname,
+   * which appears on the card, the profile and the community.
+   *
+   * `birth_date` was stored and never read by anything; only the age derived
+   * from it has any use, so the three selects became one number. Occupation,
+   * interests and dream goals fed one prompt (`generateDailyIntention`) that
+   * already handles them being absent, and they are still editable later in
+   * Profile — they just no longer stand between a new account and the app.
+   */
+  const totalSteps = 2;
 
   /*
    * Language state (must be first to use in translations).
@@ -305,14 +305,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
   // Form data
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [nicknameError, setNicknameError] = useState('');
-  const [birthYear, setBirthYear] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthDay, setBirthDay] = useState('');
-  const [occupation, setOccupation] = useState(profile?.occupation || '');
-  const [interests, setInterests] = useState<string[]>(profile?.interests || []);
-  const [dreamGoals, setDreamGoals] = useState<string[]>(
-    profile?.dream_goals ? profile.dream_goals.split(', ') : []
-  );
+  const [age, setAge] = useState(profile?.age ? String(profile.age) : '');
 
   // Location data
   const [countryCode, setCountryCode] = useState('US');
@@ -352,76 +345,46 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     }
   }, [profile]);
 
-  // Generate year options
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({length: 87}, (_, i) => currentYear - 13 - i);
-
-  // Generate day options
-  const getDaysInMonth = (year: string, month: string) => {
-    if (!year || !month) return 31;
-    return new Date(parseInt(year), parseInt(month), 0).getDate();
-  };
-  const dayOptions = Array.from(
-    {length: getDaysInMonth(birthYear, birthMonth)},
-    (_, i) => i + 1
-  );
-
   const handleNext = async () => {
     console.log('handleNext called - currentStep:', currentStep, 'totalSteps:', totalSteps, 'fullName:', fullName);
     setError('');
 
-    // Validate Step 1 (required fields)
+    // Step 1 — the nickname, and the only thing this form insists on.
     if (currentStep === 1) {
-      if (!birthYear || !birthMonth || !birthDay) {
-        setError(t.fillRequired);
-        return;
-      }
-    }
-
-    // Validate Step 2 (nickname is REQUIRED)
-    if (currentStep === 2) {
-      // Check if nickname is empty
       if (!fullName || fullName.trim().length === 0) {
         setError(preferredLanguage === 'ko' ? '닉네임을 입력해주세요' : 'Please enter a nickname');
         return;
       }
 
-      // Validate nickname format
       const validation = validateNickname(fullName);
       if (!validation.isValid) {
         setError(validation.error);
         return;
       }
 
-      console.log('Step 2: Checking nickname uniqueness for:', fullName);
       setLoading(true);
       try {
-        // Check if nickname already exists in nicknames table
-        console.log('Querying nicknames table for:', fullName);
         const { data, error: queryError } = await supabase
           .from('nicknames')
           .select('id')
           .eq('nickname', fullName)
           .maybeSingle();
 
-        console.log('Nickname query result:', { data, error: queryError });
-
         if (queryError) throw queryError;
 
         if (data) {
-          console.warn('Nickname already taken:', fullName);
           setError(t.nicknameTaken);
           setLoading(false);
           return;
         }
-
-        console.log('Nickname is available:', fullName);
       } catch (err) {
         console.error('Error checking nickname:', err);
       } finally {
         setLoading(false);
       }
     }
+
+    // Step 2 is age, and it is skippable. Nothing to validate.
 
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
@@ -477,18 +440,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     }
   };
 
-  const calculateAge = () => {
-    if (!birthYear || !birthMonth || !birthDay) return undefined;
-    const today = new Date();
-    const birth = new Date(`${birthYear}-${birthMonth}-${birthDay}`);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
@@ -497,12 +448,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       const updateData: any = {
         full_name: fullName || null,
         display_name: fullName || null,  // Also save to display_name for table display
-        birth_date: birthYear && birthMonth && birthDay ? `${birthYear}-${birthMonth}-${birthDay}` : null,
-        age: calculateAge(),
+        age: age ? Number(age) : null,
         country_name: countryName || null,
-        occupation: occupation || null,
-        interests: interests.length > 0 ? interests : null,
-        dream_goals: dreamGoals.length > 0 ? dreamGoals.join(', ') : null,
         profile_completed: true
       };
 
@@ -543,27 +490,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     }
   };
 
-  const toggleInterest = (interest: string) => {
-    setInterests(prev =>
-      prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
-  };
-
-  const toggleDreamGoal = (goal: string) => {
-    setDreamGoals(prev =>
-      prev.includes(goal)
-        ? prev.filter(g => g !== goal)
-        : [...prev, goal]
-    );
-  };
-
   const getStepTitle = () => {
-    const titles = [
-      t.step1Title, t.step2Title, t.step3Title, t.step4Title,
-      t.step5Title
-    ];
+    const titles = [t.step2Title, t.ageTitle];
     return titles[currentStep - 1];
   };
 
@@ -643,124 +571,8 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
 
         {/* Step Content */}
         <div style={{ marginBottom: '24px' }}>
-          {/* Step 1: Birth Date, Country, Language */}
+          {/* Step 1 — the nickname. The one answer the app actually uses. */}
           {currentStep === 1 && (
-            <>
-              {detectingLocation ? (
-                <div style={{ textAlign: 'center', padding: '20px', color: 'var(--matcha-green)' }}>
-                  {t.detectingLocation}
-                </div>
-              ) : (
-                <>
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                      {t.dateOfBirth}
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                      <select
-                        value={birthYear}
-                        onChange={(e) => setBirthYear(e.target.value)}
-                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                      >
-                        <option value="">{t.year}</option>
-                        {yearOptions.map(year => (
-                          <option key={year} value={year}>{year}</option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthMonth}
-                        onChange={(e) => setBirthMonth(e.target.value)}
-                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                      >
-                        <option value="">{t.month}</option>
-                        {monthOptions.map(month => (
-                          <option key={month.value} value={month.value}>
-                            {preferredLanguage === 'ko' ? month.labelKo : month.label}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={birthDay}
-                        onChange={(e) => setBirthDay(e.target.value)}
-                        style={{ padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                      >
-                        <option value="">{t.day}</option>
-                        {dayOptions.map(day => (
-                          <option key={day} value={day.toString().padStart(2, '0')}>{day}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                      {t.country}
-                    </label>
-                    <select
-                      value={countryCode}
-                      onChange={(e) => {
-                        const selected = COUNTRIES.find(c => c.code === e.target.value);
-                        setCountryCode(e.target.value);
-                        setCountryName(selected?.name || e.target.value);
-                      }}
-                      style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-                    >
-                      {COUNTRIES.map(country => (
-                        <option key={country.code} value={country.code}>{country.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                      {t.preferredLanguage}
-                    </label>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setPreferredLanguage('en')}
-                        style={{
-                          flex: 1,
-                          padding: '10px',
-                          borderRadius: '12px',
-                          border: '2px solid',
-                          borderColor: preferredLanguage === 'en' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
-                          background: preferredLanguage === 'en' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
-                          color: 'var(--matcha-dark)',
-                          fontSize: '14px',
-                          fontWeight: preferredLanguage === 'en' ? '600' : '400',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        English
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPreferredLanguage('ko')}
-                        style={{
-                          flex: 1,
-                          padding: '10px',
-                          borderRadius: '12px',
-                          border: '2px solid',
-                          borderColor: preferredLanguage === 'ko' ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
-                          background: preferredLanguage === 'ko' ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
-                          color: 'var(--matcha-dark)',
-                          fontSize: '14px',
-                          fontWeight: preferredLanguage === 'ko' ? '600' : '400',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        한국어
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </>
-          )}
-
-          {/* Step 2: Name */}
-          {currentStep === 2 && (
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
                 {t.name}
@@ -799,85 +611,43 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
             </div>
           )}
 
-          {/* Step 3: Occupation */}
-          {currentStep === 3 && (
+          {/*
+            Step 2 — age, optional.
+            
+            It used to be a birth date across three selects, and `birth_date`
+            was then never read by anything. Only the derived age is of any
+            use, so it is asked for directly: one field instead of three, and
+            skippable, because nobody owes it before they have seen the app.
+          */}
+          {currentStep === 2 && (
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: 'var(--matcha-dark)', marginBottom: '6px', lineHeight: '1.3' }}>
-                {t.occupation}
+                {preferredLanguage === 'ko' ? '나이 (선택)' : 'Age (optional)'}
               </label>
-              <select
-                value={occupation}
-                onChange={(e) => setOccupation(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid rgba(127, 176, 105, 0.2)', fontSize: '14px', background: 'rgba(255, 255, 255, 0.8)' }}
-              >
-                <option value="">{t.selectOccupation}</option>
-                {(OCCUPATION_OPTIONS[preferredLanguage] || OCCUPATION_OPTIONS.en).map((option, idx) => (
-                  <option key={`${option}-${idx}`} value={option}>{option}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Step 4: Interests */}
-          {currentStep === 4 && (
-            <div>
-              <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
-                {t.interestsDesc}
+              <input
+                type="number"
+                inputMode="numeric"
+                min={13}
+                max={120}
+                value={age}
+                onChange={(e) => setAge(e.target.value.replace(/[^0-9]/g, '').slice(0, 3))}
+                placeholder={preferredLanguage === 'ko' ? '예: 29' : 'e.g. 29'}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '12px',
+                  border: '2px solid rgba(127, 176, 105, 0.2)',
+                  fontSize: '16px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <p style={{ fontSize: '12px', color: 'var(--sage)', margin: '8px 0 0' }}>
+                {preferredLanguage === 'ko'
+                  ? '해석의 맥락으로만 씁니다. 어디에도 표시되지 않아요.'
+                  : 'Used only as context for your readings. It is never shown anywhere.'}
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px' }}>
-                {(INTEREST_OPTIONS[preferredLanguage] || INTEREST_OPTIONS.en).map((interest, idx) => (
-                  <button
-                    key={`${interest}-${idx}`}
-                    type="button"
-                    onClick={() => toggleInterest(interest)}
-                    style={{
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '2px solid',
-                      borderColor: interests.includes(interest) ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
-                      background: interests.includes(interest) ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
-                      color: 'var(--matcha-dark)',
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {interest}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Dream Goals */}
-          {currentStep === 5 && (
-            <div>
-              <p style={{ fontSize: '14px', color: 'var(--sage)', marginBottom: '16px', lineHeight: '1.4' }}>
-                {t.dreamGoalsDesc}
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {(DREAM_GOAL_OPTIONS[preferredLanguage] || DREAM_GOAL_OPTIONS.en).map((goal, idx) => (
-                  <button
-                    key={`${goal}-${idx}`}
-                    type="button"
-                    onClick={() => toggleDreamGoal(goal)}
-                    style={{
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '2px solid',
-                      borderColor: dreamGoals.includes(goal) ? 'var(--matcha-green)' : 'rgba(127, 176, 105, 0.2)',
-                      background: dreamGoals.includes(goal) ? 'rgba(127, 176, 105, 0.1)' : 'rgba(255, 255, 255, 0.8)',
-                      color: 'var(--matcha-dark)',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {goal}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
         </div>
@@ -910,7 +680,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
             </button>
           )}
 
-          {currentStep > 2 && currentStep < totalSteps && (
+          {currentStep === 2 && (
             <button
               onClick={handleSkip}
               disabled={loading}
