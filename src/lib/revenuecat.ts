@@ -113,6 +113,90 @@ async function packageFor(plan: PlanId): Promise<PurchasesPackage | null> {
   );
 }
 
+export type PlanPricing = {
+  /** The store's own formatted price, in the buyer's currency. */
+  priceString: string;
+  /**
+   * The introductory offer, and only when this account can actually claim it.
+   * Null covers three different situations that all want the same treatment:
+   * no offer configured, an offer this Apple Account has already used, and an
+   * eligibility check that came back unknown.
+   */
+  intro: { free: boolean; priceString: string; units: number; unit: string } | null;
+};
+
+/**
+ * What the store says these plans cost, and whether a trial is on the table.
+ *
+ * The paywall had $5.99 and $49.99 written into it as strings. That is wrong
+ * twice over: it shows dollars to someone whose store charges won, and it goes
+ * quietly out of date the moment a price changes in App Store Connect.
+ *
+ * The eligibility check matters as much as the price. Apple grants an
+ * introductory offer once per subscription group, so someone who took the trial
+ * on one plan cannot take it on the other — promising them a free week and then
+ * charging them at the sheet is exactly the kind of mismatch review looks for.
+ * The SDK returns UNKNOWN in cases it cannot decide, and RevenueCat's own
+ * guidance for that is to show the regular price, which is what null does here.
+ *
+ * Returns {} off-native, where there is no store to ask, so the caller keeps
+ * whatever it was going to show anyway.
+ */
+export async function loadPricing(plans: PlanId[]): Promise<Partial<Record<PlanId, PlanPricing>>> {
+  if (!(await configureRevenueCat())) return {};
+
+  try {
+    const { Purchases, INTRO_ELIGIBILITY_STATUS } = await sdk();
+    const { current } = await Purchases.getOfferings();
+    if (!current) return {};
+
+    const found = plans
+      .map((plan) => ({
+        plan,
+        pkg: current.availablePackages.find((p) => p.identifier === PACKAGE_IDS[plan]),
+      }))
+      .filter((entry): entry is { plan: PlanId; pkg: PurchasesPackage } => Boolean(entry.pkg));
+
+    if (found.length === 0) return {};
+
+    let eligibility: Record<string, { status: number }> = {};
+    try {
+      eligibility = await Purchases.checkTrialOrIntroductoryPriceEligibility({
+        productIdentifiers: found.map((e) => e.pkg.product.identifier),
+      });
+    } catch (error) {
+      // Not fatal — an unanswered eligibility check just means no trial is
+      // advertised, which is the safe direction to be wrong in.
+      console.warn('[RevenueCat] eligibility check failed:', error);
+    }
+
+    const result: Partial<Record<PlanId, PlanPricing>> = {};
+    for (const { plan, pkg } of found) {
+      const { product } = pkg;
+      const eligible =
+        eligibility[product.identifier]?.status ===
+        INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE;
+
+      result[plan] = {
+        priceString: product.priceString,
+        intro:
+          eligible && product.introPrice
+            ? {
+                free: product.introPrice.price === 0,
+                priceString: product.introPrice.priceString,
+                units: product.introPrice.periodNumberOfUnits,
+                unit: product.introPrice.periodUnit,
+              }
+            : null,
+      };
+    }
+    return result;
+  } catch (error) {
+    console.error('[RevenueCat] loadPricing failed:', error);
+    return {};
+  }
+}
+
 export type PurchaseOutcome =
   | { status: 'purchased' }
   | { status: 'cancelled' }

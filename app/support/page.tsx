@@ -138,6 +138,19 @@ export default function SupportPage() {
             a="An interpretation every day rather than seven a month — for dreams and for moods — plus the monthly dream review with its pattern analysis, and every feature added later at no extra cost."
           />
           <FAQItem
+            q="Is there a free trial?"
+            a={
+              <>
+                The yearly plan starts with a free week. The pricing screen shows
+                it on the Yearly card when your Apple Account can claim it — and
+                only then, because Apple grants the trial once per person: if you
+                have used it before, on either plan, the card shows the normal
+                price instead. Cancel any time during the week and you are not
+                charged.
+              </>
+            }
+          />
+          <FAQItem
             q="How do I cancel?"
             a={
               <>

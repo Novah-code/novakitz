@@ -4,6 +4,7 @@ import { goTo } from '../../src/lib/platform';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { startCheckout } from '../../src/lib/checkout';
+import { loadPricing, type PlanPricing } from '../../src/lib/revenuecat';
 import Toast, { ToastType } from '../../src/components/Toast';
 import FAQItem from '../../src/components/FAQItem';
 import { G, panel } from '../../src/lib/uiTokens';
@@ -17,11 +18,62 @@ function Check({ color = G.green }: { color?: string }) {
   );
 }
 
+/*
+ * "7 days free", from whatever the store actually configured.
+ *
+ * Apple's offer is set as one week; saying "7 days" rather than "1 week" is the
+ * phrasing people read fastest, so weeks are converted. Everything else is
+ * printed as the store gives it, because the words have to match what the
+ * purchase sheet will say.
+ */
+function introPeriod(intro: NonNullable<PlanPricing['intro']>, ko: boolean): string {
+  const n = intro.units;
+  switch (intro.unit.toUpperCase()) {
+    case 'WEEK': return ko ? `${n * 7}일` : `${n * 7} days`;
+    case 'DAY': return ko ? `${n}일` : `${n} day${n > 1 ? 's' : ''}`;
+    case 'MONTH': return ko ? `${n}개월` : `${n} month${n > 1 ? 's' : ''}`;
+    case 'YEAR': return ko ? `${n}년` : `${n} year${n > 1 ? 's' : ''}`;
+    default: return '';
+  }
+}
+
+/*
+ * The button says how long, because the Free plan's button next to it already
+ * says "Start free" and two of those on one row means neither is an answer.
+ */
+function introCta(intro: NonNullable<PlanPricing['intro']>, ko: boolean): string | null {
+  if (!intro.free) return null;
+  const period = introPeriod(intro, ko);
+  if (!period) return null;
+  return ko ? `${period} 무료로 시작` : `Start ${period} free`;
+}
+
+function introLine(intro: NonNullable<PlanPricing['intro']>, full: string, ko: boolean): string {
+  const period = introPeriod(intro, ko);
+  if (!period) return '';
+  if (intro.free) {
+    return ko ? `${period} 무료 체험 후 ${full}` : `${period} free, then ${full}`;
+  }
+  return ko
+    ? `첫 ${period} ${intro.priceString}, 이후 ${full}`
+    : `${intro.priceString} for the first ${period}, then ${full}`;
+}
+
 export default function PricingPage() {
   const router = useRouter();
   const [language, setLanguage] = useState<'en' | 'ko'>('en');
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [purchased, setPurchased] = useState(false);
+  const [pricing, setPricing] = useState<Partial<Record<'premium' | 'yearly', PlanPricing>>>({});
+
+  /*
+   * Ask the store what these cost. Off-native this returns {} and the written
+   * prices below stand, which is the best the web page can do — there is no
+   * App Store to ask from a browser.
+   */
+  useEffect(() => {
+    loadPricing(['premium', 'yearly']).then(setPricing).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
@@ -285,8 +337,13 @@ export default function PricingPage() {
               <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  $5.99 <span style={{ fontSize: 14, fontWeight: 400, color: G.textLight }}>/ {ko ? '월' : 'mo'}</span>
+                  {pricing.premium?.priceString ?? '$5.99'} <span style={{ fontSize: 14, fontWeight: 400, color: G.textLight }}>/ {ko ? '월' : 'mo'}</span>
                 </div>
+                {pricing.premium?.intro && (
+                  <div style={{ marginTop: 8, fontSize: 13, fontWeight: 600, color: G.green }}>
+                    {introLine(pricing.premium.intro, pricing.premium.priceString, ko)}
+                  </div>
+                )}
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
                 {premiumFeatures.map((f, i) => (
@@ -301,7 +358,8 @@ export default function PricingPage() {
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(122,179,130,0.12)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.4)'; }}
               >
-                {ko ? 'Pro 시작하기' : 'Start Pro'}
+                {(pricing.premium?.intro && introCta(pricing.premium.intro, ko))
+                  ?? (ko ? 'Pro 시작하기' : 'Start Pro')}
               </button>
             </div>
 
@@ -315,12 +373,23 @@ export default function PricingPage() {
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 16, color: G.textLight, textDecoration: 'line-through', opacity: 0.7 }}>$71.88</span>
-                  $49.99
+                  {pricing.yearly?.priceString ?? '$49.99'}
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14, color: G.textLight }}>{ko ? '연간 결제' : 'per year'}</span>
                   <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(122,179,130,0.15)', color: G.green, borderRadius: 8, fontWeight: 700 }}>30% Off</span>
                 </div>
+                {/*
+                  The offer that was configured in August and that nobody was
+                  ever told about. It only renders when the store says this
+                  account can claim it, so it is never a promise the purchase
+                  sheet will contradict.
+                */}
+                {pricing.yearly?.intro && (
+                  <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 10, background: 'rgba(122,179,130,0.14)', fontSize: 13, fontWeight: 700, color: G.green }}>
+                    {introLine(pricing.yearly.intro, pricing.yearly.priceString, ko)}
+                  </div>
+                )}
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
                 {yearlyFeatures.map((f, i) => (
@@ -335,7 +404,8 @@ export default function PricingPage() {
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(122,179,130,0.4)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(122,179,130,0.3)'; }}
               >
-                {ko ? '연간 구독 시작하기' : 'Start Yearly'}
+                {(pricing.yearly?.intro && introCta(pricing.yearly.intro, ko))
+                  ?? (ko ? '연간 구독 시작하기' : 'Start Yearly')}
               </button>
             </div>
 
