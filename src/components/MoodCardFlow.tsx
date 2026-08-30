@@ -658,11 +658,8 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     }}>
       <Container onClose={onClose}>
         <div onClick={e => e.stopPropagation()} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '6px', textAlign: 'center', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '4px', textAlign: 'center', lineHeight: 1.5 }}>
             {isKo ? `'${selectedEmotion}' 기록했어요` : `'${selectedEmotion}' is saved`}
-          </p>
-          <p style={{ fontSize: '14px', color: '#8BA390', marginBottom: '4px', textAlign: 'center', lineHeight: 1.5 }}>
-            {isKo ? '아침은 여기까지면 충분해요.' : 'That is enough for a morning.'}
           </p>
 
           <div style={{ marginTop: '24px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
