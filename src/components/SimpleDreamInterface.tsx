@@ -888,19 +888,32 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           setSavedDreams(updatedDreams);
           console.log('Dream saved to offline storage');
 
-          // Generate daily intentions even in offline mode
-          if (user && newDream.id) {
-            console.log('⏱️  Scheduling intention generation in 500ms (offline mode)...');
-            setTimeout(async () => {
-              console.log(' Starting intention generation for offline dream:', newDream.id);
-              const result = await generateDailyIntention(response, dreamText, newDream.id);
-              if (result) {
-                console.log('✅ Intention generation completed successfully (offline)');
-              } else {
-                console.warn('⚠️  Intention generation did not return data (offline)');
-              }
-            }, 500);
-          }
+          /*
+           * The second interpretation nobody asked for is gone.
+           *
+           * Saving a dream used to fire `generateDailyIntention` as well, which
+           * built its own prompt — starting "당신은 Carl Jung의 심리학과 꿈
+           * 해석에 기반한 전문가입니다" — and posted it to /api/analyze-dream as
+           * the `dreamText`. The server then wrapped that instruction inside its
+           * own prompt as the dream to be read: a prompt nested in a prompt,
+           * arriving as if it were something the person had dreamt.
+           *
+           * Four things followed. The word the server prompt is under orders
+           * never to use was sitting in its input. The two instruction sets
+           * disagreed — one wanted three intentions, the other one reading. No
+           * `mode` was sent, so the dream prompt handled it regardless. And
+           * `checkQuota` counted it, so writing one dream spent two of the seven
+           * interpretations a free account gets in a month.
+           *
+           * What came back was prose, which the line-by-line parser mostly
+           * failed on, so the fallbacks below filled in — and the result was
+           * written to `daily_intentions`, a table nothing in the app reads.
+           *
+           * So: half the quota back, and one fewer place the model is invited to
+           * say Jung. `generateDailyIntention` stays defined for now; whether it
+           * comes back as a real feature with its own server-side mode is a
+           * decision for after launch.
+           */
 
           return; // Exit early - don't try Supabase
         } catch (err) {
@@ -997,28 +1010,8 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
           setSavedDreams(updatedDreams);
           setLastSavedDreamId(data.id);
           console.log('✅ Local state updated. Total dreams:', updatedDreams.length);
-
-          // Generate daily intentions after saving dream
-          if (user && data && data.id) {
-            console.log('✅ Dream saved with ID:', data.id);
-            console.log('✅ Ready to generate intentions. User:', user.id, 'Dream ID:', data.id);
-            // Generate intentions with a small delay to ensure dream is saved
-            console.log('⏱️  Scheduling intention generation in 500ms...');
-            setTimeout(async () => {
-              console.log(' Starting intention generation for dream:', data.id);
-              console.log(' Response to use:', response.substring(0, 100) + '...');
-              console.log(' Dream text:', dreamText.substring(0, 100) + '...');
-              const result = await generateDailyIntention(response, dreamText, data.id);
-              if (result) {
-                console.log('✅ Intention generation completed successfully');
-                console.log('✅ Result:', result);
-              } else {
-                console.warn('⚠️  Intention generation did not return data');
-              }
-            }, 500);
-          } else {
-            console.warn('⚠️  Cannot generate intentions: user=', !!user, 'data=', !!data, 'data.id=', data?.id);
-          }
+          // The second interpretation used to be generated here. See the note in
+          // the offline path above for why it is gone.
         }
       } catch (error) {
         console.error('Exception saving to Supabase:', error);

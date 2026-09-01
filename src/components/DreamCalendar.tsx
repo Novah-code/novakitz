@@ -57,9 +57,51 @@ const MOOD_KO: Record<string, string> = {
   평화: 'peaceful', 화남: 'angry', 혼란: 'confused',
 };
 
+/*
+ * The pebble's own outline, carried over from the morning picker.
+ *
+ * Each mood is a different shape there, not only a different colour, and that
+ * shape is the thing someone actually presses. Printing the month as flat
+ * colour blocks threw half of it away — a month of squares says less than a
+ * month of the shapes you chose.
+ *
+ * These are the `border-radius` values from `getEmotionPebble` in
+ * MoodCardFlow. Two of them were written in pixels for a 110px pebble; at a
+ * calendar cell's size that would have rounded almost nothing, so they are
+ * converted to the percentages they work out to (15/110 ≈ 14%, 30/110 ≈ 27%).
+ * Keep this table and that one in step: the shape someone taps in the morning
+ * should be the shape the day turns in the month.
+ */
+const MOOD_SHAPES: Record<string, string> = {
+  peaceful: '50%', calm: '50%', serene: '50%', content: '50%', balanced: '50%',
+  joyful: '45% 55% 45% 55% / 65% 55% 45% 35%',
+  happy: '45% 55% 45% 55% / 65% 55% 45% 35%',
+  excited: '45% 55% 45% 55% / 65% 55% 45% 35%',
+  grateful: '45% 55% 45% 55% / 65% 55% 45% 35%',
+  hopeful: '50% 50% 50% 50% / 70% 70% 40% 40%',
+  curious: '50% 50% 50% 50% / 70% 70% 40% 40%',
+  anxious: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  stressed: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  worried: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  nervous: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  overwhelmed: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  confused: '40% 60% 30% 70% / 60% 40% 70% 30%',
+  fear: '50% 50% 60% 60% / 40% 40% 70% 70%',
+  fearful: '50% 50% 60% 60% / 40% 40% 70% 70%',
+  scared: '50% 50% 60% 60% / 40% 40% 70% 70%',
+  lonely: '50% 50% 40% 40% / 40% 40% 60% 60%',
+  sad: '50% 50% 40% 40% / 40% 40% 60% 60%',
+  melancholic: '50% 50% 40% 40% / 40% 40% 60% 60%',
+  anger: '14% 27% 14% 27%',
+  angry: '14% 27% 14% 27%',
+  low: '15%',
+  tired: '15%',
+};
+
 /* Anything unrecognised still gets a block — a logged day should never look
    like an empty one just because the mood was typed rather than tapped. */
 const MOOD_FALLBACK = '#e8eee6';
+const SHAPE_FALLBACK = '42%';
 
 /* A morning that was kept without a dream to write down. */
 const REST_COLOR = '#eceae4';
@@ -237,6 +279,9 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                * PEACE / FUL. The colour carries it now and the legend below
                * says what the colours are.
                */
+              /* A rest day keeps a soft round pebble — it was still a morning. */
+              const shape = skipped ? '50%' : key ? MOOD_SHAPES[key] : SHAPE_FALLBACK;
+
               const Tag = entries.length > 0 ? 'button' : 'div';
 
               return (
@@ -244,7 +289,6 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                   key={date}
                   className={`dcal__cell${entries.length > 0 ? ' dcal__cell--filled' : ''}`}
                   style={{
-                    background: fill,
                     /* The selected day is pressed into the sheet rather than
                        outlined, so it reads against any of the eight fills. */
                     boxShadow: isSelected ? 'inset 0 0 0 2px var(--ink)' : undefined,
@@ -253,6 +297,13 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                     ? { type: 'button' as const, onClick: () => onDateSelect(date) }
                     : {})}
                 >
+                  {fill && (
+                    <span
+                      className="dcal__pebble"
+                      style={{ background: fill, borderRadius: shape }}
+                      aria-hidden="true"
+                    />
+                  )}
                   <span className={`dcal__num${isToday ? ' dcal__num--today' : ci === 0 ? ' dcal__num--sun' : ''}`}>
                     {day}
                   </span>

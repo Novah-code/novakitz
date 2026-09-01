@@ -191,6 +191,26 @@
   outline-offset: -3px;
 }
 
+/*
+ * The mood is a pebble sitting in the cell, not a fill covering it.
+ *
+ * Filling the whole cell turned every mood into the same square and lost the
+ * shape the person actually pressed in the morning. Inset by a few pixels the
+ * ruled grid still reads as a grid, and the eight outlines come back.
+ */
+.dcal__pebble {
+  position: absolute;
+  inset: 3px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dcal__num,
+.dcal__more {
+  position: relative;
+  z-index: 1;
+}
+
 .dcal__num {
   font-size: 11px;
   font-weight: 600;
@@ -298,16 +318,22 @@
   z-index: 1;
 }
 
+/*
+ * Both sparks used to hang over the sheet's edge on negative offsets, which
+ * only works if nothing above clips — and the modal that carries the calendar
+ * does. Half of each star was being cut off. They sit inside the sheet now, so
+ * they survive whatever wraps this component.
+ */
 .dcal__spark--a {
-  top: -9px;
-  left: 22px;
+  top: 8px;
+  left: 20px;
   width: 19px;
   height: 19px;
 }
 
 .dcal__spark--b {
-  right: -7px;
-  bottom: 42px;
+  right: 10px;
+  bottom: 46px;
   width: 13px;
   height: 13px;
   opacity: 0.6;

@@ -68,7 +68,6 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
-  const [isLifetime, setIsLifetime] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
@@ -207,9 +206,27 @@ export default function SimpleDreamInterfaceWithAuth() {
   };
 
   useEffect(() => {
-    // Load preferred language
+    /*
+     * Language on first launch follows the phone, not the network.
+     *
+     * It used to default to English for everyone and only reach Korean later,
+     * from inside the profile form, by sending the request IP to ipapi.co and
+     * checking whether the country came back KR. So a Korean speaker opened
+     * the app to an English screen, and the fix for that was a round trip to a
+     * third party — which is also the reason the App Privacy questionnaire has
+     * to declare Coarse Location.
+     *
+     * `navigator.language` is instant, offline, and more accurate: a Korean
+     * speaker abroad still gets Korean, because it follows the phone rather
+     * than the address the request came from.
+     *
+     * A saved choice still wins. Someone who has used the toggle has said what
+     * they want, and the system should not overrule that on the next launch.
+     */
     const savedLanguage = localStorage.getItem('preferredLanguage') as 'en' | 'ko' | null;
-    if (savedLanguage) setLanguage(savedLanguage);
+    const deviceLanguage = typeof navigator !== 'undefined'
+      && navigator.language?.toLowerCase().startsWith('ko') ? 'ko' : 'en';
+    setLanguage(savedLanguage ?? deviceLanguage);
 
     let cancelled = false;
 
@@ -325,7 +342,6 @@ export default function SimpleDreamInterfaceWithAuth() {
     const checkPremiumStatus = async () => {
       if (!user) {
         setIsPremium(false);
-        setIsLifetime(false);
         return;
       }
 
@@ -343,7 +359,6 @@ export default function SimpleDreamInterfaceWithAuth() {
         if (!premiumPlanId) {
           console.log('❌ Could not find premium plan');
           setIsPremium(false);
-          setIsLifetime(false);
           return;
         }
 
@@ -359,38 +374,38 @@ export default function SimpleDreamInterfaceWithAuth() {
           // Check if subscription is not expired
           const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
 
-          // Premium with no expiry date is a lifetime purchase.
-          const isLifetimeValue = subscription.plan_id === premiumPlanId && !subscription.expires_at;
-
+          /*
+           * A premium row with no expiry used to mean a Lifetime purchase, and
+           * the app labelled it that way. There is no Lifetime plan any more —
+           * it was taken off the paywall — so the only rows without an expiry
+           * now are comped ones: the demo account for review, and anything
+           * granted from the admin screen. They get Pro, because that is the
+           * only paid tier there is.
+           */
           console.log('📋 Subscription details:', {
             subscription_id: subscription.id,
             status: subscription.status,
             plan_id: subscription.plan_id,
             premium_plan_id: premiumPlanId,
             expires_at: subscription.expires_at,
-            isExpired,
-            isLifetime: isLifetimeValue
+            isExpired
           });
 
           if (!isExpired) {
             const isPremiumValue = subscription.plan_id === premiumPlanId;
-            console.log('✅ Setting isPremium to:', isPremiumValue, 'isLifetime to:', isLifetimeValue);
+            console.log('✅ Setting isPremium to:', isPremiumValue);
             setIsPremium(isPremiumValue);
-            setIsLifetime(isLifetimeValue);
           } else {
             console.log('⏳ Subscription expired, setting isPremium to false');
             setIsPremium(false);
-            setIsLifetime(false);
           }
         } else {
           console.log('❌ No subscription found');
           setIsPremium(false);
-          setIsLifetime(false);
         }
       } catch (error) {
         console.error('Error checking premium status:', error);
         setIsPremium(false);
-        setIsLifetime(false);
       }
     };
 
@@ -663,7 +678,7 @@ export default function SimpleDreamInterfaceWithAuth() {
                     letterSpacing: '0.04em',
                     boxShadow: '0 2px 6px rgba(122,179,130,0.35)',
                   }}>
-                    {isLifetime ? 'LIFETIME' : 'PRO'}
+                    PRO
                   </span>
                 )}
               </button>
@@ -944,7 +959,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             fetchUserProfile();
           }}
           isPremium={isPremium}
-          isLifetime={isLifetime}
         />
       )}
 

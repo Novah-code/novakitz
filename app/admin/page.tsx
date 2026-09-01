@@ -318,7 +318,7 @@ export default function AdminDashboard() {
       if (data.success) {
         setManualResult({
           success: true,
-          message: `${manualEmail} - ${manualPlan === 'lifetime' ? '평생' : manualPlan === 'yearly' ? '연간' : '월간'} 구독 활성화 완료!`
+          message: `${manualEmail} - ${manualPlan === 'lifetime' ? '만료 없음' : manualPlan === 'yearly' ? '연간' : '월간'} 구독 활성화 완료!`
         });
         setManualEmail('');
         loadDashboardData(); // Refresh subscription list
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
   };
 
   const getStatusText = (status: string, expiresAt: string | null) => {
-    if (!expiresAt) return '평생';
+    if (!expiresAt) return '만료 없음';
     const isExpired = new Date(expiresAt) <= new Date();
     if (status === 'active' && !isExpired) return '활성';
     if (isExpired) return '만료';
@@ -702,7 +702,7 @@ export default function AdminDashboard() {
               >
                 <option value="monthly">월간 (30일)</option>
                 <option value="yearly">연간 (365일)</option>
-                <option value="lifetime">평생</option>
+                <option value="lifetime">만료 없음 (심사·데모용)</option>
               </select>
             </div>
 
@@ -788,7 +788,7 @@ export default function AdminDashboard() {
                     <option value="all">전체 보기</option>
                     <option value="free">무료</option>
                     <option value="active">활성 (월간/연간)</option>
-                    <option value="lifetime">평생</option>
+                    <option value="lifetime">만료 없음</option>
                     <option value="expired">만료</option>
                   </select>
                   <button
@@ -860,7 +860,7 @@ export default function AdminDashboard() {
                                        u.subscriptionStatus === 'active' ? '#10b981' :
                                        u.subscriptionStatus === 'expired' ? '#ef4444' : '#9ca3af',
                           }}>
-                            {u.subscriptionStatus === 'lifetime' ? '평생' :
+                            {u.subscriptionStatus === 'lifetime' ? '만료 없음' :
                              u.subscriptionStatus === 'active' ? '활성' :
                              u.subscriptionStatus === 'expired' ? '만료' : '무료'}
                           </span>
@@ -889,7 +889,7 @@ export default function AdminDashboard() {
                             <option value="free">무료</option>
                             <option value="monthly">월간</option>
                             <option value="yearly">연간</option>
-                            <option value="lifetime">평생</option>
+                            <option value="lifetime">만료 없음</option>
                           </select>
                         </td>
                         <td style={{ padding: '1rem' }}>
@@ -1380,7 +1380,7 @@ export default function AdminDashboard() {
                       {formatDate(sub.started_at)}
                     </td>
                     <td style={{ padding: '1rem', fontSize: '14px', color: '#6b7280' }}>
-                      {sub.expires_at ? formatDate(sub.expires_at) : '평생'}
+                      {sub.expires_at ? formatDate(sub.expires_at) : '만료 없음'}
                     </td>
                   </tr>
                 ))}

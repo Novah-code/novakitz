@@ -3,7 +3,7 @@
 import { supabase } from './supabase';
 import { isNative, purchase, restore } from './revenuecat';
 
-export type PlanId = 'premium' | 'yearly' | 'lifetime';
+export type PlanId = 'premium' | 'yearly';
 
 type Lang = 'en' | 'ko';
 
