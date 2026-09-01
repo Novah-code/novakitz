@@ -105,6 +105,12 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
   const isMoodEntry = (d: Dream) =>
     !!(d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record'));
 
+  /* `check_date` is a DATE column, so it is compared as a local calendar day.
+     `toISOString` would shift the boundary by the timezone offset and drop the
+     first or last morning of the month. */
+  const isoDay = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
   const loadMonthReport = async (monthOffset: number, premium: boolean) => {
     if (!user) return;
     try {
@@ -132,12 +138,34 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
         .lte('created_at', monthEnd.toISOString())
         .order('created_at', { ascending: false });
 
-      if (!allEntries || allEntries.length === 0) { setHasData(false); return; }
+      /*
+       * The mornings that were only felt.
+       *
+       * A mood check-in is a row in `checkins`; this report read `dreams` and
+       * nothing else, so someone who taps a pebble every morning and writes
+       * no dreams fell straight into `hasData: false` and got an empty
+       * report — the flagship paid feature, blank, for the way most people
+       * actually use the app.
+       */
+      const { data: checkinRows } = await supabase
+        .from('checkins')
+        .select('check_date, emotion')
+        .eq('user_id', user.id)
+        .eq('time_of_day', 'morning')
+        .gte('check_date', isoDay(monthStart))
+        .lte('check_date', isoDay(monthEnd));
+
+      const checkins = (checkinRows || []).map(c => {
+        const [y, m, d] = String(c.check_date).split('-').map(Number);
+        return { day: new Date(y, (m || 1) - 1, d || 1), emotion: (c.emotion as string | null) ?? null };
+      });
+
+      if ((!allEntries || allEntries.length === 0) && checkins.length === 0) { setHasData(false); return; }
       setHasData(true);
 
-      const moods = allEntries.filter(isMoodEntry);
-      const dreams = allEntries.filter(d => !isMoodEntry(d));
-      setMoodCount(moods.length);
+      const entries = allEntries || [];
+      const moods = entries.filter(isMoodEntry);
+      const dreams = entries.filter(d => !isMoodEntry(d));
       setDreamCount(dreams.length);
 
       const dayKey = (d: Dream) => {
@@ -148,6 +176,12 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       const dreamDaySet = new Set<string>();
       moods.forEach(m => moodDaySet.add(dayKey(m)));
       dreams.forEach(d => dreamDaySet.add(dayKey(d)));
+      checkins.forEach(c =>
+        moodDaySet.add(`${c.day.getFullYear()}-${c.day.getMonth()}-${c.day.getDate()}`)
+      );
+
+      /* Mornings with a mood, counted once each however they were recorded. */
+      setMoodCount(moodDaySet.size);
 
       const daysInMonth = monthEnd.getDate();
       const grid: ActivityDay[] = [];
@@ -159,7 +193,18 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       setActivityGrid(grid);
 
       if (premium) {
-        loadPremiumInsights(dreams, moods, label, targetDate.getFullYear(), targetDate.getMonth(), isCurrent);
+        /*
+         * The reading is made from what the month actually holds, so a
+         * pebble-only month gets a real report rather than a paid screen with
+         * nothing in it.
+         */
+        const moodLines = [
+          ...moods.map(m => m.content?.replace('[감정 기록]', '').trim().substring(0, 120) || ''),
+          ...checkins
+            .filter(c => c.emotion)
+            .map(c => `${c.day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — woke up ${c.emotion}`),
+        ].filter(Boolean);
+        loadPremiumInsights(dreams, moodLines, label, targetDate.getFullYear(), targetDate.getMonth(), isCurrent);
         const dreamIds = dreams.map(d => d.id).filter(Boolean);
         loadArchetypes(dreamIds, dreams);
       }
@@ -170,8 +215,8 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
     }
   };
 
-  const loadPremiumInsights = async (dreams: Dream[], moods: Dream[], label: string, year: number, month: number, isCurrent: boolean) => {
-    if (dreams.length === 0 && moods.length === 0) return;
+  const loadPremiumInsights = async (dreams: Dream[], moodLines: string[], label: string, year: number, month: number, isCurrent: boolean) => {
+    if (dreams.length === 0 && moodLines.length === 0) return;
 
     const cacheKey = `mdr_insights_${user!.id}_${year}_${month}`;
     const cached = localStorage.getItem(cacheKey);
@@ -192,9 +237,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       const dreamSummaries = dreams.slice(0, 10).map((d, i) =>
         `Dream ${i + 1}: ${d.title || 'untitled'} — ${d.content?.substring(0, 200) || ''}`
       ).join('\n');
-      const moodSummaries = moods.slice(0, 8).map((m, i) =>
-        `Mood ${i + 1}: ${m.content?.replace('[감정 기록]', '').trim().substring(0, 120) || ''}`
-      ).join('\n');
+      const moodSummaries = moodLines.slice(0, 12).map((line, i) => `Mood ${i + 1}: ${line}`).join('\n');
 
       const prompt = language === 'ko'
         ? `다음은 ${label}의 기록입니다:\n\n감정 기록:\n${moodSummaries}\n\n꿈 기록:\n${dreamSummaries}\n\n중요한 원칙: 감정과 꿈을 좋고 나쁨으로 평가하지 마세요. 불안, 두려움, 악몽, 어두운 감정 모두 유쾌한 감정과 동등하게 내면의 현상 그 자체로 다루세요. 어떤 감정이나 꿈도 고쳐야 하거나 변화해야 한다는 뉘앙스 없이 있는 그대로 탐색하세요. "정말 힘드셨겠어요" 같은 과장된 공감 표현은 피하고 담백하되 따뜻하게 유지하세요.\n\n다음 JSON 형식으로 분석해주세요:\n{"narrativeTitle":"이달을 표현하는 시적 제목(10단어 이내)","narrativeText":"이달 전체 흐름을 설명하는 2-3문장","synthesisTheme":"이달의 핵심 주제(5단어 이내)","synthesisDescription":"감정과 꿈의 거시적 연결 패턴(4-5문장, 반복적으로 나타난 테마와 변화 포함)","synthesisQuestion":"내면을 깊이 탐색하도록 유도하는 구체적인 성찰 질문(1문장, 판단 없이 현상을 바라보도록)","deepDive":"감정 패턴과 꿈 상징에 대한 심층 탐색(5-7문장, 반복 상징의 의미, 내면의 변화 흐름, 주목할 만한 감정들, 삶에서의 연결 포함. 좋고 나쁨 없이 현상으로 다룰 것)","lookingAheadTitle":"다음 달 제목(5단어 이내)","lookingAheadSuggestion":"이달 패턴을 바탕으로 한 다음 달 구체적 제안(2-3문장)"}`
