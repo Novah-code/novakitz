@@ -652,24 +652,49 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     }
   };
 
-  // ── Abstract card visual (gradient + floating shapes)
   /*
-   * The locked card is gone.
+   * The card on the saved screen.
    *
-   * It was only ever rendered blurred — CardVisual was called in exactly one
-   * place, always with blurred=true — so the artwork behind it, twenty
-   * hand-drawn arcana, was never once shown to anyone. What people actually
-   * got was a large rectangle carrying a padlock and the word UNCONSCIOUS,
-   * sitting above the two buttons that are the real point of this screen.
+   * I took this out once and shouldn't have. The reasoning was that it only
+   * ever rendered blurred, so the twenty hand-drawn arcana behind it were
+   * never seen — but the card is not there to show the artwork. It is there
+   * so the moment has an object in it. Without it the screen is two buttons
+   * on an empty panel.
    *
-   * It also rendered wrong on the device. The overlay put backdrop-filter over
-   * a sibling SVG, which iOS composites unreliably: dark cards came out washed
-   * grey with a hard band through them while bright ones happened to survive.
-   * That is the "broken image" — no image was ever involved.
+   * The rendering fault was real, though, so this is not the old code back.
+   * The blur used to be an overlay with `backdrop-filter` sitting over a
+   * sibling SVG, and iOS composites that unreliably: dark cards came out
+   * washed grey with a hard band through them. The blur is now `filter` on
+   * the art itself, which is a single layer and composites the same way
+   * everywhere.
    *
-   * The arcana still chooses the affirmation and the saved title, so what goes
-   * is a locked door with nothing behind it.
+   * The padlock and the word UNCONSCIOUS are gone. A veil over a card reads
+   * as something waiting; a padlock reads as something being sold.
    */
+  const CardFrame = () => (
+    <div style={{
+      width: '150px',
+      height: '218px',
+      borderRadius: '18px',
+      background: `linear-gradient(145deg, ${card.from} 0%, ${card.mid} 50%, ${card.to} 100%)`,
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: '0 16px 40px rgba(0,0,0,0.12)',
+      border: '1px solid rgba(255,255,255,0.8)',
+      flexShrink: 0,
+    }}>
+      <svg
+        width="100%" height="100%" viewBox="0 0 200 290"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ position: 'absolute', inset: 0, filter: 'blur(9px)', opacity: 0.85 }}
+      >
+        {arcanaArtChildren(arcanaId)}
+      </svg>
+
+      {/* A veil, not a lock — it softens the art without hiding that one is there. */}
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(244,249,245,0.28)' }} />
+    </div>
+  );
 
   // ==============================
   // STEP: blurred card
@@ -686,9 +711,11 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     }}>
       <Container onClose={onClose}>
         <div onClick={e => e.stopPropagation()} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '4px', textAlign: 'center', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '20px', textAlign: 'center', lineHeight: 1.5 }}>
             {isKo ? `'${selectedEmotion}' 기록했어요` : `'${selectedEmotion}' is saved`}
           </p>
+
+          <CardFrame />
 
           <div style={{ marginTop: '24px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
             {/* Button 1: Dream recording */}
@@ -706,7 +733,8 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 position: 'relative',
               }}
             >
-              <span>{isKo ? '꿈을 기억하나요?' : 'Did you remember your dream?'}</span>
+              {/* Short enough to stay on one line at 88% of a phone panel. */}
+              <span style={{ whiteSpace: 'nowrap' }}>{isKo ? '꿈 기억나요?' : 'Remember a dream?'}</span>
               <svg style={{ position: 'absolute', right: 20 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
 
@@ -725,7 +753,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 position: 'relative',
               }}
             >
-              <span>{isKo ? '감정 체크하기' : 'Check your mood'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>{isKo ? '무드만 확인' : 'Check your mood'}</span>
               <svg style={{ position: 'absolute', right: 20 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </button>
           </div>
