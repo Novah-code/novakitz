@@ -142,7 +142,34 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      /*
+       * Mornings where a mood was tapped and nothing was written.
+       *
+       * This screen counted rows in `dreams` and nothing else, so a person who
+       * checks in every morning without writing a dream saw 0 TOTAL LOGS, 0
+       * THIS WEEK and 0 DAY STREAK — the app telling them they had never used
+       * it, on the screen whose job is to show that they had.
+       */
+      const { data: checkinRows } = await supabase
+        .from('checkins')
+        .select('check_date, emotion')
+        .eq('user_id', user.id)
+        .eq('time_of_day', 'morning');
+
       const entries = allEntries || [];
+
+      /* `YYYY-MM-DD` parsed by the Date constructor is UTC midnight, which is
+         the previous day for anyone west of Greenwich. Build it locally. */
+      const dayFromIso = (s: string) => {
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, (m || 1) - 1, d || 1);
+      };
+
+      const dreamDays = new Set(entries.map(d => new Date(d.created_at).toDateString()));
+      /* A day that already carries a dream is one morning, not two. */
+      const checkinOnly = (checkinRows || [])
+        .map(c => ({ day: dayFromIso(c.check_date), emotion: c.emotion as string | null }))
+        .filter(c => !dreamDays.has(c.day.toDateString()));
 
       // Separate mood/emotion logs from dream entries
       const isMoodEntry = (d: { content?: string; tags?: string[] }) =>
@@ -157,12 +184,18 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
 
       const now = Date.now();
       const week = 7 * 86400000;
-      const thisWeek = entries.filter(d => now - new Date(d.created_at).getTime() < week).length;
+      const thisWeek =
+        entries.filter(d => now - new Date(d.created_at).getTime() < week).length +
+        checkinOnly.filter(c => now - c.day.getTime() < week).length;
+
+      /* A morning counts whether it was written down or only felt. */
+      const totalLogs = entries.length + checkinOnly.length;
 
       // Streak: consecutive days with any entry
       let currentStreak = 0;
-      if (entries.length > 0) {
-        const uniqueDates = [...new Set(entries.map(d => new Date(d.created_at).toDateString()))]
+      const allDays = [...dreamDays, ...checkinOnly.map(c => c.day.toDateString())];
+      if (allDays.length > 0) {
+        const uniqueDates = [...new Set(allDays)]
           .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
         const today = new Date().toDateString();
         const yesterday = new Date(now - 86400000).toDateString();
@@ -192,6 +225,16 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         moodCounts[d.mood] = (moodCounts[d.mood] || 0) + 1;
         if (recent14Ids.has(d.id)) moodRecent[d.mood] = (moodRecent[d.mood] || 0) + 1;
         if (older14Ids.has(d.id)) moodOlder[d.mood] = (moodOlder[d.mood] || 0) + 1;
+      });
+      /* The pebble someone pressed is a mood they had, whether or not a dream
+         came with it — otherwise "The Waking Mind" only ever describes the
+         mornings that happened to produce writing. */
+      checkinOnly.forEach(c => {
+        if (!c.emotion) return;
+        const age = now - c.day.getTime();
+        moodCounts[c.emotion] = (moodCounts[c.emotion] || 0) + 1;
+        if (age < 14 * 86400000) moodRecent[c.emotion] = (moodRecent[c.emotion] || 0) + 1;
+        else if (age < 28 * 86400000) moodOlder[c.emotion] = (moodOlder[c.emotion] || 0) + 1;
       });
       const moodPatterns: MoodData[] = Object.entries(moodCounts)
         .sort((a, b) => b[1] - a[1]).slice(0, 3)
@@ -226,25 +269,34 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
           return { keyword, category: v.category, count: v.total, trend };
         });
 
-      // Sentiment balance from ALL entries that have a mood
+      // Sentiment balance from every morning that carries a mood
       let pos = 0, neg = 0, neu = 0;
-      entries.forEach(d => {
-        if (!d.mood) return;
-        const m = d.mood.toLowerCase();
+      const countSentiment = (mood?: string | null) => {
+        if (!mood) return;
+        const m = mood.toLowerCase();
         if (POSITIVE_MOODS.has(m)) pos++;
         else if (NEGATIVE_MOODS.has(m)) neg++;
         else neu++;
-      });
-      const total = pos + neg + neu || 1;
-      const posPct = Math.round((pos / total) * 100);
-      const neuPct = Math.round((neu / total) * 100);
-      const sentimentBalance = {
-        positive: posPct,
-        neutral: neuPct,
-        negative: Math.max(0, 100 - posPct - neuPct),
       };
+      entries.forEach(d => countSentiment(d.mood));
+      checkinOnly.forEach(c => countSentiment(c.emotion));
+      /*
+       * An empty account used to read "Heavy (100%)".
+       *
+       * `negative` was the remainder — 100 minus the other two — and with
+       * nothing recorded the other two are zero, so the bar filled with the
+       * heaviest colour and told a brand new user their mornings were entirely
+       * heavy. The remainder is only meaningful once something has been
+       * counted.
+       */
+      const counted = pos + neg + neu;
+      const posPct = counted ? Math.round((pos / counted) * 100) : 0;
+      const neuPct = counted ? Math.round((neu / counted) * 100) : 0;
+      const sentimentBalance = counted
+        ? { positive: posPct, neutral: neuPct, negative: Math.max(0, 100 - posPct - neuPct) }
+        : { positive: 0, neutral: 0, negative: 0 };
 
-      setStats({ totalDreams: entries.length, thisWeek, currentStreak, moodPatterns, dreamSymbols, sentimentBalance });
+      setStats({ totalDreams: totalLogs, thisWeek, currentStreak, moodPatterns, dreamSymbols, sentimentBalance });
     } catch {
       setStats({ totalDreams: 0, thisWeek: 0, currentStreak: 0, moodPatterns: [], dreamSymbols: [], sentimentBalance: { positive: 0, neutral: 0, negative: 0 } });
     } finally {
