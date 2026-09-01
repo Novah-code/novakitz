@@ -277,7 +277,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [repositioningDreamId, setRepositioningDreamId] = useState<string | null>(null);
-  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { mood: number; energy_level: number }>>({});
+  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { mood: number; emotion: string | null; energy_level: number }>>({});
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // Extract background images from saved dreams
@@ -461,13 +461,19 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             try {
               const { data: checkinData } = await supabase
                 .from('checkins')
-                .select('check_date, time_of_day, mood, energy_level')
+                /*
+                 * `emotion` is what the calendar colours a day from. `mood` is
+                 * a number and several pebbles share one — anxious, lonely and
+                 * anger are all 2 — so selecting mood alone could not tell the
+                 * calendar which pebble was pressed.
+                 */
+                .select('check_date, time_of_day, mood, emotion, energy_level')
                 .eq('user_id', user.id)
                 .eq('time_of_day', 'morning');
               if (checkinData) {
-                const map: Record<string, { mood: number; energy_level: number }> = {};
+                const map: Record<string, { mood: number; emotion: string | null; energy_level: number }> = {};
                 checkinData.forEach((c: any) => {
-                  map[c.check_date] = { mood: c.mood, energy_level: c.energy_level };
+                  map[c.check_date] = { mood: c.mood, emotion: c.emotion ?? null, energy_level: c.energy_level };
                 });
                 setCheckinsByDate(map);
               }
@@ -4323,7 +4329,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   flexDirection: 'column'
                 }}>
                   <DreamCalendar
-                    dreams={filteredDreams as any}
+                    /*
+                     * `savedDreams`, not `filteredDreams`. The filter above
+                     * drops "no dream" markers with a comment saying they are
+                     * for the calendar only — but it was the array being
+                     * handed to the calendar, so the rest-day colour it can
+                     * draw had nothing to draw it from. Search and tag
+                     * filtering belongs to the list, not to a record of which
+                     * mornings happened.
+                     */
+                    dreams={savedDreams as any}
+                    checkins={checkinsByDate}
                     onDateSelect={(date) => {
                       // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
                       const dreamsForDate = filteredDreams.filter(d => {

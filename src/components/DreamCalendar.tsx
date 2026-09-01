@@ -8,6 +8,23 @@ interface DreamCalendarProps {
   dreams: Dream[];
   onDateSelect: (date: string) => void;
   selectedDate: string | null;
+  /*
+   * Mornings where a mood was tapped, keyed by `YYYY-MM-DD`.
+   *
+   * Without this the month could only ever show days that carried a written
+   * dream, because a mood check-in is a row in `checkins` and never becomes a
+   * row in `dreams`. Someone who taps a pebble every morning and writes
+   * nothing saw an empty calendar and `0 MORNINGS THIS MONTH` — the one
+   * screen meant to show that something is accumulating showed nothing
+   * accumulating.
+   */
+  checkins?: Record<string, { emotion?: string | null }>;
+}
+
+/* Local calendar date, not UTC — `toISOString` would roll the day over for
+   anyone east of Greenwich in the evening. */
+function isoDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /*
@@ -142,7 +159,7 @@ function Sparkle({ className }: { className: string }) {
   );
 }
 
-export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: DreamCalendarProps) {
+export default function DreamCalendar({ dreams, onDateSelect, selectedDate, checkins }: DreamCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const year = currentDate.getFullYear();
@@ -164,6 +181,8 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
     day: number;
     date: string;
     entries: Dream[];
+    /* The mood tapped that morning, when no dream was written for the day. */
+    checkinMood: string | null;
     isToday: boolean;
     isSelected: boolean;
   };
@@ -173,11 +192,13 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
 
   const todayString = new Date().toDateString();
   for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day).toDateString();
+    const d = new Date(year, month, day);
+    const date = d.toDateString();
     cells.push({
       day,
       date,
       entries: dreamsByDate[date] || [],
+      checkinMood: checkins?.[isoDate(d)]?.emotion ?? null,
       isToday: date === todayString,
       isSelected: date === selectedDate,
     });
@@ -188,7 +209,36 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
   const weeks: Array<Array<Cell | null>> = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
-  const loggedDays = cells.filter(c => c && c.entries.length > 0).length;
+  /* A morning counts whether it was written down or only felt. */
+  const loggedDays = cells.filter(c => c && (c.entries.length > 0 || c.checkinMood)).length;
+
+  /*
+   * One place decides what a day looks like, so the legend and the grid can
+   * never disagree about a colour.
+   *
+   * A written dream wins over the morning's check-in — it is the more
+   * specific record of the day, and its mood is what the reading was made
+   * from. A day with only a check-in still gets its pebble.
+   */
+  type Mark = { legendKey: string; fill: string; shape: string } | null;
+
+  const markFor = (cell: Cell): Mark => {
+    const first = cell.entries[0];
+    if (first) {
+      if (isNoDream(first)) return { legendKey: 'rest', fill: REST_COLOR, shape: '50%' };
+      const key = moodKey(first.mood);
+      return key
+        ? { legendKey: key, fill: MOOD_COLORS[key], shape: MOOD_SHAPES[key] }
+        : { legendKey: 'logged', fill: MOOD_FALLBACK, shape: SHAPE_FALLBACK };
+    }
+    if (cell.checkinMood) {
+      const key = moodKey(cell.checkinMood);
+      return key
+        ? { legendKey: key, fill: MOOD_COLORS[key], shape: MOOD_SHAPES[key] }
+        : { legendKey: 'logged', fill: MOOD_FALLBACK, shape: SHAPE_FALLBACK };
+    }
+    return null;
+  };
 
   /*
    * Which colours this month actually used, in the order they first appear.
@@ -198,20 +248,12 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
   const legend = useMemo(() => {
     const seen = new Map<string, string>();
     cells.forEach(cell => {
-      if (!cell || cell.entries.length === 0) return;
-      const first = cell.entries[0];
-      if (isNoDream(first)) {
-        if (!seen.has('rest')) seen.set('rest', REST_COLOR);
-        return;
-      }
-      const key = moodKey(first.mood);
-      if (key) {
-        if (!seen.has(key)) seen.set(key, MOOD_COLORS[key]);
-      } else if (!seen.has('logged')) {
-        seen.set('logged', MOOD_FALLBACK);
-      }
+      if (!cell) return;
+      const mark = markFor(cell);
+      if (mark && !seen.has(mark.legendKey)) seen.set(mark.legendKey, mark.fill);
     });
     return Array.from(seen.entries());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cells]);
 
   return (
@@ -259,18 +301,9 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
               if (!cell) return <div className="dcal__cell" key={`${wi}-${ci}`} />;
 
               const { day, date, entries, isToday, isSelected } = cell;
-              const first = entries[0];
               const rest = entries.length > 1;
-              const skipped = first ? isNoDream(first) : false;
-
-              const key = first && !skipped ? moodKey(first.mood) : null;
-              const fill = entries.length === 0
-                ? undefined
-                : skipped
-                ? REST_COLOR
-                : key
-                ? MOOD_COLORS[key]
-                : MOOD_FALLBACK;
+              const mark = markFor(cell);
+              const hasEntry = entries.length > 0;
 
               /*
                * The mood used to be printed inside the cell. At seven columns
@@ -279,28 +312,27 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate }: Dr
                * PEACE / FUL. The colour carries it now and the legend below
                * says what the colours are.
                */
-              /* A rest day keeps a soft round pebble — it was still a morning. */
-              const shape = skipped ? '50%' : key ? MOOD_SHAPES[key] : SHAPE_FALLBACK;
-
-              const Tag = entries.length > 0 ? 'button' : 'div';
+              /* Only a written dream has something to open. A mood-only
+                 morning is a mark on the month, not a destination. */
+              const Tag = hasEntry ? 'button' : 'div';
 
               return (
                 <Tag
                   key={date}
-                  className={`dcal__cell${entries.length > 0 ? ' dcal__cell--filled' : ''}`}
+                  className={`dcal__cell${mark ? ' dcal__cell--filled' : ''}`}
                   style={{
                     /* The selected day is pressed into the sheet rather than
                        outlined, so it reads against any of the eight fills. */
                     boxShadow: isSelected ? 'inset 0 0 0 2px var(--ink)' : undefined,
                   }}
-                  {...(entries.length > 0
+                  {...(hasEntry
                     ? { type: 'button' as const, onClick: () => onDateSelect(date) }
                     : {})}
                 >
-                  {fill && (
+                  {mark && (
                     <span
                       className="dcal__pebble"
-                      style={{ background: fill, borderRadius: shape }}
+                      style={{ background: mark.fill, borderRadius: mark.shape }}
                       aria-hidden="true"
                     />
                   )}
