@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Roboto } from "next/font/google";
+import { Inter, Roboto, Instrument_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -17,6 +17,23 @@ const roboto = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
   weight: ["300", "400", "500", "700"],
+  display: 'swap',
+  preload: true,
+});
+
+/*
+ * The morning screens' display face.
+ *
+ * Loaded through next/font rather than a <link> to fonts.googleapis.com
+ * because the app runs from capacitor://localhost as a static export — a
+ * remote stylesheet would leave the heading in the fallback face whenever the
+ * phone is offline, which for a morning app is often. next/font copies the
+ * file into the bundle at build time.
+ */
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
   display: 'swap',
   preload: true,
 });
@@ -149,7 +166,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico?v=5" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=5" />
       </head>
-      <body className={`${inter.variable} ${roboto.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${roboto.variable} ${instrumentSerif.variable} font-sans antialiased`}>
         <div className="particles">
           <div className="particle particle-1"></div>
           <div className="particle particle-2"></div>

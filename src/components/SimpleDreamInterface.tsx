@@ -5914,11 +5914,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               }}
             >✕</button>
 
+            {/*
+              * Instrument Serif on the heading only — the pebbles and their
+              * labels stay in the UI face. Korean keeps S-CoreDream because
+              * Instrument Serif has no Hangul, and `html[lang="ko"] *` in
+              * globals.css carries `!important`, so an inline face could not
+              * take there anyway.
+              */}
             <p style={{
-              fontSize: '16px', fontWeight: 500,
+              fontSize: language === 'ko' ? '16px' : '26px',
+              fontWeight: language === 'ko' ? 500 : 400,
               color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
-              letterSpacing: '-0.5px',
-              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+              letterSpacing: language === 'ko' ? '-0.5px' : '0',
+              fontFamily: language === 'ko'
+                ? "'S-CoreDream', sans-serif"
+                : "var(--font-display), Georgia, serif",
             }}>
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
