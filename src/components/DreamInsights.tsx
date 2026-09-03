@@ -305,7 +305,7 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, padding: 'clamp(12px,3vw,24px)', fontFamily: 'inherit' }}>
+    <div className="di-shell" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, fontFamily: 'inherit' }}>
       <style>{`
         @keyframes di-spin { to { transform: rotate(360deg); } }
         .di-scroll::-webkit-scrollbar { width: 4px; }
@@ -314,12 +314,48 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         .di-symbol-card:hover { border-color: #7ea886 !important; }
         .di-hdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
         .di-cta-btn:hover { background: #d6a848 !important; }
+
+        .di-shell { padding: clamp(12px,3vw,24px); }
+        .di-card {
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          border-radius: 24px;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        }
+
+        /*
+         * On a phone the panel is the screen, not a card floating on it.
+         *
+         * A 600px card inside a 24px gutter leaves a ring of blurred
+         * background on every side and squeezes the content into the middle —
+         * on a 6.9" screen that reads as a web page in a lightbox rather than
+         * a screen in an app. Full bleed also means the numbers and the
+         * sentiment bar get the whole width.
+         *
+         * The insets matter here in a way they did not for a floating card:
+         * the header would otherwise sit under the status bar and the last
+         * section under the home indicator.
+         */
+        @media (max-width: 640px) {
+          .di-shell { padding: 0; }
+          .di-card {
+            max-width: none;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+          }
+          .di-hdr { padding-top: calc(14px + env(safe-area-inset-top)) !important; }
+          .di-scroll { padding-bottom: calc(32px + env(safe-area-inset-bottom)) !important; }
+        }
       `}</style>
 
-      <div style={{ position: 'relative', width: '100%', maxWidth: 600, background: 'white', borderRadius: 24, boxShadow: '0 25px 60px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+      <div className="di-card" style={{ position: 'relative', background: 'white', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* ── Sticky Header ── */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div className="di-hdr" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
             <BarChart3Icon size={17} />
             <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065', margin: 0 }}>

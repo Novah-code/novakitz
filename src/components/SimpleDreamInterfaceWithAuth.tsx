@@ -850,8 +850,38 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: '20px', maxWidth: '600px', width: '92%', maxHeight: '90vh', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/*
+            * On a phone this is the screen, not a card on it.
+            *
+            * A 92%-wide card left a dark ring on every side and pushed the
+            * month's content into the middle of a 6.9" display. The report is
+            * the longest screen in the app, so the gutter cost the most here.
+            */}
+          <style>{`
+            .mdr-card {
+              background: white;
+              border-radius: 20px;
+              max-width: 600px;
+              width: 92%;
+              max-height: 90vh;
+              overflow: hidden;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            @media (max-width: 640px) {
+              .mdr-card {
+                width: 100%;
+                max-width: none;
+                height: 100%;
+                max-height: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+              }
+            }
+          `}</style>
+          <div className="mdr-card">
             <MonthlyDreamReport user={user} language={language} onClose={() => setShowMonthlyReport(false)} />
           </div>
         </div>

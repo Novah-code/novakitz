@@ -390,7 +390,14 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
 
   /* ── Main ── */
   return (
-    <div style={{ fontFamily: 'inherit', color: '#334139', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+    <div className="mdr-body" style={{ fontFamily: 'inherit', color: '#334139', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+      {/* The shell around this goes full-bleed on a phone; without matching
+          heights here the report would still stop at 90% of the screen. */}
+      <style>{`
+        @media (max-width: 640px) {
+          .mdr-body { height: 100%; max-height: 100% !important; }
+        }
+      `}</style>
       <style>{`
         @keyframes mdr-spin { to { transform: rotate(360deg); } }
         .mdr-scroll::-webkit-scrollbar { width: 4px; }
