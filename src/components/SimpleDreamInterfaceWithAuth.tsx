@@ -69,6 +69,14 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
+  /*
+   * Mornings where a mood was tapped, keyed by `YYYY-MM-DD`.
+   *
+   * The calendar rendered here is a second copy — SimpleDreamInterface has its
+   * own — and this one is what the menu actually opens. Teaching only the other
+   * one to read check-ins left this one still showing an empty month.
+   */
+  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { emotion: string | null }>>({});
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -417,10 +425,26 @@ export default function SimpleDreamInterfaceWithAuth() {
     const loadDreams = async () => {
       if (!user) {
         setDreams([]);
+        setCheckinsByDate({});
         return;
       }
 
       try {
+        /* Loaded whether or not any dream exists — a month of pebbles and no
+           writing is the ordinary case, not an edge one. */
+        const { data: checkinRows } = await supabase
+          .from('checkins')
+          .select('check_date, emotion')
+          .eq('user_id', user.id)
+          .eq('time_of_day', 'morning');
+        if (checkinRows) {
+          const map: Record<string, { emotion: string | null }> = {};
+          checkinRows.forEach((c: any) => {
+            map[c.check_date] = { emotion: c.emotion ?? null };
+          });
+          setCheckinsByDate(map);
+        }
+
         /*
          * The calendar needs a dot on a day and a title to tap — it does not
          * need what was written. `select('*')` pulled every dream's full text
@@ -858,6 +882,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}
+                checkins={checkinsByDate}
                 onDateSelect={(date) => setCalendarSelectedDate(date)}
                 selectedDate={calendarSelectedDate}
               />
