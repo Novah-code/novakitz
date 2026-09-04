@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
+import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
 import StreakBadge from './StreakBadge';
@@ -2039,18 +2040,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       dream.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dream.response.toLowerCase().includes(searchTerm.toLowerCase());
 
+    /* Case-insensitive, or picking "Peaceful" from the list would miss every
+       dream the model tagged "peaceful". */
     const matchesTag = selectedTag === '' ||
-      dream.autoTags?.includes(selectedTag) ||
-      dream.tags?.includes(selectedTag);
+      hasTag(dream.autoTags, selectedTag) ||
+      hasTag(dream.tags, selectedTag);
 
     return matchesSearch && matchesTag;
   });
 
   // Get all unique tags for filter dropdown
-  const allTags = [...new Set([
+  const allTags = dedupeTags([
     ...savedDreams.flatMap(dream => dream.autoTags || []),
     ...savedDreams.flatMap(dream => dream.tags || [])
-  ])].sort();
+  ]).sort((a, b) => a.localeCompare(b));
 
 
   return (

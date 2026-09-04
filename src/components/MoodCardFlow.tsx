@@ -7,6 +7,7 @@ import { speechSupported, startListening, type SpeechSession } from '../lib/spee
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
 import { authHeader } from '../lib/authHeader';
+import { dedupeTags } from '../lib/tags';
 
 interface MoodCardFlowProps {
   selectedEmotion: string;
@@ -1274,7 +1275,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
 
           {/* Tags */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {[...new Set(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name])].map(tag => (
+            {dedupeTags(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name]).map(tag => (
               <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>
                 #{tag}
               </span>
@@ -1494,7 +1495,7 @@ export function MoodCardJournalView({
         {/* Scrollable content */}
         <div style={{ flex: 1, padding: '28px 24px 40px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {[...new Set(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name])].map(tag => (
+            {dedupeTags(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name]).map(tag => (
               <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>#{tag}</span>
             ))}
           </div>

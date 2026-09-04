@@ -259,7 +259,6 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
   return (
     <div className="dcal">
       <Sparkle className="dcal__spark dcal__spark--a" />
-      <Sparkle className="dcal__spark dcal__spark--b" />
 
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
         <div style={{ minWidth: 0 }}>
@@ -359,6 +358,9 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
       )}
 
       <div className="dcal__foot">
+        {/* Anchored to the tally box rather than to the sheet, so it cannot
+            land on the box however tall that box turns out to be. */}
+        <Sparkle className="dcal__spark dcal__spark--b" />
         <span className="dcal__foot-count">{loggedDays}</span>
         <span className="dcal__foot-label">
           {loggedDays === 1 ? 'morning this month' : 'mornings this month'}
