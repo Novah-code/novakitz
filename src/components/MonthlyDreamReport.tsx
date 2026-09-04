@@ -205,8 +205,15 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
             .map(c => `${c.day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — woke up ${c.emotion}`),
         ].filter(Boolean);
         loadPremiumInsights(dreams, moodLines, label, targetDate.getFullYear(), targetDate.getMonth(), isCurrent);
-        const dreamIds = dreams.map(d => d.id).filter(Boolean);
-        loadArchetypes(dreamIds, dreams);
+        /*
+         * Mood-card records count here too. Tapping the circle, choosing a
+         * pebble and writing the scene is how a dream gets recorded in this
+         * app, so scanning only the long-press entries meant the archetypes had
+         * almost nothing to read and the card sat on its placeholder forever.
+         */
+        const archetypeSources = [...dreams, ...moods];
+        const archetypeIds = archetypeSources.map(d => d.id).filter(Boolean);
+        loadArchetypes(archetypeIds, archetypeSources);
       }
     } catch (err) {
       console.error('Error loading month report:', err);
@@ -611,9 +618,17 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
               <div style={{ position: 'relative' }}>
                 <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    {/*
+                      * The placeholder used to say "Analyzing… results will
+                      * appear shortly" whenever nothing was found, and nothing
+                      * was ever analysed after that — no request was in flight
+                      * and no result was coming. A month with too little in it
+                      * to name an archetype should say so instead of promising
+                      * something that never arrives.
+                      */}
                     {(archetypes.length > 0 ? archetypes : [
-                      { name: language === 'ko' ? '분석 중...' : 'Analyzing...', category: '—', meaning: language === 'ko' ? '꿈 패턴을 분석하고 있습니다.' : 'Analyzing your dream patterns.', iconType: 'key' as const },
-                      { name: language === 'ko' ? '분석 중...' : 'Analyzing...', category: '—', meaning: language === 'ko' ? '곧 결과가 나타납니다.' : 'Results will appear shortly.', iconType: 'compass' as const },
+                      { name: language === 'ko' ? '아직 없음' : 'Not yet', category: '—', meaning: language === 'ko' ? '이번 달 기록이 아직 원형을 이룰 만큼 쌓이지 않았습니다.' : 'This month does not hold enough yet for an archetype to show.', iconType: 'key' as const },
+                      { name: language === 'ko' ? '계속 기록하세요' : 'Keep recording', category: '—', meaning: language === 'ko' ? '꿈을 몇 번 더 적으면 반복되는 상이 드러납니다.' : 'A few more dreams and the recurring figures start to surface.', iconType: 'compass' as const },
                     ]).map((arch, i) => (
                       <div key={i} style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

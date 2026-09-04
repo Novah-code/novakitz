@@ -406,6 +406,19 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [sceneText, setSceneText] = useState('');
   const [analysisText, setAnalysisText] = useState('');
   const [analysisKeywords, setAnalysisKeywords] = useState<string[]>([]);
+  /*
+   * The structured form of the same keywords — the ones that carry a category
+   * and a sentiment and belong in `dream_keywords`.
+   *
+   * Tapping the circle and choosing a pebble is how a person records a dream in
+   * this app, so this flow is the main way dreams get written down. It was
+   * saving the row and nothing else, which meant Reflection's "The Sleeping
+   * Mind" had no symbols to find and stayed empty no matter how much someone
+   * wrote.
+   */
+  const [analysisKeywordRows, setAnalysisKeywordRows] = useState<
+    { keyword: string; category: string; sentiment: string }[]
+  >([]);
   const [nickname, setNickname] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -525,6 +538,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     if (analysisText) {
       setAnalysisText(analysisText);
       setAnalysisKeywords(analysisKeywordsResult);
+      setAnalysisKeywordRows(analysisResult?.keywords ?? []);
       if (user) {
         recordAIUsage(user.id, undefined, 'moodcard_analysis');
       } else {
@@ -577,6 +591,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
       if (res.ok && data.analysis) {
         setAnalysisText(data.analysis);
         setAnalysisKeywords(data.autoTags ?? []);
+        setAnalysisKeywordRows(data.keywords ?? []);
       } else if (!res.ok) {
         console.error('[EgoAnalysis] API error:', res.status, data);
       }
@@ -631,16 +646,50 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
         const content = analysisText
           ? `${originalRecord}\n\n---\n\nAnalysis:\n${analysisText}`
           : originalRecord;
-        const { error: moodError } = await supabase.from('dreams').insert([{
+        /*
+         * `toISOString()` was giving this row a UTC date. For an app about
+         * mornings that is exactly backwards: in KST every morning before 09:00
+         * lands on the previous UTC day, so the calendar drew the pebble on the
+         * wrong square for the people using it earliest. The ego branch above
+         * already builds a local date; this one now does too.
+         */
+        const moodDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const { data: moodRow, error: moodError } = await supabase.from('dreams').insert([{
           user_id: user.id,
           title: `${selectedEmotion} — ${card.name}`,
           content: `[감정 기록] ${content}`,
           mood: selectedEmotion,
           tags: ['emotion-record', selectedEmotion, ...analysisKeywords.slice(0, 2)],
-          date: now.toISOString().split('T')[0],
+          date: moodDateStr,
           time: timeStr,
-        }]);
+        }]).select('id').single();
         if (moodError) throw moodError;
+
+        /*
+         * The symbols, kept.
+         *
+         * This flow is how a dream gets written down — circle, pebble, then the
+         * scene — so its keywords have to reach `dream_keywords` the same way
+         * the long-press flow's do. Without this row Reflection's "The Sleeping
+         * Mind" had nothing to read and stayed empty for anyone who recorded
+         * their dreams the ordinary way.
+         *
+         * A failure here does not fail the save: the dream itself is written,
+         * and losing its symbols is not worth losing the dream over.
+         */
+        if (moodRow?.id && analysisKeywordRows.length > 0) {
+          const { error: kwError } = await supabase.from('dream_keywords').insert(
+            analysisKeywordRows.map((kw) => ({
+              user_id: user.id,
+              dream_id: moodRow.id,
+              keyword: kw.keyword,
+              category: kw.category,
+              sentiment: kw.sentiment,
+              confidence: 0.8,
+            }))
+          );
+          if (kwError) console.error('Error saving mood-card keywords:', kwError);
+        }
       }
       setSaved(true);
       if (onEmotionLogged) onEmotionLogged();

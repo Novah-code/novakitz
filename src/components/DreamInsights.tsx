@@ -175,8 +175,20 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
       // Separate mood/emotion logs from dream entries
       const isMoodEntry = (d: { content?: string; tags?: string[] }) =>
         d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record');
-      const dreamEntries = entries.filter(d => !isMoodEntry(d));
-      const dreamIds = dreamEntries.map(d => d.id);
+      /*
+       * Symbols come from any record that holds a dream, and a mood-card record
+       * with a scene in it holds one — tapping the circle, choosing a pebble
+       * and writing the scene is the ordinary way to record a dream here.
+       * Reading only the long-press entries left "The Sleeping Mind" empty for
+       * people who were recording their dreams every morning.
+       *
+       * An ego record — how you woke, sleep and stress with no scene — is not a
+       * dream, so it stays out.
+       */
+      const dreamLike = entries.filter(
+        d => !isMoodEntry(d) || (d.content ?? '').includes('핵심 장면:')
+      );
+      const dreamIds = dreamLike.map(d => d.id);
 
       const { data: keywordsData } = await supabase
         .from('dream_keywords')
@@ -244,8 +256,8 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         });
 
       // Dream symbols from dream_keywords (dream entries only)
-      const dreamRecent14Ids = new Set(dreamEntries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
-      const dreamOlder14Ids = new Set(dreamEntries.filter(d => {
+      const dreamRecent14Ids = new Set(dreamLike.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
+      const dreamOlder14Ids = new Set(dreamLike.filter(d => {
         const age = now - new Date(d.created_at).getTime();
         return age >= 14 * 86400000 && age < 28 * 86400000;
       }).map(d => d.id));
