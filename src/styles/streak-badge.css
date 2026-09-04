@@ -31,17 +31,15 @@
    * The paper and ink are the calendar's, so the badge belongs to the same
    * app as the month sheet rather than to the iOS chrome it used to imitate.
    *
-   * At 82% the paper lets a little sky through so it sits in the scene rather
-   * than on top of it as a solid card. That costs almost nothing where it
-   * matters — the ink still measures 9.28:1 on day and 7.53:1 on night — but
-   * it does soften the pill's own edge against the sky (2.14 to 1.88), so the
-   * border carries a bit more weight to keep the shape defined. No
-   * backdrop-filter behind it: it would be a fourth blurred layer in an app
-   * WKWebView's layer ordering has bitten three times, and the sky behind the
-   * badge is a smooth gradient that has nothing to blur.
+   * The paper is opaque. A translucent version was tried at 82% so a little
+   * sky would come through, and it softened the pill's edge against that sky
+   * from 2.14 to 1.88 for no gain worth having. No backdrop-filter behind it
+   * either: it would be a fourth blurred layer in an app WKWebView's layer
+   * ordering has bitten three times, and the sky here is a smooth gradient
+   * with nothing to blur.
    */
-  border: 1px solid rgba(47, 59, 51, 0.12);
-  background: rgba(247, 243, 233, 0.82);
+  border: 1px solid rgba(47, 59, 51, 0.08);
+  background: #F7F3E9;
   color: #2F3B33;
 
   /* The glow, as a small shadow. A backdrop-filter here was a third blurred
@@ -96,26 +94,27 @@
 }
 
 /*
- * Done: the stone is placed. Soft rose fill, deep rose ring.
+ * Done: the stone is placed. One flat rose, no outline.
  *
- * The fill alone could not do this job. The app's own pale coral measures
- * 1.00:1 against this paper — identical luminance, the white-on-white mistake
- * again in a different hue — and a pale pink is barely better at 1.09:1. At
- * 10px that reads as hollow even when it is filled, which erases the one thing
- * the badge is for: whether today is done. So the fill is a step deeper at
- * 1.55:1, still unmistakably pink, and the ring carries the shape — #A94E5E
- * measures 4.23:1 on the day paper and 3.43:1 on the night one, both over the
- * 3.0 floor a graphical object this small needs.
+ * The colour is chosen rather than picked from the app's pastels because those
+ * are made to sit on white cells in the calendar, not on cream. The palest of
+ * them measures 1.00:1 against this paper — identical luminance, which is the
+ * white-on-white problem this badge was just fixed for, in a different hue.
+ * #E8A9B4 is the point where the shape still reads as a filled stone at 10px
+ * with nothing drawn around it.
  */
 .is-done .streak-badge__pebble {
   background: #E8A9B4;
-  border: 1.5px solid #A94E5E;
 }
 
-/* Not yet: the outline of the stone, with nothing in it. */
+/*
+ * Not yet: the outline of the stone, with nothing in it. This one keeps a
+ * border because an empty shape has no other way to exist — the ring is what
+ * draws the space the morning's stone will go into.
+ */
 .is-open .streak-badge__pebble {
   background: transparent;
-  border: 1.5px solid rgba(169, 78, 94, 0.6);
+  border: 1.5px solid rgba(200, 140, 152, 0.75);
 }
 
 .streak-badge__count {
