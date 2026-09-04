@@ -4941,7 +4941,23 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 getF('수면:') ? `${language === 'ko' ? '수면' : 'Sleep'}: ${getF('수면:')}` : '',
                 getF('스트레스:') ? `${language === 'ko' ? '스트레스' : 'Stress'}: ${getF('스트레스:')}` : '',
                 contentParts[0].split('\n').filter((l: string) => !l.startsWith('감정:') && !l.startsWith('수면:') && !l.startsWith('스트레스:')).join('\n').trim(),
-              ].filter(Boolean).join('\n') : getF('핵심 장면:');
+              ].filter(Boolean).join('\n') : (() => {
+                /*
+                 * Every other field is one line, and the scene is not — it is
+                 * whatever the person typed, and a dream written as a paragraph
+                 * has line breaks in it. Reading it with the single-line helper
+                 * kept the first line and dropped the rest, so the record came
+                 * back cut mid-sentence.
+                 *
+                 * The full text was in the row the whole time; only the parse
+                 * was lossy. The scene is written last in the record, so it runs
+                 * from its own marker to the end of the original-record block.
+                 */
+                const originalLines = (contentParts[0] ?? '').split('\n');
+                const start = originalLines.findIndex((l: string) => l.startsWith('핵심 장면:'));
+                if (start === -1) return '';
+                return originalLines.slice(start).join('\n').slice('핵심 장면:'.length).trim();
+              })();
               return (
                 <MoodCardJournalView
                   emotion={emotion}
