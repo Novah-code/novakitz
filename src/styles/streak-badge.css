@@ -30,9 +30,18 @@
    *
    * The paper and ink are the calendar's, so the badge belongs to the same
    * app as the month sheet rather than to the iOS chrome it used to imitate.
+   *
+   * At 82% the paper lets a little sky through so it sits in the scene rather
+   * than on top of it as a solid card. That costs almost nothing where it
+   * matters — the ink still measures 9.28:1 on day and 7.53:1 on night — but
+   * it does soften the pill's own edge against the sky (2.14 to 1.88), so the
+   * border carries a bit more weight to keep the shape defined. No
+   * backdrop-filter behind it: it would be a fourth blurred layer in an app
+   * WKWebView's layer ordering has bitten three times, and the sky behind the
+   * badge is a smooth gradient that has nothing to blur.
    */
-  border: 1px solid rgba(47, 59, 51, 0.08);
-  background: #F7F3E9;
+  border: 1px solid rgba(47, 59, 51, 0.12);
+  background: rgba(247, 243, 233, 0.82);
   color: #2F3B33;
 
   /* The glow, as a small shadow. A backdrop-filter here was a third blurred
@@ -86,17 +95,27 @@
   transition: background-color 300ms ease, border-color 300ms ease;
 }
 
-/* Done: the stone is placed. Filled, in the app's green — 6.4:1 on the paper,
-   where the old white-on-white pebble was invisible on its own badge. */
+/*
+ * Done: the stone is placed. Soft rose fill, deep rose ring.
+ *
+ * The fill alone could not do this job. The app's own pale coral measures
+ * 1.00:1 against this paper — identical luminance, the white-on-white mistake
+ * again in a different hue — and a pale pink is barely better at 1.09:1. At
+ * 10px that reads as hollow even when it is filled, which erases the one thing
+ * the badge is for: whether today is done. So the fill is a step deeper at
+ * 1.55:1, still unmistakably pink, and the ring carries the shape — #A94E5E
+ * measures 4.23:1 on the day paper and 3.43:1 on the night one, both over the
+ * 3.0 floor a graphical object this small needs.
+ */
 .is-done .streak-badge__pebble {
-  background: #3D6044;
-  border: 1px solid #3D6044;
+  background: #E8A9B4;
+  border: 1.5px solid #A94E5E;
 }
 
-/* Not yet: the space for it is there, waiting. */
+/* Not yet: the outline of the stone, with nothing in it. */
 .is-open .streak-badge__pebble {
   background: transparent;
-  border: 1.5px solid rgba(61, 96, 68, 0.55);
+  border: 1.5px solid rgba(169, 78, 94, 0.6);
 }
 
 .streak-badge__count {
