@@ -867,7 +867,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
-        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {/*
             * On a phone this is the screen, not a card on it.
             *
@@ -906,7 +906,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it

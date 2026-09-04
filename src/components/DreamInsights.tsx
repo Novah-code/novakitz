@@ -305,7 +305,7 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
   };
 
   return (
-    <div className="di-shell" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, fontFamily: 'inherit' }}>
+    <div className="di-shell" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10001, fontFamily: 'inherit' }}>
       <style>{`
         @keyframes di-spin { to { transform: rotate(360deg); } }
         .di-scroll::-webkit-scrollbar { width: 4px; }
