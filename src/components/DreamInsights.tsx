@@ -4,6 +4,7 @@ import { goTo } from '../lib/platform';
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { loadStreak } from '../lib/streak';
 
 interface DreamInsightsProps {
   user: User;
@@ -191,22 +192,19 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
       /* A morning counts whether it was written down or only felt. */
       const totalLogs = entries.length + checkinOnly.length;
 
-      // Streak: consecutive days with any entry
-      let currentStreak = 0;
-      const allDays = [...dreamDays, ...checkinOnly.map(c => c.day.toDateString())];
-      if (allDays.length > 0) {
-        const uniqueDates = [...new Set(allDays)]
-          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-        const today = new Date().toDateString();
-        const yesterday = new Date(now - 86400000).toDateString();
-        if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
-          currentStreak = 1;
-          for (let i = 1; i < uniqueDates.length; i++) {
-            const diff = Math.round((new Date(uniqueDates[i]).getTime() - new Date(uniqueDates[i - 1]).getTime()) / 86400000);
-            if (diff === -1) currentStreak++; else break;
-          }
-        }
-      }
+      /*
+       * The streak comes from src/lib/streak.ts, not from a second count here.
+       *
+       * This screen had its own walk over the dates, and it broke on the first
+       * gap. The shared one forgives one missed day per calendar month, on
+       * purpose — a single overslept morning taking a long streak to zero is
+       * the moment people stop altogether. So the badge on the home screen and
+       * this panel were reading the same mornings and reporting 11 and 9.
+       *
+       * Two implementations of one number is a bug we have already fixed once
+       * on this app; the fix is one implementation, not a third.
+       */
+      const { current: currentStreak } = await loadStreak(user.id);
 
       // Trend window: recent 14 days vs previous 14 days
       const recent14Ids = new Set(entries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
@@ -512,9 +510,32 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
               </section>
 
               {/* ── Bottom CTA ── */}
-              <section style={{ position: 'relative', overflow: 'hidden', background: '#3d6044', borderRadius: 20, padding: 24, color: 'white', textAlign: 'center', boxShadow: '0 4px 16px rgba(61,96,68,0.3)' }}>
-                <div style={{ position: 'absolute', top: 0, right: 0, width: 128, height: 128, background: '#5c8065', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(50%,-50%)', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: 0, width: 160, height: 160, background: '#2c4a32', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(-33%,33%)', pointerEvents: 'none' }} />
+              {/*
+                * The two glows are painted into the background, not stacked as
+                * blurred siblings.
+                *
+                * They used to be absolutely positioned divs carrying
+                * `filter: blur(20px)`, and on iOS everything below the sparkle
+                * — heading, copy, button — disappeared behind them: a blurred
+                * element gets its own compositing layer in WKWebView, and the
+                * layer order does not reliably follow the z-index its siblings
+                * were given. The same fault took out the mood card
+                * (backdrop-filter over a sibling SVG) and left seams in the
+                * dawn sky (a large box-shadow blur composited per tile).
+                *
+                * A radial-gradient is one paint on one element, so there is no
+                * second layer to get out of order.
+                */}
+              <section style={{
+                position: 'relative',
+                overflow: 'hidden',
+                background: `
+                  radial-gradient(circle at 100% 0%, rgba(92,128,101,0.55) 0%, rgba(92,128,101,0) 55%),
+                  radial-gradient(circle at 0% 100%, rgba(44,74,50,0.6) 0%, rgba(44,74,50,0) 60%),
+                  #3d6044`,
+                borderRadius: 20, padding: 24, color: 'white', textAlign: 'center',
+                boxShadow: '0 4px 16px rgba(61,96,68,0.3)',
+              }}>
                 <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   {isPremium ? (
                     <>
