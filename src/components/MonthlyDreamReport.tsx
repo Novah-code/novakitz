@@ -424,7 +424,12 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065' }}>{language === 'ko' ? '리뷰' : 'Review'}</span>
           {isPremium && (
             <span style={{ marginLeft: 4, padding: '2px 8px', background: 'linear-gradient(to right, #e8ce90, #7ea886)', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Premium
+              {/* "Pro" everywhere the person can see it. The entitlement is
+                  still called `premium` in RevenueCat and in the plan slug, and
+                  renaming that would invalidate live subscriptions — but the
+                  badge is the one place a subscriber reads the plan's name, and
+                  it has to match what the paywall sold them. */}
+              Pro
             </span>
           )}
         </div>

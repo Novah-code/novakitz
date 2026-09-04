@@ -348,6 +348,30 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
           .di-hdr { padding-top: calc(14px + env(safe-area-inset-top)) !important; }
           .di-scroll { padding-bottom: calc(32px + env(safe-area-inset-bottom)) !important; }
         }
+
+        /*
+         * The scroller has to be the part that gives, and its sections must not.
+         *
+         * It is a flex column inside a flex column, and neither had been told
+         * so: the scroller kept its default `flex: 0 1 auto`, and every section
+         * inside it kept a shrink factor of 1. On a phone, where the card is
+         * exactly the screen's height, the browser then did the reasonable
+         * thing and squeezed the sections until they fitted. Two symptoms came
+         * out of that one fact — the bottom CTA is `overflow: hidden`, so being
+         * squeezed clipped everything under its sparkle, and nothing overflowed
+         * any more, so there was nothing left to scroll.
+         *
+         * `min-height: 0` is the part that is easy to leave out: without it a
+         * flex item will not shrink below its content, and the scroller would
+         * push past the card instead of scrolling inside it.
+         */
+        .di-scroll {
+          flex: 1 1 auto;
+          min-height: 0;
+        }
+        .di-scroll > * {
+          flex-shrink: 0;
+        }
       `}</style>
 
       <div className="di-card" style={{ position: 'relative', background: 'white', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
