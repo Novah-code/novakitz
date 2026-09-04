@@ -775,6 +775,31 @@ anxious/lonely/anger가 전부 2로 겹쳐서 그대로는 색을 복원할 수 
 
 ---
 
+## 11. Xcode "Update to recommended settings" — 제출 후에
+
+제출 당일(2026-09-04) Xcode가 권장 설정 업데이트 다이얼로그를 띄웠고, **Cancel**
+했습니다.
+
+### 왜 지금 안 했나
+
+목록에 **Enable User Script Sandboxing**이 들어 있습니다. 이건 빌드 스크립트가
+파일을 쓰지 못하게 막는 설정인데, 이 앱의 빌드는 스크립트로 파일을 씁니다 —
+CocoaPods의 `[CP] Embed Pods Frameworks`, Capacitor의 웹 자산 복사. 켜면
+`Sandbox: rsync deny file-write-create` 계열 에러로 아카이브가 깨지는 것이
+Capacitor/CocoaPods 프로젝트의 흔한 패턴입니다.
+
+나머지 항목(String Catalog 심볼 생성, 병렬 빌드, Development Team 상속,
+deprecated 경고)은 **앱 동작을 하나도 바꾸지 않습니다.** 즉 이 다이얼로그 전체가
+"사용자에게 돌아가는 이득 0, 아카이브가 깨질 위험 있음"입니다. 제출 몇 시간 전에
+할 거래가 아닙니다.
+
+### 출시 후에 할 때
+
+한 번에 다 켜지 말고 **User Script Sandboxing만 따로** 켜서 아카이브까지 통과하는지
+보세요. 깨지면 그 항목만 되돌리면 됩니다. 나머지는 같이 켜도 안전합니다.
+
+---
+
 ## 기록해둘 결정들
 
 **부제는 `Morning Ritual Kit`입니다 (2026-08-31).** 이름의 `kitz`와 붙고,
