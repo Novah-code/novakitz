@@ -33,7 +33,12 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  padding: 22px 18px 18px;
+  /*
+   * The extra top padding is the spark's room. The month wordmark runs up to
+   * 40px and starts right below this padding, so at 22px the star and the
+   * first letter were sitting in the same place.
+   */
+  padding: 36px 18px 18px;
   border-radius: 20px;
   background: var(--paper);
   border: 1px solid var(--paper-edge);
@@ -325,10 +330,10 @@
  * they survive whatever wraps this component.
  */
 .dcal__spark--a {
-  top: 8px;
+  top: 11px;
   left: 20px;
-  width: 19px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
 }
 
 .dcal__spark--b {
