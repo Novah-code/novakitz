@@ -393,6 +393,52 @@ affirmationCount = 3;   // 플랜을 조회한 뒤 무조건 덮어씀
 
 ---
 
+## 5-1. `ios/`가 저장소에 없습니다 — 노트북 한 대에만 있습니다
+
+**출시 직후에 하세요.** 미루기에는 잃을 것이 큽니다.
+
+`.gitignore`에 막혀 있는 것도 아니고, 한 번도 커밋된 적이 없습니다
+(`git ls-files ios`가 비어 있습니다). Capacitor의 iOS 프로젝트 전체가
+윤아님 맥에만 존재합니다.
+
+### 지금 한 곳에만 있는 것들
+
+- **앱 아이콘** — `AppIcon.appiconset/05.png`. 일곱 번 만들고 알파 채널까지
+  잡은 그 파일
+- **`ITSAppUsesNonExemptEncryption`** — 2026-09-03에 넣었습니다
+- **서명 설정과 Capabilities** — Sign in with Apple 포함. 가이드라인 4.8
+  필수 항목이고 `939cdbb`에서 동작을 확인했습니다
+- **Capacitor 플러그인의 네이티브 설정** — 음성 인식, Apple 로그인
+
+맥이 고장 나거나 다른 컴퓨터로 옮기면 `npx cap add ios`가 **빈 프로젝트를
+새로 만듭니다.** 위 네 가지를 처음부터 다시 해야 하고, 아이콘 알파 채널처럼
+한 번 데였던 함정도 다시 밟게 됩니다.
+
+### 무엇을 빼고 넣나
+
+```
+echo "ios/App/Pods/"        >> .gitignore
+echo "ios/App/App/public/"  >> .gitignore
+echo "ios/DerivedData/"     >> .gitignore
+git add ios .gitignore
+git commit -m "Track the iOS project"
+```
+
+`ios/App/App/public/`은 `npx cap sync`가 빌드할 때마다 웹 번들을 통째로
+복사해 넣는 곳입니다. 커밋하면 빌드마다 수백 개 파일이 diff에 나타나고,
+저장소에 같은 내용이 두 벌 들어갑니다.
+
+### 왜 제출 전에 안 했나
+
+파일 수백 개짜리 커밋이라 제출 직전에 넣으면 무엇이 바뀌었는지 확인이
+불가능해집니다. 그리고 제출에 아무 도움이 되지 않습니다 — 빌드는 어차피
+로컬 파일로 만듭니다.
+
+**제가 대신 할 수도 없습니다.** 이 폴더는 개발 환경에 존재하지 않아서
+윤아님 맥에서만 가능합니다.
+
+---
+
 ## 6. `arcanaArtChildren`이 이제 아무 데서도 안 쓰입니다
 
 2026-08-25에 "카드 이미지 깨짐"으로 보고된 건이 **이미지 문제가 아니었습니다.**
