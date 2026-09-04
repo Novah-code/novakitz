@@ -17,12 +17,31 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  color: #fff;
+
+  /*
+   * Dark on the calendar's paper, not white on a translucent pill.
+   *
+   * The old badge was white text over white at 22% on the sky, which measured
+   * 1.93:1 — under the 3.0 floor for large text, and worse than the same white
+   * text on the bare sky at 2.34:1. The translucent pill was lightening the
+   * background toward the text rather than backing it. A glow could not have
+   * fixed that; only inverting could.
+   *
+   * The paper and ink are the calendar's, so the badge belongs to the same
+   * app as the month sheet rather than to the iOS chrome it used to imitate.
+   */
+  border: 1px solid rgba(47, 59, 51, 0.08);
+  background: #F7F3E9;
+  color: #2F3B33;
+
+  /* The glow, as a small shadow. A backdrop-filter here was a third blurred
+     layer in an app that has been bitten by those three times already, and a
+     solid pill has no need of one. */
+  box-shadow:
+    0 0 18px rgba(255, 255, 255, 0.5),
+    0 2px 8px rgba(47, 59, 51, 0.16);
+
   font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 14px;
   line-height: 1;
@@ -46,8 +65,9 @@
  * something waiting to be finished.
  */
 .streak-badge.is-open {
-  opacity: 0.72;
+  opacity: 0.88;
   border-style: dashed;
+  border-color: rgba(47, 59, 51, 0.28);
 }
 
 /*
@@ -59,23 +79,24 @@
  * reads as a count of mornings rather than a threat.
  */
 .streak-badge__pebble {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   flex: none;
   border-radius: 40% 60% 30% 70% / 60% 40% 70% 30%;
   transition: background-color 300ms ease, border-color 300ms ease;
 }
 
-/* Done: the stone is placed. */
+/* Done: the stone is placed. Filled, in the app's green — 6.4:1 on the paper,
+   where the old white-on-white pebble was invisible on its own badge. */
 .is-done .streak-badge__pebble {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: #3D6044;
+  border: 1px solid #3D6044;
 }
 
 /* Not yet: the space for it is there, waiting. */
 .is-open .streak-badge__pebble {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1.5px solid rgba(61, 96, 68, 0.55);
 }
 
 .streak-badge__count {
