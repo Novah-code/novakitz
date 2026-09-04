@@ -116,17 +116,17 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico?v=5", sizes: "any" },
-      { url: "/icons/icon-192x192.png?v=5", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png?v=5", sizes: "512x512", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=5", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=5", sizes: "16x16", type: "image/png" }
+      { url: "/favicon.ico?v=6", sizes: "any" },
+      { url: "/icons/icon-192x192.png?v=6", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png?v=6", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=6", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=6", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/icons/icon-192x192.png?v=5", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=5", sizes: "192x192", type: "image/png" }
+      { url: "/icons/icon-192x192.png?v=6", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=6", sizes: "192x192", type: "image/png" }
     ],
-    shortcut: "/icons/icon-192x192.png?v=5"
+    shortcut: "/icons/icon-192x192.png?v=6"
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -162,9 +162,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
         <link rel="dns-prefetch" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
         <link rel="preconnect" href="https://generativelanguage.googleapis.com" />
-        <link rel="icon" href="/favicon.ico?v=5" sizes="any" />
-        <link rel="shortcut icon" href="/favicon.ico?v=5" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=5" />
+        <link rel="icon" href="/favicon.ico?v=6" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico?v=6" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=6" />
       </head>
       <body className={`${inter.variable} ${roboto.variable} ${instrumentSerif.variable} font-sans antialiased`}>
         <div className="particles">
