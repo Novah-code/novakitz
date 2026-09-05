@@ -114,13 +114,15 @@
    * file arrives with the circle already painted into it, that painted edge
    * sits a fraction inside the square's inscribed circle, and the corner
    * colour shows through as a ring: blue along the top, green along the
-   * bottom. Nudging the image out by 4% puts that edge outside the cut.
+   * bottom. Nudging the image out puts that edge outside the cut.
    *
-   * It costs 4% of a full-bleed painting's outermost pixels, which is inside
-   * the margin the README already asks for, so it is safe for artwork that
-   * follows the rule and it rescues artwork that does not.
+   * 4% was not enough for the file that prompted this — a thin arc survived
+   * along the top — so it is 8%. It costs the outermost 8% of a full-bleed
+   * painting, still inside the margin the README already asks anyone to leave
+   * clear, so it is safe for artwork that follows the rule and it rescues
+   * artwork that does not.
    */
-  transform: scale(1.04);
+  transform: scale(1.08);
 
   /*
    * iOS puts its own long-press menu on any image — Share, Save to Photos,
