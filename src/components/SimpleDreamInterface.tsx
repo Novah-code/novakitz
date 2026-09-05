@@ -4956,7 +4956,22 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 const originalLines = (contentParts[0] ?? '').split('\n');
                 const start = originalLines.findIndex((l: string) => l.startsWith('핵심 장면:'));
                 if (start === -1) return '';
-                return originalLines.slice(start).join('\n').slice('핵심 장면:'.length).trim();
+                const raw = originalLines.slice(start).join('\n').slice('핵심 장면:'.length).trim();
+                /*
+                 * Unwrap the hard line breaks, keep the paragraph breaks.
+                 *
+                 * Text pasted from somewhere else arrives wrapped at whatever
+                 * width it was written in, and this block renders with
+                 * `pre-line`, so it honoured every one of those breaks — lines
+                 * stopped mid-sentence with half the width still empty. A blank
+                 * line is a paragraph the person meant; a single break inside
+                 * one is an artefact of where their old window happened to end.
+                 */
+                return raw
+                  .split(/\n\s*\n/)
+                  .map((para: string) => para.split('\n').map((l: string) => l.trim()).filter(Boolean).join(' '))
+                  .filter(Boolean)
+                  .join('\n\n');
               })();
               return (
                 <MoodCardJournalView

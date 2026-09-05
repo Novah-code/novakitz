@@ -271,6 +271,34 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         if (dreamRecent14Ids.has(kw.dream_id)) kwFreq[key].recent++;
         if (dreamOlder14Ids.has(kw.dream_id)) kwFreq[key].older++;
       });
+      /*
+       * Fall back to the tags the dream already carries.
+       *
+       * `dream_keywords` is only written at save time, so every dream recorded
+       * before that code existed has no row there and the section stayed empty
+       * for people with months of entries. The same words are on the dream
+       * itself — the interpretation's keywords are stored as its tags — so when
+       * the table has nothing to say, read those instead.
+       *
+       * The mood is dropped: it is already the whole of "The Waking Mind" above,
+       * and the model returns it as one of the keywords, so leaving it in put
+       * the same word in both sections and called it a symbol.
+       */
+      if (Object.keys(kwFreq).length === 0) {
+        const NON_SYMBOL = new Set(['emotion-record', 'no-dream', '꿈안꿈']);
+        for (const d of dreamLike) {
+          const mood = (d.mood ?? '').trim().toLowerCase();
+          for (const tag of d.tags ?? []) {
+            const key = String(tag).trim().toLowerCase();
+            if (!key || NON_SYMBOL.has(key) || key === mood) continue;
+            if (!kwFreq[key]) kwFreq[key] = { category: 'symbol', total: 0, recent: 0, older: 0 };
+            kwFreq[key].total++;
+            if (dreamRecent14Ids.has(d.id)) kwFreq[key].recent++;
+            if (dreamOlder14Ids.has(d.id)) kwFreq[key].older++;
+          }
+        }
+      }
+
       const dreamSymbols: KeywordData[] = Object.entries(kwFreq)
         .sort((a, b) => b[1].total - a[1].total).slice(0, 4)
         .map(([keyword, v]) => {
