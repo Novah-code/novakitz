@@ -1502,10 +1502,24 @@ export function MoodCardJournalView({
   const recordKeywords = [places, persons].filter(Boolean).join(', ') || (scene ? scene.slice(0, 40) : '');
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(74,93,78,0.2)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', zIndex: 21000 }}>
+    /*
+     * Opaque, not frosted.
+     *
+     * The scrim and the sheet were both translucent and both relied on a
+     * backdrop-filter to blur what showed through. In this webview that blur
+     * does not reliably composite, so nothing was blurred and the screen behind
+     * came through at full clarity — the wordmark, the search field and the
+     * Card/List/Timeline tabs sat on top of the person's own dream, unreadable.
+     * The same fault has now taken out the mood card, the dawn sky, the
+     * Reflection CTA and this.
+     *
+     * A sheet that covers 90% of the screen has nothing to gain from showing
+     * what is under it, so it simply does not.
+     */
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(45,58,48,0.5)', zIndex: 21000 }}>
       <div style={{
         position: 'absolute', bottom: 0, left: 0, width: '100%', height: '90%',
-        background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)',
+        background: '#FBFCFB',
         borderRadius: '32px 32px 0 0', borderTop: '1px solid rgba(255,255,255,1)',
         display: 'flex', flexDirection: 'column', boxShadow: '0 -10px 40px rgba(74,93,78,0.12)', overflow: 'hidden',
       }}>
