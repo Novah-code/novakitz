@@ -438,7 +438,17 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                 imagePosition: dream.image_position || undefined,
                 mood: dream.mood || undefined,
                 content: dream.content,
-                userName: profileData?.full_name || 'Anonymous'
+                /*
+                 * No name means no name, not "Anonymous".
+                 *
+                 * The literal was doing two jobs at once and could not do both:
+                 * the list view treated it as a sentinel and hid the byline
+                 * whenever it saw it, while the saved-record card took it for a
+                 * name and printed "by Anonymous" over the person's own dream.
+                 * Left undefined, every view can simply ask whether there is a
+                 * name.
+                 */
+                userName: profileData?.full_name || undefined
               };
             });
             // Merge Supabase dreams with localStorage images for resilience
