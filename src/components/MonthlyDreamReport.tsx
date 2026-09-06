@@ -209,7 +209,16 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
          * nothing in it.
          */
         const moodLines = [
-          ...moods.map(m => m.content?.replace('[감정 기록]', '').trim().substring(0, 120) || ''),
+          /*
+           * Only the mornings that are not already going in as dreams.
+           *
+           * A mood record with a scene now counts on both sides, which is right
+           * for the tallies — but it meant the same text reached the model
+           * twice, once in full as a dream and once truncated as a mood line.
+           * The reading would then weigh one morning double and could describe
+           * the same dream twice in a single paragraph.
+           */
+          ...moods.filter(m => !hasScene(m)).map(m => m.content?.replace('[감정 기록]', '').trim().substring(0, 120) || ''),
           ...checkins
             .filter(c => c.emotion)
             .map(c => `${c.day.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — woke up ${c.emotion}`),

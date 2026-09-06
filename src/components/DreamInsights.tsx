@@ -216,7 +216,21 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
        * Two implementations of one number is a bug we have already fixed once
        * on this app; the fix is one implementation, not a third.
        */
-      const { current: currentStreak } = await loadStreak(user.id);
+      let currentStreak = 0;
+      try {
+        ({ current: currentStreak } = await loadStreak(user.id));
+      } catch (err) {
+        /*
+         * The streak is worth its own catch because it is the only number on
+         * this screen that costs two extra network calls. The old inline count
+         * was computed from rows already fetched and could not fail; this one
+         * can, and the outer catch answers any failure by setting every stat to
+         * zero — which is precisely the "you have never used this app" screen
+         * that the check-in fix was written to stop showing to people who use
+         * it daily. A missing streak should cost the streak, not the panel.
+         */
+        console.error('Streak unavailable for Reflection:', err);
+      }
 
       // Trend window: recent 14 days vs previous 14 days
       const recent14Ids = new Set(entries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
