@@ -165,7 +165,17 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
 
       const entries = allEntries || [];
       const moods = entries.filter(isMoodEntry);
-      const dreams = entries.filter(d => !isMoodEntry(d));
+      /*
+       * A mood record that carries a scene is a dream as well as a mood.
+       *
+       * Counting only the long-press entries put a bare 0 under DREAMS on the
+       * same screen whose summary was describing the dream the person had just
+       * written. It is genuinely both — they chose a pebble and then wrote the
+       * dream — so it counts on both sides and the day reads as "both" in the
+       * activity grid, which is what that legend is for.
+       */
+      const hasScene = (d: Dream) => (d.content ?? '').includes('핵심 장면:');
+      const dreams = entries.filter(d => !isMoodEntry(d) || hasScene(d));
       setDreamCount(dreams.length);
 
       const dayKey = (d: Dream) => {
