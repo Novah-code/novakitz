@@ -33,7 +33,12 @@
   width: 100%;
   box-sizing: border-box;
   position: relative;
-  padding: 22px 18px 18px;
+  /*
+   * The extra top padding is the spark's room. The month wordmark runs up to
+   * 40px and starts right below this padding, so at 22px the star and the
+   * first letter were sitting in the same place.
+   */
+  padding: 36px 18px 18px;
   border-radius: 20px;
   background: var(--paper);
   border: 1px solid var(--paper-edge);
@@ -279,7 +284,10 @@
 }
 
 .dcal__foot {
-  margin-top: 14px;
+  position: relative;
+  /* The extra room is the second spark's band, the same way the sheet's top
+     padding is the first one's. */
+  margin-top: 26px;
   padding: 10px 14px;
   border-radius: 12px;
   background: var(--ink);
@@ -325,15 +333,24 @@
  * they survive whatever wraps this component.
  */
 .dcal__spark--a {
-  top: 8px;
+  top: 11px;
   left: 20px;
-  width: 19px;
-  height: 19px;
+  width: 16px;
+  height: 16px;
 }
 
+/*
+ * Anchored to the tally box, not to the sheet.
+ *
+ * On the sheet it was placed at a fixed distance from the bottom edge, which
+ * only misses the dark box while that box is exactly as tall as it was the day
+ * the number was picked. It is one line of text and a label that wraps, so it
+ * is not — and the star was sitting on the box's corner. Measuring from the
+ * box's own top edge, it cannot land on it at any height.
+ */
 .dcal__spark--b {
-  right: 10px;
-  bottom: 46px;
+  top: -17px;
+  right: 4px;
   width: 13px;
   height: 13px;
   opacity: 0.6;

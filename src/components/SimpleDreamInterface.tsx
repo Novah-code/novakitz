@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
+import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
 import StreakBadge from './StreakBadge';
@@ -277,7 +278,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [isOnlineStatus, setIsOnlineStatus] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [repositioningDreamId, setRepositioningDreamId] = useState<string | null>(null);
-  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { mood: number; energy_level: number }>>({});
+  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { mood: number; emotion: string | null; energy_level: number }>>({});
   const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number } | null>(null);
 
   // Extract background images from saved dreams
@@ -437,7 +438,17 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                 imagePosition: dream.image_position || undefined,
                 mood: dream.mood || undefined,
                 content: dream.content,
-                userName: profileData?.full_name || 'Anonymous'
+                /*
+                 * No name means no name, not "Anonymous".
+                 *
+                 * The literal was doing two jobs at once and could not do both:
+                 * the list view treated it as a sentinel and hid the byline
+                 * whenever it saw it, while the saved-record card took it for a
+                 * name and printed "by Anonymous" over the person's own dream.
+                 * Left undefined, every view can simply ask whether there is a
+                 * name.
+                 */
+                userName: profileData?.full_name || undefined
               };
             });
             // Merge Supabase dreams with localStorage images for resilience
@@ -461,13 +472,19 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
             try {
               const { data: checkinData } = await supabase
                 .from('checkins')
-                .select('check_date, time_of_day, mood, energy_level')
+                /*
+                 * `emotion` is what the calendar colours a day from. `mood` is
+                 * a number and several pebbles share one — anxious, lonely and
+                 * anger are all 2 — so selecting mood alone could not tell the
+                 * calendar which pebble was pressed.
+                 */
+                .select('check_date, time_of_day, mood, emotion, energy_level')
                 .eq('user_id', user.id)
                 .eq('time_of_day', 'morning');
               if (checkinData) {
-                const map: Record<string, { mood: number; energy_level: number }> = {};
+                const map: Record<string, { mood: number; emotion: string | null; energy_level: number }> = {};
                 checkinData.forEach((c: any) => {
-                  map[c.check_date] = { mood: c.mood, energy_level: c.energy_level };
+                  map[c.check_date] = { mood: c.mood, emotion: c.emotion ?? null, energy_level: c.energy_level };
                 });
                 setCheckinsByDate(map);
               }
@@ -2033,18 +2050,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
       dream.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       dream.response.toLowerCase().includes(searchTerm.toLowerCase());
 
+    /* Case-insensitive, or picking "Peaceful" from the list would miss every
+       dream the model tagged "peaceful". */
     const matchesTag = selectedTag === '' ||
-      dream.autoTags?.includes(selectedTag) ||
-      dream.tags?.includes(selectedTag);
+      hasTag(dream.autoTags, selectedTag) ||
+      hasTag(dream.tags, selectedTag);
 
     return matchesSearch && matchesTag;
   });
 
   // Get all unique tags for filter dropdown
-  const allTags = [...new Set([
+  const allTags = dedupeTags([
     ...savedDreams.flatMap(dream => dream.autoTags || []),
     ...savedDreams.flatMap(dream => dream.tags || [])
-  ])].sort();
+  ]).sort((a, b) => a.localeCompare(b));
 
 
   return (
@@ -4323,7 +4342,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   flexDirection: 'column'
                 }}>
                   <DreamCalendar
-                    dreams={filteredDreams as any}
+                    /*
+                     * `savedDreams`, not `filteredDreams`. The filter above
+                     * drops "no dream" markers with a comment saying they are
+                     * for the calendar only — but it was the array being
+                     * handed to the calendar, so the rest-day colour it can
+                     * draw had nothing to draw it from. Search and tag
+                     * filtering belongs to the list, not to a record of which
+                     * mornings happened.
+                     */
+                    dreams={savedDreams as any}
+                    checkins={checkinsByDate}
                     onDateSelect={(date) => {
                       // Find all dreams for the selected date (date is in toDateString() format: "Wed Nov 29 2024")
                       const dreamsForDate = filteredDreams.filter(d => {
@@ -4922,7 +4951,38 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 getF('수면:') ? `${language === 'ko' ? '수면' : 'Sleep'}: ${getF('수면:')}` : '',
                 getF('스트레스:') ? `${language === 'ko' ? '스트레스' : 'Stress'}: ${getF('스트레스:')}` : '',
                 contentParts[0].split('\n').filter((l: string) => !l.startsWith('감정:') && !l.startsWith('수면:') && !l.startsWith('스트레스:')).join('\n').trim(),
-              ].filter(Boolean).join('\n') : getF('핵심 장면:');
+              ].filter(Boolean).join('\n') : (() => {
+                /*
+                 * Every other field is one line, and the scene is not — it is
+                 * whatever the person typed, and a dream written as a paragraph
+                 * has line breaks in it. Reading it with the single-line helper
+                 * kept the first line and dropped the rest, so the record came
+                 * back cut mid-sentence.
+                 *
+                 * The full text was in the row the whole time; only the parse
+                 * was lossy. The scene is written last in the record, so it runs
+                 * from its own marker to the end of the original-record block.
+                 */
+                const originalLines = (contentParts[0] ?? '').split('\n');
+                const start = originalLines.findIndex((l: string) => l.startsWith('핵심 장면:'));
+                if (start === -1) return '';
+                const raw = originalLines.slice(start).join('\n').slice('핵심 장면:'.length).trim();
+                /*
+                 * Unwrap the hard line breaks, keep the paragraph breaks.
+                 *
+                 * Text pasted from somewhere else arrives wrapped at whatever
+                 * width it was written in, and this block renders with
+                 * `pre-line`, so it honoured every one of those breaks — lines
+                 * stopped mid-sentence with half the width still empty. A blank
+                 * line is a paragraph the person meant; a single break inside
+                 * one is an artefact of where their old window happened to end.
+                 */
+                return raw
+                  .split(/\n\s*\n/)
+                  .map((para: string) => para.split('\n').map((l: string) => l.trim()).filter(Boolean).join(' '))
+                  .filter(Boolean)
+                  .join('\n\n');
+              })();
               return (
                 <MoodCardJournalView
                   emotion={emotion}
@@ -5898,11 +5958,21 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               }}
             >✕</button>
 
+            {/*
+              * Instrument Serif on the heading only — the pebbles and their
+              * labels stay in the UI face. Korean keeps S-CoreDream because
+              * Instrument Serif has no Hangul, and `html[lang="ko"] *` in
+              * globals.css carries `!important`, so an inline face could not
+              * take there anyway.
+              */}
             <p style={{
-              fontSize: '16px', fontWeight: 500,
+              fontSize: language === 'ko' ? '16px' : '26px',
+              fontWeight: language === 'ko' ? 500 : 400,
               color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
-              letterSpacing: '-0.5px',
-              fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+              letterSpacing: language === 'ko' ? '-0.5px' : '0',
+              fontFamily: language === 'ko'
+                ? "'S-CoreDream', sans-serif"
+                : "var(--font-display), Georgia, serif",
             }}>
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>

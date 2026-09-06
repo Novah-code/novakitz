@@ -4,9 +4,15 @@
 
 ## Overview
 
-This Refund Policy explains our policy regarding refunds for Novakitz premium subscriptions purchased through Gumroad. All refunds are processed through Gumroad's platform and are subject to both our policy and Gumroad's refund terms. Please read this policy carefully before purchasing a subscription.
+Where you bought your subscription decides who refunds it.
 
-**Important**: All refund requests must be processed through Gumroad's system. While Gumroad technically allows refunds within 90 days, our policy is to honor refund requests within 30 days of purchase.
+**Bought in the iOS app (Apple In-App Purchase).** Apple handles the payment and Apple handles the refund. We cannot issue, approve or decline a refund for an App Store purchase. Request one at https://reportaproblem.apple.com under Apple's own terms. If you contact us first we will point you there, and we are glad to help you explain the request.
+
+**Bought on the web.** The rest of this policy applies. Refunds are processed through our web payment processor, and our policy is to honour requests within 30 days of purchase.
+
+To stop being billed at all — as opposed to asking for money back — cancel the subscription. For an App Store subscription that is done in your Apple Account settings; deleting the app does not stop renewal.
+
+Please read this policy carefully before purchasing a subscription.
 
 ## 1. General Policy
 
@@ -71,8 +77,8 @@ To request a refund:
 
 3. **Response Time**: We aim to respond to refund requests within 2-3 business days
 
-### 3.2 Gumroad Process
-**All refunds must be processed through Gumroad**:
+### 3.2 Web Purchases
+**This section applies only to subscriptions bought on the web, not in the iOS app**:
 - Refunds are issued through Gumroad's dashboard only
 - We cannot issue refunds directly through Stripe or PayPal
 - Gumroad will return the purchase amount minus the payment processor fee (non-refundable)

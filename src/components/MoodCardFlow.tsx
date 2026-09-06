@@ -7,6 +7,7 @@ import { speechSupported, startListening, type SpeechSession } from '../lib/spee
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { addSingleAffirmation } from '../lib/affirmations';
 import { authHeader } from '../lib/authHeader';
+import { dedupeTags } from '../lib/tags';
 
 interface MoodCardFlowProps {
   selectedEmotion: string;
@@ -405,6 +406,19 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [sceneText, setSceneText] = useState('');
   const [analysisText, setAnalysisText] = useState('');
   const [analysisKeywords, setAnalysisKeywords] = useState<string[]>([]);
+  /*
+   * The structured form of the same keywords — the ones that carry a category
+   * and a sentiment and belong in `dream_keywords`.
+   *
+   * Tapping the circle and choosing a pebble is how a person records a dream in
+   * this app, so this flow is the main way dreams get written down. It was
+   * saving the row and nothing else, which meant Reflection's "The Sleeping
+   * Mind" had no symbols to find and stayed empty no matter how much someone
+   * wrote.
+   */
+  const [analysisKeywordRows, setAnalysisKeywordRows] = useState<
+    { keyword: string; category: string; sentiment: string }[]
+  >([]);
   const [nickname, setNickname] = useState('');
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -524,6 +538,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     if (analysisText) {
       setAnalysisText(analysisText);
       setAnalysisKeywords(analysisKeywordsResult);
+      setAnalysisKeywordRows(analysisResult?.keywords ?? []);
       if (user) {
         recordAIUsage(user.id, undefined, 'moodcard_analysis');
       } else {
@@ -576,6 +591,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
       if (res.ok && data.analysis) {
         setAnalysisText(data.analysis);
         setAnalysisKeywords(data.autoTags ?? []);
+        setAnalysisKeywordRows(data.keywords ?? []);
       } else if (!res.ok) {
         console.error('[EgoAnalysis] API error:', res.status, data);
       }
@@ -630,16 +646,50 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
         const content = analysisText
           ? `${originalRecord}\n\n---\n\nAnalysis:\n${analysisText}`
           : originalRecord;
-        const { error: moodError } = await supabase.from('dreams').insert([{
+        /*
+         * `toISOString()` was giving this row a UTC date. For an app about
+         * mornings that is exactly backwards: in KST every morning before 09:00
+         * lands on the previous UTC day, so the calendar drew the pebble on the
+         * wrong square for the people using it earliest. The ego branch above
+         * already builds a local date; this one now does too.
+         */
+        const moodDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const { data: moodRow, error: moodError } = await supabase.from('dreams').insert([{
           user_id: user.id,
           title: `${selectedEmotion} — ${card.name}`,
           content: `[감정 기록] ${content}`,
           mood: selectedEmotion,
           tags: ['emotion-record', selectedEmotion, ...analysisKeywords.slice(0, 2)],
-          date: now.toISOString().split('T')[0],
+          date: moodDateStr,
           time: timeStr,
-        }]);
+        }]).select('id').single();
         if (moodError) throw moodError;
+
+        /*
+         * The symbols, kept.
+         *
+         * This flow is how a dream gets written down — circle, pebble, then the
+         * scene — so its keywords have to reach `dream_keywords` the same way
+         * the long-press flow's do. Without this row Reflection's "The Sleeping
+         * Mind" had nothing to read and stayed empty for anyone who recorded
+         * their dreams the ordinary way.
+         *
+         * A failure here does not fail the save: the dream itself is written,
+         * and losing its symbols is not worth losing the dream over.
+         */
+        if (moodRow?.id && analysisKeywordRows.length > 0) {
+          const { error: kwError } = await supabase.from('dream_keywords').insert(
+            analysisKeywordRows.map((kw) => ({
+              user_id: user.id,
+              dream_id: moodRow.id,
+              keyword: kw.keyword,
+              category: kw.category,
+              sentiment: kw.sentiment,
+              confidence: 0.8,
+            }))
+          );
+          if (kwError) console.error('Error saving mood-card keywords:', kwError);
+        }
       }
       setSaved(true);
       if (onEmotionLogged) onEmotionLogged();
@@ -1274,7 +1324,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
 
           {/* Tags */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {[...new Set(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name])].map(tag => (
+            {dedupeTags(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name]).map(tag => (
               <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>
                 #{tag}
               </span>
@@ -1452,10 +1502,24 @@ export function MoodCardJournalView({
   const recordKeywords = [places, persons].filter(Boolean).join(', ') || (scene ? scene.slice(0, 40) : '');
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(74,93,78,0.2)', backdropFilter: 'blur(5px)', WebkitBackdropFilter: 'blur(5px)', zIndex: 21000 }}>
+    /*
+     * Opaque, not frosted.
+     *
+     * The scrim and the sheet were both translucent and both relied on a
+     * backdrop-filter to blur what showed through. In this webview that blur
+     * does not reliably composite, so nothing was blurred and the screen behind
+     * came through at full clarity — the wordmark, the search field and the
+     * Card/List/Timeline tabs sat on top of the person's own dream, unreadable.
+     * The same fault has now taken out the mood card, the dawn sky, the
+     * Reflection CTA and this.
+     *
+     * A sheet that covers 90% of the screen has nothing to gain from showing
+     * what is under it, so it simply does not.
+     */
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(45,58,48,0.5)', zIndex: 21000 }}>
       <div style={{
         position: 'absolute', bottom: 0, left: 0, width: '100%', height: '90%',
-        background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)',
+        background: '#FBFCFB',
         borderRadius: '32px 32px 0 0', borderTop: '1px solid rgba(255,255,255,1)',
         display: 'flex', flexDirection: 'column', boxShadow: '0 -10px 40px rgba(74,93,78,0.12)', overflow: 'hidden',
       }}>
@@ -1494,7 +1558,7 @@ export function MoodCardJournalView({
         {/* Scrollable content */}
         <div style={{ flex: 1, padding: '28px 24px 40px', overflowY: 'auto' }}>
           <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {[...new Set(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name])].map(tag => (
+            {dedupeTags(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name]).map(tag => (
               <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>#{tag}</span>
             ))}
           </div>

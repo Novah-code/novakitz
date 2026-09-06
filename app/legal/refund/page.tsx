@@ -1,4 +1,4 @@
-import { readMarkdownFile } from '@/lib/markdownReader';
+import { readMarkdownFile, convertMarkdownToHtml } from '@/lib/markdownReader';
 import Link from 'next/link';
 
 export const metadata = {
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default function RefundPage() {
-  const content = readMarkdownFile('refund-policy.md');
+  const html = convertMarkdownToHtml(readMarkdownFile('refund-policy.md'));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E8F5E8] to-[#F5E8E8]">
@@ -20,20 +20,13 @@ export default function RefundPage() {
         </Link>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* The markdown is converted in markdownReader; the classes it emits do
+              the styling, because the Tailwind typography plugin the old
+              `prose-*` classes needed was never installed. */}
           <div
-            className="prose prose-sm md:prose-base max-w-none
-              prose-headings:text-[#7CB892]
-              prose-h1:text-3xl prose-h1:font-bold prose-h1:mb-4
-              prose-h2:text-2xl prose-h2:font-semibold prose-h2:mt-8 prose-h2:mb-4
-              prose-h3:text-xl prose-h3:font-semibold prose-h3:mt-6 prose-h3:mb-3
-              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-              prose-strong:text-gray-900 prose-strong:font-semibold
-              prose-ul:my-4 prose-li:text-gray-700
-              prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline"
-            style={{ whiteSpace: 'pre-wrap' }}
-          >
-            {content}
-          </div>
+            className="max-w-none text-[15px]"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-600">

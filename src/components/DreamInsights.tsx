@@ -4,6 +4,7 @@ import { goTo } from '../lib/platform';
 import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { loadStreak } from '../lib/streak';
 
 interface DreamInsightsProps {
   user: User;
@@ -142,13 +143,52 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      /*
+       * Mornings where a mood was tapped and nothing was written.
+       *
+       * This screen counted rows in `dreams` and nothing else, so a person who
+       * checks in every morning without writing a dream saw 0 TOTAL LOGS, 0
+       * THIS WEEK and 0 DAY STREAK — the app telling them they had never used
+       * it, on the screen whose job is to show that they had.
+       */
+      const { data: checkinRows } = await supabase
+        .from('checkins')
+        .select('check_date, emotion')
+        .eq('user_id', user.id)
+        .eq('time_of_day', 'morning');
+
       const entries = allEntries || [];
+
+      /* `YYYY-MM-DD` parsed by the Date constructor is UTC midnight, which is
+         the previous day for anyone west of Greenwich. Build it locally. */
+      const dayFromIso = (s: string) => {
+        const [y, m, d] = s.split('-').map(Number);
+        return new Date(y, (m || 1) - 1, d || 1);
+      };
+
+      const dreamDays = new Set(entries.map(d => new Date(d.created_at).toDateString()));
+      /* A day that already carries a dream is one morning, not two. */
+      const checkinOnly = (checkinRows || [])
+        .map(c => ({ day: dayFromIso(c.check_date), emotion: c.emotion as string | null }))
+        .filter(c => !dreamDays.has(c.day.toDateString()));
 
       // Separate mood/emotion logs from dream entries
       const isMoodEntry = (d: { content?: string; tags?: string[] }) =>
         d.content?.startsWith('[감정 기록]') || d.tags?.includes('emotion-record');
-      const dreamEntries = entries.filter(d => !isMoodEntry(d));
-      const dreamIds = dreamEntries.map(d => d.id);
+      /*
+       * Symbols come from any record that holds a dream, and a mood-card record
+       * with a scene in it holds one — tapping the circle, choosing a pebble
+       * and writing the scene is the ordinary way to record a dream here.
+       * Reading only the long-press entries left "The Sleeping Mind" empty for
+       * people who were recording their dreams every morning.
+       *
+       * An ego record — how you woke, sleep and stress with no scene — is not a
+       * dream, so it stays out.
+       */
+      const dreamLike = entries.filter(
+        d => !isMoodEntry(d) || (d.content ?? '').includes('핵심 장면:')
+      );
+      const dreamIds = dreamLike.map(d => d.id);
 
       const { data: keywordsData } = await supabase
         .from('dream_keywords')
@@ -157,23 +197,26 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
 
       const now = Date.now();
       const week = 7 * 86400000;
-      const thisWeek = entries.filter(d => now - new Date(d.created_at).getTime() < week).length;
+      const thisWeek =
+        entries.filter(d => now - new Date(d.created_at).getTime() < week).length +
+        checkinOnly.filter(c => now - c.day.getTime() < week).length;
 
-      // Streak: consecutive days with any entry
-      let currentStreak = 0;
-      if (entries.length > 0) {
-        const uniqueDates = [...new Set(entries.map(d => new Date(d.created_at).toDateString()))]
-          .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-        const today = new Date().toDateString();
-        const yesterday = new Date(now - 86400000).toDateString();
-        if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
-          currentStreak = 1;
-          for (let i = 1; i < uniqueDates.length; i++) {
-            const diff = Math.round((new Date(uniqueDates[i]).getTime() - new Date(uniqueDates[i - 1]).getTime()) / 86400000);
-            if (diff === -1) currentStreak++; else break;
-          }
-        }
-      }
+      /* A morning counts whether it was written down or only felt. */
+      const totalLogs = entries.length + checkinOnly.length;
+
+      /*
+       * The streak comes from src/lib/streak.ts, not from a second count here.
+       *
+       * This screen had its own walk over the dates, and it broke on the first
+       * gap. The shared one forgives one missed day per calendar month, on
+       * purpose — a single overslept morning taking a long streak to zero is
+       * the moment people stop altogether. So the badge on the home screen and
+       * this panel were reading the same mornings and reporting 11 and 9.
+       *
+       * Two implementations of one number is a bug we have already fixed once
+       * on this app; the fix is one implementation, not a third.
+       */
+      const { current: currentStreak } = await loadStreak(user.id);
 
       // Trend window: recent 14 days vs previous 14 days
       const recent14Ids = new Set(entries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
@@ -193,6 +236,16 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         if (recent14Ids.has(d.id)) moodRecent[d.mood] = (moodRecent[d.mood] || 0) + 1;
         if (older14Ids.has(d.id)) moodOlder[d.mood] = (moodOlder[d.mood] || 0) + 1;
       });
+      /* The pebble someone pressed is a mood they had, whether or not a dream
+         came with it — otherwise "The Waking Mind" only ever describes the
+         mornings that happened to produce writing. */
+      checkinOnly.forEach(c => {
+        if (!c.emotion) return;
+        const age = now - c.day.getTime();
+        moodCounts[c.emotion] = (moodCounts[c.emotion] || 0) + 1;
+        if (age < 14 * 86400000) moodRecent[c.emotion] = (moodRecent[c.emotion] || 0) + 1;
+        else if (age < 28 * 86400000) moodOlder[c.emotion] = (moodOlder[c.emotion] || 0) + 1;
+      });
       const moodPatterns: MoodData[] = Object.entries(moodCounts)
         .sort((a, b) => b[1] - a[1]).slice(0, 3)
         .map(([mood, count]) => {
@@ -203,8 +256,8 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         });
 
       // Dream symbols from dream_keywords (dream entries only)
-      const dreamRecent14Ids = new Set(dreamEntries.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
-      const dreamOlder14Ids = new Set(dreamEntries.filter(d => {
+      const dreamRecent14Ids = new Set(dreamLike.filter(d => now - new Date(d.created_at).getTime() < 14 * 86400000).map(d => d.id));
+      const dreamOlder14Ids = new Set(dreamLike.filter(d => {
         const age = now - new Date(d.created_at).getTime();
         return age >= 14 * 86400000 && age < 28 * 86400000;
       }).map(d => d.id));
@@ -218,6 +271,34 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         if (dreamRecent14Ids.has(kw.dream_id)) kwFreq[key].recent++;
         if (dreamOlder14Ids.has(kw.dream_id)) kwFreq[key].older++;
       });
+      /*
+       * Fall back to the tags the dream already carries.
+       *
+       * `dream_keywords` is only written at save time, so every dream recorded
+       * before that code existed has no row there and the section stayed empty
+       * for people with months of entries. The same words are on the dream
+       * itself — the interpretation's keywords are stored as its tags — so when
+       * the table has nothing to say, read those instead.
+       *
+       * The mood is dropped: it is already the whole of "The Waking Mind" above,
+       * and the model returns it as one of the keywords, so leaving it in put
+       * the same word in both sections and called it a symbol.
+       */
+      if (Object.keys(kwFreq).length === 0) {
+        const NON_SYMBOL = new Set(['emotion-record', 'no-dream', '꿈안꿈']);
+        for (const d of dreamLike) {
+          const mood = (d.mood ?? '').trim().toLowerCase();
+          for (const tag of d.tags ?? []) {
+            const key = String(tag).trim().toLowerCase();
+            if (!key || NON_SYMBOL.has(key) || key === mood) continue;
+            if (!kwFreq[key]) kwFreq[key] = { category: 'symbol', total: 0, recent: 0, older: 0 };
+            kwFreq[key].total++;
+            if (dreamRecent14Ids.has(d.id)) kwFreq[key].recent++;
+            if (dreamOlder14Ids.has(d.id)) kwFreq[key].older++;
+          }
+        }
+      }
+
       const dreamSymbols: KeywordData[] = Object.entries(kwFreq)
         .sort((a, b) => b[1].total - a[1].total).slice(0, 4)
         .map(([keyword, v]) => {
@@ -226,25 +307,34 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
           return { keyword, category: v.category, count: v.total, trend };
         });
 
-      // Sentiment balance from ALL entries that have a mood
+      // Sentiment balance from every morning that carries a mood
       let pos = 0, neg = 0, neu = 0;
-      entries.forEach(d => {
-        if (!d.mood) return;
-        const m = d.mood.toLowerCase();
+      const countSentiment = (mood?: string | null) => {
+        if (!mood) return;
+        const m = mood.toLowerCase();
         if (POSITIVE_MOODS.has(m)) pos++;
         else if (NEGATIVE_MOODS.has(m)) neg++;
         else neu++;
-      });
-      const total = pos + neg + neu || 1;
-      const posPct = Math.round((pos / total) * 100);
-      const neuPct = Math.round((neu / total) * 100);
-      const sentimentBalance = {
-        positive: posPct,
-        neutral: neuPct,
-        negative: Math.max(0, 100 - posPct - neuPct),
       };
+      entries.forEach(d => countSentiment(d.mood));
+      checkinOnly.forEach(c => countSentiment(c.emotion));
+      /*
+       * An empty account used to read "Heavy (100%)".
+       *
+       * `negative` was the remainder — 100 minus the other two — and with
+       * nothing recorded the other two are zero, so the bar filled with the
+       * heaviest colour and told a brand new user their mornings were entirely
+       * heavy. The remainder is only meaningful once something has been
+       * counted.
+       */
+      const counted = pos + neg + neu;
+      const posPct = counted ? Math.round((pos / counted) * 100) : 0;
+      const neuPct = counted ? Math.round((neu / counted) * 100) : 0;
+      const sentimentBalance = counted
+        ? { positive: posPct, neutral: neuPct, negative: Math.max(0, 100 - posPct - neuPct) }
+        : { positive: 0, neutral: 0, negative: 0 };
 
-      setStats({ totalDreams: entries.length, thisWeek, currentStreak, moodPatterns, dreamSymbols, sentimentBalance });
+      setStats({ totalDreams: totalLogs, thisWeek, currentStreak, moodPatterns, dreamSymbols, sentimentBalance });
     } catch {
       setStats({ totalDreams: 0, thisWeek: 0, currentStreak: 0, moodPatterns: [], dreamSymbols: [], sentimentBalance: { positive: 0, neutral: 0, negative: 0 } });
     } finally {
@@ -253,7 +343,7 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10000, padding: 'clamp(12px,3vw,24px)', fontFamily: 'inherit' }}>
+    <div className="di-shell" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10001, fontFamily: 'inherit' }}>
       <style>{`
         @keyframes di-spin { to { transform: rotate(360deg); } }
         .di-scroll::-webkit-scrollbar { width: 4px; }
@@ -262,12 +352,72 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         .di-symbol-card:hover { border-color: #7ea886 !important; }
         .di-hdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
         .di-cta-btn:hover { background: #d6a848 !important; }
+
+        .di-shell { padding: clamp(12px,3vw,24px); }
+        .di-card {
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          border-radius: 24px;
+          box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        }
+
+        /*
+         * On a phone the panel is the screen, not a card floating on it.
+         *
+         * A 600px card inside a 24px gutter leaves a ring of blurred
+         * background on every side and squeezes the content into the middle —
+         * on a 6.9" screen that reads as a web page in a lightbox rather than
+         * a screen in an app. Full bleed also means the numbers and the
+         * sentiment bar get the whole width.
+         *
+         * The insets matter here in a way they did not for a floating card:
+         * the header would otherwise sit under the status bar and the last
+         * section under the home indicator.
+         */
+        @media (max-width: 640px) {
+          .di-shell { padding: 0; }
+          .di-card {
+            max-width: none;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+          }
+          .di-hdr { padding-top: calc(14px + env(safe-area-inset-top)) !important; }
+          .di-scroll { padding-bottom: calc(32px + env(safe-area-inset-bottom)) !important; }
+        }
+
+        /*
+         * The scroller has to be the part that gives, and its sections must not.
+         *
+         * It is a flex column inside a flex column, and neither had been told
+         * so: the scroller kept its default flex of 0 1 auto, and every section
+         * inside it kept a shrink factor of 1. On a phone, where the card is
+         * exactly the screen's height, the browser then did the reasonable
+         * thing and squeezed the sections until they fitted. Two symptoms came
+         * out of that one fact — the bottom CTA hides its overflow, so being
+         * squeezed clipped everything under its sparkle, and nothing overflowed
+         * any more, so there was nothing left to scroll.
+         *
+         * The min-height of 0 is the part that is easy to leave out: without it a
+         * flex item will not shrink below its content, and the scroller would
+         * push past the card instead of scrolling inside it.
+         */
+        .di-scroll {
+          flex: 1 1 auto;
+          min-height: 0;
+        }
+        .di-scroll > * {
+          flex-shrink: 0;
+        }
       `}</style>
 
-      <div style={{ position: 'relative', width: '100%', maxWidth: 600, background: 'white', borderRadius: 24, boxShadow: '0 25px 60px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+      <div className="di-card" style={{ position: 'relative', background: 'white', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* ── Sticky Header ── */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div className="di-hdr" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
             <BarChart3Icon size={17} />
             <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065', margin: 0 }}>
@@ -424,9 +574,32 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
               </section>
 
               {/* ── Bottom CTA ── */}
-              <section style={{ position: 'relative', overflow: 'hidden', background: '#3d6044', borderRadius: 20, padding: 24, color: 'white', textAlign: 'center', boxShadow: '0 4px 16px rgba(61,96,68,0.3)' }}>
-                <div style={{ position: 'absolute', top: 0, right: 0, width: 128, height: 128, background: '#5c8065', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(50%,-50%)', pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', bottom: 0, left: 0, width: 160, height: 160, background: '#2c4a32', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', transform: 'translate(-33%,33%)', pointerEvents: 'none' }} />
+              {/*
+                * The two glows are painted into the background, not stacked as
+                * blurred siblings.
+                *
+                * They used to be absolutely positioned divs carrying
+                * `filter: blur(20px)`, and on iOS everything below the sparkle
+                * — heading, copy, button — disappeared behind them: a blurred
+                * element gets its own compositing layer in WKWebView, and the
+                * layer order does not reliably follow the z-index its siblings
+                * were given. The same fault took out the mood card
+                * (backdrop-filter over a sibling SVG) and left seams in the
+                * dawn sky (a large box-shadow blur composited per tile).
+                *
+                * A radial-gradient is one paint on one element, so there is no
+                * second layer to get out of order.
+                */}
+              <section style={{
+                position: 'relative',
+                overflow: 'hidden',
+                background: `
+                  radial-gradient(circle at 100% 0%, rgba(92,128,101,0.55) 0%, rgba(92,128,101,0) 55%),
+                  radial-gradient(circle at 0% 100%, rgba(44,74,50,0.6) 0%, rgba(44,74,50,0) 60%),
+                  #3d6044`,
+                borderRadius: 20, padding: 24, color: 'white', textAlign: 'center',
+                boxShadow: '0 4px 16px rgba(61,96,68,0.3)',
+              }}>
                 <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   {isPremium ? (
                     <>

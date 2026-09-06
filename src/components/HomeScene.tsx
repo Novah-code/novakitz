@@ -12,6 +12,21 @@ const SCENE_SOURCES = {
   night: '/scenes/scene-night.png',
 } as const;
 
+/*
+ * The flower, on its own transparent layer above the landscape.
+ *
+ * Kept separate from the scene so it can open and turn without the hills
+ * turning with it. Optional: if the file is not there the scene renders
+ * exactly as before, so the landscape never depends on it.
+ *
+ * Expected as a square PNG with transparency, the flower centred and sized to
+ * the same square as the scene behind it.
+ */
+const BLOOM_SOURCES = {
+  day: '/scenes/bloom-day.png',
+  night: '/scenes/bloom-night.png',
+} as const;
+
 interface HomeSceneProps {
   /**
    * The disc keeps the orb's press semantics: a short tap opens the emotion
@@ -32,6 +47,7 @@ export default function HomeScene({
 }: HomeSceneProps) {
   const { scene, canToggle, toggle } = useTimeOfDay();
   const [artMissing, setArtMissing] = useState(false);
+  const [bloomMissing, setBloomMissing] = useState(false);
 
   return (
     <div className={`home-scene home-scene--${scene}`}>
@@ -58,6 +74,22 @@ export default function HomeScene({
               alt=""
               onError={() => setArtMissing(true)}
             />
+          )}
+
+          {/*
+            * Two elements, two transforms: the wrapper opens, the image turns.
+            * Putting both animations on one element would have the second
+            * overwrite the first's transform at the handoff.
+            */}
+          {!artMissing && !bloomMissing && (
+            <span className="home-scene__bloom" aria-hidden="true">
+              <img
+                className="home-scene__bloom-art"
+                src={BLOOM_SOURCES[scene]}
+                alt=""
+                onError={() => setBloomMissing(true)}
+              />
+            </span>
           )}
         </span>
       </button>

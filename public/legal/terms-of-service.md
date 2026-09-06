@@ -45,27 +45,25 @@ Novakitz provides an AI-powered dream journaling and interpretation platform tha
 
 ### 5.1 Free and Premium Plans
 - Basic features are available for free with limitations
-- Premium features require a paid subscription through our payment processor (Gumroad)
+- Pro features require a paid subscription
 - Subscription fees are billed in advance on a monthly or annual basis
 
 ### 5.2 Payment Processing
-- Payments are processed by third-party payment processors
+- In the iOS app, subscriptions are sold through Apple In-App Purchase and payment is charged to your Apple Account
+- On the web, subscriptions are handled by our web payment processor
 - You agree to provide accurate payment information
-- You authorize us to charge your payment method for applicable fees
+- We never see or store your payment card details
 
 ### 5.3 Cancellation
 - You may cancel your subscription at any time
+- For subscriptions bought in the iOS app, cancel in your Apple Account settings; cancelling in the app alone does not stop renewal
 - Cancellations take effect at the end of the current billing period
 - No refunds will be provided for partial subscription periods except as required by law
 
-### 5.4 Payment Processor Relationship
-Payments are processed by Gumroad, an independent third-party service.
+### 5.4 Auto-Renewal (Apple In-App Purchase)
+Payment is charged to your Apple Account at confirmation of purchase. A subscription renews automatically unless auto-renew is turned off at least 24 hours before the end of the current period. Your account is charged for renewal within 24 hours before the current period ends. You can manage or cancel your subscription in your Apple Account settings after purchase. Any unused portion of a free trial is forfeited when you buy a subscription.
 
-By subscribing, you also agree to:
-- Gumroad's Terms of Service
-- Gumroad's Privacy Policy
-
-We do not store your payment card information. All payment data is handled securely by Gumroad.
+Refunds for purchases made through Apple are handled by Apple under its own terms, not by us.
 
 ### 5.5 Electronic Financial Transactions (Korea)
 For Korean users, subscription payments are subject to the Electronic Financial Transactions Act (전자금융거래법).
@@ -274,7 +272,7 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 
 ### 5.1 무료 및 프리미엄 플랜
 - 기본 기능은 제한적으로 무료로 제공됩니다
-- 프리미엄 기능은 결제 프로세서(Gumroad)를 통한 유료 구독이 필요합니다
+- Pro 기능은 유료 구독이 필요합니다
 - 구독료는 월 또는 연 단위로 선불로 청구됩니다
 
 ### 5.2 결제 처리
@@ -288,13 +286,11 @@ Novakitz는 다음을 제공하는 AI 기반 꿈 일기 및 해석 플랫폼입�
 - 법률에서 요구하는 경우를 제외하고 부분 구독 기간에 대한 환불은 제공되지 않습니다
 
 ### 5.4 결제 처리 관계
-결제는 독립적인 제3자 서비스인 Gumroad에서 처리됩니다.
+iOS 앱에서의 구독은 Apple 인앱결제로 판매되며, 대금은 Apple 계정으로 청구됩니다. 웹에서의 구독은 당사의 웹 결제 대행사가 처리합니다.
 
-구독 시 다음에도 동의하게 됩니다:
-- Gumroad 이용약관
-- Gumroad 개인정보 처리방침
+구독은 현재 기간 종료 24시간 전까지 자동 갱신을 해제하지 않으면 자동으로 갱신됩니다. 갱신 대금은 현재 기간 종료 24시간 이내에 청구됩니다. 구매 후 Apple 계정 설정에서 구독을 관리하거나 해지할 수 있습니다. 무료 체험 기간이 남아 있는 상태에서 구독을 구매하면 남은 체험 기간은 소멸됩니다.
 
-카드 정보는 저장하지 않습니다. 모든 결제 데이터는 Gumroad에서 안전하게 처리됩니다.
+카드 정보는 당사가 보관하지 않습니다. Apple을 통한 구매의 환불은 당사가 아니라 Apple의 정책에 따라 Apple이 처리합니다.
 
 ### 5.5 전자금융거래 (한국)
 한국 사용자의 경우 구독 결제는 전자금융거래법의 적용을 받습니다.

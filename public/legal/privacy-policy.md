@@ -21,7 +21,7 @@ Welcome to Novakitz ("we," "our," or "us"). We respect your privacy and are comm
 - **Cookies**: Session cookies, preference cookies (see Cookie Policy below)
 
 ### 1.3 Third-Party Data
-- **Payment Information**: Processed by Gumroad (we do not store full payment details)
+- **Payment Information**: Handled by Apple for in-app purchases, or by our web payment processor for purchases on the web. We never receive or store your card details.
 - **AI Processing**: Dream text sent to Google Gemini for interpretation
 - **Analytics**: Usage statistics through our analytics providers
 
@@ -61,7 +61,7 @@ We DO NOT sell your personal information. We may share your information only in 
 ### 3.1 Service Providers
 - **Supabase**: Database hosting and authentication
 - **Google Gemini**: AI dream interpretation processing
-- **Gumroad**: Payment processing for subscriptions
+- **Apple**: In-app purchase and subscription billing for the iOS app
 - **Email Service**: SendGrid or Gmail for sending notifications
 - **Vercel**: Hosting and deployment infrastructure
 
@@ -296,7 +296,7 @@ Novakitz("당사", "저희")에 오신 것을 환영합니다. 당사는 귀하�
 - **쿠키**: 세션 쿠키, 환경 설정 쿠키(아래 쿠키 정책 참조)
 
 ### 1.3 제3자 데이터
-- **결제 정보**: Gumroad에서 처리(전체 결제 세부 정보는 저장하지 않음)
+- **결제 정보**: 인앱결제는 Apple이, 웹 결제는 당사의 웹 결제 대행사가 처리합니다. 카드 정보는 당사가 받지도 보관하지도 않습니다.
 - **AI 처리**: 해석을 위해 Google Gemini로 전송된 꿈 텍스트
 - **분석**: 분석 제공업체를 통한 사용 통계
 
@@ -336,7 +336,7 @@ Novakitz("당사", "저희")에 오신 것을 환영합니다. 당사는 귀하�
 ### 3.1 서비스 제공업체
 - **Supabase**: 데이터베이스 호스팅 및 인증
 - **Google Gemini**: AI 꿈 해석 처리
-- **Gumroad**: 구독 결제 처리
+- **Apple**: iOS 앱의 인앱결제 및 구독 청구
 - **이메일 서비스**: 알림 전송을 위한 SendGrid 또는 Gmail
 - **Vercel**: 호스팅 및 배포 인프라
 

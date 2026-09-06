@@ -67,8 +67,33 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+
+  /*
+   * The drawer's panels are one at a time.
+   *
+   * Each button used to set only its own flag, so opening Monthly Review from
+   * the menu left the Calendar mounted underneath it — the calendar had to be
+   * closed by hand before the report was reachable. Only Inner Journal cleared
+   * the others, and it did it by listing all four at every call site, which is
+   * how the other three came to be missed.
+   */
+  const openPanel = (panel: 'history' | 'calendar' | 'insights' | 'streak' | 'monthly' | null) => {
+    setShowHistory(panel === 'history');
+    setShowCalendar(panel === 'calendar');
+    setShowInsights(panel === 'insights');
+    setShowStreak(panel === 'streak');
+    setShowMonthlyReport(panel === 'monthly');
+  };
   const [isPremium, setIsPremium] = useState(false);
   const [dreams, setDreams] = useState<any[]>([]);
+  /*
+   * Mornings where a mood was tapped, keyed by `YYYY-MM-DD`.
+   *
+   * The calendar rendered here is a second copy — SimpleDreamInterface has its
+   * own — and this one is what the menu actually opens. Teaching only the other
+   * one to read check-ins left this one still showing an empty month.
+   */
+  const [checkinsByDate, setCheckinsByDate] = useState<Record<string, { emotion: string | null }>>({});
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -417,10 +442,26 @@ export default function SimpleDreamInterfaceWithAuth() {
     const loadDreams = async () => {
       if (!user) {
         setDreams([]);
+        setCheckinsByDate({});
         return;
       }
 
       try {
+        /* Loaded whether or not any dream exists — a month of pebbles and no
+           writing is the ordinary case, not an edge one. */
+        const { data: checkinRows } = await supabase
+          .from('checkins')
+          .select('check_date, emotion')
+          .eq('user_id', user.id)
+          .eq('time_of_day', 'morning');
+        if (checkinRows) {
+          const map: Record<string, { emotion: string | null }> = {};
+          checkinRows.forEach((c: any) => {
+            map[c.check_date] = { emotion: c.emotion ?? null };
+          });
+          setCheckinsByDate(map);
+        }
+
         /*
          * The calendar needs a dot on a day and a title to tap — it does not
          * need what was written. `select('*')` pulled every dream's full text
@@ -704,7 +745,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               {(() => {
                 const isActive = showHistory;
                 return (
-                  <button onClick={() => handleGuestAction(() => { setShowCalendar(false); setShowInsights(false); setShowStreak(false); setShowMonthlyReport(false); setShowHistory(true); setMenuOpen(false); })}
+                  <button onClick={() => handleGuestAction(() => { openPanel('history'); setMenuOpen(false); })}
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -718,7 +759,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               {(() => {
                 const isActive = showCalendar;
                 return (
-                  <button onClick={() => handleGuestAction(() => { setShowCalendar(true); setMenuOpen(false); })}
+                  <button onClick={() => handleGuestAction(() => { openPanel('calendar'); setMenuOpen(false); })}
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -732,7 +773,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               {(() => {
                 const isActive = showInsights;
                 return (
-                  <button onClick={() => handleGuestAction(() => { setShowInsights(true); setMenuOpen(false); })}
+                  <button onClick={() => handleGuestAction(() => { openPanel('insights'); setMenuOpen(false); })}
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -746,7 +787,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               {(() => {
                 const isActive = showMonthlyReport;
                 return (
-                  <button onClick={() => handleGuestAction(() => { setShowMonthlyReport(true); setMenuOpen(false); })}
+                  <button onClick={() => handleGuestAction(() => { openPanel('monthly'); setMenuOpen(false); })}
                     style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -816,7 +857,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Dream Insights Modal */}
       {showInsights && user && (
-        <DreamInsights user={user} language={language} onClose={() => setShowInsights(false)} isPremium={isPremium} onOpenMonthlyReview={() => { setShowInsights(false); setShowMonthlyReport(true); }} />
+        <DreamInsights user={user} language={language} onClose={() => setShowInsights(false)} isPremium={isPremium} onOpenMonthlyReview={() => openPanel('monthly')} />
       )}
 
       {/* Streak Modal */}
@@ -826,8 +867,38 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: 'white', borderRadius: '20px', maxWidth: '600px', width: '92%', maxHeight: '90vh', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/*
+            * On a phone this is the screen, not a card on it.
+            *
+            * A 92%-wide card left a dark ring on every side and pushed the
+            * month's content into the middle of a 6.9" display. The report is
+            * the longest screen in the app, so the gutter cost the most here.
+            */}
+          <style>{`
+            .mdr-card {
+              background: white;
+              border-radius: 20px;
+              max-width: 600px;
+              width: 92%;
+              max-height: 90vh;
+              overflow: hidden;
+              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            }
+            @media (max-width: 640px) {
+              .mdr-card {
+                width: 100%;
+                max-width: none;
+                height: 100%;
+                max-height: 100%;
+                border-radius: 0;
+                box-shadow: none;
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+              }
+            }
+          `}</style>
+          <div className="mdr-card">
             <MonthlyDreamReport user={user} language={language} onClose={() => setShowMonthlyReport(false)} />
           </div>
         </div>
@@ -835,7 +906,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 2000, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it
@@ -858,6 +929,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
                 dreams={dreams}
+                checkins={checkinsByDate}
                 onDateSelect={(date) => setCalendarSelectedDate(date)}
                 selectedDate={calendarSelectedDate}
               />
