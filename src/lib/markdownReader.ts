@@ -45,12 +45,15 @@ function inline(s: string): string {
 export function convertMarkdownToHtml(markdown: string): string {
   const out: string[] = [];
   let list: string[] = [];
+  /* Which kind of list is open — bullets and numbers cannot share one block. */
+  let listTag: 'ul' | 'ol' = 'ul';
   let para: string[] = [];
 
   const flushList = () => {
     if (list.length === 0) return;
+    const style = listTag === 'ol' ? 'list-decimal' : 'list-disc';
     out.push(
-      `<ul class="list-disc pl-6 space-y-1 my-4 text-gray-700">${list.join('')}</ul>`
+      `<${listTag} class="${style} pl-6 space-y-1 my-4 text-gray-700">${list.join('')}</${listTag}>`
     );
     list = [];
   };
@@ -96,9 +99,26 @@ export function convertMarkdownToHtml(markdown: string): string {
       continue;
     }
 
+    /*
+     * Numbered steps are a list too. The refund policy walks through how to ask
+     * for one in three numbered steps, and with only bullets recognised those
+     * three ran together into a single paragraph reading "1. Email Us ... 2.
+     * Include Information ... 3. Response Time".
+     */
+    const numbered = /^\s*\d+\.\s+(.*)$/.exec(line);
+    if (numbered) {
+      flushPara();
+      if (listTag !== 'ol') flushList();
+      listTag = 'ol';
+      list.push(`<li>${inline(numbered[1])}</li>`);
+      continue;
+    }
+
     const bullet = /^\s*[-*]\s+(.*)$/.exec(line);
     if (bullet) {
       flushPara();
+      if (listTag !== 'ul') flushList();
+      listTag = 'ul';
       list.push(`<li>${inline(bullet[1])}</li>`);
       continue;
     }
