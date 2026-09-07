@@ -3,7 +3,7 @@
 import { goTo } from '../../src/lib/platform';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { startCheckout } from '../../src/lib/checkout';
+import { startCheckout, restorePurchases } from '../../src/lib/checkout';
 import { loadPricing, type PlanPricing } from '../../src/lib/revenuecat';
 import Toast, { ToastType } from '../../src/components/Toast';
 import FAQItem from '../../src/components/FAQItem';
@@ -65,6 +65,30 @@ export default function PricingPage() {
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
   const [purchased, setPurchased] = useState(false);
   const [pricing, setPricing] = useState<Partial<Record<'premium' | 'yearly', PlanPricing>>>({});
+  const [restoring, setRestoring] = useState(false);
+
+  /*
+   * Restoring a purchase belongs on the screen that sells it.
+   *
+   * `restorePurchases` was written and exported months ago and the only place
+   * that ever called it is the support page, which nothing in the app links to
+   * — so in practice a person who reinstalled had no way back to what they had
+   * paid for, and a reviewer looking for the control Guideline 3.1.1 asks for
+   * would not have found one either.
+   */
+  const handleRestore = async () => {
+    if (restoring) return;
+    setRestoring(true);
+    try {
+      const { changed, message } = await restorePurchases(language);
+      /* A null message means there is nothing worth saying — a cancelled
+         sheet, for instance. Only the silence is intended, not an empty toast. */
+      if (message) setToast({ message, type: changed ? 'success' : 'info' });
+      if (changed) setPurchased(true);
+    } finally {
+      setRestoring(false);
+    }
+  };
 
   /*
    * Ask the store what these cost. Off-native this returns {} and the written
@@ -487,8 +511,25 @@ export default function PricingPage() {
           </button>
         </div>
 
-        {/* Footer links */}
-        <div style={{ textAlign: 'center', paddingTop: '1rem', borderTop: '1px solid rgba(122,179,130,0.2)' }}>
+        {/* Restore, then the legal links. */}
+        <div style={{ textAlign: 'center', paddingTop: '1.25rem', borderTop: '1px solid rgba(122,179,130,0.2)' }}>
+          <button
+            onClick={handleRestore}
+            disabled={restoring}
+            style={{
+              background: 'none', border: 'none', padding: '4px 8px', marginBottom: 10,
+              color: G.green, fontSize: 13, fontWeight: 600,
+              textDecoration: 'underline', cursor: restoring ? 'default' : 'pointer',
+              opacity: restoring ? 0.6 : 1,
+            }}
+          >
+            {restoring
+              ? (ko ? '복원 중…' : 'Restoring…')
+              : (ko ? '구매 복원' : 'Restore Purchases')}
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
           {[['Terms', '/legal/terms/'], ['Privacy', '/legal/privacy/'], ['Refund', '/legal/refund/']].map(([label, href], i) => (
             <span key={i}>
               {i > 0 && <span style={{ fontSize: 11, color: G.textLight, margin: '0 4px' }}>·</span>}
