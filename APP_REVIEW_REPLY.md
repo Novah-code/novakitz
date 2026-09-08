@@ -30,8 +30,12 @@ Apple이 신규 개발자 계정에 보내는 표준 질문지입니다. **앱�
 1. **홈 화면에서 앱 아이콘 탭** — 실행 장면이 반드시 들어가야 합니다
 2. **회원가입** — 이 녹화용으로 새 계정을 하나 만드세요 (`test+review@…`).
    데모 계정으로 하지 마세요, 뒤에서 지울 거라서요
-3. **원을 한 번 탭** → 조약돌 8개 → 하나 선택 → 저장
-4. **원을 길게 누르기** → 꿈 입력 → 해석 결과가 나올 때까지 기다렸다 스크롤
+3. **원을 한 번 탭** → 조약돌 8개 → 하나 선택
+4. 다음 카드에서 **`Remember a dream?`** → 꿈 입력 → 해석 결과가 나올 때까지
+   기다렸다 스크롤
+
+   길게 누르기는 **안 보여줘도 됩니다.** 그건 조약돌을 건너뛰는 단축키일 뿐이고,
+   Apple이 요구한 건 "typical user flow"입니다. 탭으로 가는 길이 그 길이에요.
 5. **메뉴(우상단)** → Calendar → 8월로 넘겨서 조약돌 보이기 → 닫기
 6. **메뉴** → Reflection → 끝까지 스크롤 → 닫기
 7. **메뉴** → Monthly Review → 스크롤 → 닫기
@@ -62,8 +66,8 @@ ritual, the subscription screen and account deletion.
 2. PURPOSE AND TARGET AUDIENCE
 
 Novakitz is a one-minute morning ritual. The person opens it just after waking,
-taps a circle, and chooses one of eight shapes for how they woke up. If they
-remember a dream they can press and hold the same circle to write it down and
+taps a circle, and chooses one of eight shapes for how they woke up. The app
+then asks whether they remember a dream; if they do, they write it down and
 receive a reflective reading of it.
 
 The problem it addresses is that mornings are usually spent reacting to a screen
@@ -85,14 +89,19 @@ every screen has real data):
   User name: info.muonkr@gmail.com
   Password:  Novakitz2026!
 
-The home screen is a single circle and carries two gestures:
+The home screen is a single circle. Everything below is reachable by tapping.
 
-  - A short TAP opens the morning mood check-in. Eight shapes appear; choosing
-    one records the morning. This is the core daily action and takes about five
-    seconds.
-  - A PRESS AND HOLD of about one second skips the shape and opens the dream
-    entry form directly, for people who wake with a dream they want to write
-    down before it fades.
+  1. TAP the circle once. Eight shapes appear — choose the one that matches how
+     you woke up.
+  2. The next card asks whether you remember a dream. "Remember a dream?" opens
+     the dream entry form; "Check your mood" ends the morning there. Either
+     answer completes the morning, and the whole thing takes under a minute.
+  3. A dream you write is sent for a reflective reading, which appears on the
+     same screen after a few seconds.
+
+  There is also a shortcut: pressing and holding the circle for about a second
+  skips the shapes and opens the dream form directly. It is optional — nothing
+  requires it.
 
 The menu button at the top right opens Inner Journal, Calendar, Reflection,
 Monthly Review, Pricing, and profile settings.
