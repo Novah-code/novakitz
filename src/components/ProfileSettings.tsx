@@ -98,8 +98,10 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     }
 
     // Letters and the spaces between them. Names have spaces; handles did not.
-    if (!/^[a-zA-Z]+(?: [a-zA-Z]+)*$/.test(trimmed)) {
-      return { isValid: false, error: language === 'ko' ? '영문으로 적어주세요' : 'Letters only, please' };
+    // \p{L} is any script's letters, so 윤아 and Anna both pass and digits,
+    // punctuation and emoji still do not.
+    if (!/^\p{L}+(?: \p{L}+)*$/u.test(trimmed)) {
+      return { isValid: false, error: language === 'ko' ? '문자만 쓸 수 있어요' : 'Letters only, please' };
     }
 
     return { isValid: true, error: '' };

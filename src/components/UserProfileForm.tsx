@@ -155,7 +155,7 @@ const translations = {
 
     // Step 2
     name: 'Your name',
-    namePlaceholder: 'Enter a unique nickname',
+    namePlaceholder: 'What we should call you',
 
     // Step 3
 
@@ -166,7 +166,6 @@ const translations = {
     // Buttons
     next: 'Next',
     skip: 'Skip',
-    skipAll: 'Set this up later',
     back: 'Back',
     complete: 'Complete',
     saving: 'Saving...',
@@ -196,7 +195,7 @@ const translations = {
 
     // Step 2
     name: '이름',
-    namePlaceholder: '고유한 닉네임을 입력하세요',
+    namePlaceholder: '어떻게 불러드릴까요',
 
     // Step 3
 
@@ -207,7 +206,6 @@ const translations = {
     // Buttons
     next: '다음',
     skip: '건너뛰기',
-    skipAll: '나중에 설정하기',
     back: '이전',
     complete: '완료',
     saving: '저장 중...',
@@ -279,8 +277,15 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
    * called Anna are two people called Anna.
    *
    * So the uniqueness check is gone and spaces are allowed, because names have
-   * them. Letters only, and Latin ones: this field appears on shared profiles
-   * and the app ships to English-speaking markets.
+   * them.
+   *
+   * It is letters in any script, not Latin only. That was the earlier rule, and
+   * it held while there was a "Set this up later" link to leave by. There is
+   * not one now — this is the single required question in the form — so a rule
+   * this field cannot satisfy is not a validation message, it is a locked door
+   * on the first screen after signing up. The app is offered in Korean and its
+   * language toggle is right there; someone reading Korean writes their name in
+   * Hangul, and used to be told 영문으로 적어주세요 with no way around it.
    *
    * ProfileSettings edits the same field and keeps an identical copy of these
    * rules. They have drifted apart once already — Hangul was accepted here and
@@ -298,8 +303,10 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
     }
 
     // Letters and the spaces between them. Names have spaces; handles did not.
-    if (!/^[a-zA-Z]+(?: [a-zA-Z]+)*$/.test(trimmed)) {
-      return { isValid: false, error: preferredLanguage === 'ko' ? '영문으로 적어주세요' : 'Letters only, please' };
+    // \p{L} is any script's letters, so 윤아 and Anna both pass and digits,
+    // punctuation and emoji still do not.
+    if (!/^\p{L}+(?: \p{L}+)*$/u.test(trimmed)) {
+      return { isValid: false, error: preferredLanguage === 'ko' ? '문자만 쓸 수 있어요' : 'Letters only, please' };
     }
 
     return { isValid: true, error: '' };
@@ -385,37 +392,6 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       setCurrentStep(currentStep + 1);
     } else {
       handleSubmit();
-    }
-  };
-
-  /**
-   * Leave the whole thing for later.
-   *
-   * Steps 1 and 2 were mandatory — a birth date and a nickname before the app
-   * would open at all — and the per-step Skip only appeared from step 3. There
-   * was no way past them, so anyone who did not want to answer was simply
-   * stuck, and so was anyone whose profile row went missing. App Review is in
-   * that position too, on the first screen after signing in, and 5.1.1(v) does
-   * not allow requiring personal information the app does not need to run.
-   *
-   * This writes the row, empty, so the question counts as answered and is not
-   * asked again on every launch. Everything in it can be filled in later from
-   * Profile, which is where it was always editable.
-   */
-  const handleSkipAll = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .upsert({ user_id: user.id, profile_completed: false }, { onConflict: 'user_id' });
-      if (error) throw error;
-      if (onComplete) onComplete();
-    } catch (err: any) {
-      console.error('Skip profile error:', err);
-      setError(err.message || 'An error occurred');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -709,28 +685,24 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
         </div>
 
         {/*
-          * A way out, on every step. Quiet rather than hidden: this is the
-          * first screen after signing in, and nothing behind it needs a birth
-          * date to work.
+          * There used to be a "Set this up later" link under the buttons, on
+          * every step including this one. It read as an offer the form did not
+          * keep: the name is the one thing asked for, so on step 1 the link sat
+          * directly beneath a field that answers an empty Next with "Please
+          * enter a nickname" — two controls contradicting each other on the
+          * first screen after signing in.
+          *
+          * It is gone, and the form is now one required question and one
+          * optional one. Age keeps its own Skip. 5.1.1(v) is the reason it was
+          * added — Apple does not allow personal information to be required
+          * when the app does not need it — and a name the person chooses for
+          * the app to call them by is not that; it is read on the home screen,
+          * in the affirmation and on the card. Nothing else here is mandatory.
+          *
+          * Because the way out is gone, the name field must accept every
+          * person who reaches it: see the note on validateNickname, which is
+          * why it no longer rejects Hangul.
           */}
-        <button
-          onClick={handleSkipAll}
-          disabled={loading}
-          style={{
-            display: 'block',
-            margin: '14px auto 0',
-            padding: '6px 10px',
-            background: 'none',
-            border: 'none',
-            color: 'rgba(90, 132, 73, 0.7)',
-            fontSize: '13px',
-            textDecoration: 'underline',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.5 : 1,
-          }}
-        >
-          {t.skipAll}
-        </button>
       </div>
     </div>
   );
