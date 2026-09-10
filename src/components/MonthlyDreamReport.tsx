@@ -482,9 +482,19 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                 {aiInsights?.narrativeTitle || (language === 'ko' ? `${monthLabel}의 기록` : `${monthLabel} in Review`)}
               </h1>
               <p style={{ color: '#5c8065', lineHeight: 1.7, maxWidth: 380, margin: '0 auto', fontSize: 14 }}>
+                {/*
+                  * "1 dreams and 1 moods" was the English, and the second half
+                  * was also claiming more than it could show: `moodCount` counts
+                  * mornings a pebble was tapped, and a tapped pebble is a row in
+                  * `checkins` that Inner Journal does not list. So someone who
+                  * wrote a dream and started the mood cards but backed out read
+                  * that they had recorded a mood, went looking for it, and found
+                  * nothing. It is a check-in, and calling it one puts it where it
+                  * lives — the calendar — instead of implying an entry.
+                  */}
                 {aiInsights?.narrativeText || (language === 'ko'
-                  ? `이달에 ${dreamCount}개의 꿈과 ${moodCount}개의 감정을 기록했습니다.`
-                  : `You recorded ${dreamCount} dreams and ${moodCount} moods this month.`)}
+                  ? `이달에 꿈 ${dreamCount}개를 적고 ${moodCount}일 아침을 기록했습니다.`
+                  : `You wrote ${dreamCount} ${dreamCount === 1 ? 'dream' : 'dreams'} and checked in on ${moodCount} ${moodCount === 1 ? 'morning' : 'mornings'} this month.`)}
               </p>
             </>
           )}
