@@ -438,8 +438,7 @@ export default function SimpleDreamInterfaceWithAuth() {
   }, [user]);
 
   // Load dreams for calendar
-  useEffect(() => {
-    const loadDreams = async () => {
+  const loadDreams = useCallback(async () => {
       if (!user) {
         setDreams([]);
         setCheckinsByDate({});
@@ -484,10 +483,30 @@ export default function SimpleDreamInterfaceWithAuth() {
       } catch (error) {
         console.error('Exception loading dreams:', error);
       }
-    };
-
-    loadDreams();
   }, [user]);
+
+  useEffect(() => {
+    loadDreams();
+  }, [loadDreams]);
+
+  /*
+   * And again every time the calendar is opened.
+   *
+   * This ran on sign-in and never again, so `dreams` and `checkinsByDate` were
+   * whatever existed when the app launched. Record a dream at 4am, open the
+   * menu, tap Calendar — the morning you just wrote is not there, and will not
+   * be until the app is killed and relaunched. It saved correctly every time;
+   * the calendar was reading a list fetched before it existed.
+   *
+   * Refetching on open rather than notifying from each place that writes: the
+   * mood flow, the long-press dream form and delete all change what the month
+   * should look like, and they sit at different depths under this component.
+   * One request when a panel opens is cheaper than keeping three call sites
+   * correct, and it cannot go stale by being forgotten at a fourth.
+   */
+  useEffect(() => {
+    if (showCalendar) loadDreams();
+  }, [showCalendar, loadDreams]);
 
   /**
    * Open one dream from the calendar, fetching the text the list left behind.
