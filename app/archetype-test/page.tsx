@@ -196,7 +196,7 @@ export default function ArchetypeTestLanding() {
               <path d="M10 2L11.5 7L16 7.5L12 11L13 16L10 13.5L7 16L8 11L4 7.5L8.5 7L10 2Z" fill="#7FB069"/>
             </svg>
             <span style={{ fontSize: '14px', color: '#4b5563' }}>
-              {language === 'ko' ? '12가지 융 아키타입 분석' : '12 Jungian archetypes analysis'}
+              {language === 'ko' ? '12가지 아키타입 분석' : '12 archetypes'}
             </span>
           </div>
           <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center' }}>

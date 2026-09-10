@@ -378,7 +378,7 @@ export default function SharedArchetypeResult() {
               borderRadius: '12px'
             }}>
               <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.6' }}>
-                ✨ {language === 'ko' ? '12가지 융 아키타입 분석' : '12 Jungian archetypes'}<br />
+                ✨ {language === 'ko' ? '12가지 아키타입 분석' : '12 archetypes'}<br />
                 ⏱️ {language === 'ko' ? '소요 시간: 3-5분' : 'Takes 3-5 minutes'}<br />
                 🔒 {language === 'ko' ? '로그인 불필요' : 'No login required'}
               </div>
