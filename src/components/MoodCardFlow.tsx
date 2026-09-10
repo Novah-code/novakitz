@@ -1366,7 +1366,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           {/* Analysis — only shown when there is content */}
           {analysisText && (
             <>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>JUNGIAN ANALYSIS</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>READING</div>
               <div style={{ paddingLeft: 20, borderLeft: '2px solid #7AB382', marginBottom: 26 }}>
                 <div style={{ fontSize: 15, lineHeight: 1.85, fontWeight: 300, color: '#4A5D4E' }}>
                   {analysisText.split(/\n\n+/).map((para, pi) => (
@@ -1582,7 +1582,7 @@ export function MoodCardJournalView({
 
           {analysis && (
             <>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>JUNGIAN ANALYSIS</div>
+              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>READING</div>
               <div style={{ paddingLeft: 20, borderLeft: '2px solid #7AB382', marginBottom: 26 }}>
                 <div style={{ fontSize: 15, lineHeight: 1.85, fontWeight: 300, color: '#4A5D4E', whiteSpace: 'pre-line' }}>{analysis}</div>
               </div>

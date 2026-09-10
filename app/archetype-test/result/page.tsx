@@ -339,7 +339,7 @@ export default function ArchetypeResult() {
                 lineHeight: '1.6'
               }}>
                 {language === 'ko'
-                  ? "융 심리학 기반의 '그림자(Shadow)' 분석과 성장 가이드를 확인하세요."
+                  ? "'그림자(Shadow)' 분석과 성장 가이드를 확인하세요."
                   : "Unlock your Jung-based 'Shadow' analysis and growth guide."}
               </p>
 

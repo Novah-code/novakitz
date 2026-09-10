@@ -47,11 +47,11 @@ export const metadata: Metadata = {
     default: "Novakitz",
     template: "%s | Novakitz"
   },
-  description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track your dreams, uncover archetypes, and receive personalized daily affirmations. 무의식 탐험과 AI 꿈 분석으로 자기 성장을 경험하세요.",
+  description: "A one-minute morning ritual. Record how you woke up, write the dream while you still have it, and read it back — with a calendar, a monthly review and a daily affirmation drawn from what you actually recorded. 아침 1분, 오늘의 기분과 꿈을 기록하고 다시 읽어보세요.",
   keywords: [
-    "dream journal", "dream interpretation", "AI dream analysis", "Jungian psychology",
-    "archetypes", "subconscious mind", "dream diary", "self discovery", "personal growth",
-    "꿈 해석", "꿈 분석", "꿈 일기", "무의식", "융 심리학", "아키타입", "자기 성장"
+    "morning ritual", "dream journal", "dream interpretation", "mood tracker",
+    "dream diary", "self discovery", "personal growth", "reflection", "affirmations",
+    "모닝루틴", "꿈 해석", "꿈 일기", "감정 기록", "자기 성장", "확언"
   ],
   authors: [{ name: "Novakitz" }],
   creator: "Novakitz",
@@ -68,8 +68,8 @@ export const metadata: Metadata = {
     alternateLocale: "ko_KR",
     url: "https://www.novakitz.com",
     siteName: "Novakitz",
-    title: "Novakitz - AI Inner Journal & Jungian Analysis",
-    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track dreams, uncover archetypes, and grow.",
+    title: "Novakitz - A Morning Ritual for Dreams and Moods",
+    description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: [
       {
         url: "/og-image.png",
@@ -83,8 +83,8 @@ export const metadata: Metadata = {
   // Twitter Card - 트위터/X 공유 시 표시
   twitter: {
     card: "summary_large_image",
-    title: "Novakitz - AI Inner Journal & Jungian Analysis",
-    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis.",
+    title: "Novakitz - A Morning Ritual for Dreams and Moods",
+    description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: ["/og-image.png"],
     creator: "@novakitz",
   },

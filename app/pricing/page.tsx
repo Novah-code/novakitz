@@ -234,7 +234,7 @@ export default function PricingPage() {
     {
       title: 'Novakitz 소개',
       items: [
-        { q: 'Novakitz란 무엇인가요?', a: 'Novakitz는 AI 기반 꿈 일기 앱입니다. 꿈을 기록하고 융 심리학과 아키타입 분석을 통해 무의식을 탐험할 수 있도록 도와줍니다.' },
+        { q: 'Novakitz란 무엇인가요?', a: 'Novakitz는 아침 1분의 기록 앱입니다. 어떻게 일어났는지 고르고, 남아 있는 꿈을 적으면, 그 꿈을 다시 읽어드립니다. 하루하루가 쌓이면 달력과 월간 리뷰에서 패턴이 보입니다.' },
         { q: 'Novakitz는 단순한 꿈 해석 앱인가요?', a: '아니요. Novakitz는 일회성 꿈 해석이 아닌 장기적인 꿈 기록, 무의식 패턴 분석, 개인 아키타입 탐험에 집중합니다. 시간이 지남에 따라 당신의 꿈 패턴과 내면의 변화를 추적할 수 있습니다.' },
         { q: 'Novakitz는 누구를 위한 앱인가요?', a: '내 안에 뭔가 비어있는 것 같은 느낌이 드는 사람들을 위해.\n\n일기를 쓰고, 생각을 정리해도 정작 깊은 내면은 여전히 수수께끼로 남아있죠.\n\n노바키츠는 당신의 무의식에 귀 기울여 꿈을 의미 있는 통찰로 바꿔줍니다.' },
       ],
@@ -257,7 +257,7 @@ export default function PricingPage() {
     {
       title: 'About Novakitz',
       items: [
-        { q: 'What is Novakitz?', a: 'Novakitz is an AI-powered inner journal designed to help users record dreams and explore their unconscious through Jungian psychology and archetype analysis.' },
+        { q: 'What is Novakitz?', a: 'Novakitz is a one-minute morning ritual. Choose how you woke up, write the dream while you still have it, and read it back. As the mornings add up, the calendar and the monthly review show what recurs.' },
         { q: 'Is Novakitz just a dream interpretation app?', a: 'No. Novakitz focuses on long-term inner journaling, unconscious pattern analysis, and personal archetype exploration rather than one-time dream meanings. Over time, you can track your dream patterns and inner changes.' },
         { q: 'Who is Novakitz for?', a: "For people who feel like they're missing something inside themselves.\n\nYou journal. You reflect. But your dreams stay mysterious.\n\nNovakitz helps you listen to your unconscious and turn dreams into meaningful insights." },
       ],
