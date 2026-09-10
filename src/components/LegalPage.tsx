@@ -1,4 +1,6 @@
-import Link from 'next/link';
+'use client';
+
+import { goTo } from '../lib/platform';
 
 /*
  * The frame the three legal pages share.
@@ -11,6 +13,14 @@ import Link from 'next/link';
  *
  * So it is inline styles now, like the rest of the app, and in one place
  * instead of three.
+ *
+ * Navigation goes through `goTo` rather than next/link for the same reason the
+ * paywall's links do: the export writes each route as a directory index, and
+ * Capacitor's file handler does not resolve a directory to it. Inside the app
+ * these links would land back on the home screen — so having arrived at the
+ * terms, you could not reach the privacy policy beside it. The markdown is
+ * still converted on the server; only the page around it is a client
+ * component.
  */
 
 const LINKS: Record<string, { href: string; label: string }> = {
@@ -38,18 +48,25 @@ export default function LegalPage({
       }}
     >
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
-        <Link
-          href="/"
+        {/* A button, not an anchor: next/lint rejects a bare <a href="/">, and
+            the point of going through goTo is that this is not an ordinary
+            link inside the app anyway. */}
+        <button
+          onClick={() => goTo('/')}
           style={{
             display: 'inline-block',
             marginBottom: 20,
+            padding: 0,
+            background: 'none',
+            border: 'none',
             color: '#4a7a5f',
             fontSize: 14,
-            textDecoration: 'none',
+            fontFamily: 'inherit',
+            cursor: 'pointer',
           }}
         >
           ← Back to Home
-        </Link>
+        </button>
 
         <div
           style={{
@@ -68,9 +85,13 @@ export default function LegalPage({
           {others.map((key, i) => (
             <span key={key}>
               {i > 0 && <span style={{ margin: '0 6px' }}>|</span>}
-              <Link href={LINKS[key].href} style={{ color: '#4a7a5f', textDecoration: 'none' }}>
+              <a
+                href={LINKS[key].href}
+                onClick={(e) => { e.preventDefault(); goTo(LINKS[key].href); }}
+                style={{ color: '#4a7a5f', textDecoration: 'none' }}
+              >
                 {LINKS[key].label}
-              </Link>
+              </a>
             </span>
           ))}
         </div>

@@ -532,10 +532,26 @@ export default function PricingPage() {
         </div>
 
         <div style={{ textAlign: 'center' }}>
+          {/*
+            * `goTo`, not a bare href.
+            *
+            * The export writes each route as a directory index, and Capacitor's
+            * file handler will not resolve /legal/terms/ to that index — it
+            * falls back to the root document instead. In the app these three
+            * links did nothing except reload the home page, which is exactly
+            * the control App Review was told to look for on this screen.
+            * `goTo` names index.html on native and keeps the clean URL on web.
+            */}
           {[['Terms', '/legal/terms/'], ['Privacy', '/legal/privacy/'], ['Refund', '/legal/refund/']].map(([label, href], i) => (
             <span key={i}>
               {i > 0 && <span style={{ fontSize: 11, color: G.textLight, margin: '0 4px' }}>·</span>}
-              <a href={href} style={{ fontSize: 11, color: G.textLight, textDecoration: 'none', margin: '0 6px' }}>{label}</a>
+              <a
+                href={href}
+                onClick={(e) => { e.preventDefault(); goTo(href); }}
+                style={{ fontSize: 11, color: G.textLight, textDecoration: 'none', margin: '0 6px' }}
+              >
+                {label}
+              </a>
             </span>
           ))}
         </div>
