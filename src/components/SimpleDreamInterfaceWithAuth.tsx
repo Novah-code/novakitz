@@ -448,15 +448,31 @@ export default function SimpleDreamInterfaceWithAuth() {
       try {
         /* Loaded whether or not any dream exists — a month of pebbles and no
            writing is the ordinary case, not an edge one. */
+        /*
+         * Every check-in for the day, not only the ones filed as 'morning'.
+         *
+         * The pebble used to be written as an 'evening' row whenever it was
+         * tapped after noon, and this query asked for mornings — so an
+         * afternoon pebble saved correctly and then never appeared anywhere.
+         * New ones are always 'morning' now (see handleEmotionSelect), but the
+         * rows already written that way are still in the table and are still
+         * days that happened.
+         *
+         * Keyed by date, so a date holding both an old evening row and a
+         * morning row collapses to one square rather than counting twice; the
+         * morning wins because the ritual is what that colour is describing.
+         */
         const { data: checkinRows } = await supabase
           .from('checkins')
-          .select('check_date, emotion')
-          .eq('user_id', user.id)
-          .eq('time_of_day', 'morning');
+          .select('check_date, time_of_day, emotion')
+          .eq('user_id', user.id);
         if (checkinRows) {
           const map: Record<string, { emotion: string | null }> = {};
+          const isMorning: Record<string, boolean> = {};
           checkinRows.forEach((c: any) => {
+            if (map[c.check_date] && isMorning[c.check_date]) return;
             map[c.check_date] = { emotion: c.emotion ?? null };
+            isMorning[c.check_date] = c.time_of_day === 'morning';
           });
           setCheckinsByDate(map);
         }

@@ -341,7 +341,24 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         String(now.getMonth() + 1).padStart(2, '0') +
         '-' +
         String(now.getDate()).padStart(2, '0');
-      const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
+      /*
+       * Always 'morning', whatever the clock says.
+       *
+       * This was `now.getHours() < 12 ? 'morning' : 'evening'`, and every
+       * screen that draws the day back — the calendar, Reflection, the monthly
+       * review — reads `.eq('time_of_day', 'morning')`. So a pebble tapped at
+       * noon or later was written as an evening row that nothing ever read: the
+       * day stayed blank, and the person who had just recorded it was looking
+       * at an empty square.
+       *
+       * The column exists because `checkins` is unique on
+       * (user_id, check_date, time_of_day) and an older twice-a-day check-in
+       * feature needed the two halves. That feature is gone. What is left is
+       * one pebble a day meaning "how I woke up" — which is a morning whether
+       * it is recorded at 6am or at 3pm — so pinning it makes the uniqueness
+       * key one row per day, and the later tap corrects the earlier one.
+       */
+      const timeOfDay = 'morning';
       // Upsert, not insert: checkins is unique on (user_id, check_date,
       // time_of_day), so checking in a second time the same morning came back
       // 409 and the mood was quietly dropped — along with the day's streak.
@@ -478,13 +495,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                  * anger are all 2 — so selecting mood alone could not tell the
                  * calendar which pebble was pressed.
                  */
+                /*
+                 * No time_of_day filter — see the note on the same query in
+                 * SimpleDreamInterfaceWithAuth. A pebble tapped after noon used
+                 * to be stored as an evening row, and asking only for mornings
+                 * hid it. Keyed by date so one day is one square either way.
+                 */
                 .select('check_date, time_of_day, mood, emotion, energy_level')
-                .eq('user_id', user.id)
-                .eq('time_of_day', 'morning');
+                .eq('user_id', user.id);
               if (checkinData) {
                 const map: Record<string, { mood: number; emotion: string | null; energy_level: number }> = {};
+                const isMorning: Record<string, boolean> = {};
                 checkinData.forEach((c: any) => {
+                  if (map[c.check_date] && isMorning[c.check_date]) return;
                   map[c.check_date] = { mood: c.mood, emotion: c.emotion ?? null, energy_level: c.energy_level };
+                  isMorning[c.check_date] = c.time_of_day === 'morning';
                 });
                 setCheckinsByDate(map);
               }
