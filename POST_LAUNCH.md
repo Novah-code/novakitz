@@ -1010,6 +1010,44 @@ App Review가 계정 접근을 못 하는 것이 이번 라운드에서 가장 �
 
 ---
 
+## 16. Tailwind이 켜져 있지 않습니다 — 남은 두 화면
+
+`package.json`에 `tailwindcss@4`와 `@tailwindcss/postcss`가 있고 `postcss.config.mjs`도
+Tailwind을 플러그인으로 걸고 있는데, **`app/globals.css`가 Tailwind을 import하지
+않습니다.** v4는 `@import "tailwindcss";` 한 줄이 있어야 유틸리티를 뽑아냅니다.
+그 줄이 없으니 컴파일 결과가 빈 스타일시트고, 코드 안의 Tailwind 클래스는 **전부 이름만
+있고 규칙이 없는 상태**입니다.
+
+윤아님이 결제 화면에서 보신 그 팝업이 이것 때문이었습니다. `fixed bottom-6 right-6`이
+아무것도 안 하니까 토스트가 문서 흐름 맨 아래로 떨어져서 화면 폭을 가득 채웠고,
+배경색·흰 글씨·둥근 모서리·여백이 전부 사라져서 `ℹ`와 `×`만 맨몸으로 남았습니다.
+
+**고친 것** (`9634f95` 다음 커밋):
+- `src/components/Toast.tsx` — 인라인 스타일로 다시 씀
+- `app/legal/{terms,privacy,refund}/page.tsx` — 세 장이 각자 갖고 있던 Tailwind
+  레이아웃을 `src/components/LegalPage.tsx` 하나로 합치고 인라인 스타일로
+- `src/lib/markdownReader.ts` — 뽑아내는 HTML의 클래스를 `style="…"`로
+- `app/auth/callback/page.tsx` — 구글·애플 로그인 돌아올 때 잠깐 뜨는 화면
+
+**안 고친 것 — 나중에:**
+- `src/components/UpdateNotification.tsx` — 새 버전 알림. 웹에서만 뜨고 앱에서는
+  안 뜹니다
+- `src/components/APIMonitoringDashboard.tsx` — `/admin`. 윤아님만 보는 화면
+
+### 왜 Tailwind을 그냥 켜지 않았나
+
+v4의 preflight가 전역 리셋입니다 — 모든 요소의 margin, border, `button`의 배경과
+테두리, 기본 폰트까지 건드립니다. 이 앱은 인라인 스타일과 자체 CSS로 그려져 있고,
+**그런 리셋이 없다는 전제**로 만들어져 있습니다. 한 줄 추가하면 다시 확인하지 않은
+화면 수십 개의 모양이 같이 바뀝니다. 재제출을 며칠 앞두고 할 일이 아닙니다.
+
+언젠가 켤 거라면 그때는 preflight를 끄고(`@layer base` 없이 import하거나 v4의
+`@import "tailwindcss/utilities"`만) 시작하는 게 맞습니다. 급하지 않습니다 — 남은
+두 파일을 인라인으로 옮기면 Tailwind 의존은 0이 되고, 그때 `package.json`에서
+빼도 됩니다.
+
+---
+
 ## 기록해둘 결정들
 
 **부제는 `Morning Ritual Kit`입니다 (2026-08-31).** 이름의 `kitz`와 붙고,
