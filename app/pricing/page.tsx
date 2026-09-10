@@ -235,6 +235,7 @@ export default function PricingPage() {
       title: 'Novakitz 소개',
       items: [
         { q: 'Novakitz란 무엇인가요?', a: 'Novakitz는 아침 1분의 기록 앱입니다. 어떻게 일어났는지 고르고, 남아 있는 꿈을 적으면, 그 꿈을 다시 읽어드립니다. 하루하루가 쌓이면 달력과 월간 리뷰에서 패턴이 보입니다.' },
+        { q: '해석은 어디에서 오나요?', a: '적어주신 내용을 바탕으로 AI가 씁니다. 꿈을 고정된 뜻이 정해진 암호가 아니라 마음이 내놓은 이미지로 읽고, 되풀이되는 인물을 아키타입으로 보는 융의 심층심리학 전통을 따릅니다.\n\n그래서 단정하지 않고 되묻습니다. 바다가 나온 꿈을 사전에서 찾는 대신, 그 바다가 거기서 무엇을 하고 있었는지를 물어봅니다. 진단이 아니라 생각해볼 거리이고, Novakitz는 의료나 심리 상담 서비스가 아닙니다.' },
         { q: 'Novakitz는 단순한 꿈 해석 앱인가요?', a: '아니요. Novakitz는 일회성 꿈 해석이 아닌 장기적인 꿈 기록, 무의식 패턴 분석, 개인 아키타입 탐험에 집중합니다. 시간이 지남에 따라 당신의 꿈 패턴과 내면의 변화를 추적할 수 있습니다.' },
         { q: 'Novakitz는 누구를 위한 앱인가요?', a: '내 안에 뭔가 비어있는 것 같은 느낌이 드는 사람들을 위해.\n\n일기를 쓰고, 생각을 정리해도 정작 깊은 내면은 여전히 수수께끼로 남아있죠.\n\n노바키츠는 당신의 무의식에 귀 기울여 꿈을 의미 있는 통찰로 바꿔줍니다.' },
       ],
@@ -258,6 +259,7 @@ export default function PricingPage() {
       title: 'About Novakitz',
       items: [
         { q: 'What is Novakitz?', a: 'Novakitz is a one-minute morning ritual. Choose how you woke up, write the dream while you still have it, and read it back. As the mornings add up, the calendar and the monthly review show what recurs.' },
+        { q: 'Where do the readings come from?', a: "An AI model writes them from what you recorded, in the tradition of depth psychology — Jung's, mostly: a dream read as an image the mind offered rather than a code with a fixed meaning, and the figures that keep returning understood as archetypes.\n\nWhat that means in practice is that a reading asks rather than tells. A dream about the sea is not looked up in a dictionary; you are asked what the sea was doing there. It is something to think with, not a diagnosis, and Novakitz is not a medical or counselling service." },
         { q: 'Is Novakitz just a dream interpretation app?', a: 'No. Novakitz focuses on long-term inner journaling, unconscious pattern analysis, and personal archetype exploration rather than one-time dream meanings. Over time, you can track your dream patterns and inner changes.' },
         { q: 'Who is Novakitz for?', a: "For people who feel like they're missing something inside themselves.\n\nYou journal. You reflect. But your dreams stay mysterious.\n\nNovakitz helps you listen to your unconscious and turn dreams into meaningful insights." },
       ],
