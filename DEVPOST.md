@@ -171,3 +171,64 @@ Build in Public(포스팅을 하는 경우에만).
 Pro가 반드시 들어가야 하는 이유는 제출 폼에 **심사위원이 프로모 코드를 쓸 의무가
 없다**고 적혀 있어서입니다. 무료 기능에 2분을 쓰면 정작 심사 대상이 화면에 안
 나옵니다.
+
+---
+
+# 데모 영상 스크립트 — 3분
+
+**Apple에 보낸 영상과 반대로 만듭니다.** 그건 한 번에 쭉 찍은 무편집 영상이었고,
+이건 **편집한 피치 영상**입니다. 컷을 나누고, 자막을 얹고, 지루한 대기 시간은
+잘라냅니다.
+
+## 찍기 전에
+
+- **데모 계정(`info.muonkr@gmail.com`)으로 로그인한 상태에서 찍으세요.** 한 달치
+  기록이 들어 있어서 달력·리플렉션·월간 리뷰에 실제 데이터가 나옵니다. 새 계정으로
+  찍으면 심사위원이 보는 건 빈 화면입니다
+- **Pro가 켜져 있어야 합니다** — 데모 계정은 이미 켜져 있습니다
+- 실기기(빌드 3)에서, 방해금지 켜고, 배터리 100% 근처
+- **음악은 넣지 마세요.** 저작권 있는 트랙 한 곡이 실격 사유입니다. 무음 + 자막이
+  제일 안전하고, 내레이션을 넣으실 거면 직접 녹음한 목소리만
+
+목표 길이 **2분 50초**. 3분은 상한이지 목표가 아닙니다.
+
+---
+
+## 컷 시트
+
+| 시간 | 화면 | 자막 / 내레이션 |
+| --- | --- | --- |
+| **0:00–0:10** | 홈 화면. 원을 탭 → 조약돌 8개 → 하나 선택 → 저장됨 | `This is a whole morning.` |
+| 0:10–0:18 | 같은 화면 정지 | `Five seconds. Before you open anything that wants something from you.` |
+| **0:18–0:30** | 홈 화면 천천히 (아트워크 보이게) | `Novakitz is a one-minute morning ritual. You record how you woke up — and the dream, if you still have it.` |
+| **0:30–0:45** | `Remember a dream?` → 장소 · 등장 → 장면 입력 | `Most people don't forget their dreams because their memory is poor. They forget because nothing was waiting to receive them.` |
+| **0:45–1:05** | 해석 결과. 아르카나 카드 → `READING` 아래로 스크롤 | `The reading asks rather than tells. It doesn't look the sea up in a dictionary — it asks what the sea was doing there.` |
+| **1:05–1:25** | 메뉴 → Calendar. 8월로 넘겨서 한 달 전체 | `Eight moods, eight shapes. A month is the actual sequence of shapes you pressed.` |
+| 1:25–1:35 | 스트릭 뱃지 클로즈업 | `The streak forgives one missed day a month. A habit tool that punishes one bad night is training the wrong thing.` |
+| **1:35–2:15** | **메뉴 → Monthly Review.** 천천히 스크롤 — AI 종합, 아키타입, Dual Logs | `This is Pro. A written reading of the month, the archetypes that surfaced in it, and what recurred.` |
+| 2:15–2:25 | 계속 스크롤 | `One morning tells you almost nothing. A month of them shows the pattern.` |
+| **2:25–2:45** | 메뉴 → Pricing. 월간·연간 카드 | `Pro is $5.99 a month or $49.99 a year, with a week free. Subscriptions run on RevenueCat over Apple In-App Purchase.` |
+| 2:45–2:50 | 홈 화면으로 복귀, 정지 | `Novakitz. On the App Store.` |
+
+---
+
+## 시간 배분의 근거
+
+**Pro에 40초를 줍니다 (1:35–2:15).** 제출 폼에 **심사위원이 프로모 코드를 쓸 의무가
+없다**고 적혀 있습니다. 무료 기능에 2분을 쓰면 정작 심사 대상이 화면에 안 나옵니다.
+월간 리뷰가 Pro의 얼굴이니 거기에 제일 긴 시간을 줬습니다.
+
+**0:00에 바로 조약돌을 찍습니다.** 로고나 타이틀 카드로 시작하지 마세요 — 3분짜리
+영상에서 처음 10초를 브랜딩에 쓰면 제품을 보여줄 시간이 사라집니다. 이름은 마지막에
+말해도 늦지 않습니다.
+
+**꿈 입력은 짧게 찍고 잘라냅니다.** 타이핑하는 15초와 해석을 기다리는 몇 초는
+컷으로 넘기세요. Apple 영상에서는 그걸 남겨야 했지만(실제로 동작한다는 증거),
+여기서는 지루함일 뿐입니다.
+
+**달력이 Design Award의 핵심 장면입니다.** 한 달이 "색깔 격자"가 아니라 "내가 누른
+모양들의 배열"로 보이는 순간이 저 카테고리에서 제일 강한 한 컷입니다. 여기서
+서두르지 마세요.
+
+**RevenueCat을 한 번 명시합니다.** RevenueCat 해커톤이고, 결제가 그 위에서 돈다는
+걸 말해두는 게 맞습니다. 한 문장이면 충분하고 그 이상은 광고처럼 들립니다.
