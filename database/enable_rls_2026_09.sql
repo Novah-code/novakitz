@@ -139,3 +139,32 @@ order by c.relrowsecurity asc, c.relname;
 -- If either goes empty, the policy is wrong, not the data gone. Nothing here
 -- deletes anything.
 -- ─────────────────────────────────────────────────────────────────────────
+
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- OUTCOME, 2026-09-15 — this is finished. Nothing here needs checking again.
+--
+-- The advisor's table was `balance_votes`: rls_enabled false, no policies, and
+-- its name appears nowhere in the code or in any SQL in this directory. An
+-- abandoned experiment. Closed with
+--
+--   alter table public.balance_votes enable row level security;
+--
+-- and nothing broke, because nothing reads it.
+--
+-- `credit_transactions` was already RLS-on with no policies — same story, a
+-- table nothing uses, and no policies means the anon key can do nothing with
+-- it. Left as it is.
+--
+-- Two pre-existing policies were checked rather than assumed:
+--
+--   contact_requests   "service only", ALL, qual = false. No row matches for
+--                      anyone going through RLS, and the service role bypasses
+--                      RLS, so the support route still writes and nobody with
+--                      the anon key can read the inbox. Correct.
+--   subscription_plans "Users can view plans", SELECT, qual = true. That is
+--                      the price list; it is meant to be readable.
+--
+-- Every other table in public now reports rls_enabled true with at least one
+-- policy.
+-- ─────────────────────────────────────────────────────────────────────────
