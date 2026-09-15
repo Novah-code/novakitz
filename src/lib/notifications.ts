@@ -16,6 +16,17 @@ import { Capacitor } from '@capacitor/core';
  */
 
 const STORAGE_KEY = 'novakitz.reminders';
+/*
+ * Whether the in-app ask has been answered — either way, and separately from
+ * whether the reminder is on.
+ *
+ * iOS shows its permission dialog once. A refusal there can only be undone in
+ * Settings, which nobody does, so the app asks its own reversible question
+ * first and only reaches the system one for people who said yes. This key is
+ * what stops that question being asked twice; saying "not now" to it costs
+ * nothing, and the reminder can still be switched on later from Profile.
+ */
+const ASKED_KEY = 'novakitz.reminders.asked';
 
 // Stable ids so rescheduling replaces rather than stacks duplicates.
 const MORNING_ID = 1;
@@ -39,13 +50,22 @@ export const DEFAULT_REMINDERS: ReminderSettings = {
 const copy = {
   en: {
     morningTitle: 'Good morning',
-    morningBody: 'What did you dream about last night?',
+    /*
+     * About waking, not about dreaming.
+     *
+     * This asked what you dreamt, which is the wrong question for the thing it
+     * is reminding you to do: the morning is a pebble, five seconds, and most
+     * days there is no dream. Asking for one makes the notification feel like
+     * it is for people who remember their dreams, and everyone else has
+     * already failed it before opening the app.
+     */
+    morningBody: 'How did you wake up?',
     eveningTitle: 'Winding down',
     eveningBody: 'Take a moment to reflect on today.',
   },
   ko: {
     morningTitle: '좋은 아침이에요',
-    morningBody: '어젯밤 어떤 꿈을 꾸셨나요?',
+    morningBody: '오늘 아침은 어떠셨어요?',
     eveningTitle: '하루를 마무리하며',
     eveningBody: '오늘 하루를 잠시 돌아볼까요?',
   },
@@ -63,6 +83,36 @@ export function loadReminders(): ReminderSettings {
   } catch {
     return DEFAULT_REMINDERS;
   }
+}
+
+/** True once the in-app ask has been answered, whichever way. */
+export function hasBeenAsked(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    return window.localStorage.getItem(ASKED_KEY) === '1';
+  } catch {
+    /* Storage unavailable — treat as asked rather than pestering on every
+       single morning. */
+    return true;
+  }
+}
+
+export function markAsked(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(ASKED_KEY, '1');
+  } catch {
+    /* Nothing to do; the worst case is being asked once more. */
+  }
+}
+
+/**
+ * Whether to offer the morning reminder.
+ *
+ * Native only, once, and not to someone who already turned it on in Profile.
+ */
+export function shouldOfferMorningReminder(): boolean {
+  return remindersSupported() && !hasBeenAsked() && !loadReminders().morningEnabled;
 }
 
 export function saveReminders(settings: ReminderSettings): void {
