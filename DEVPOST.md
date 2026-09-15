@@ -246,20 +246,22 @@ Devpost의 `About the project` 칸에 그대로 붙여넣습니다. 마크다운
 ```markdown
 ## Inspiration
 
-Before Novakitz was an app it was a website, and fourteen strangers found it
-from a social post and used it. Not friends — people I have never met, some in
-Korea and some not. They averaged thirteen days. One of them lasted forty-two.
+Before Novakitz was an app it was a website. More than forty people signed up
+from a social post — strangers, not friends, some in Korea and some not.
+Fourteen of them kept using it past the third day. Those fourteen averaged
+thirteen days each. One lasted forty-two.
 
-There was no app. No icon on their home screen, no notifications, nothing. To
-use it they had to open a browser and type an address, every morning, for six
-weeks.
+There was no app. No icon on a home screen, no notifications, nothing to bring
+anyone back. To use it they had to open a browser and type an address, every
+morning, for six weeks.
 
-Then all fourteen stopped, within the same few days.
+Then they all stopped, within the same few days.
 
-I had assumed I would need a better reason for people to come back. The forty-
-two days say the reason was already there and what was missing was the signal —
-there was simply nothing to remind them the thing existed. That is what turned
-this into an app.
+I had assumed the problem was that I needed a better reason for people to
+return. The forty-two days say otherwise: the reason was already there, and
+what was missing was the signal. Nothing in their day ever mentioned it existed.
+That is what turned this into an app — not new features, an icon and a
+notification.
 
 ## What it does
 
