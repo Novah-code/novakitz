@@ -108,8 +108,10 @@ All of it is CSS. There are no image assets in the interface chrome.
 ## Influencer Award → Productivity (Christopher Lawley)
 
 ```
-Novakitz is a morning routine that happens to be about dreams, not a dream
-dictionary that happens to open in the morning.
+The project story says Novakitz was built instead of another productivity app,
+and entering this category anyway is deliberate rather than careless. What it
+was built instead of is a task manager. What it is, is a morning routine — and
+the first five minutes of a day decide more about that day than any list does.
 
 The loop is one tap. You wake, tap the circle, choose the shape that matches
 how you woke up, and the morning is recorded — about five seconds, before you
@@ -125,9 +127,14 @@ month into a row of the shapes you chose, which is the fastest read on how the
 weeks have gone. A monthly review reads the whole month back to you.
 
 The dream is the input to that loop, not the product. Most days there is no
-dream and the routine still completes — which is the difference between a
-habit that holds and one that depends on remembering something you cannot
-control.
+dream and the routine still completes — which is the difference between a habit
+that holds and one that depends on remembering something you cannot control.
+
+The productivity claim is a modest one, and I would rather state it exactly. The
+app does not help you get more done. It occupies the two minutes before the
+day's demands arrive, and it asks a question you answer for yourself rather than
+one somebody else set. For anyone who has noticed that their morning is decided
+by whatever was on the screen first, that is the tool this is.
 ```
 
 **왜 이렇게 썼나:** `SHIPATON.md` §4b는 "의도(intentions)를 앞세우라"고 적어뒀지만,
