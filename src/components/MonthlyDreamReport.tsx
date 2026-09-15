@@ -202,7 +202,25 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       }
       setActivityGrid(grid);
 
-      if (premium) {
+      /*
+       * Generated for free accounts too, once the month has ended.
+       *
+       * `if (premium)` gated the generation itself, which meant the blurred
+       * box a free account was squinting at held the fallback string — "This
+       * Month's Pattern", the same words for everybody. A blur only works over
+       * something the person wants, so that one hid nothing and sold nothing.
+       *
+       * `!isCurrent` is what keeps it cheap. Finished months cache forever
+       * (see loadPremiumInsights); the current month caches for a day, so
+       * opening it daily would be a call a day. Restricted to months that are
+       * over, this is one call per account per month, and the monthly mode
+       * does not touch the free tier's seven readings — `checkQuota` in
+       * analyze-dream applies to `mode === 'dream'` only.
+       *
+       * Archetypes come along because they cost a table read, not a model
+       * call, and their placeholder had the same problem.
+       */
+      if (premium || !isCurrent) {
         /*
          * The reading is made from what the month actually holds, so a
          * pebble-only month gets a real report rather than a paid screen with
@@ -560,7 +578,16 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           </div>
 
           {/* Current month preview banner */}
-          {isCurrentMonthPreview && isPremium && (
+          {/*
+            * Shown to free accounts as well.
+            *
+            * It was Pro-only, so someone on the free tier who opened this
+            * mid-month met a thin screen with no explanation of why it was
+            * thin — the worst possible first impression of the thing being
+            * sold. The banner turns that into a reason to come back, which is
+            * also when the reading for that month exists.
+            */}
+          {isCurrentMonthPreview && (
             <div style={{ background: '#fffbea', border: '1px solid #e8ce90', borderRadius: 12, padding: '10px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
               <IconSparkles size={13} color="#d6a848" />
               <p style={{ fontSize: 12, color: '#a07c2a', margin: 0, lineHeight: 1.5 }}>
@@ -585,7 +612,22 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                     {language === 'ko' ? 'AI 월간 종합' : 'AI Monthly Synthesis'}
                   </h3>
                 </div>
-                {/* Content */}
+                {/*
+                  * The theme is legible; what it means is not.
+                  *
+                  * Everything here used to sit behind the blur together. Now
+                  * that the reading actually exists for a free account, its
+                  * theme is the part worth showing — "A month spent at the
+                  * threshold", in their own month's words, with the four
+                  * sentences that explain it greyed out beneath. That is a
+                  * screen someone might pay to finish reading. The version
+                  * that blurred a stock phrase was not.
+                  */}
+                <h4 style={{ fontSize: 20, fontWeight: 800, color: '#3d6044', marginBottom: 12 }}>
+                  {aiLoading && !aiInsights
+                    ? (language === 'ko' ? '생성 중...' : 'Generating...')
+                    : (aiInsights?.synthesisTheme || (language === 'ko' ? '이달의 패턴' : "This Month's Pattern"))}
+                </h4>
                 <div style={{ position: 'relative' }}>
                   <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
                     {aiLoading && !aiInsights ? (
@@ -595,9 +637,6 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                       </div>
                     ) : (
                       <>
-                        <h4 style={{ fontSize: 20, fontWeight: 800, color: '#3d6044', marginBottom: 12 }}>
-                          {aiInsights?.synthesisTheme || (language === 'ko' ? '이달의 패턴' : "This Month's Pattern")}
-                        </h4>
                         <p style={{ fontSize: 13, color: '#5c8065', lineHeight: 1.7, marginBottom: 20 }}>
                           {aiInsights?.synthesisDescription || (language === 'ko' ? '이달의 감정과 꿈 사이의 연결 패턴을 분석하고 있습니다.' : 'Analyzing the connection patterns between your moods and dreams this month.')}
                         </p>
