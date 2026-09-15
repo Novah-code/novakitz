@@ -487,3 +487,61 @@ on the demo account: menu -> Calendar, then step back to August. Each day is the
 shape the person actually pressed that morning, at cell size, and a month of
 them has a texture. It is the clearest single answer to what this app is for.
 ```
+
+---
+
+# 이미지 갤러리 구성
+
+## 규격
+
+**1800×1200 (3:2)**, 크림 배경(`#F7F3E9`) 위에 스크린샷을 얹습니다. 스크린샷이
+1320×2868이라 그대로 올리면 카드에서 가운데만 남고 위아래가 잘립니다.
+
+세로 스크린샷 하나를 캔버스 높이의 80~85%로 놓으면 양옆에 여백이 크게 남습니다.
+그 여백에 **짧은 문장 한 줄**을 넣으세요. 두 장을 나란히 놓아도 됩니다.
+
+**기기 목업 프레임은 쓰지 마세요.** 제출 폼이 프레임 없는 스크린샷을 따로 요구하고
+있어서, 갤러리까지 프레임 없이 통일하는 게 헷갈릴 일이 없습니다. 스크린샷 사각형에
+옅은 그림자 정도면 충분합니다.
+
+## 순서 — 6~8장이면 충분합니다
+
+15장까지 되지만 **짧은 갤러리가 더 잘 읽힙니다.** 열 장을 넘기면 뒤쪽은 아무도 안
+봅니다.
+
+| # | 내용 | 얹을 문장 |
+| --- | --- | --- |
+| **1** | **표지.** 홈 아트워크를 크게 + 앱 이름 + 한 줄 | `A one-minute morning ritual for a better day.` |
+| 2 | 조약돌 8개 | `Eight shapes for how you woke up. Five seconds.` |
+| 3 | 갈림길 카드 (꿈 / 무드) | `Then: a dream, if you have one.` |
+| 4 | 해석 결과 | `It asks what the sea was doing there.` |
+| **5** | **달력 한 달** | `A month is the shapes you actually pressed.` |
+| 6 | Reflection | `What keeps coming back.` |
+| 7 | 월간 리뷰 (Pro) | `Your month, read back to you.` |
+| 8 | Pricing | `Free doesn't expire. It isn't a trial.` |
+
+## 1번이 제일 중요합니다
+
+**갤러리 목록에서 카드 썸네일이 되는 이미지입니다.** 수백 개 출품작 사이에 작게
+뜨고, 그걸 보고 들어올지 말지가 결정됩니다.
+
+그래서 1번만은 **스크린샷을 그대로 쓰지 마세요.** 작게 줄이면 원 하나가 점이 되고
+아무것도 안 읽힙니다. **아트워크를 프레임 대부분에 크게 놓고, 이름과 한 줄만**
+얹으세요. 작게 봐도 읽히는 유일한 구성입니다.
+
+## GIF 한 장을 섞으세요
+
+**갤러리가 GIF를 받습니다.** 정지 이미지만 있는 갤러리 사이에서 움직이는 카드 하나는
+눈에 띕니다.
+
+제일 좋은 소재는 **조약돌 선택**입니다 — 원을 탭하면 여덟 개가 펼쳐지고 하나를
+고르는 2초. 이 앱에서 제일 예쁘고 제일 짧은 동작이에요.
+
+**5MB 제한이 빡빡하니** 2초 이내, 초당 12프레임, 가로 1200px 정도로 줄이세요.
+3번 자리에 넣는 게 좋습니다 — 표지에 넣으면 썸네일이 멈춘 첫 프레임으로 잡힐 수
+있습니다.
+
+## 만들 때
+
+전부 같은 크림 배경, 같은 여백, 같은 위치에 문장. **여덟 장이 한 세트로 보여야
+합니다** — Design Award에 내는 앱의 갤러리가 제각각이면 그 자체가 반증입니다.
