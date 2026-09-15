@@ -7,42 +7,120 @@
 -- So "anyone with your project URL" means anyone who downloaded the app.
 --
 -- Every table created by the SQL in this directory already enables RLS. The
--- ones below are the tables the code uses that no script here ever protected —
--- they were created somewhere else, probably by hand in the dashboard.
---
---   dream_patterns        archetype hints derived from a person's dreams
---   unconscious_profiles  read straight from the client (app/profile/page.tsx)
---   contact_requests      support messages, with the sender's email address
---   avatars               referenced by ProfileSettings
---   community_likes       deleted client-side when an account is removed
---   profiles              only /api/admin reads it — probably superseded by
---                         user_profiles
---   subscriptions         only /api/admin reads it — probably superseded by
---                         user_subscriptions
+-- list below is the tables the code queries that no script here protects: they
+-- were created somewhere else, probably by hand in the dashboard. Some of them
+-- turn out not to exist at all any more.
 --
 --
--- ⚠️  READ THIS BEFORE RUNNING ANY OF IT
+-- HOW TO RUN IT
 --
--- Turning RLS on for a table with no policy does not raise an error. It makes
--- the table invisible: every query returns zero rows, quietly, and the app
--- looks like the data was deleted. So each block below turns RLS on *and*
--- grants the owner access in the same step. Do not run half of one.
+-- Paste the whole file into the Supabase SQL editor and run it once. It skips
+-- any table that is not there, so a name that has since been dropped is not an
+-- error — the first version of this script stopped dead on `community_likes`,
+-- which does not exist.
 --
--- The service role key bypasses RLS entirely, so anything written by
--- `supabaseAdmin` in an API route keeps working regardless.
+-- Then run the query at the bottom to see the result.
+--
+--
+-- WHY EACH TABLE IS HANDLED THE WAY IT IS
+--
+--   dream_patterns        archetype hints from a person's dreams. Has user_id.
+--   unconscious_profiles  read straight from the browser at
+--                         app/profile/page.tsx:57, and holds an inference
+--                         about someone drawn from everything they wrote.
+--                         Has user_id. The one that matters most.
+--   community_likes       has user_id, if it exists.
+--   contact_requests      support messages with the sender's email address.
+--                         Written only by the service role and never read by
+--                         the app, so it gets RLS and *no policy at all* —
+--                         the service role bypasses RLS, and nobody with the
+--                         anon key should be reading the support inbox.
+--   profiles              read only by /api/admin, which uses the service
+--   subscriptions         role. Superseded by user_profiles and
+--                         user_subscriptions. Same treatment: closed, no
+--                         policy, nothing on the client reads them.
+--   avatars               probably `supabase.storage.from('avatars')` rather
+--                         than a table. If it is a bucket this script will not
+--                         find it, which is correct — buckets have their own
+--                         policies under Storage.
+--
+-- Turning RLS on without a policy does not raise an error; it makes the table
+-- return zero rows to the app as well, quietly. That is why the tables people
+-- read from the client get their owner policies in the same pass, and only the
+-- service-role-only tables are left bare.
 
 
 -- ─────────────────────────────────────────────────────────────────────────
--- STEP 1 — find out which tables are actually unprotected
+-- Enable RLS wherever it is missing, and give owners access where the client
+-- needs it. Skips tables that do not exist.
+-- ─────────────────────────────────────────────────────────────────────────
+
+do $$
+declare
+  -- Tables the app reads as the signed-in person: RLS plus owner policies.
+  owned text[] := array['dream_patterns', 'unconscious_profiles', 'community_likes'];
+  -- Tables only the service role touches: RLS, deliberately no policy.
+  service_only text[] := array['contact_requests', 'profiles', 'subscriptions'];
+  t text;
+begin
+  foreach t in array owned loop
+    if to_regclass('public.' || t) is null then
+      raise notice 'skipping %, table does not exist', t;
+      continue;
+    end if;
+
+    execute format('alter table public.%I enable row level security', t);
+
+    -- Ownership has to be a column on the table for these to mean anything.
+    if not exists (
+      select 1 from information_schema.columns
+      where table_schema = 'public' and table_name = t and column_name = 'user_id'
+    ) then
+      raise warning '% has no user_id column — RLS is on but it has no policy, so the app cannot read it either. Fix before using the app.', t;
+      continue;
+    end if;
+
+    execute format('drop policy if exists "Owner can select" on public.%I', t);
+    execute format(
+      'create policy "Owner can select" on public.%I for select using (auth.uid() = user_id)', t);
+
+    execute format('drop policy if exists "Owner can insert" on public.%I', t);
+    execute format(
+      'create policy "Owner can insert" on public.%I for insert with check (auth.uid() = user_id)', t);
+
+    execute format('drop policy if exists "Owner can update" on public.%I', t);
+    execute format(
+      'create policy "Owner can update" on public.%I for update using (auth.uid() = user_id)', t);
+
+    execute format('drop policy if exists "Owner can delete" on public.%I', t);
+    execute format(
+      'create policy "Owner can delete" on public.%I for delete using (auth.uid() = user_id)', t);
+
+    raise notice 'protected % with owner policies', t;
+  end loop;
+
+  foreach t in array service_only loop
+    if to_regclass('public.' || t) is null then
+      raise notice 'skipping %, table does not exist', t;
+      continue;
+    end if;
+    execute format('alter table public.%I enable row level security', t);
+    raise notice 'closed % to the anon key (service role only)', t;
+  end loop;
+end $$;
+
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- Check the result.
 --
--- Run this on its own first. It reads nothing but the catalogue, changes
--- nothing, and tells you exactly which tables the advisor is complaining
--- about. Fix what it lists; skip the rest.
+-- `rls_enabled = false` is still a problem.
+-- `rls_enabled = true, policy_count = 0` is correct for contact_requests,
+-- profiles and subscriptions, and wrong for anything the app reads.
 -- ─────────────────────────────────────────────────────────────────────────
 
 select
-  c.relname                                   as table_name,
-  c.relrowsecurity                            as rls_enabled,
+  c.relname        as table_name,
+  c.relrowsecurity as rls_enabled,
   (select count(*) from pg_policies p
     where p.schemaname = 'public' and p.tablename = c.relname) as policy_count
 from pg_class c
@@ -51,143 +129,13 @@ where n.nspname = 'public'
   and c.relkind = 'r'
 order by c.relrowsecurity asc, c.relname;
 
--- `rls_enabled = false` is the problem.
--- `rls_enabled = true` with `policy_count = 0` is the other problem: protected
--- from strangers and from your own app equally.
-
 
 -- ─────────────────────────────────────────────────────────────────────────
--- STEP 2 — the fixes, one table at a time
---
--- Run only the blocks for tables STEP 1 listed as unprotected.
--- ─────────────────────────────────────────────────────────────────────────
-
-
--- dream_patterns ──────────────────────────────────────────────────────────
--- Has user_id (see app/api/extract-patterns/route.ts). The monthly review
--- queries it by dream_id without filtering on the person; RLS supplies that
--- filter itself, so the existing query keeps working and stops being able to
--- read anyone else's rows.
-
-alter table public.dream_patterns enable row level security;
-
-drop policy if exists "Users read own dream patterns" on public.dream_patterns;
-create policy "Users read own dream patterns"
-  on public.dream_patterns for select
-  using (auth.uid() = user_id);
-
-drop policy if exists "Users write own dream patterns" on public.dream_patterns;
-create policy "Users write own dream patterns"
-  on public.dream_patterns for insert
-  with check (auth.uid() = user_id);
-
-drop policy if exists "Users update own dream patterns" on public.dream_patterns;
-create policy "Users update own dream patterns"
-  on public.dream_patterns for update
-  using (auth.uid() = user_id);
-
-drop policy if exists "Users delete own dream patterns" on public.dream_patterns;
-create policy "Users delete own dream patterns"
-  on public.dream_patterns for delete
-  using (auth.uid() = user_id);
-
-
--- unconscious_profiles ────────────────────────────────────────────────────
--- The one to care about most. It is read from the browser at
--- app/profile/page.tsx:57, so the anon key reaches it directly, and what it
--- holds is an inference about a person drawn from everything they wrote.
-
-alter table public.unconscious_profiles enable row level security;
-
-drop policy if exists "Users read own unconscious profile" on public.unconscious_profiles;
-create policy "Users read own unconscious profile"
-  on public.unconscious_profiles for select
-  using (auth.uid() = user_id);
-
-drop policy if exists "Users write own unconscious profile" on public.unconscious_profiles;
-create policy "Users write own unconscious profile"
-  on public.unconscious_profiles for insert
-  with check (auth.uid() = user_id);
-
-drop policy if exists "Users update own unconscious profile" on public.unconscious_profiles;
-create policy "Users update own unconscious profile"
-  on public.unconscious_profiles for update
-  using (auth.uid() = user_id);
-
-drop policy if exists "Users delete own unconscious profile" on public.unconscious_profiles;
-create policy "Users delete own unconscious profile"
-  on public.unconscious_profiles for delete
-  using (auth.uid() = user_id);
-
-
--- contact_requests ────────────────────────────────────────────────────────
--- Written only by the service role (app/api/contact-support/route.ts) and
--- never read by the app. So RLS with no policy at all is exactly right: the
--- service role still writes, and nobody holding the anon key can read the
--- support inbox — which contains other people's email addresses and whatever
--- they wrote in.
-
-alter table public.contact_requests enable row level security;
-
-
--- community_likes ─────────────────────────────────────────────────────────
--- Only referenced by the account-deletion path, which deletes by user_id, so
--- it has that column.
-
-alter table public.community_likes enable row level security;
-
-drop policy if exists "Users read own likes" on public.community_likes;
-create policy "Users read own likes"
-  on public.community_likes for select
-  using (auth.uid() = user_id);
-
-drop policy if exists "Users write own likes" on public.community_likes;
-create policy "Users write own likes"
-  on public.community_likes for insert
-  with check (auth.uid() = user_id);
-
-drop policy if exists "Users delete own likes" on public.community_likes;
-create policy "Users delete own likes"
-  on public.community_likes for delete
-  using (auth.uid() = user_id);
-
-
--- profiles, subscriptions ─────────────────────────────────────────────────
--- Read only by /api/admin/weekly-metrics, which runs with the service role.
--- The live tables are user_profiles and user_subscriptions, and these two look
--- like what came before them.
---
--- ⚠️ Check STEP 1 first. If they are not in that list they no longer exist and
--- there is nothing to do. If they do exist and hold real rows, closing them to
--- the anon key costs nothing, because nothing on the client reads them.
-
-alter table public.profiles enable row level security;
-alter table public.subscriptions enable row level security;
-
-
--- avatars ─────────────────────────────────────────────────────────────────
--- ⚠️ Check STEP 1 before running this one.
---
--- ProfileSettings.tsx:138 calls `.from('avatars')`, but that may be
--- `supabase.storage.from('avatars')` — a storage bucket, not a table. Buckets
--- do not appear in STEP 1 and are governed by their own policies under
--- Storage. Only run this if STEP 1 actually lists a table called avatars.
-
--- alter table public.avatars enable row level security;
-
-
--- ─────────────────────────────────────────────────────────────────────────
--- STEP 3 — check the app afterwards
---
--- Re-run STEP 1: everything should read true with a policy count above zero,
--- except contact_requests, which is meant to have none.
---
 -- Then open the app and look at the two screens that read these tables:
 --
 --   menu -> Monthly Review   (dream_patterns — the archetypes)
 --   /profile                 (unconscious_profiles)
 --
--- If either goes empty, the policy is wrong rather than the data being gone.
--- The fastest check is whether the table's ownership column is really named
--- user_id. Nothing here deletes anything.
+-- If either goes empty, the policy is wrong, not the data gone. Nothing here
+-- deletes anything.
 -- ─────────────────────────────────────────────────────────────────────────
