@@ -373,3 +373,110 @@ revenuecat, google-gemini, css, vercel
 3. 달력 한 달
 4. 해석 결과
 5. 월간 리뷰
+
+---
+
+# Additional info — 칸별 정리
+
+대부분 비워둡니다. 실제로 채울 건 아래 8개뿐입니다.
+
+## 지금 채울 것
+
+| 칸 | 답 |
+| --- | --- |
+| 1024×1024 아이콘 첨부했나 | **Yes** (알파 채널 없는 그 파일) |
+| 기기 프레임 없는 스크린샷 첨부했나 | **Yes** (시뮬레이터 원본) |
+| 2026/8/1~9/30 사이 첫 출시인가 | **Yes** |
+| RevenueCat/스폰서 직원인가 | **No** |
+| 앱 종류 | **iOS** 만 체크 |
+| RevenueCat 프로젝트 ID | Project Settings에서 복사 |
+| Influencer 카테고리 | **Productivity — Christopher Lawley** |
+| Growth Fund 관심 있나 | **Yes** — 공짜고 잃을 게 없습니다 |
+
+## 승인 후 채울 것
+
+| 칸 | |
+| --- | --- |
+| Published iOS App Store URL | 승인되면 바로 |
+
+## 서술형 — 위에 써둔 것 붙여넣기
+
+| 칸 | 어디에 있나 |
+| --- | --- |
+| Peace Prize | 이 문서 위쪽 |
+| Design Award | 이 문서 위쪽 |
+| Influencer Award 설명 | 이 문서의 Productivity 글 |
+| HAMM | 아래 |
+| Additional notes for judges | 아래 |
+
+## 비워둘 것 — 전부
+
+Google Play URL · Galaxy Store URL · Next Gen 3칸(학생 전용) · Grand Prize(출시 후
+성장 데이터가 필요한데 아직 출시 전) · Catvertising(RevenueCat Ads 미사용) ·
+Best Game · Kotlin Multiplatform · Most Viral(Noise 미사용) · Best App for
+Galaxy · Idea to Income(Replit 미사용) · Keep Them Coming Back(OneSignal 필요 —
+우리 알림은 로컬이라 서버가 필요 없고, 한 카테고리 때문에 다시 깔 이유가 없습니다) ·
+Growth Loop(Layers 미사용) · Funnel Vision 3칸(Stripe 웹 퍼널 미사용)
+
+**Build in Public**은 윤아님만 답할 수 있습니다 — Shipaton 기간 동안 **만드는
+과정**을 공개적으로 올리셨다면 채우고, 모닝루틴 콘텐츠만 올리셨다면 비웁니다.
+없는 걸 있다고 쓰면 링크를 요구하는 칸이 바로 옆에 있습니다.
+
+**프로모 코드**는 선택입니다. 데모 계정에 Pro가 켜져 있고 영상 3분 안에 Pro가
+나오므로 없어도 됩니다.
+
+---
+
+## HAMM Award — 수익 모델
+
+```
+Two auto-renewable subscriptions through RevenueCat over Apple In-App Purchase:
+USD 5.99 a month, or USD 49.99 a year with a one-week free trial. They unlock
+the same Pro tier.
+
+The part worth explaining is the free tier, because it is not a trial and does
+not expire. It includes the morning check-in, the calendar, the streak,
+personalised affirmations, the full history, and seven AI readings a month.
+Someone who never pays keeps the thing that helps, permanently.
+
+That is a deliberate trade, and the product is the reason for it. Novakitz is
+worth something only in accumulation — one morning tells you almost nothing, and
+a month of them shows which moods recur and which images repeat. A trial that
+expires on day seven deletes the habit exactly where it starts to pay off, and
+with it the reason to ever subscribe. So the free tier has to survive long
+enough for the person to have something worth reading.
+
+Which means the paywall cannot sit on the daily action. Tapping a pebble is free
+forever; it is five seconds and it is the whole ritual. What Pro adds is the
+reading of what those mornings amount to: a daily AI dream reading, and the full
+monthly review with its written analysis and the archetypes it found. The
+monthly review is where the paywall actually bites — once a month, on a screen
+showing your own month, with the analysis of it just out of reach.
+
+Novakitz is in the App Store Small Business Program, so Apple's commission is
+15% rather than 30%. On the yearly plan that is the difference between keeping
+USD 34.99 and USD 42.49 — about 21% more per subscriber, at no cost to the
+person paying, which is the rare kind of margin that does not trade against
+conversion.
+
+There are no conversion numbers yet: the app is launching now, and the honest
+answer is that the first ones will arrive after this hackathon closes. What the
+model is built to avoid is the pattern where a free tier is a countdown, the
+person feels the clock, and the app becomes another thing that wants something
+from them before breakfast.
+```
+
+## Additional notes for judges
+
+```
+Two things that may help while reviewing.
+
+Novakitz is launching now rather than already launched, so there is no growth or
+revenue data to show. The subscription integration is live and verified
+end-to-end through RevenueCat, including renewals.
+
+If you have time for only one screen, make it the calendar with a month of data
+on the demo account: menu -> Calendar, then step back to August. Each day is the
+shape the person actually pressed that morning, at cell size, and a month of
+them has a texture. It is the clearest single answer to what this app is for.
+```
