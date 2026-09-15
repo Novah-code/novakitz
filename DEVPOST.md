@@ -232,3 +232,140 @@ Pro가 반드시 들어가야 하는 이유는 제출 폼에 **심사위원이 �
 
 **RevenueCat을 한 번 명시합니다.** RevenueCat 해커톤이고, 결제가 그 위에서 돈다는
 걸 말해두는 게 맞습니다. 한 문장이면 충분하고 그 이상은 광고처럼 들립니다.
+
+---
+
+# About the project — 본문
+
+Devpost의 `About the project` 칸에 그대로 붙여넣습니다. 마크다운이 지원되니 헤더가
+그대로 렌더됩니다.
+
+**전부 실제로 있었던 일입니다.** 과장한 부분이 없어야 심사위원이 앱을 열었을 때
+어긋나지 않습니다.
+
+```markdown
+## Inspiration
+
+Before Novakitz was an app it was a website, and fourteen strangers found it
+from a social post and used it. Not friends — people I have never met, some in
+Korea and some not. They averaged thirteen days. One of them lasted forty-two.
+
+There was no app. No icon on their home screen, no notifications, nothing. To
+use it they had to open a browser and type an address, every morning, for six
+weeks.
+
+Then all fourteen stopped, within the same few days.
+
+I had assumed I would need a better reason for people to come back. The forty-
+two days say the reason was already there and what was missing was the signal —
+there was simply nothing to remind them the thing existed. That is what turned
+this into an app.
+
+## What it does
+
+Novakitz is a one-minute morning ritual.
+
+You wake up, tap a circle, and choose one of eight shapes for how you woke.
+That is a complete morning. It takes about five seconds, and on a rushed day
+that is the whole thing.
+
+Then it asks whether you remember a dream. If you do, you write it down and get
+a reflective reading back — not a dictionary definition of what the sea means,
+but a question about what the sea was doing there. If you don't, you're done.
+
+A single morning tells you almost nothing. The point is the month:
+
+- a **calendar** where each day is the pebble you actually pressed
+- **Reflection** — the moods that keep returning, the images that repeat
+- a **monthly review**, written from your own month
+- a **streak that forgives one missed day each month**, and tells you it did
+
+That last one is the whole philosophy in one rule. A habit tool that punishes
+a single bad night is training the wrong thing.
+
+## How I built it
+
+Next.js as a static export, wrapped in Capacitor and shipped to the App Store.
+Supabase for auth and data, Google Gemini for the readings, RevenueCat over
+Apple In-App Purchase for the two subscriptions.
+
+Wrapping the existing web app rather than rewriting in Swift was a deliberate
+choice, and the fourteen users are the reason: they already had accounts and
+months of records, and a rewrite would have meant starting the product from
+zero to gain rendering I do not need. What this app draws is text, colour and a
+circle. The eight mood shapes are border-radius morphs; the grain over the sky
+is an SVG filter; the calendar is CSS grid. There is no image asset in the
+interface at all.
+
+## Challenges I ran into
+
+**An app about mornings, built with `toISOString()`, in Seoul.** In KST every
+morning before 09:00 is the previous day in UTC. So the calendar filed each
+morning under yesterday and the streak broke — precisely for the people using
+the app earliest, which is to say the people using it as intended. Every date
+in the codebase is now built from local components.
+
+**WKWebView composites `filter` and `backdrop-filter` onto their own layers,**
+and those layers do not respect sibling `z-index`. I found this four separate
+times, on four different screens, before I recognised the shape of it: a card
+that looked correct in the browser and sat behind its own background on the
+phone.
+
+**Records that saved perfectly and then appeared nowhere.** The main way people
+record a dream is through the mood-card flow, and that path never wrote to the
+keywords table. Everything saved. The calendar showed the day. But Reflection's
+recurring symbols stayed empty, the archetypes sat on a placeholder that
+promised results which were never coming, and the monthly review printed
+"0 DREAMS" beside a summary describing the dream you had just written. An app
+whose entire premise is accumulation was quietly accumulating nothing.
+
+**And the review.** The first submission came back under Guideline 2.1. Working
+through it turned up two things I would have shipped otherwise: the Restore
+Purchases control existed in code but was only reachable from a page nothing
+linked to, and the terms of service still said subscriptions were billed
+through a payment processor the iOS app does not use.
+
+## What I learned
+
+Almost none of the real bugs were crashes. They were things that worked,
+saved correctly, and then showed up nowhere — and an app built on accumulation
+fails silently when that happens. Nothing errors. The screen is just empty, and
+the person quietly concludes there is nothing there.
+
+The other lesson is about kindness as a feature. The forgiving streak, the free
+tier that never expires, the absence of any feed to perform for — those started
+as design taste and turned out to be the product.
+
+## What's next
+
+A bottom tab bar, so the screens that show what is accumulating are not behind
+a drawer. A weekly recap that arrives instead of waiting to be found. And the
+morning reminder — the signal those fourteen people never got.
+```
+
+---
+
+## Built with — 태그
+
+```
+next.js, react, typescript, capacitor, ios, supabase, postgresql,
+revenuecat, google-gemini, css, vercel
+```
+
+## Try it out 링크
+
+- `https://apps.apple.com/...` ← **승인 후 App Store URL** (필수)
+- `https://novakitz.com`
+
+저장소는 비공개이니 링크하지 마세요.
+
+## 이미지 갤러리
+
+3:2 비율 권장이라 세로 스크린샷은 잘립니다. **6.9" 스크린샷을 그대로 올리되 순서만
+신경 쓰세요** — 첫 장이 카드 썸네일이 됩니다.
+
+1. 홈 화면 (아트워크)
+2. 조약돌 8개
+3. 달력 한 달
+4. 해석 결과
+5. 월간 리뷰
