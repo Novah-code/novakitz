@@ -10,6 +10,8 @@ import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/ima
 import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
+import NotificationPrompt from './NotificationPrompt';
+import { shouldOfferMorningReminder } from '../lib/notifications';
 import StreakBadge from './StreakBadge';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
@@ -255,6 +257,16 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
   const [showStreakPopup, setShowStreakPopup] = useState(false);
+  /*
+   * The morning-reminder ask, queued rather than shown.
+   *
+   * It has to come after a morning has been recorded — that is the whole
+   * point, the question is about something the person just did — but the
+   * streak popup already occupies that moment. So recording sets this, and the
+   * ask appears once the streak popup is out of the way. Two sheets stacked on
+   * top of each other is how both get dismissed without being read.
+   */
+  const [notificationAskQueued, setNotificationAskQueued] = useState(false);
   // Bumped whenever the ritual is completed so the badge recounts without a reload.
   const [streakRefresh, setStreakRefresh] = useState(0);
   const [newTag, setNewTag] = useState<string>('');
@@ -5607,6 +5619,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         />
       )}
 
+      {/* Morning reminder — the in-app ask, before the system one */}
+      {notificationAskQueued && !showStreakPopup && !showMoodCardFlow && user && (
+        <NotificationPrompt
+          language={language}
+          onClose={() => setNotificationAskQueued(false)}
+        />
+      )}
+
       {/* Share Modal with Glassmorphism */}
       {showShareModal && shareModalDream && (
         <div style={{
@@ -5938,7 +5958,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClose={() => setShowMoodCardFlow(false)}
           user={user ?? null}
           onRequestLogin={onGuestAnalyze}
-          onEmotionLogged={() => { setShowStreakPopup(true); setDreamRefreshTrigger(t => t + 1); }}
+          onEmotionLogged={() => {
+            setShowStreakPopup(true);
+            setDreamRefreshTrigger(t => t + 1);
+            if (shouldOfferMorningReminder()) setNotificationAskQueued(true);
+          }}
         />
       )}
 
