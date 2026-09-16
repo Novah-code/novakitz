@@ -424,6 +424,18 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const [saving, setSaving] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [usageLimitReached, setUsageLimitReached] = useState(false);
+  /*
+   * How many readings are left, but only once that is worth saying.
+   *
+   * Null until loaded, and deliberately not shown while there are plenty. A
+   * counter at seven-of-seven is noise on a screen whose whole argument is
+   * that this takes five seconds, and putting it in front of someone before
+   * they have written anything turns the ritual into an account balance.
+   *
+   * It appears at two remaining, which is the point where it stops being
+   * trivia and starts being something a person would want to have known.
+   */
+  const [readingsLeft, setReadingsLeft] = useState<number | null>(null);
   const [isEgoMode, setIsEgoMode] = useState(false);
   const [selectedSleep, setSelectedSleep] = useState('');
   const [selectedStress, setSelectedStress] = useState('');
@@ -547,6 +559,17 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
     }
     setStep('revealed');
   };
+
+  /* Loaded when the two-way card appears, because both of its buttons lead to
+     a reading. One request, once per flow. */
+  useEffect(() => {
+    if (step !== 'blurred' || !user) return;
+    let cancelled = false;
+    canAnalyzeDream(user.id)
+      .then(({ remaining }) => { if (!cancelled) setReadingsLeft(remaining); })
+      .catch(() => { /* Not worth interrupting a morning over. */ });
+    return () => { cancelled = true; };
+  }, [step, user]);
 
   const handleFinishEgo = async () => {
     if (!user) {
@@ -815,6 +838,18 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               <span style={{ whiteSpace: 'nowrap' }}>{isKo ? '무드만 확인' : 'Check your mood'}</span>
               <svg style={{ position: 'absolute', right: 20 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             </button>
+
+            {readingsLeft !== null && readingsLeft <= 2 && (
+              <p style={{ fontSize: 12, color: '#7d8f82', margin: '4px 0 0', textAlign: 'center', lineHeight: 1.5 }}>
+                {readingsLeft > 0
+                  ? (isKo
+                      ? `이번 달 해석 ${readingsLeft}번 남았어요`
+                      : `${readingsLeft} ${readingsLeft === 1 ? 'reading' : 'readings'} left this month`)
+                  : (isKo
+                      ? '이번 달 해석을 다 썼어요. 기록은 계속 저장돼요'
+                      : "You've used this month's readings. Recording still works")}
+              </p>
+            )}
           </div>
         </div>
       </Container>
