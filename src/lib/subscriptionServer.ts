@@ -57,10 +57,25 @@ export async function checkQuota(userId: string): Promise<Quota> {
     // column is filled in from the browser's local calendar, so for anyone east
     // of UTC it can land on the last day of the previous month — fine for the
     // client, which reads back what it wrote, but not something to key on here.
+    /*
+     * Morning mood check-ins are excluded.
+     *
+     * The allowance is seven *dream* readings — that is what the paywall
+     * advertises and what Pro is sold against. The mood check-in is the daily
+     * ritual itself, and the ritual is free; the route already refuses to
+     * block it (`mode === 'ego'` skips this function entirely), so counting it
+     * here only had the effect of spending someone's dream readings on
+     * mornings they never wrote a dream at all.
+     *
+     * Rows written before 2026-09-16 carry the old 'moodcard_analysis' label
+     * for both branches and cannot be told apart, so this month's counts stay
+     * slightly high for anyone affected. It corrects itself next month.
+     */
     const { count, error } = await supabase
       .from('ai_usage')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
+      .neq('interpretation_type', 'mood_checkin')
       .gte('created_at', monthStart());
 
     if (error) throw error;
