@@ -596,7 +596,21 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
         console.error('[EgoAnalysis] API error:', res.status, data);
       }
       if (user) {
-        if (res.ok && data.analysis) recordAIUsage(user.id, undefined, 'moodcard_analysis');
+        /*
+         * Recorded as its own kind, because the quota must not count it.
+         *
+         * This is the morning mood check-in, not a dream reading. It was
+         * logged as 'moodcard_analysis' — the same label the dream branch
+         * above uses — and checkQuota counts every row in ai_usage for the
+         * month regardless of type. So somebody who only ever checked in on
+         * their mood, and never wrote a dream, silently spent all seven of
+         * their dream readings, and the eighth morning they did remember
+         * something was refused with no way to understand why.
+         *
+         * The route already declines to *block* this call (`mode === 'ego'`
+         * skips checkQuota). Now it stops paying for it too.
+         */
+        if (res.ok && data.analysis) recordAIUsage(user.id, undefined, 'mood_checkin');
       } else {
         localStorage.setItem('moodcard_guest_used', '1');
       }
