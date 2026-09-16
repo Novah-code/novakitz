@@ -11,7 +11,6 @@ import DreamInsights from './DreamInsights';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
-import AIUsageWidget from './AIUsageWidget';
 import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
 

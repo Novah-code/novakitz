@@ -6,6 +6,7 @@ import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import ReminderSettings from './ReminderSettings';
 import { loadStreak, nextMilestone, type Streak } from '../lib/streak';
+import { canAnalyzeDream } from '../lib/subscription';
 
 interface ProfileSettingsProps {
   user: User;
@@ -26,6 +27,26 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form states
+  /*
+   * Readings left this month.
+   *
+   * There was an AIUsageWidget for this, imported by
+   * SimpleDreamInterfaceWithAuth and never rendered — half in English and half
+   * in hardcoded Korean, linking to /pricing/ with a bare href that does not
+   * resolve inside Capacitor, and re-querying every five minutes for a number
+   * that changes a few times a day. Twenty lines here beat fixing four things
+   * in a component nothing was using.
+   */
+  const [readings, setReadings] = useState<{ remaining: number; limit: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    canAnalyzeDream(user.id)
+      .then(({ remaining, limit }) => { if (!cancelled) setReadings({ remaining, limit }); })
+      .catch(() => { /* A settings screen is not worth an error over. */ });
+    return () => { cancelled = true; };
+  }, [user.id]);
+
   const [username, setUsername] = useState(profile?.full_name || '');
   const [website, setWebsite] = useState(profile?.website || '');
   const [bio, setBio] = useState(profile?.bio || '');
@@ -702,6 +723,52 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
                   {user.email}
                 </p>
               </div>
+
+              {/*
+                * What is left, and what is never rationed.
+                *
+                * The second sentence is the one that matters: someone checking
+                * this is worried the app is about to stop working, and the
+                * answer is that the ritual never does — only the model's reply
+                * waits. Stated even at zero, especially at zero.
+                */}
+              {readings && (
+                <div style={{ marginBottom: 24 }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#5C7061', marginBottom: 6 }}>
+                    {language === 'ko' ? '이번 달 AI 해석' : "This month's AI readings"}
+                  </label>
+                  <p style={{ fontSize: 15, color: '#2F3B33', margin: '0 0 4px', fontWeight: 600 }}>
+                    {readings.remaining > 0
+                      ? (language === 'ko'
+                          ? `${readings.remaining}번 남았어요`
+                          : `${readings.remaining} left`)
+                      : (language === 'ko' ? '이번 달은 다 썼어요' : 'None left this month')}
+                    {!isPremium && (
+                      <span style={{ fontSize: 13, fontWeight: 400, color: '#8a9a8f' }}>
+                        {language === 'ko' ? ` · 월 ${readings.limit}회` : ` · ${readings.limit} a month`}
+                      </span>
+                    )}
+                  </p>
+                  <p style={{ fontSize: 13, color: '#7d8f82', margin: 0, lineHeight: 1.55 }}>
+                    {language === 'ko'
+                      ? '조약돌, 꿈, 무드 기록은 횟수 제한 없이 언제나 무료예요.'
+                      : 'Pebbles, dreams and mood records are always free, with no limit.'}
+                  </p>
+                  {!isPremium && readings.remaining <= 2 && (
+                    <button
+                      onClick={() => goTo('/pricing/')}
+                      style={{
+                        marginTop: 10, padding: '8px 14px', borderRadius: 999,
+                        border: '1.5px solid rgba(122,179,130,0.45)', background: 'transparent',
+                        color: '#3d6044', fontSize: 13, fontWeight: 700,
+                        fontFamily: 'inherit', cursor: 'pointer',
+                      }}
+                    >
+                      {language === 'ko' ? '매일 받기 — Pro' : 'Get one every day — Pro'}
+                    </button>
+                  )}
+                </div>
+              )}
 
               <ReminderSettings language={language} />
 
