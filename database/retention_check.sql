@@ -1,6 +1,12 @@
 -- How many of the people who signed up actually came back?
 --
--- Run in the Supabase SQL editor. Read-only — it only counts rows.
+-- Read-only — it only counts rows.
+--
+-- RUN ONE QUERY AT A TIME. Do not paste the whole file in and press Run.
+-- The Supabase SQL editor shows the result of the LAST statement only, so
+-- running all of them returns the last table and silently throws away the
+-- other four. Select one query (from its first SELECT/WITH down to its
+-- semicolon), run it, read it, then move to the next.
 --
 -- One signup number tells you nothing on its own. What matters for a daily
 -- ritual app is how many separate DAYS a person showed up, so that is what
@@ -117,27 +123,27 @@ rate AS (
   SELECT label, ord, eligible, returned,
          ROUND(100.0 * returned / NULLIF(eligible, 0)) AS pct
   FROM (
-    SELECT 'D1  — came back the next day'          AS label, 1 AS ord,
+    SELECT 'D1  / came back the next day'          AS label, 1 AS ord,
            COUNT(*) FILTER (WHERE age_days >= 1)                         AS eligible,
            COUNT(*) FILTER (WHERE age_days >= 1  AND back_d1)            AS returned
     FROM per_user
     UNION ALL
-    SELECT 'D7  — came back within 7 days', 2,
+    SELECT 'D7  / came back within 7 days', 2,
            COUNT(*) FILTER (WHERE age_days >= 7),
            COUNT(*) FILTER (WHERE age_days >= 7  AND back_within_7)
     FROM per_user
     UNION ALL
-    SELECT 'D30 — came back within 30 days', 3,
+    SELECT 'D30 / came back within 30 days', 3,
            COUNT(*) FILTER (WHERE age_days >= 30),
            COUNT(*) FILTER (WHERE age_days >= 30 AND back_within_30)
     FROM per_user
     UNION ALL
-    SELECT 'D7  — still active on/after day 7', 4,
+    SELECT 'D7  / still active on or after day 7', 4,
            COUNT(*) FILTER (WHERE age_days >= 7),
            COUNT(*) FILTER (WHERE age_days >= 7  AND alive_at_7)
     FROM per_user
     UNION ALL
-    SELECT 'D30 — still active on/after day 30', 5,
+    SELECT 'D30 / still active on or after day 30', 5,
            COUNT(*) FILTER (WHERE age_days >= 30),
            COUNT(*) FILTER (WHERE age_days >= 30 AND alive_at_30)
     FROM per_user
