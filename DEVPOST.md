@@ -352,21 +352,26 @@ Devpost의 `About the project` 칸에 그대로 붙여넣습니다. 마크다운
 ## Inspiration
 
 Before Novakitz was an app, it was a website, and the only way anyone found it
-was the morning routine content I have been posting for a while. Not one viral
+was the morning-routine content I had been posting for a while. Not one viral
 post — a steady habit of sharing my own mornings.
 
-Fifty-one people signed up that way. Strangers, not friends, some in Korea and
-some not. Fourteen of them kept going past the third day, averaging thirteen
-days each. One lasted forty-two.
+Forty-nine people signed up that way. Strangers, not friends, some in Korea and
+some not. Twelve of them kept going past the third day.
 
-There was no app. No icon on a home screen, no notifications, nothing that
-could bring anyone back. To use it they opened a browser and typed an address,
-every morning, for six weeks.
+There was no app. No icon on a home screen, no notification, nothing that could
+bring anyone back. To use it they opened a browser and typed an address, every
+morning.
 
-Then they all stopped, within the same few days.
+Most of them stopped within the same few weeks. One didn't — and I'll come back
+to that.
 
-I had assumed what I needed was a better reason for people to return. Those
-forty-two days say otherwise — the reason was already there. What was missing
+Most mornings start on a screen, with someone else's day. We wake up and check
+messages, news and notifications, and before we notice how we feel we are
+already carrying someone else's thoughts. I wanted a small space between waking
+up and entering the rest of the world.
+
+I had assumed what I needed was a better reason for people to return. The one
+who kept going says otherwise — the reason was already there. What was missing
 was the signal: nothing in anyone's day ever mentioned that it existed. That is
 what turned this into an app. Not new features. An icon and a notification.
 
@@ -398,13 +403,17 @@ Next.js as a static export, wrapped in Capacitor and shipped to the App Store.
 Supabase for auth and data, Google Gemini for the readings, RevenueCat over
 Apple In-App Purchase for the two subscriptions.
 
+Novakitz was not built for this hackathon. It has been running since October
+2025, and the iOS app is that same product brought to the phone — the app and
+the website share one Supabase project, so everyone who used the website keeps
+their accounts and every record.
+
 Wrapping the existing web app rather than rewriting in Swift was a deliberate
-choice, and the fourteen users are the reason: they already had accounts and
-months of records, and a rewrite would have meant starting the product from
-zero to gain rendering I do not need. What this app draws is text, colour and a
-circle. The eight mood shapes are border-radius morphs; the grain over the sky
-is an SVG filter; the calendar is CSS grid. There is no image asset in the
-interface at all.
+choice, and those users are the reason: they already had months of records, and
+a rewrite would have meant starting the product from zero to gain rendering I
+do not need. What this app draws is text, colour and a circle. The eight mood
+shapes are border-radius morphs; the grain over the sky is an SVG filter; the
+calendar is CSS grid. There is no image asset in the interface at all.
 
 ## Challenges I ran into
 
@@ -434,6 +443,44 @@ Purchases control existed in code but was only reachable from a page nothing
 linked to, and the terms of service still said subscriptions were billed
 through a payment processor the iOS app does not use.
 
+## Accomplishments that I'm proud of
+
+**People came back without being asked to.**
+Novakitz ran for eleven months as a website — no icon, no push notification,
+no App Store listing, no paid acquisition, no existing audience. Of the
+forty-four people who had been signed up long enough to count, seven were still
+recording a month later. One has come back on forty-three separate mornings
+across five months, the most recent one five days ago. They missed far more
+days than they kept, and they came back anyway.
+
+That is the exact behaviour the product is designed around, and I did not have
+to engineer it. It is also why the streak forgives a missed day: the person who
+kept using it is precisely the person a strict streak would have thrown away.
+
+**I took it from a web prototype to something Apple would ship.**
+Alone — design, code, artwork, copy and the submission itself. That meant
+finishing the parts nobody demos:
+
+- eight morning moods drawn as eight shapes, redrawn at cell size so a month
+  reads as the sequence you actually pressed
+- AI readings that ask about the dream instead of defining it
+- affirmations written from that morning's entry
+- a monthly review built from the person's own month
+- subscriptions on RevenueCat over Apple In-App Purchase, with the free trial
+  and entitlements handled properly
+- accounts, records that survive a reinstall, and account deletion from inside
+  the app
+
+The landscape on the home screen is a drawing of mine.
+
+**I left things out.**
+A morning that takes five seconds is the thing I am proudest of, and it is the
+one nobody will notice.
+
+The question underneath all of it was never a feature checklist: can a digital
+product help someone spend the first minute of the day with themselves instead
+of with everyone else? That is still the only thing I am building toward.
+
 ## What I learned
 
 Almost none of the real bugs were crashes. They were things that worked,
@@ -448,8 +495,14 @@ as design taste and turned out to be the product.
 ## What's next
 
 A bottom tab bar, so the screens that show what is accumulating are not behind
-a drawer. A weekly recap that arrives instead of waiting to be found. And the
-morning reminder — the signal those fourteen people never got.
+a drawer. A weekly recap that arrives instead of waiting to be found — a month
+is the right unit for a pattern, but a week is the one a person can still
+remember. And the morning reminder, arriving at the hour someone actually wakes
+rather than an hour I guessed: the signal those forty-nine people never got.
+
+None of it turns noticing into a scoreboard. There is no feed here and there
+will not be one. A place to meet yourself before meeting the rest of the world
+only works if nobody else is watching.
 ```
 
 ---
