@@ -202,3 +202,117 @@ SELECT
   COUNT(*) FILTER (WHERE day <  CURRENT_DATE - 30)                      AS over_30_days_ago,
   COUNT(*) FILTER (WHERE day IS NULL)                                   AS never_did_anything
 FROM last_seen;
+
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- WHOSE ROWS ARE THESE? — per person, one line each
+--
+-- Run this before quoting any number above. Two accounts are almost
+-- certainly in the totals and are not users:
+--
+--   the owner's own account, which was used while building the thing
+--   info.muonkr@gmail.com, the demo account, which was filled with a
+--     month of records for the review video — that month is seeded, not
+--     lived, and it is long enough to be the top row
+--
+-- The `best_user_days = 42` figure quoted to App Review and in DEVPOST.md
+-- came from the totals, so check which email is at the top of this list
+-- before repeating it.
+--
+-- The email column is here so accounts can be recognised. Do not paste this
+-- output anywhere — it is a list of real people's addresses.
+-- ─────────────────────────────────────────────────────────────────────────
+
+WITH activity AS (
+  SELECT user_id, check_date       AS day FROM public.checkins
+  UNION
+  SELECT user_id, created_at::date AS day FROM public.dreams
+  UNION
+  SELECT user_id, reflection_date  AS day FROM public.evening_reflections
+  UNION
+  SELECT user_id, date             AS day FROM public.daily_intentions
+)
+SELECT
+  u.email,
+  u.created_at::date AS signed_up,
+  (SELECT COUNT(*) FROM public.checkins c WHERE c.user_id = u.id)            AS checkins,
+  (SELECT COUNT(*) FROM public.dreams d WHERE d.user_id = u.id)              AS dreams,
+  (SELECT COUNT(*) FROM public.evening_reflections e WHERE e.user_id = u.id) AS reflections,
+  (SELECT COUNT(DISTINCT a.day) FROM activity a WHERE a.user_id = u.id)      AS active_days,
+  (SELECT MAX(a.day) FROM activity a WHERE a.user_id = u.id)                 AS last_seen
+FROM auth.users u
+ORDER BY active_days DESC NULLS LAST, last_seen DESC NULLS LAST;
+
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- D1 / D7 / D30 AGAIN, WITHOUT THE ACCOUNTS THAT ARE NOT USERS
+--
+-- Same query as the cohort one above, with an exclusion list at the top.
+-- Put every address that belongs to the owner or to testing in `mine`, then
+-- run it. These are the numbers to quote.
+--
+-- They will be lower, and that is the point: a founder's own account is the
+-- most engaged account in every database, and leaving it in flatters the
+-- result by exactly the amount that makes the result worthless.
+-- ─────────────────────────────────────────────────────────────────────────
+
+WITH mine AS (
+  SELECT id FROM auth.users
+  WHERE lower(email) IN (
+    'jeongnewna@gmail.com',
+    'info.muonkr@gmail.com'
+    -- add any other address of yours here
+  )
+),
+people AS (
+  SELECT id, created_at FROM auth.users WHERE id NOT IN (SELECT id FROM mine)
+),
+activity AS (
+  SELECT user_id, check_date       AS day FROM public.checkins
+  UNION
+  SELECT user_id, created_at::date AS day FROM public.dreams
+  UNION
+  SELECT user_id, reflection_date  AS day FROM public.evening_reflections
+  UNION
+  SELECT user_id, date             AS day FROM public.daily_intentions
+),
+per_user AS (
+  SELECT
+    u.id,
+    CURRENT_DATE - u.created_at::date AS age_days,
+    COALESCE(bool_or(a.day - u.created_at::date = 1), false)               AS back_d1,
+    COALESCE(bool_or(a.day - u.created_at::date BETWEEN 1 AND 7), false)   AS back_within_7,
+    COALESCE(bool_or(a.day - u.created_at::date BETWEEN 1 AND 30), false)  AS back_within_30,
+    COALESCE(bool_or(a.day - u.created_at::date >= 7), false)              AS alive_at_7,
+    COALESCE(bool_or(a.day - u.created_at::date >= 30), false)             AS alive_at_30
+  FROM people u
+  LEFT JOIN activity a ON a.user_id = u.id
+  GROUP BY u.id, u.created_at
+),
+rate AS (
+  SELECT label, ord, eligible, returned,
+         ROUND(100.0 * returned / NULLIF(eligible, 0)) AS pct
+  FROM (
+    SELECT 'D1  / came back the next day' AS label, 1 AS ord,
+           COUNT(*) FILTER (WHERE age_days >= 1)              AS eligible,
+           COUNT(*) FILTER (WHERE age_days >= 1  AND back_d1) AS returned
+    FROM per_user
+    UNION ALL
+    SELECT 'D7  / came back within 7 days', 2,
+           COUNT(*) FILTER (WHERE age_days >= 7),
+           COUNT(*) FILTER (WHERE age_days >= 7  AND back_within_7) FROM per_user
+    UNION ALL
+    SELECT 'D30 / came back within 30 days', 3,
+           COUNT(*) FILTER (WHERE age_days >= 30),
+           COUNT(*) FILTER (WHERE age_days >= 30 AND back_within_30) FROM per_user
+    UNION ALL
+    SELECT 'D7  / still active on or after day 7', 4,
+           COUNT(*) FILTER (WHERE age_days >= 7),
+           COUNT(*) FILTER (WHERE age_days >= 7  AND alive_at_7) FROM per_user
+    UNION ALL
+    SELECT 'D30 / still active on or after day 30', 5,
+           COUNT(*) FILTER (WHERE age_days >= 30),
+           COUNT(*) FILTER (WHERE age_days >= 30 AND alive_at_30) FROM per_user
+  ) x
+)
+SELECT label, eligible, returned, pct AS percent FROM rate ORDER BY ord;
