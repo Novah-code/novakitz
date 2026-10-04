@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { supabase, Dream } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { getUserPlanInfo } from '../lib/subscription';
+import { isPremiumNow } from '../lib/premium';
 import { authHeader } from '../lib/authHeader';
 
 interface MonthlyReportProps {
@@ -373,7 +374,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
     try {
       setLoading(true);
       const planInfo = await getUserPlanInfo(user.id);
-      const premium = planInfo.planSlug === 'premium';
+      const premium = planInfo.planSlug === 'premium' || (await isPremiumNow(user.id));
       setIsPremium(premium);
 
       const { data: allEntries } = await supabase

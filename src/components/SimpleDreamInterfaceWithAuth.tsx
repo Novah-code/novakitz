@@ -13,6 +13,7 @@ import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
 import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
+import { isPremiumNow } from '../lib/premium';
 
 // Translations
 const translations = {
@@ -361,79 +362,29 @@ export default function SimpleDreamInterfaceWithAuth() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Check premium status when user changes
+  /*
+   * Premium status.
+   *
+   * This used to return early when there was no `user`, because the only
+   * source was a `user_subscriptions` row keyed on the Supabase id. That is
+   * no longer true: a purchase made while signed out lives on RevenueCat's
+   * anonymous app user id, and `isPremiumNow` asks the store when the
+   * database has nothing to say. So it now runs whether or not anyone is
+   * signed in — otherwise the person who just paid without an account would
+   * watch the paywall stay shut.
+   *
+   * It re-runs on sign-in as well, which is when `identify()` has aliased any
+   * anonymous purchase onto the account.
+   */
   useEffect(() => {
-    const checkPremiumStatus = async () => {
-      if (!user) {
-        setIsPremium(false);
-        return;
-      }
+    let cancelled = false;
 
-      try {
-        // Get premium plan ID first
-        const { data: premiumPlans } = await supabase
-          .from('subscription_plans')
-          .select('id')
-          .eq('plan_slug', 'premium')
-          .maybeSingle();
+    (async () => {
+      const premium = await isPremiumNow(user?.id ?? null);
+      if (!cancelled) setIsPremium(premium);
+    })();
 
-        const premiumPlanId = premiumPlans?.id;
-        console.log('📋 Premium plan ID:', premiumPlanId);
-
-        if (!premiumPlanId) {
-          console.log('❌ Could not find premium plan');
-          setIsPremium(false);
-          return;
-        }
-
-        const { data: subscription } = await supabase
-          .from('user_subscriptions')
-          .select('id, status, plan_id, expires_at')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
-          .maybeSingle();
-
-        if (subscription) {
-          // Check if subscription is not expired
-          const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
-
-          /*
-           * A premium row with no expiry used to mean a Lifetime purchase, and
-           * the app labelled it that way. There is no Lifetime plan any more —
-           * it was taken off the paywall — so the only rows without an expiry
-           * now are comped ones: the demo account for review, and anything
-           * granted from the admin screen. They get Pro, because that is the
-           * only paid tier there is.
-           */
-          console.log('📋 Subscription details:', {
-            subscription_id: subscription.id,
-            status: subscription.status,
-            plan_id: subscription.plan_id,
-            premium_plan_id: premiumPlanId,
-            expires_at: subscription.expires_at,
-            isExpired
-          });
-
-          if (!isExpired) {
-            const isPremiumValue = subscription.plan_id === premiumPlanId;
-            console.log('✅ Setting isPremium to:', isPremiumValue);
-            setIsPremium(isPremiumValue);
-          } else {
-            console.log('⏳ Subscription expired, setting isPremium to false');
-            setIsPremium(false);
-          }
-        } else {
-          console.log('❌ No subscription found');
-          setIsPremium(false);
-        }
-      } catch (error) {
-        console.error('Error checking premium status:', error);
-        setIsPremium(false);
-      }
-    };
-
-    checkPremiumStatus();
+    return () => { cancelled = true; };
   }, [user]);
 
   // Load dreams for calendar

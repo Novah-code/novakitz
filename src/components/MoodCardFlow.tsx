@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
+import { isPremiumNow } from '../lib/premium';
 import { addSingleAffirmation } from '../lib/affirmations';
 import { authHeader } from '../lib/authHeader';
 import { dedupeTags } from '../lib/tags';
@@ -497,10 +498,24 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const isKo = language === 'ko';
   const affirmation = arcanaAffirmations[arcanaId]?.[isKo ? 'ko' : 'en'] ?? (isKo ? '오늘도 당신은 충분합니다.' : 'You are enough today.');
 
+  /*
+   * A signed-out person gets one reading, then a sign-in prompt.
+   *
+   * Someone who bought Pro without an account is also signed out, and metering
+   * them would be taking the money and then withholding what it bought. That is
+   * the substance of the 5.1.1(v) rejection rather than just the button that
+   * triggered it, so the guest limit asks the store before it bites.
+   */
+  const guestOutOfReadings = async (): Promise<boolean> => {
+    if (typeof window === 'undefined') return false;
+    if (!localStorage.getItem('moodcard_guest_used')) return false;
+    return !(await isPremiumNow(null));
+  };
+
   const handleFinishRecord = async () => {
     // Check usage limits before analyzing
     if (!user) {
-      if (typeof window !== 'undefined' && localStorage.getItem('moodcard_guest_used')) {
+      if (await guestOutOfReadings()) {
         setStep('revealed');
         setShowLoginPrompt(true);
         return;
@@ -573,7 +588,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
 
   const handleFinishEgo = async () => {
     if (!user) {
-      if (typeof window !== 'undefined' && localStorage.getItem('moodcard_guest_used')) {
+      if (await guestOutOfReadings()) {
         setStep('revealed'); setShowLoginPrompt(true); return;
       }
     } else {

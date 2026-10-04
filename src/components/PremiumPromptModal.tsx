@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { isPremiumNow } from '../lib/premium';
 import { User } from '@supabase/supabase-js';
 import PaymentMethodModal from './PaymentMethodModal';
 import '../styles/premium-prompt-modal.css';
@@ -57,55 +57,15 @@ export default function PremiumPromptModal({
           }
         }
 
-        // Get premium plan ID first
-        const { data: premiumPlans } = await supabase
-          .from('subscription_plans')
-          .select('id')
-          .eq('plan_slug', 'premium')
-          .maybeSingle();
-
-        const premiumPlanId = premiumPlans?.id;
-
-        if (!premiumPlanId) {
-          console.warn('Could not find premium plan');
-          setIsPremium(false);
-          setShowModal(true);
-          return;
-        }
-
-        // Check subscription status
-        const { data: subscription, error } = await supabase
-          .from('user_subscriptions')
-          .select('id, status, plan_id')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
-
-        if (error) {
-          console.warn('Error querying subscriptions:', error);
-          setIsPremium(false);
-          setShowModal(true);
-          return;
-        }
-
-        console.log('Subscription data:', subscription);
-
-        if (subscription) {
-          // User has an active subscription, check if it's premium
-          const isPremium = subscription.plan_id === premiumPlanId;
-          console.log('User is premium:', isPremium);
-          setIsPremium(isPremium || false);
-
-          // Only show prompt to free users
-          if (!isPremium) {
-            setShowModal(true);
-          }
-        } else {
-          // No active subscription = free user
-          console.log('No active subscription found - user is free');
-          setIsPremium(false);
-          setShowModal(true);
-        }
+        /*
+         * One question, two possible sources — see lib/premium.ts. Asking the
+         * database alone used to mean that a customer whose webhook never
+         * landed, or who bought before signing in, got an upsell for something
+         * they had already paid for.
+         */
+        const premium = await isPremiumNow(user.id);
+        setIsPremium(premium);
+        setShowModal(!premium);
       } catch (error) {
         console.error('Error checking premium status:', error);
         // On error, show the prompt to be safe

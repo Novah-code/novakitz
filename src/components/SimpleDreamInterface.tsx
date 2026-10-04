@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
+import { isPremiumNow } from '../lib/premium';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
@@ -550,45 +551,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
     // Load premium status and AI usage
     const loadPremiumStatus = async () => {
-      if (user) {
-        try {
-          // Check if user has active premium subscription
-          const { data: subscription } = await supabase
-            .from('user_subscriptions')
-            .select(`
-              *,
-              subscription_plans:plan_id(
-                plan_slug,
-                ai_interpretations_per_month
-              )
-            `)
-            .eq('user_id', user.id)
-            .eq('status', 'active')
-            .maybeSingle();
+      try {
+        /*
+         * Runs signed out too. Someone who bought without an account holds the
+         * entitlement on RevenueCat's anonymous id, and `isPremiumNow` asks the
+         * store when the database has no row to offer.
+         */
+        setIsPremium(await isPremiumNow(user?.id ?? null));
 
-          console.log('🔍 Premium status check:', {
-            userID: user.id,
-            hasSubscription: !!subscription,
-            subscriptionData: subscription ? {
-              status: subscription.status,
-              plan: subscription.subscription_plans?.plan_slug,
-              ai_limit: subscription.subscription_plans?.ai_interpretations_per_month
-            } : null
-          });
-
-          const isPremiumUser = subscription && subscription.subscription_plans?.plan_slug === 'premium';
-          setIsPremium(isPremiumUser || false);
-
-          console.log('✅ isPremium set to:', isPremiumUser || false);
-
-          // Load AI usage
-          const usage = await getRemainingAIInterpretations(user.id);
-          setRemainingAIUsage(usage);
-
-          console.log('AI usage loaded:', usage);
-        } catch (error) {
-          console.error('Error loading premium status:', error);
+        // Usage is counted per account, so there is nothing to count without
+        // one. A signed-out buyer is on Pro, which has no monthly limit.
+        if (user) {
+          setRemainingAIUsage(await getRemainingAIInterpretations(user.id));
         }
+      } catch (error) {
+        console.error('Error loading premium status:', error);
       }
     };
     loadPremiumStatus();
