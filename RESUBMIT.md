@@ -19,12 +19,11 @@
 ## 1. 코드 받기
 
 ```
-git fetch origin
+git pull --no-rebase --no-edit origin claude/revenue-hackathon-pwa-app-r6w9jo
 ```
 
-```
-git merge --no-rebase origin/claude/revenue-hackathon-pwa-app-r6w9jo
-```
+`--no-edit` 가 중요합니다. 빠지면 vim이 열리고, 다음 줄에 붙여넣은 명령을 vim이
+받아먹습니다. 이미 한 번 당했습니다.
 
 **`git reset --hard` 를 쓰지 마세요.** 2026-10-04에 그것 때문에
 `ios/App/App.xcodeproj/project.pbxproj` 가 사라졌습니다.
