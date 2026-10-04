@@ -1746,6 +1746,96 @@ URL 스킴, `GoogleService-Info.plist`, Supabase의 Authorized Client IDs, 그�
 
 ---
 
+## 21. Guideline 5.1.1(v) — 구매하려면 가입부터 하라고 합니다
+
+**2026-10-03 심사.** 4.3(a) 스팸 혐의는 사라졌습니다. 같은 제출(Submission ID
+`12a5477c`)을 다시 본 결과 그 지적은 없어졌고, 대신 5.1.1(v)가 왔습니다.
+
+### 심사자가 본 것
+
+`src/lib/checkout.ts:61`
+
+```ts
+if (!(await isSignedIn())) {
+  return { changed: false, message: t.signInFirst };
+}
+```
+
+> "Please sign in first so your subscription is attached to your account."
+
+가격 페이지는 로그인 없이 열립니다. 그래서 심사자는 **로그인하지 않은 채 구독
+버튼을 누를 수 있었고, 돌아온 것이 저 문장입니다.** 가이드라인이 금지하는 것이
+정확히 이 모양 — 구매 앞에 세워둔 가입 벽입니다.
+
+**`restorePurchases`에도 같은 게이트가 있습니다 (`checkout.ts:86`).** 이쪽이 더
+분명한 위반입니다. 구매 복원은 계정과 무관하게 항상 동작해야 합니다.
+
+### 저 코드가 틀린 게 아니었다는 점은 짚어둘 만합니다
+
+주석에 적힌 이유가 사실입니다 — 로그인 없이 사면 RevenueCat의 익명 ID에 붙고,
+웹훅은 그 구매를 줄 Supabase 사용자를 못 찾습니다. 그래서 막아둔 것이었습니다.
+
+**해결책은 RevenueCat이 이미 갖고 있습니다.** 익명으로 산 뒤 나중에
+`Purchases.logIn({ appUserID })`을 부르면 익명 ID가 실제 계정으로 **별칭 처리되고
+구매가 따라옵니다.** `identify()`가 이미 그 호출이고
+(`SimpleDreamInterfaceWithAuth.tsx:126`에서 로그인 시 실행됩니다), 그러니 익명
+구매 → 나중 로그인 → 자동 이전 경로는 **새로 만들 게 아니라 이미 깔려 있습니다.**
+
+### 고치면 생기는 진짜 문제
+
+게이트만 걷어내면 **돈을 받고 아무것도 안 주는 앱이 됩니다.** 반려보다 나쁩니다.
+
+프리미엄 판정이 네 군데에서 전부 Supabase `user_subscriptions`를 `user.id`로
+조회합니다:
+
+- `SimpleDreamInterfaceWithAuth.tsx:366`
+- `SimpleDreamInterface.tsx:580`
+- `MonthlyDreamReport.tsx:377`
+- `PremiumPromptModal.tsx:95`
+
+계정이 없으면 `user.id`가 없고, 그러면 결제해도 `isPremium`이 `false`입니다.
+
+**필요한 것:** `hasPremiumEntitlement()`(`revenuecat.ts:259`)가 이미 RevenueCat에
+직접 묻는 함수로 존재합니다. 네 곳을 공용 헬퍼 하나로 모으고, 계정이 없을 때 —
+또는 DB에 행이 없을 때 — 그 함수를 보조 근거로 쓰면 됩니다.
+
+### 남는 구멍 하나
+
+`ai_usage` 사용량 집계는 `user_id`로 셉니다. 계정 없는 Pro 사용자는 셀 키가
+없습니다. **Pro는 한도가 없으니 실질 영향은 없지만**, 계정 없이 Pro인 상태에서
+`canAnalyzeDream`이 무엇을 반환하는지는 확인해야 합니다.
+
+### 다른 선택지 — 반박
+
+**"이 앱의 콘텐츠는 계정 기반이 맞다"는 주장도 성립합니다.** Pro가 여는 것은
+*그 사람 자신의* 꿈에 대한 해석과 *그 사람 자신의* 한 달에 대한 리뷰입니다.
+계정이 없으면 분석할 기록 자체가 없습니다. 가이드라인 5.1.1은 콘텐츠가 계정
+기반일 때는 가입 요구를 허용합니다.
+
+**그래도 고치는 쪽을 권합니다.** 이유는 셋입니다 — 심사자가 실제로 겪은 것은
+논리가 아니라 막힌 버튼이고, 반박은 또 한 주를 쓰고도 질 수 있으며, 고치고 나면
+**계정 없이도 살 수 있는 앱**이 되어 신규 사용자 마찰이 줄어듭니다.
+
+Apple이 Next Steps에 적어준 문장이 그대로 설계도입니다:
+
+> "You may explain to the user that registering will enable them to access the
+> purchased content from any of their supported devices and provide them a way
+> to register at any time."
+
+가입을 **막는** 게 아니라 **권하는** 것으로 바꾸면 됩니다.
+
+### 할 일
+
+1. `checkout.ts`의 게이트 두 개 제거
+2. 프리미엄 판정을 공용 헬퍼로 모으고 RevenueCat 폴백 추가 — **1번보다 먼저
+   끝나야 합니다**
+3. 결제 직후 로그인 권유(강제 아님), 문구는 기기 간 동기화 이유로
+4. 계정 없는 Pro에서 `canAnalyzeDream` 확인
+5. §20(구글 로그인)을 **같은 빌드에 넣습니다.** 어차피 새 빌드를 만들어야 하고,
+   심사도 한 번에 끝납니다
+
+---
+
 ## 기록해둘 결정들
 
 **부제는 `Morning Ritual Kit`입니다 (2026-08-31).** 이름의 `kitz`와 붙고,
