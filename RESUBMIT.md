@@ -19,11 +19,22 @@
 ## 1. 코드 받기
 
 ```
-git fetch origin && git reset --hard origin/claude/revenue-hackathon-pwa-app-r6w9jo
+git fetch origin
 ```
 
-`reset --hard`는 로컬에서 고친 것을 **버립니다.** 직접 수정한 게 있으면 먼저
-`git stash` 하세요.
+```
+git merge --no-rebase origin/claude/revenue-hackathon-pwa-app-r6w9jo
+```
+
+**`git reset --hard` 를 쓰지 마세요.** 2026-10-04에 그것 때문에
+`ios/App/App.xcodeproj/project.pbxproj` 가 사라졌습니다.
+
+이 저장소에는 `ios/` 폴더가 없습니다 (§5-1). 그런데 로컬에는 커밋돼 있어서,
+`reset --hard` 가 "원격에 없는 추적 파일"로 보고 지웁니다. Xcode 프로젝트가
+통째로 날아가고 서명·기능 설정을 다시 만들어야 합니다.
+
+충돌이 나면 멈추고 물어보세요. `reset --hard` 로 넘기지 마세요 — 그게 이 사고의
+전부입니다.
 
 ## 2. 웹 번들 만들기
 
