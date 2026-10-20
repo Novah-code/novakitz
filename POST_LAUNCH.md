@@ -1771,9 +1771,46 @@ URL 스킴, `GoogleService-Info.plist`, Supabase의 Authorized Client IDs, 그�
 
 ### 할 일 (출시 후 첫 빌드)
 
-- `signInWithGoogle`에 `isNative()` 분기 — `appleAuth.ts`와 같은 구조
+- ~~`signInWithGoogle`에 `isNative()` 분기~~ → **코드 작성됨 (2026-10-20,
+  `src/lib/googleAuth.ts`).** 아래 "적용 순서"의 윤아님 맥 쪽 설정이 남아 있고,
+  **기기에서 돌려보기 전까지는 동작이 확인된 것이 아닙니다.**
 - §6-1(비밀번호 재설정)과 §15(딥링크)를 같이 묶어서. 셋 다 같은 리디렉트
   문제이고, 한 번에 설정하고 한 번에 실기기 검증하는 편이 안전합니다
+
+### 구글 로그인 수정 — 적용 순서 (2026-10-20)
+
+방식은 **앱 전용 주소로 돌아오게 하는 것**입니다. `Google → Supabase →
+com.novakitz.app://auth/callback#access_token=… → iOS가 앱을 열어줌 →
+appUrlOpen → 세션 적용`.
+
+코드는 `googleAuth.ts`에 있고, 코드 바깥에 **두 군데 설정**이 필요합니다.
+둘 중 하나라도 빠지면 증상이 다르게 나타나서 어디가 빠졌는지 구분됩니다.
+
+| 증상 | 빠진 것 |
+|---|---|
+| Safari가 앱으로 안 돌아오고 **novakitz.com 웹사이트**가 뜸 | Supabase 허용 목록에 `com.novakitz.app://auth/callback` 없음 (Site URL로 폴백됨) |
+| 전과 같이 `address is invalid` | Xcode `Info.plist`에 URL 스킴 `com.novakitz.app` 등록 안 됨 |
+| 앱이 열리는데 로그인 안 됨 | `googleAuth.ts` 쪽 문제 — 에러 메시지를 보고 판단 |
+
+적용 순서(윤아님 맥):
+
+1. `git pull --no-rebase --no-edit origin <branch>` — 새 플러그인이 `package.json`에
+   들어옵니다
+2. `npm install`
+3. Supabase → Authentication → URL Configuration → Redirect URLs에
+   `com.novakitz.app://auth/callback` 추가 (`capacitor://localhost`는 둬도 됩니다)
+4. `npm run build:app` → `npx cap sync ios` — 새 플러그인 두 개
+   (`@capacitor/app`, `@capacitor/browser`)가 iOS 프로젝트에 연결됩니다
+5. Xcode → App 타깃 → **Info** 탭 → **URL Types** → ＋ → Identifier와
+   URL Schemes에 `com.novakitz.app`
+6. **폰에 Run(케이블)으로 설치해서 시험.** Archive/Upload가 아닙니다 —
+   심사 대기 중인 빌드 4의 순서를 건드리지 않습니다
+
+**걸릴 수 있는 곳 두 가지.** (1) `cap sync`가 새 플러그인을
+`CapApp-SPM/Package.swift`에 못 쓰면 이전에 본 경고(`Unable to write to
+Package.swift`)가 다시 나옵니다. 음성 인식 플러그인이 SPM을 지원하지 않는 것과
+같은 계열의 문제입니다. (2) 구글 로그인이 끝난 뒤 앱이 **완전히 종료된 상태에서**
+돌아오는 경우(콜드 스타트)는 다루지 않았습니다.
 
 ---
 

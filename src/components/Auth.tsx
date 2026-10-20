@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { signInWithApple, isAppleSignInCancelled } from '../lib/appleAuth';
+import { signInWithGoogle, isGoogleSignInCancelled } from '../lib/googleAuth';
+import { isNative } from '../lib/platform';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -124,23 +126,18 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
     setMessage('');
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin,
-          skipBrowserRedirect: false,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-      if (error) throw error;
-      // 성공시 Google 페이지로 리다이렉트됨
-    } catch (error: any) {
-      console.error('Google sign-in failed:', error);
-      setMessage(`Could not sign in with Google: ${error.message}`);
+      await signInWithGoogle();
+      // On the web this resolves as the browser navigates to Google, so the
+      // spinner is left running until the page goes. In the app the flow ends
+      // here — with a session, or with the sheet closed — and nothing else will
+      // clear it.
+      if (isNative()) setLoading(null);
+    } catch (error: unknown) {
       setLoading(null);
+      if (isGoogleSignInCancelled(error)) return;
+      console.error('Google sign-in failed:', error);
+      const detail = (error as { message?: string })?.message ?? '';
+      setMessage(`Could not sign in with Google: ${detail}`);
     }
   };
 
