@@ -14,6 +14,7 @@ import DreamCalendar from './DreamCalendar';
 import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
 import { isPremiumNow } from '../lib/premium';
+import AccountButton from './AccountButton';
 import BottomTabBar, { TAB_BAR_HEIGHT, SUB_SWITCH_SPACE, type TabId, type SubId } from './BottomTabBar';
 
 // Translations
@@ -68,6 +69,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  // What the account button shows: their photo, or the first letter of their name.
+  const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string }>({ url: null, initial: '' });
   // True while the home screen is in a full-screen step (see SimpleDreamInterface).
   const [immersive, setImmersive] = useState(false);
 
@@ -390,6 +393,38 @@ export default function SimpleDreamInterfaceWithAuth() {
     return () => { cancelled = true; };
   }, [user]);
 
+  /*
+   * The account button's face. Read once per account rather than from
+   * `userProfile`, which is only filled in when settings are opened — the button
+   * is on screen long before that.
+   */
+  useEffect(() => {
+    if (!user) {
+      setAvatarInfo({ url: null, initial: '' });
+      return;
+    }
+    let cancelled = false;
+    const fallback = (user.user_metadata?.name || user.email || '').toString().trim();
+    setAvatarInfo({ url: null, initial: fallback.charAt(0) });
+
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('avatar_url, display_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (cancelled || !data) return;
+        const name = (data.display_name || fallback).toString().trim();
+        setAvatarInfo({ url: data.avatar_url || null, initial: name.charAt(0) });
+      } catch {
+        // The letter from the account's own name is already showing.
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [user]);
+
   // Load dreams for calendar
   const loadDreams = useCallback(async () => {
       if (!user) {
@@ -620,58 +655,28 @@ export default function SimpleDreamInterfaceWithAuth() {
   // Show main app (for both logged-in users and guests)
   return (
     <>
-      {/* Hamburger Menu Button (Top Right) */}
-      <button
+      {/*
+        Account button (top right). It opens the drawer, which now only holds
+        what is about the account — the places moved to the bottom tab bar.
+      */}
+      <AccountButton
+        language={language}
+        open={menuOpen}
+        signedIn={!!user}
+        avatarUrl={avatarInfo.url}
+        initial={avatarInfo.initial}
         onClick={() => setMenuOpen(!menuOpen)}
-        style={{
-          position: 'fixed',
-          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-          right: 'calc(env(safe-area-inset-right, 0px) + 20px)',
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.5)',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          padding: '12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '5px',
-          transition: 'all 0.3s',
-          zIndex: 10000,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)'
-        }}
-        aria-label="Menu"
-      >
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          transform: menuOpen ? 'rotate(45deg) translateY(8px)' : 'none'
-        }}></div>
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          opacity: menuOpen ? 0 : 1
-        }}></div>
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          transform: menuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none'
-        }}></div>
-      </button>
+      />
 
       {/* Hamburger Menu Sidebar */}
       {menuOpen && (
         <>
+          {/*
+            The drawer is translucent, and the home screen's two buttons showed
+            through it and sat on top of its Language row. They are not part of
+            this screen while it is open.
+          */}
+          <style>{`.home-actions { display: none !important; }`}</style>
           {/* Backdrop */}
           <div
             onClick={() => setMenuOpen(false)}
@@ -696,7 +701,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             <style>{`@keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }`}</style>
 
             {/*
-              * Room for the hamburger, which is fixed above this panel and
+              * Room for the account button, which is fixed above this panel and
               * turns into an X while the menu is open. The drawer used to carry
               * a second close button of its own, directly under that one — two
               * X's stacked in the same corner, both doing the same thing. The
@@ -711,7 +716,13 @@ export default function SimpleDreamInterfaceWithAuth() {
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
               >
                 <div style={{ position: 'relative' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)', boxShadow: '0 2px 8px rgba(127,176,105,0.3)' }} />
+                  {/* The same face as the account button, so the two read as one person. */}
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)', boxShadow: '0 2px 8px rgba(127,176,105,0.3)', color: '#fff', fontSize: 17, fontWeight: 600, textTransform: 'uppercase' }}>
+                    {avatarInfo.url
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={avatarInfo.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : avatarInfo.initial}
+                  </div>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="3" style={{ position: 'absolute', bottom: '-2px', right: '-4px' }}>
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
