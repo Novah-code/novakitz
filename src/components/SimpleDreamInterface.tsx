@@ -53,6 +53,18 @@ interface SimpleDreamInterfaceProps {
   onImmersiveChange?: (immersive: boolean) => void;
 }
 
+/*
+ * How the pebble picker lays out its eight pebbles now that it has the whole
+ * screen. The pebbles themselves are unchanged.
+ */
+const PICKER_LAYOUTS = {
+  // The grid as it always was, just centred on a full screen.
+  wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px' },
+  // Two columns of four, a little larger, to use the height.
+  tall: { columns: 2, size: '76px', gap: '40px 24px', label: '13px' },
+} as const;
+const PICKER_LAYOUT = PICKER_LAYOUTS.tall;
+
 // Client-side only PulseDots component to avoid SSR issues
 const PulseDots = () => {
   const [mounted, setMounted] = useState(false);
@@ -6025,33 +6037,32 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClick={() => setShowEmotionModal(false)}
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.35)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
+            // The card's own colour, now the whole screen. There is no frame and
+            // no scrim: the pebbles sit on exactly what they always sat on.
+            background: '#EAF4EC',
             zIndex: 20000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '20px',
+            display: 'flex',
           }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: '90%', maxWidth: '360px',
-              background: '#EAF4EC',
-              borderRadius: '32px',
-              padding: '35px 25px 45px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+              width: '100%', height: '100%',
+              boxSizing: 'border-box',
+              padding: 'calc(env(safe-area-inset-top, 0px) + 78px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)',
               position: 'relative',
               textAlign: 'center',
-              maxHeight: 'calc(100vh - 40px)',
+              display: 'flex', flexDirection: 'column',
               overflowY: 'auto',
             }}
           >
             <button
               onClick={() => setShowEmotionModal(false)}
               style={{
-                position: 'absolute', top: '20px', right: '20px',
-                width: '30px', height: '30px',
+                position: 'absolute',
+                top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+                right: 'calc(env(safe-area-inset-right, 0px) + 18px)',
+                width: '40px', height: '40px',
                 background: 'rgba(0,0,0,0.05)',
                 border: 'none', borderRadius: '50%',
                 cursor: 'pointer', fontSize: '14px',
@@ -6079,10 +6090,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
 
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{
+              width: '100%',
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '20px 10px',
+              gridTemplateColumns: `repeat(${PICKER_LAYOUT.columns}, 1fr)`,
+              gap: PICKER_LAYOUT.gap,
               justifyItems: 'center',
             }}>
               {emotionList.map((emotion, idx) => (
@@ -6099,7 +6112,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
                 >
                   <div style={{
-                    width: '56px', height: '56px',
+                    width: PICKER_LAYOUT.size, height: PICKER_LAYOUT.size,
                     backgroundColor: emotion.color,
                     borderRadius: emotion.borderRadius,
                     backdropFilter: 'blur(10px)',
@@ -6108,7 +6121,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     transition: 'all 0.3s ease',
                   }} />
                   <span style={{
-                    fontSize: '11px', fontWeight: 500,
+                    fontSize: PICKER_LAYOUT.label, fontWeight: 500,
                     color: '#4A5D4E', opacity: 0.8,
                     fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
                   }}>
@@ -6116,6 +6129,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </span>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </div>
