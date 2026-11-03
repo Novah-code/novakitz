@@ -324,17 +324,16 @@ export default function PricingPage() {
       <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', pointerEvents: 'none' }} />
       <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed', zIndex: 0 }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(48px,8vw,80px) 24px', position: 'relative', zIndex: 1 }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(36px,6vw,64px) 24px', position: 'relative', zIndex: 1 }}>
 
         {/* ── Header ── */}
-        <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <span style={{ ...M, fontSize: 11, letterSpacing: 2, color: P.light, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <span style={{ ...M, fontSize: 11, letterSpacing: 0.6, color: P.light, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
             {ko ? '1분 아침 리추얼' : 'A 1-minute morning ritual'}
           </span>
-          <h1 style={{ ...S, fontSize: 'clamp(44px,8vw,60px)', color: P.ink, margin: '0 0 40px', letterSpacing: 0 }}>
+          <h1 style={{ ...S, fontSize: 'clamp(44px,8vw,60px)', color: P.ink, margin: '0 0 16px', letterSpacing: 0, lineHeight: 1.05 }}>
             {ko ? '요금제' : 'Pricing'}
           </h1>
-
           {/*
             * No card around the opening lines. They sat in a frosted panel the same
             * size and weight as the plan cards below, which made the first thing on
@@ -343,36 +342,29 @@ export default function PricingPage() {
             * and the question in the display italic.
             */}
           <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <p style={{ ...S, margin: 0, fontSize: 'clamp(20px,4.6vw,24px)', lineHeight: 1.5, color: P.base, whiteSpace: 'pre-line', textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
+            <p style={{ ...S, margin: 0, fontSize: 'clamp(20px,4.6vw,24px)', lineHeight: 1.4, color: P.base, whiteSpace: 'pre-line', textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
               {ko
                 ? "비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 'Yesterday'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다."
                 : "Paul McCartney composed 'Yesterday' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas."}
             </p>
-            <span aria-hidden="true" style={{ display: 'block', width: 36, height: 2, borderRadius: 2, background: P.pink, margin: '30px 0' }} />
-            <p style={{ ...S, margin: 0, fontSize: 'clamp(28px,6vw,36px)', lineHeight: 1.2, color: P.ink, textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
+            <span aria-hidden="true" style={{ display: 'block', width: 36, height: 2, borderRadius: 2, background: P.pink, margin: '18px 0' }} />
+            <p style={{ ...S, margin: 0, fontSize: 'clamp(26px,5.6vw,32px)', lineHeight: 1.15, color: P.ink, textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
               {ko ? '위대한 통찰은 종종 우리가 잠든 사이 시작됩니다.' : 'Great insights often begin while we sleep.'}
             </p>
-            <p style={{ ...S, margin: '22px 0 0', fontSize: 'clamp(24px,5vw,30px)', fontStyle: 'italic', color: P.rose }}>
+            <p style={{ ...S, margin: '12px 0 0', fontSize: 'clamp(22px,4.6vw,26px)', fontStyle: 'italic', color: P.rose }}>
               {ko ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?'}
             </p>
           </div>
         </div>
 
         {/* ── Pricing Cards ── */}
-        <div style={{ marginBottom: 100 }}>
-          <div style={{ textAlign: 'center', marginBottom: 50 }}>
-            <h2 style={{ ...S, fontSize: 'clamp(30px,6vw,40px)', color: P.ink, margin: '0 0 10px' }}>
-              {ko ? '플랜 선택하기' : 'Choose Your Plan'}
-            </h2>
-            <p style={{ fontSize: 15, color: P.light, margin: 0 }}>
-              {ko ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams'}
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24, alignItems: 'stretch' }}>
+        <div style={{ marginBottom: 80 }}>
+          <div className="pr-plans" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24, alignItems: 'stretch' }}>
+            {/* One column on a phone: the plans that cost money come first, Free last. */}
+            <style>{`@media (max-width: 760px) { .pr-yearly { order: 1; } .pr-pro { order: 2; } .pr-free { order: 3; } }`}</style>
 
             {/* Free */}
-            <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column', opacity: 0.92 }}>
+            <div className="pr-free" style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column', opacity: 0.92 }}>
               <h3 style={{ ...S, fontSize: 30, color: P.ink, margin: '0 0 6px' }}>Free</h3>
               <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '가입만 하면' : 'Just sign up'}</p>
               <div style={{ marginBottom: 24 }}>
@@ -396,7 +388,7 @@ export default function PricingPage() {
             </div>
 
             {/* Pro */}
-            <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>
+            <div className="pr-pro" style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ ...S, fontSize: 30, color: P.ink, margin: '0 0 6px' }}>Pro</h3>
               <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
               <div style={{ marginBottom: 24 }}>
@@ -426,7 +418,7 @@ export default function PricingPage() {
             </div>
 
             {/* Yearly – Popular */}
-            <div style={{ ...panel, border: `2px solid ${P.pink}`, boxShadow: '0 12px 32px rgba(237,163,188,0.30), inset 0 1px 0 rgba(255,255,255,0.95)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            <div className="pr-yearly" style={{ ...panel, border: `2px solid ${P.pink}`, boxShadow: '0 12px 32px rgba(237,163,188,0.30), inset 0 1px 0 rgba(255,255,255,0.95)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
               <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: 1, borderRadius: 999, background: P.pink, boxShadow: '0 4px 12px rgba(237,163,188,0.45)', whiteSpace: 'nowrap' }}>
                 POPULAR
               </div>
@@ -511,7 +503,7 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
-            <p style={{ ...S, fontSize: 26, fontStyle: 'italic', color: P.rose, whiteSpace: 'pre-line', margin: 0 }}>
+            <p style={{ ...S, fontSize: 'clamp(20px,4.6vw,24px)', fontStyle: 'italic', color: P.rose, whiteSpace: 'pre-line', margin: 0, textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
               {ko
                 ? '노바키츠는 사라지는 꿈과 감정을 붙잡아,\n당신 내면의 선명한 지도로 만들어드립니다.'
                 : 'Novakitz captures your fleeting dreams and emotions\nand turns them into a clear map of your inner life.'}
