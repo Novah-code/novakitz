@@ -27,6 +27,19 @@
  * rectangles across the sky), and the grain is measured rather than guessed.
  */
 
+/*
+ * The day sky, defined once. Three blooms over cream: warm top-left, lavender
+ * right, butter at the foot. The home scene wears it, and so does the pebble
+ * picker, which is a screen of its own and should read as the same room.
+ */
+:root {
+  --home-sky-day:
+    radial-gradient(circle at 12% 10%, rgba(255, 190, 165, 0.95) 0%, rgba(255, 190, 165, 0) 52%),
+    radial-gradient(circle at 92% 28%, rgba(196, 180, 255, 0.90) 0%, rgba(196, 180, 255, 0) 54%),
+    radial-gradient(circle at 40% 100%, rgba(255, 228, 150, 0.95) 0%, rgba(255, 228, 150, 0) 58%),
+    linear-gradient(180deg, #F7F1E8 0%, #F2ECE2 100%);
+}
+
 .home-scene {
   position: fixed;
   inset: 0;
@@ -37,12 +50,7 @@
 .home-scene--day {
   --field: #5BB0F5;
   --field-deep: #4FA4EE;
-  /* Three blooms over cream: warm top-left, lavender right, butter at the foot. */
-  --sky:
-    radial-gradient(circle at 12% 10%, rgba(255, 190, 165, 0.95) 0%, rgba(255, 190, 165, 0) 52%),
-    radial-gradient(circle at 92% 28%, rgba(196, 180, 255, 0.90) 0%, rgba(196, 180, 255, 0) 54%),
-    radial-gradient(circle at 40% 100%, rgba(255, 228, 150, 0.95) 0%, rgba(255, 228, 150, 0) 58%),
-    linear-gradient(180deg, #F7F1E8 0%, #F2ECE2 100%);
+  --sky: var(--home-sky-day);
   --halo: rgba(255, 255, 255, 0.55);
   --halo-fade: rgba(255, 255, 255, 0);
 }

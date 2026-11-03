@@ -380,6 +380,14 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     };
   }, [user]);
 
+  // With no visible close button, Escape is the keyboard's way out of the picker.
+  useEffect(() => {
+    if (!showEmotionModal) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowEmotionModal(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showEmotionModal]);
+
   // Tell the shell when this screen wants to be alone. See onImmersiveChange.
   const immersive = showInput || showResponse || showMoodCardFlow || showEmotionModal;
   useEffect(() => {
@@ -6037,16 +6045,18 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClick={() => setShowEmotionModal(false)}
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            // The card's own colour, now the whole screen. There is no frame and
-            // no scrim: the pebbles sit on exactly what they always sat on.
-            background: '#EAF4EC',
+            // The home screen's own gradient (home-scene.css), so the picker reads
+            // as the same room. No frame and no scrim.
+            backgroundImage: 'var(--home-sky-day)',
+            backgroundColor: '#F4EEE5',
             zIndex: 20000,
             display: 'flex',
           }}
         >
+          <div className="home-scene__grain" aria-hidden="true" />
           <div
-            onClick={(e) => e.stopPropagation()}
             style={{
+              zIndex: 2,
               width: '100%', height: '100%',
               boxSizing: 'border-box',
               padding: 'calc(env(safe-area-inset-top, 0px) + 78px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)',
@@ -6056,20 +6066,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               overflowY: 'auto',
             }}
           >
+            {/*
+              No visible close button. Tapping any empty part of the screen —
+              above or below the pebbles — closes the picker, and Escape does on
+              a keyboard. This one is only for screen readers, which cannot see
+              that the empty screen is the way out.
+            */}
             <button
               onClick={() => setShowEmotionModal(false)}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
               style={{
-                position: 'absolute',
-                top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-                right: 'calc(env(safe-area-inset-right, 0px) + 18px)',
-                width: '40px', height: '40px',
-                background: 'rgba(0,0,0,0.05)',
-                border: 'none', borderRadius: '50%',
-                cursor: 'pointer', fontSize: '14px',
-                color: '#4A5D4E', display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
+                position: 'absolute', width: 1, height: 1, margin: -1, padding: 0,
+                overflow: 'hidden', clip: 'rect(0 0 0 0)', border: 0, opacity: 0,
               }}
-            >✕</button>
+            />
 
             {/*
               * Instrument Serif on the heading only — the pebbles and their
@@ -6091,7 +6101,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             </p>
 
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{
+            <div onClick={(e) => e.stopPropagation()} style={{
               width: '100%',
               display: 'grid',
               gridTemplateColumns: `repeat(${PICKER_LAYOUT.columns}, 1fr)`,
