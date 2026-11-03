@@ -408,8 +408,8 @@ const headingStyle = (isKo: boolean, enSize: number, koSize: number): React.CSSP
 
 const stepBody: React.CSSProperties = { width: '100%', flex: 1, display: 'flex', flexDirection: 'column' };
 
-const NextButton = ({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) => (
-  <div style={{ marginTop: '48px', marginBottom: 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}>
+const NextButton = ({ label, onClick, disabled, done, top = 48 }: { label: string; onClick: () => void; disabled?: boolean; done?: boolean; top?: number }) => (
+  <div style={{ marginTop: `${top}px`, marginBottom: 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}>
     <button
       onClick={onClick}
       disabled={disabled}
@@ -424,7 +424,7 @@ const NextButton = ({ label, onClick, disabled }: { label: string; onClick: () =
         cursor: disabled ? 'default' : 'pointer',
         fontFamily: 'inherit', fontSize: '16px', fontWeight: 700, textAlign: 'left',
         color: '#2E3C33',
-        opacity: disabled ? 0.45 : 1,
+        opacity: disabled && !done ? 0.45 : 1,
         background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
         backdropFilter: 'blur(22px) saturate(180%)',
         WebkitBackdropFilter: 'blur(22px) saturate(180%)',
@@ -441,11 +441,28 @@ const NextButton = ({ label, onClick, disabled }: { label: string; onClick: () =
         boxShadow: '0 2px 8px rgba(40,60,45,0.16)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{done ? <polyline points="20 6 9 17 4 12"/> : <polyline points="9 18 15 12 9 6"/>}</svg>
       </span>
     </button>
   </div>
 );
+
+/* The result screen's blocks: the home screen's glass, as a card. */
+const glassCard: React.CSSProperties = {
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+  backdropFilter: 'blur(22px) saturate(180%)',
+  WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+  border: '1px solid rgba(255,255,255,0.85)',
+  borderRadius: '24px',
+  boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.08)',
+  padding: '20px 22px',
+  width: '100%',
+  boxSizing: 'border-box',
+};
+const sectionLabel: React.CSSProperties = {
+  fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.2, color: '#7d8f82',
+  fontWeight: 700, margin: '0 0 10px 6px', textAlign: 'left',
+};
 
 const Container = ({ children, onBack, onClose }: { children: React.ReactNode; onBack?: () => void; onClose: () => void }) => (
   <div style={{
@@ -1329,228 +1346,143 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const persons = showCustomPerson ? (customPerson ? [customPerson] : []) : selectedPersons;
   const recordKeywords = [...places, ...persons].join(', ') || (sceneText ? sceneText.slice(0, 40) : '');
 
+  const pebble = getEmotionPebble(selectedEmotion);
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(74,93,78,0.2)',
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-      zIndex: 21000,
-    }}>
-      {/* Bottom sheet */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, width: '100%', height: '90%',
-        background: 'rgba(255,255,255,0.88)',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        borderRadius: '32px 32px 0 0',
-        borderTop: '1px solid rgba(255,255,255,1)',
-        display: 'flex', flexDirection: 'column',
-        boxShadow: '0 -10px 40px rgba(74,93,78,0.12)',
-        overflow: 'hidden',
-      }}>
-        {/* Handle */}
-        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', width: 40, height: 4, background: 'rgba(0,0,0,0.1)', borderRadius: 2, zIndex: 40 }} />
+    <SkyBackdrop>
+      <Container onClose={onClose}>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: 32 }}>
 
-        {/* Action bar */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', padding: '20px 24px', boxSizing: 'border-box', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 30 }}>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E', boxShadow: '0 4px 10px rgba(0,0,0,0.04)' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-              </svg>
-            </button>
-          </div>
-          <button onClick={onClose} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E', boxShadow: '0 4px 10px rgba(0,0,0,0.04)' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Visual header — tarot card only */}
-        <div style={{
-          width: '100%', height: '38%', position: 'relative', flexShrink: 0,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 12,
-          background: `radial-gradient(circle at 50% 100%, ${card.from}55 0%, transparent 70%)`,
-          borderBottom: '1px solid rgba(255,255,255,0.5)',
-          paddingTop: 28,
-        }}>
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 220, height: 160, background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)', filter: 'blur(20px)', zIndex: 0 }} />
-          <div style={{
-            width: 100, height: 135, borderRadius: 22,
-            background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`,
-            border: '2px solid rgba(255,255,255,0.85)',
-            boxShadow: `10px 10px 25px rgba(74,93,78,0.12), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 8px rgba(255,255,255,1), inset -3px -3px 10px ${card.from}55`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 1,
-          }}>
-            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
-          </div>
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#7AB382', fontWeight: 700, opacity: 0.9, textAlign: 'center', zIndex: 1 }}>
-            {card.arcana} · {card.name.toUpperCase()}
-          </div>
-        </div>
-
-        {/* Scrollable content */}
-        <div style={{ flex: 1, padding: '28px 24px 40px', overflowY: 'auto' }}>
-
-          {/* Tags */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {dedupeTags(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name]).map(tag => (
-              <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>
-                #{tag}
-              </span>
-            ))}
-          </div>
-
-          {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 6px' }}>
-            <div style={{ width: 20, height: 20, borderRadius: getEmotionPebble(selectedEmotion).borderRadius, flexShrink: 0, background: getEmotionPebble(selectedEmotion).background, boxShadow: '2px 2px 5px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.8)' }} />
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 30, fontWeight: 700, margin: 0, color: '#2D3748' }}>Today&apos;s Mood</h1>
-          </div>
-
-          {/* Author + date */}
-          <div style={{ fontSize: 13, color: '#718096', marginBottom: 26, display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Title, date */}
+          <p style={{ ...headingStyle(isKo, 40, 24), margin: 0 }}>{isKo ? '오늘의 기분' : "Today's Mood"}</p>
+          <div style={{ fontSize: 13, color: '#7d8f82', margin: '10px 0 26px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
             {username && username !== 'you' && (
               <>by <span style={{ color: '#4A5D4E', fontWeight: 500 }}>{username}</span><span>•</span></>
             )}
             <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{dateStr}</span>
           </div>
 
-          {/* Original record */}
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>
-            {isKo ? 'ORIGINAL RECORD' : 'ORIGINAL RECORD'}
+          {/* The card this record drew. */}
+          <div style={{
+              width: 110, height: 150, borderRadius: 22, flexShrink: 0,
+              background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`,
+              border: '2px solid rgba(255,255,255,0.85)',
+              boxShadow: `8px 10px 22px rgba(74,93,78,0.16), -4px -4px 14px rgba(255,255,255,0.8), inset 3px 3px 8px rgba(255,255,255,0.7)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+            }}>
+              <div style={{ width: 54, height: 70, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
+            </div>
+          <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.2, color: '#7d8f82', fontWeight: 700, textAlign: 'center', margin: '16px 0 18px' }}>
+            {card.arcana} · {card.name.toUpperCase()}
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.65)', borderRadius: 16, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 26, boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.5)' }}>
-            <div style={{ fontSize: 15, lineHeight: 1.7, fontWeight: 300, color: '#4A5D4E', whiteSpace: 'pre-line' }}>
-              {isEgoMode ? [
-                selectedSleep ? `${isKo ? '수면' : 'Sleep'}: ${selectedSleep}` : '',
-                selectedStress ? `${isKo ? '스트레스' : 'Stress'}: ${selectedStress}` : '',
-                egoFreeText || '',
-              ].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)') : [
-                places.length > 0 ? `${isKo ? '장소' : 'Place'}: ${places.join(', ')}` : '',
-                persons.length > 0 ? `${isKo ? '등장' : 'Who'}: ${persons.join(', ')}` : '',
-                sceneText || '',
-              ].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)')}
+
+          {/* Tags */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 30, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {dedupeTags(analysisKeywords.length > 0 ? [selectedEmotion, ...analysisKeywords.slice(0, 2)] : [selectedEmotion, card.name]).map(tag => (
+              <span key={tag} style={{ fontFamily: 'monospace', fontSize: 12, padding: '6px 12px', borderRadius: 14, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', color: '#4A5D4E', fontWeight: 700 }}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Original record */}
+          <div style={{ width: '100%', marginBottom: 22 }}>
+            <div style={sectionLabel}>ORIGINAL RECORD</div>
+            <div style={{ ...glassCard, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+              {/* The pebble that was chosen, small, where the record starts. */}
+              <div aria-hidden="true" style={{
+                width: 34, height: 34, flexShrink: 0, marginTop: 3,
+                background: pebble.background, borderRadius: pebble.borderRadius,
+                border: '1px solid rgba(255,255,255,0.8)',
+                boxShadow: '2px 2px 6px rgba(0,0,0,0.07), -2px -2px 6px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)',
+              }} />
+              <div style={{ fontSize: 15, lineHeight: 1.7, fontWeight: 400, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left', minWidth: 0 }}>
+                {isEgoMode ? [
+                  selectedSleep ? `${isKo ? '수면' : 'Sleep'}: ${selectedSleep}` : '',
+                  selectedStress ? `${isKo ? '스트레스' : 'Stress'}: ${selectedStress}` : '',
+                  egoFreeText || '',
+                ].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)') : [
+                  places.length > 0 ? `${isKo ? '장소' : 'Place'}: ${places.join(', ')}` : '',
+                  persons.length > 0 ? `${isKo ? '등장' : 'Who'}: ${persons.join(', ')}` : '',
+                  sceneText || '',
+                ].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)')}
+              </div>
             </div>
           </div>
 
           {/* Analysis — only shown when there is content */}
           {analysisText && (
-            <>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>READING</div>
-              <div style={{ paddingLeft: 20, borderLeft: '2px solid #7AB382', marginBottom: 26 }}>
-                <div style={{ fontSize: 15, lineHeight: 1.85, fontWeight: 300, color: '#4A5D4E' }}>
+            <div style={{ width: '100%', marginBottom: 22 }}>
+              <div style={sectionLabel}>READING</div>
+              <div style={glassCard}>
+                <div style={{ fontSize: 15, lineHeight: 1.85, fontWeight: 400, color: '#4A5D4E', textAlign: 'left' }}>
                   {analysisText.split(/\n\n+/).map((para, pi) => (
                     <p key={pi} style={{ margin: '0 0 14px', marginTop: pi === 0 ? 0 : 2 }}>
                       {para.split(/(\*\*[^*]+\*\*)/).map((chunk, ci) =>
                         chunk.startsWith('**') && chunk.endsWith('**')
-                          ? <strong key={ci} style={{ fontWeight: 600, color: '#2D3748' }}>{chunk.slice(2, -2)}</strong>
+                          ? <strong key={ci} style={{ fontWeight: 700, color: '#2E3C33' }}>{chunk.slice(2, -2)}</strong>
                           : <span key={ci}>{chunk}</span>
                       )}
                     </p>
                   ))}
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {/* Today's affirmation — always shown */}
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>TODAY&apos;S AFFIRMATION</div>
-          <div style={{ background: 'rgba(255,255,255,0.65)', borderRadius: 16, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 28, boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.5)', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, lineHeight: 1.75, color: '#4A5D4E', fontWeight: 300, fontStyle: 'italic', whiteSpace: 'pre-line' }}>{affirmation}</div>
+          <div style={{ width: '100%' }}>
+            <div style={sectionLabel}>TODAY&apos;S AFFIRMATION</div>
+            <div style={{ ...glassCard, textAlign: 'center' }}>
+              <div style={{ fontSize: 15, lineHeight: 1.8, color: '#4A5D4E', fontWeight: 400, fontStyle: 'italic', whiteSpace: 'pre-line' }}>{affirmation}</div>
+            </div>
           </div>
 
           {/* Usage limit banner for free users */}
           {usageLimitReached && (
-            <div style={{ background: 'rgba(244,196,80,0.15)', border: '1px solid rgba(244,196,80,0.4)', borderRadius: 12, padding: '12px 16px', marginBottom: 12, textAlign: 'center' }}>
+            <div style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(244,196,80,0.15)', border: '1px solid rgba(244,196,80,0.4)', borderRadius: 18, padding: '12px 16px', marginTop: 22, textAlign: 'center' }}>
               <div style={{ fontSize: 13, color: '#856404', fontWeight: 600, marginBottom: 4 }}>{isKo ? '이번 달 해석 횟수를 모두 사용했어요' : 'Monthly analysis limit reached'}</div>
               <div style={{ fontSize: 12, color: '#856404' }}>{isKo ? 'Pro로 업그레이드하면 매일 해석을 받을 수 있어요' : 'Upgrade to Pro for a daily interpretation'}</div>
             </div>
           )}
 
-          {/* Save button */}
+          {/* Save */}
           {user ? (
-            <button
-              onClick={handleSave}
+            <NextButton
+              top={32}
+              done={saved}
               disabled={saving || saved}
-              style={{
-                width: '100%', padding: '15px',
-                borderRadius: 16,
-                background: saved
-                  ? 'rgba(122,179,130,0.15)'
-                  : 'linear-gradient(135deg, #4A5D4E 0%, #3a4d3e 100%)',
-                color: saved ? '#7AB382' : '#fff',
-                border: saved ? '1.5px solid #7AB382' : 'none',
-                fontSize: 14, fontWeight: 700,
-                cursor: saved || saving ? 'default' : 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: saved ? 'none' : '0 8px 20px rgba(74,93,78,0.2)',
-                transition: 'all 0.3s ease',
-                marginBottom: 12,
-              }}
-            >
-              {saved ? (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  {isKo ? '내면의 기록에 저장됨' : 'Saved to Inner Journal'}
-                </>
-              ) : saving ? (
-                isKo ? '저장 중...' : 'Saving...'
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-                  </svg>
-                  {isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal'}
-                </>
-              )}
-            </button>
+              onClick={handleSave}
+              label={saved
+                ? (isKo ? '내면의 기록에 저장됨' : 'Saved to Inner Journal')
+                : saving
+                  ? (isKo ? '저장 중...' : 'Saving...')
+                  : (isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal')}
+            />
           ) : (
-            <button
-              onClick={() => setShowLoginPrompt(true)}
-              style={{
-                width: '100%', padding: '15px', borderRadius: 16,
-                background: 'linear-gradient(135deg, #4A5D4E 0%, #3a4d3e 100%)',
-                color: '#fff', border: 'none', fontSize: 14, fontWeight: 700,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 8px 20px rgba(74,93,78,0.2)', transition: 'all 0.3s ease', marginBottom: 12,
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-              </svg>
-              {isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal'}
-            </button>
+            <NextButton top={32} onClick={() => setShowLoginPrompt(true)} label={isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal'} />
           )}
-
         </div>
-      </div>
+      </Container>
 
       {/* Login prompt overlay */}
       {showLoginPrompt && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(74,93,78,0.35)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <div style={{ background: 'rgba(255,255,255,0.96)', borderRadius: 24, padding: '32px 28px', maxWidth: 320, width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(74,93,78,0.2)' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(60,50,70,0.28)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+          <div style={{ ...glassCard, background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(250,247,240,0.90) 100%)', maxWidth: 340, padding: '32px 26px', textAlign: 'center', borderRadius: 30 }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🌙</div>
-            <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 22, fontWeight: 700, color: '#2D3748', margin: '0 0 10px' }}>
+            <p style={{ ...headingStyle(isKo, 30, 20), margin: '0 0 22px' }}>
               {isKo ? '로그인이 필요해요' : 'Sign in to continue'}
-            </h3>
-            <button
-              onClick={() => { setShowLoginPrompt(false); onClose(); if (onRequestLogin) onRequestLogin(); }}
-              style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg, #4A5D4E 0%, #3a4d3e 100%)', color: '#fff', border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginBottom: 10 }}
-            >
-              {isKo ? '로그인 / 회원가입' : 'Sign in / Sign up'}
-            </button>
+            </p>
+            <NextButton top={0} onClick={() => { setShowLoginPrompt(false); onClose(); if (onRequestLogin) onRequestLogin(); }} label={isKo ? '로그인 / 회원가입' : 'Sign in / Sign up'} />
             <button
               onClick={() => setShowLoginPrompt(false)}
-              style={{ width: '100%', padding: '12px', borderRadius: 14, background: 'transparent', color: '#718096', border: '1px solid #E2E8F0', fontSize: 14, cursor: 'pointer' }}
+              style={{ marginTop: 16, padding: '10px 18px', background: 'transparent', color: '#7d8f82', border: 'none', fontSize: 15, cursor: 'pointer', fontFamily: 'inherit' }}
             >
               {isKo ? '나중에' : 'Maybe later'}
             </button>
           </div>
         </div>
       )}
-    </div>
+    </SkyBackdrop>
   );
 }
 

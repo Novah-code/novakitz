@@ -89,299 +89,151 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
     }
   };
 
+  /*
+   * The home screen's sky, full screen, like the screens that come before it in
+   * the morning. It used to be a white card on a dark scrim with a bright green
+   * button; it was the one place left that still looked like a different app.
+   */
+  const INK = '#2E3C33';
+  const PINK = '#EDA3BC';
+  const ko = language === 'ko';
+  const displayFont = ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  const shell = (children: React.ReactNode) => (
+    <div
+      style={{
+        position: 'fixed', inset: 0,
+        backgroundImage: 'var(--home-sky-day)',
+        backgroundColor: '#F4EEE5',
+        zIndex: 20500,
+        display: 'flex', justifyContent: 'center',
+        overflowY: 'auto',
+        fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        color: INK,
+      }}
+    >
+      <div className="home-scene__grain" aria-hidden="true" />
+      {children}
+    </div>
+  );
+
   if (loading || !streakData) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '20px'
-        }}
-        onClick={onClose}
-      >
-        <div style={{
-          background: 'white',
-          padding: '2rem',
-          borderRadius: '24px',
-          textAlign: 'center'
-        }}>
-          <p>{language === 'ko' ? '로딩 중...' : 'Loading...'}</p>
-        </div>
-      </div>
+    return shell(
+      <p style={{ position: 'relative', zIndex: 2, alignSelf: 'center', fontSize: 15, opacity: 0.6 }}>
+        {language === 'ko' ? '로딩 중...' : 'Loading...'}
+      </p>
     );
   }
 
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 10000
-        }}
-      />
+  const target = nextMilestone(streakData.currentStreak);
+  const RING = 168;
+  const R = 74;
+  const CIRC = 2 * Math.PI * R;
 
-      {/* Streak Card */}
-      <div
+  return shell(
+    <div style={{
+      position: 'relative', zIndex: 2,
+      width: '100%', maxWidth: '520px', boxSizing: 'border-box',
+      padding: 'calc(env(safe-area-inset-top, 0px) + 68px) 22px calc(env(safe-area-inset-bottom, 0px) + 28px)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+    }}>
+      {/* Share and close: white round controls, top right, like the gear. */}
+      <button
+        onClick={handleShare}
+        aria-label={t.share}
         style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'white',
-          borderRadius: '32px',
-          padding: window.innerWidth < 480 ? '1.5rem 1rem' : '2.5rem 2rem',
-          maxWidth: '600px',
-          width: window.innerWidth < 480 ? '95%' : '90%',
-          maxHeight: window.innerWidth < 480 ? '85vh' : '90vh',
-          overflowY: 'auto',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-          zIndex: 10001,
-          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
+          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: '66px',
+          width: 40, height: 40, padding: 0, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: INK, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3,
         }}
       >
-        {/* Share Button */}
-        <button
-          onClick={handleShare}
-          style={{
-            position: 'absolute',
-            top: '1.5rem',
-            right: '1.5rem',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '8px',
-            color: '#5A8449',
-            transition: 'transform 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-            <polyline points="16 6 12 2 8 6"></polyline>
-            <line x1="12" y1="2" x2="12" y2="15"></line>
-          </svg>
-        </button>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+          <polyline points="16 6 12 2 8 6"></polyline>
+          <line x1="12" y1="2" x2="12" y2="15"></line>
+        </svg>
+      </button>
 
-        {/* Copied notification */}
-        {showCopied && (
-          <div style={{
-            position: 'absolute',
-            top: '4rem',
-            right: '1.5rem',
-            background: '#7FB069',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-            animation: 'fadeIn 0.2s ease'
-          }}>
-            {t.linkCopied}
-          </div>
-        )}
+      <button
+        onClick={onClose}
+        aria-label={t.close}
+        style={{
+          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: '16px',
+          width: 40, height: 40, padding: 0, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: INK, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3,
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
 
-        {/* Title */}
-        <h2 style={{
-          margin: '0 0 2rem 0',
-          fontSize: window.innerWidth < 480 ? '1.4rem' : '1.75rem',
-          fontWeight: '600',
-          color: '#2c3e50',
-          textAlign: 'center'
-        }}>
-          {t.title}
-        </h2>
-
-        {/*
-          Lifetime total, under the streak rather than instead of it. The streak
-          is what a missed day costs; this is what it cannot take away, so a
-          broken streak does not read as starting from nothing.
-        */}
-        <p style={{
-          margin: '-1.5rem 0 1.5rem 0',
-          fontSize: '0.85rem',
-          color: '#8FAF83',
-          textAlign: 'center'
-        }}>
-          {t.totalDays(streakData.totalDays)}
-        </p>
-
-        {/* Streak Circle */}
+      {showCopied && (
         <div style={{
-          display: 'flex',
-          flexDirection: window.innerWidth < 480 ? 'column' : 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: window.innerWidth < 480 ? '1.5rem' : '3rem',
-          marginBottom: '2.5rem'
+          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 62px)', right: '16px', zIndex: 3,
+          background: 'rgba(255,255,255,0.94)', color: INK, padding: '8px 16px', borderRadius: 16,
+          fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(40,60,45,0.16)',
         }}>
-          {/* Circle with number */}
-          <div style={{
-            position: 'relative',
-            width: window.innerWidth < 480 ? '100px' : '120px',
-            height: window.innerWidth < 480 ? '100px' : '120px',
-            flexShrink: 0
-          }}>
-            <svg
-              width={window.innerWidth < 480 ? "100" : "120"}
-              height={window.innerWidth < 480 ? "100" : "120"}
-              viewBox="0 0 120 120"
-              style={{ transform: 'rotate(-90deg)' }}
-            >
-              {/* Background circle */}
-              <circle
-                cx="60"
-                cy="60"
-                r="54"
-                fill="none"
-                stroke="#e8f5e8"
-                strokeWidth="8"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="60"
-                cy="60"
-                r="54"
-                fill="none"
-                stroke="#7FB069"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={`${Math.min(streakData.currentStreak / nextMilestone(streakData.currentStreak), 1) * 339} 339`}
-                style={{ transition: 'stroke-dasharray 0.5s ease' }}
-              />
-            </svg>
-            <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                fontSize: window.innerWidth < 480 ? '2rem' : '2.5rem',
-                fontWeight: 'bold',
-                color: '#5A8449',
-                lineHeight: 1
-              }}>
-                {streakData.currentStreak}
-              </div>
-              <div style={{ fontSize: '0.7rem', color: '#8FAF83', marginTop: 4 }}>
-                / {nextMilestone(streakData.currentStreak)}
-              </div>
-            </div>
-          </div>
-
-          {/* Week Calendar */}
-          <div style={{ flex: 1, width: window.innerWidth < 480 ? '100%' : 'auto' }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(7, 1fr)',
-              gap: window.innerWidth < 480 ? '6px' : '8px'
-            }}>
-              {streakData.weekDays.map((day, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    textAlign: 'center'
-                  }}
-                >
-                  <div style={{
-                    fontSize: window.innerWidth < 480 ? '0.65rem' : '0.75rem',
-                    fontWeight: '600',
-                    color: day.completed ? '#5A8449' : '#9ca3af',
-                    marginBottom: window.innerWidth < 480 ? '4px' : '6px'
-                  }}>
-                    {day.day}
-                  </div>
-                  <div style={{
-                    width: window.innerWidth < 480 ? '36px' : '44px',
-                    height: window.innerWidth < 480 ? '36px' : '44px',
-                    borderRadius: '50%',
-                    background: day.completed ? '#7FB069' : '#e5e7eb',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s',
-                    margin: '0 auto'
-                  }}>
-                    {day.completed && (
-                      <svg
-                        width={window.innerWidth < 480 ? "16" : "20"}
-                        height={window.innerWidth < 480 ? "16" : "20"}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {t.linkCopied}
         </div>
+      )}
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: window.innerWidth < 480 ? '12px' : '14px',
-            background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: window.innerWidth < 480 ? '0.95rem' : '1rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            fontFamily: 'inherit',
-            boxShadow: '0 4px 12px rgba(127, 176, 105, 0.25)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.35)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.25)';
-          }}
-        >
-          {t.close}
-        </button>
+      <p style={{ margin: 0, textAlign: 'center', lineHeight: 1.25, fontFamily: displayFont, fontSize: ko ? 24 : 40, fontWeight: ko ? 500 : 400, letterSpacing: ko ? '-0.5px' : 0 }}>
+        {t.title}
+      </p>
+
+      {/*
+        Lifetime total, under the streak rather than instead of it. The streak
+        is what a missed day costs; this is what it cannot take away, so a
+        broken streak does not read as starting from nothing.
+      */}
+      <p style={{ margin: '10px 0 0', fontSize: 14, color: '#7d8f82', textAlign: 'center' }}>
+        {t.totalDays(streakData.totalDays)}
+      </p>
+
+      {/* Ring */}
+      <div style={{ position: 'relative', width: RING, height: RING, marginTop: 'clamp(28px, 7vh, 64px)' }}>
+        <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`} style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx={RING / 2} cy={RING / 2} r={R} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="10" />
+          <circle
+            cx={RING / 2} cy={RING / 2} r={R} fill="none" stroke={PINK} strokeWidth="10" strokeLinecap="round"
+            strokeDasharray={`${Math.min(streakData.currentStreak / target, 1) * CIRC} ${CIRC}`}
+            style={{ transition: 'stroke-dasharray 0.5s ease' }}
+          />
+        </svg>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+          <div style={{ fontFamily: displayFont, fontSize: 60, fontWeight: 400, lineHeight: 1 }}>{streakData.currentStreak}</div>
+          <div style={{ fontSize: 13, color: '#7d8f82', marginTop: 6 }}>/ {target}</div>
+        </div>
       </div>
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </>
+      {/* Week */}
+      <div style={{
+        width: '100%', marginTop: 'clamp(28px, 6vh, 52px)',
+        display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6,
+      }}>
+        {streakData.weekDays.map((day, idx) => (
+          <div key={idx} style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: day.completed ? INK : '#8e9a92', marginBottom: 8 }}>
+              {day.day}
+            </div>
+            <div style={{
+              width: 42, height: 42, borderRadius: '50%', margin: '0 auto',
+              background: day.completed ? PINK : 'rgba(255,255,255,0.55)',
+              border: '1px solid rgba(255,255,255,0.8)',
+              boxShadow: day.completed ? '0 4px 12px rgba(237,163,188,0.35)' : 'none',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {day.completed && (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
