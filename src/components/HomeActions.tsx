@@ -36,7 +36,7 @@ interface HomeActionsProps {
 }
 
 const LABELS = {
-  en: { mood: 'Mood', moodSub: 'How did you wake?', dream: 'Dream', dreamSub: 'Write it down' },
+  en: { mood: 'Mood', moodSub: 'How you woke', dream: 'Dream', dreamSub: 'Write it down' },
   ko: { mood: '무드', moodSub: '오늘 아침은?', dream: '꿈', dreamSub: '적어두기' },
 } as const;
 
@@ -68,31 +68,76 @@ export default function HomeActions({ language, onMood, onDream }: HomeActionsPr
       type="button"
       onClick={kind === 'mood' ? onMood : onDream}
       style={{
+        position: 'relative',
+        overflow: 'hidden',
         flex: 1,
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        padding: '0 16px',
-        height: '58px',
-        borderRadius: '29px',
+        padding: '0 10px 0 16px',
+        height: '60px',
+        borderRadius: '30px',
         cursor: 'pointer',
         textAlign: 'left',
         color: INK,
         fontFamily: 'inherit',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(244,241,231,0.58) 100%)',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(246,243,234,0.62) 100%)',
         backdropFilter: 'blur(22px) saturate(180%)',
         WebkitBackdropFilter: 'blur(22px) saturate(180%)',
-        border: '1px solid rgba(255, 255, 255, 0.8)',
+        border: '1px solid rgba(255, 255, 255, 0.85)',
         boxShadow: '0 8px 24px rgba(40, 60, 45, 0.16), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.08)',
         WebkitTapHighlightColor: 'transparent',
       }}
     >
-      <span style={{ display: 'flex', flexShrink: 0 }}>{kind === 'mood' ? <MoodIcon /> : <DreamIcon />}</span>
-      <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, minWidth: 0 }}>
+      {/*
+        A blob of colour bleeding in from the corner, the way the reference's
+        cards glow. Each door has its own: warm for the mood, which is about how
+        the body woke, and cool for the dream. They are the pebbles' own tones,
+        so the two buttons read as part of the same family as what they open.
+      */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          right: '-18px',
+          bottom: '-34px',
+          width: '104px',
+          height: '104px',
+          borderRadius: '50%',
+          background: kind === 'mood'
+            ? 'radial-gradient(circle, rgba(255,184,150,0.85) 0%, rgba(255,176,196,0.45) 45%, rgba(255,176,196,0) 72%)'
+            : 'radial-gradient(circle, rgba(184,166,255,0.80) 0%, rgba(160,200,255,0.42) 45%, rgba(160,200,255,0) 72%)',
+          filter: 'blur(6px)',
+          pointerEvents: 'none',
+        }}
+      />
+      <span style={{ position: 'relative', display: 'flex', flexShrink: 0 }}>{kind === 'mood' ? <MoodIcon /> : <DreamIcon />}</span>
+      <span style={{ position: 'relative', display: 'flex', flexDirection: 'column', lineHeight: 1.2, minWidth: 0, flex: 1 }}>
         <span style={{ fontSize: '15px', fontWeight: 600 }}>{kind === 'mood' ? t.mood : t.dream}</span>
         <span style={{ fontSize: '11.5px', fontWeight: 500, opacity: 0.72, whiteSpace: 'nowrap' }}>
           {kind === 'mood' ? t.moodSub : t.dreamSub}
         </span>
+      </span>
+      {/* The white round "+" — the reference's small control on each card. */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          width: '34px',
+          height: '34px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.96)',
+          boxShadow: '0 2px 8px rgba(40,60,45,0.14)',
+          color: INK,
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
       </span>
     </button>
   );
