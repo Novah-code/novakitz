@@ -862,62 +862,57 @@ export default function SimpleDreamInterfaceWithAuth() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            zIndex: 10001,
+            background: 'rgba(60,50,70,0.32)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            zIndex: 20600,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '12px',
             padding: '20px'
           }}
         >
           {/*
-            The close button used to be pinned inside the card's top-right
-            corner, where it sat on top of the Apple button's label. Outside the
-            card it cannot collide with anything, and the backdrop closes the
-            panel too — which matters now that "Maybe later" is gone. That line
-            was a third way to say no on a panel someone opened themselves.
+            The home sky in a rounded frame, like the streak window. The close is
+            a round control inside the frame's top right; the frame is padded
+            enough at the top that it cannot reach the first button. Tapping the
+            backdrop closes the panel as well.
           */}
-          <div style={{ width: '92%', maxWidth: '380px', display: 'flex', justifyContent: 'flex-end' }}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundImage: 'var(--home-sky-day)',
+              backgroundColor: '#F4EEE5',
+              border: '1px solid rgba(255,255,255,0.85)',
+              borderRadius: '32px',
+              padding: '34px 24px 26px',
+              maxWidth: '380px',
+              width: '100%',
+              boxSizing: 'border-box',
+              boxShadow: '0 24px 60px rgba(40,30,60,0.28), inset 0 1px 0 rgba(255,255,255,0.9)',
+              textAlign: 'center',
+            }}
+          >
+            <div className="home-scene__grain" aria-hidden="true" />
             <button
               onClick={() => setIsGuestMode(false)}
               aria-label={language === 'ko' ? '닫기' : 'Close'}
               style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '34px',
-                height: '34px',
-                fontSize: '17px',
-                cursor: 'pointer',
-                color: 'var(--matcha-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                position: 'absolute', top: 14, right: 14, zIndex: 3,
+                width: 40, height: 40, padding: 0, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
+                boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: '#2E3C33', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
-          </div>
-
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderRadius: '24px',
-              padding: 'clamp(1.5rem, 4vw, 2rem)',
-              maxWidth: '380px',
-              width: '92%',
-              boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
-              textAlign: 'center',
-              border: '1px solid rgba(127, 176, 105, 0.2)'
-            }}
-          >
+            <p style={{ position: 'relative', zIndex: 2, margin: '4px 0 24px', fontFamily: "var(--font-display), Georgia, serif", fontSize: 36, color: '#2E3C33', lineHeight: 1.1 }}>
+              Novakitz
+            </p>
+            <div style={{ position: 'relative', zIndex: 2 }}>
             {/*
               The sales pitch that used to sit here — a headline asking whether
               you wanted to brew your dreams, and a badge counting the free
@@ -926,6 +921,7 @@ export default function SimpleDreamInterfaceWithAuth() {
               inside, not another round of persuasion.
             */}
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
+            </div>
           </div>
         </div>
       )}

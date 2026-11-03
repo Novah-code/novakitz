@@ -31,13 +31,11 @@ interface ToastProps {
  * nobody is going to re-check.
  */
 
-const PALETTE: Record<ToastType, { bg: string; icon: string }> = {
-  success: { bg: 'rgba(94, 138, 106, 0.96)', icon: '✓' },
-  error: { bg: 'rgba(176, 96, 96, 0.96)', icon: '!' },
-  /* Not blue. The one that shows on the paywall is this one, and a system
-     blue on a screen that is entirely sage and cream reads as a browser
-     dialog rather than as the app speaking. */
-  info: { bg: 'rgba(74, 94, 82, 0.96)', icon: 'ℹ' },
+const PALETTE: Record<ToastType, { dot: string; icon: string }> = {
+  success: { dot: '#EDA3BC', icon: '✓' },
+  error: { dot: '#E7A0A6', icon: '!' },
+  /* Not blue: a system blue reads as a browser dialog rather than the app speaking. */
+  info: { dot: '#C9B8F0', icon: 'i' },
 };
 
 export default function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
@@ -63,7 +61,7 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
     setTimeout(onClose, 300);
   };
 
-  const { bg, icon } = PALETTE[type];
+  const { dot, icon } = PALETTE[type];
 
   return (
     <div
@@ -90,25 +88,29 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
           alignItems: 'center',
           gap: 12,
           padding: '14px 16px',
-          borderRadius: 16,
-          background: bg,
-          color: '#FBFCFB',
+          borderRadius: 22,
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(246,243,234,0.86) 100%)',
+          backdropFilter: 'blur(22px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+          border: '1px solid rgba(255,255,255,0.9)',
+          color: '#2E3C33',
           fontSize: 14,
           lineHeight: 1.45,
-          boxShadow: '0 10px 30px rgba(47, 59, 51, 0.28)',
+          boxShadow: '0 10px 30px rgba(40, 60, 45, 0.20), inset 0 1px 0 rgba(255,255,255,0.95)',
         }}
       >
         <span
           aria-hidden="true"
           style={{
             flex: '0 0 auto',
-            width: 22,
-            height: 22,
+            width: 24,
+            height: 24,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.18)',
+            background: dot,
+            color: '#2E3C33',
             fontSize: 13,
             fontWeight: 700,
           }}
@@ -129,7 +131,7 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
             border: 'none',
             borderRadius: '50%',
             background: 'none',
-            color: 'rgba(251, 252, 251, 0.75)',
+            color: 'rgba(46, 60, 51, 0.55)',
             fontSize: 18,
             lineHeight: 1,
             cursor: 'pointer',

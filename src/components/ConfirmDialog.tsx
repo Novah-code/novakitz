@@ -1,5 +1,8 @@
 'use client';
 
+import '../styles/home-scene.css';
+import { scrim, skyCard, pillGlass, pillWhite, heading, BASE } from '../lib/skyUi';
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -27,112 +30,63 @@ export default function ConfirmDialog({
     <div
       onClick={onCancel}
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9999,
+        ...scrim,
+        zIndex: 20600,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(4px)',
-        animation: 'fadeIn 0.2s ease-out'
+        padding: 20,
+        animation: 'fadeIn 0.2s ease-out',
       }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '32px',
-          maxWidth: '448px',
+          ...skyCard,
+          borderRadius: 32,
+          padding: '32px 26px 26px',
+          maxWidth: 380,
           width: '100%',
-          margin: '0 16px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          textAlign: 'center',
           animation: 'scaleIn 0.3s ease-out',
-          border: '1px solid rgba(127, 176, 105, 0.2)'
         }}
       >
-        <h3 style={{
-          fontSize: '24px',
-          fontWeight: 'bold',
-          marginBottom: '16px',
-          color: '#5A8449'
-        }}>
-          {title}
-        </h3>
-        <p style={{
-          color: '#374151',
-          marginBottom: '32px',
-          lineHeight: '1.625'
-        }}>
-          {message}
-        </p>
+        <div className="home-scene__grain" aria-hidden="true" />
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <h3 style={{ ...heading(false, 32, 22), marginBottom: 12 }}>{title}</h3>
+          <p style={{ color: BASE, margin: '0 0 26px', lineHeight: 1.7, fontSize: 15 }}>{message}</p>
 
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          justifyContent: 'flex-end'
-        }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-              background: '#f3f4f6',
-              color: '#6b7280',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={() => {
-              onConfirm();
-              onCancel();
-            }}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '12px',
-              color: 'white',
-              fontWeight: '500',
-              transition: 'all 0.2s',
-              border: 'none',
-              cursor: 'pointer',
-              background: isDangerous
-                ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                : 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
-            }}
-          >
-            {confirmText}
-          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={onCancel} style={{ ...pillGlass, padding: '14px 12px' }}>
+              {cancelText}
+            </button>
+            <button
+              onClick={() => {
+                onConfirm();
+                onCancel();
+              }}
+              style={{
+                ...pillWhite,
+                padding: '14px 12px',
+                ...(isDangerous
+                  ? { color: '#B5566F', background: 'rgba(181,86,111,0.14)', border: '1px solid rgba(181,86,111,0.35)', boxShadow: 'none' }
+                  : {}),
+              }}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
       </div>
 
       <style jsx>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-
         @keyframes scaleIn {
-          from {
-            transform: scale(0.9);
-            opacity: 0;
-          }
-          to {
-            transform: scale(1);
-            opacity: 1;
-          }
+          from { transform: scale(0.92); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
         }
       `}</style>
     </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import '../styles/home-scene.css';
+import { scrim, skyCard, pillWhite, heading, INK, BASE, LIGHT } from '../lib/skyUi';
 import {
   loadReminders,
   saveReminders,
@@ -88,110 +90,67 @@ export default function NotificationPrompt({
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
+        ...scrim,
         zIndex: 22000,
-        background: 'rgba(45, 58, 48, 0.5)',
+        // A window in the middle, like the other small popups (it was a sheet at the bottom).
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
-        padding: 16,
-        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+        padding: 20,
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 420,
-          background: '#FBFCFB',
-          borderRadius: 24,
-          padding: '28px 24px 20px',
-          boxShadow: '0 20px 60px rgba(47, 59, 51, 0.25)',
-        }}
-      >
-        <h3
-          style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 24,
-            fontWeight: 400,
-            color: '#2F3B33',
-            margin: '0 0 8px',
-            lineHeight: 1.25,
-          }}
-        >
-          {ko ? '내일 아침에도 알려드릴까요?' : 'Shall we remind you tomorrow?'}
-        </h3>
-        <p style={{ fontSize: 14, lineHeight: 1.6, color: '#5C7061', margin: '0 0 20px' }}>
-          {ko
-            ? '하루 한 번, 일어난 시간에 조용히. 언제든 끌 수 있어요.'
-            : 'Once a day, around the time you wake. You can turn it off whenever.'}
-        </p>
+      <div style={{ ...skyCard, width: '100%', maxWidth: 380, borderRadius: 32, padding: '30px 24px 20px' }}>
+        <div className="home-scene__grain" aria-hidden="true" />
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <h3 style={{ ...heading(ko, 30, 21), margin: '0 0 8px' }}>
+            {ko ? '내일 아침에도 알려드릴까요?' : 'Shall we remind you tomorrow?'}
+          </h3>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: BASE, margin: '0 0 20px' }}>
+            {ko
+              ? '하루 한 번, 일어난 시간에 조용히. 언제든 끌 수 있어요.'
+              : 'Once a day, around the time you wake. You can turn it off whenever.'}
+          </p>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 22 }}>
-          {TIMES.map((t, i) => {
-            const active = i === selected;
-            return (
-              <button
-                key={i}
-                onClick={() => setSelected(i)}
-                style={{
-                  padding: '9px 14px',
-                  borderRadius: 999,
-                  border: active ? '1.5px solid #7AB382' : '1.5px solid rgba(47,59,51,0.12)',
-                  background: active ? 'rgba(122,179,130,0.16)' : 'transparent',
-                  color: active ? '#3d6044' : '#5C7061',
-                  fontSize: 13,
-                  fontWeight: active ? 700 : 500,
-                  fontFamily: 'inherit',
-                  cursor: 'pointer',
-                }}
-              >
-                {label(t.hour, t.minute, ko)}
-              </button>
-            );
-          })}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 22 }}>
+            {TIMES.map((t, i) => {
+              const active = i === selected;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelected(i)}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 999,
+                    border: active ? '1.5px solid rgba(46,60,51,0.32)' : '1.5px solid rgba(255,255,255,0.9)',
+                    background: active ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.5)',
+                    boxShadow: active ? '0 4px 12px rgba(40,60,45,0.12)' : 'none',
+                    color: INK,
+                    fontSize: 14,
+                    fontWeight: active ? 700 : 500,
+                    fontFamily: 'inherit',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label(t.hour, t.minute, ko)}
+                </button>
+              );
+            })}
+          </div>
+
+          <button onClick={accept} disabled={working} style={{ ...pillWhite, opacity: working ? 0.6 : 1, cursor: working ? 'default' : 'pointer' }}>
+            {ko
+              ? `네, ${label(TIMES[selected].hour, TIMES[selected].minute, true)}에`
+              : `Yes, at ${label(TIMES[selected].hour, TIMES[selected].minute, false)}`}
+          </button>
+
+          <button
+            onClick={dismiss}
+            disabled={working}
+            style={{ width: '100%', padding: '12px', marginTop: 6, background: 'none', border: 'none', color: LIGHT, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer' }}
+          >
+            {ko ? '나중에' : 'Not now'}
+          </button>
         </div>
-
-        <button
-          onClick={accept}
-          disabled={working}
-          style={{
-            width: '100%',
-            padding: 15,
-            borderRadius: 16,
-            border: 'none',
-            background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)',
-            color: '#fff',
-            fontSize: 15,
-            fontWeight: 700,
-            fontFamily: 'inherit',
-            cursor: working ? 'default' : 'pointer',
-            opacity: working ? 0.6 : 1,
-            boxShadow: '0 8px 20px rgba(122,179,130,0.3)',
-          }}
-        >
-          {ko
-            ? `네, ${label(TIMES[selected].hour, TIMES[selected].minute, true)}에`
-            : `Yes, at ${label(TIMES[selected].hour, TIMES[selected].minute, false)}`}
-        </button>
-
-        <button
-          onClick={dismiss}
-          disabled={working}
-          style={{
-            width: '100%',
-            padding: '12px',
-            marginTop: 6,
-            background: 'none',
-            border: 'none',
-            color: '#829689',
-            fontSize: 14,
-            fontFamily: 'inherit',
-            cursor: 'pointer',
-          }}
-        >
-          {ko ? '나중에' : 'Not now'}
-        </button>
       </div>
     </div>
   );

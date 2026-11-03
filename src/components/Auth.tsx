@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { signInWithApple, isAppleSignInCancelled } from '../lib/appleAuth';
 import { signInWithGoogle, isGoogleSignInCancelled } from '../lib/googleAuth';
 import { isNative } from '../lib/platform';
+import { INK, BASE, LIGHT, pillWhite } from '../lib/skyUi';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -90,12 +91,14 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
 
   const fieldStyle: React.CSSProperties = {
     width: '100%',
-    padding: '15px 18px',
-    borderRadius: '14px',
-    border: '1px solid rgba(127, 176, 105, 0.3)',
-    background: 'rgba(255, 255, 255, 0.9)',
+    padding: '16px 20px',
+    borderRadius: '999px',
+    border: '1px solid rgba(255, 255, 255, 0.9)',
+    background: 'rgba(255, 255, 255, 0.78)',
+    boxShadow: 'inset 0 1px 3px rgba(40,60,45,0.06)',
+    boxSizing: 'border-box',
     fontSize: '0.95rem',
-    color: '#334155',
+    color: INK,
     outline: 'none',
     fontFamily: "'Roboto', -apple-system, sans-serif",
   };
@@ -163,7 +166,7 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
               margin: '-4px 0 -4px -6px',
               background: 'none',
               border: 'none',
-              color: 'var(--matcha-dark, #4a6741)',
+              color: INK,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -173,15 +176,15 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
 
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7d63', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: BASE, textAlign: 'center' }}>
             {mode === 'signup' ? 'Create your account, or ' : 'Enter your details, or '}
             <button
               type="button"
               onClick={() => { setMode(mode === 'signup' ? 'signin' : 'signup'); setMessage(''); setNotice(''); }}
               style={{
                 background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                font: 'inherit', fontWeight: 600,
-                color: 'var(--matcha-dark, #4a6741)', textDecoration: 'underline',
+                font: 'inherit', fontWeight: 700,
+                color: INK, textDecoration: 'underline',
               }}
             >
               {mode === 'signup' ? 'sign in' : 'sign up'}
@@ -216,7 +219,7 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
                 style={{
                   position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
                   width: '34px', height: '34px', border: 'none', background: 'none',
-                  cursor: 'pointer', color: '#8fa287',
+                  cursor: 'pointer', color: LIGHT,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
@@ -236,17 +239,11 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
               type="submit"
               disabled={loading !== null || !email.trim() || !password}
               style={{
-                width: '100%',
+                ...pillWhite,
                 marginTop: '4px',
-                padding: '15px 20px',
-                background: (!email.trim() || !password) ? 'rgba(127, 176, 105, 0.15)' : 'var(--matcha-green, #7FB069)',
-                border: 'none',
-                borderRadius: '999px',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                color: (!email.trim() || !password) ? '#9bab93' : '#fff',
+                opacity: (!email.trim() || !password) ? 0.5 : 1,
                 cursor: (loading !== null || !email.trim() || !password) ? 'default' : 'pointer',
-                transition: 'background 0.2s ease, color 0.2s ease',
+                transition: 'opacity 0.2s ease',
                 fontFamily: "'Roboto', -apple-system, sans-serif",
               }}
             >
@@ -268,11 +265,11 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
             disabled={loading !== null}
             style={{
               width: '100%',
-              padding: '14px 20px',
+              padding: '15px 20px',
               marginBottom: '10px',
               background: '#000',
               border: 'none',
-              borderRadius: '14px',
+              borderRadius: '999px',
               fontSize: '0.95rem',
               fontWeight: '500',
               color: '#fff',
@@ -314,37 +311,15 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
             onClick={handleGoogleSignIn}
             disabled={loading !== null}
             style={{
-              width: '100%',
-              padding: '14px 20px',
-              background: 'rgba(255, 255, 255, 0.9)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              border: '1px solid rgba(127, 176, 105, 0.3)',
-              borderRadius: '14px',
-              fontSize: '0.95rem',
-              fontWeight: '500',
-              color: 'var(--matcha-dark, #4a6741)',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              ...pillWhite,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '10px',
               marginBottom: '10px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(127, 176, 105, 0.1)',
+              fontWeight: 500,
+              cursor: loading ? 'not-allowed' : 'pointer',
               fontFamily: "'Roboto', -apple-system, sans-serif"
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(127, 176, 105, 0.5)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-              e.currentTarget.style.borderColor = 'rgba(127, 176, 105, 0.3)';
-              e.currentTarget.style.boxShadow = '0 2px 8px rgba(127, 176, 105, 0.1)';
             }}
           >
             {loading === 'google' ? (
@@ -352,8 +327,8 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
                 <div style={{
                   width: '18px',
                   height: '18px',
-                  border: '2px solid rgba(127, 176, 105, 0.3)',
-                  borderTopColor: 'var(--matcha-green, #7FB069)',
+                  border: '2px solid rgba(46, 60, 51, 0.2)',
+                  borderTopColor: INK,
                   borderRadius: '50%',
                   animation: 'spin 1s linear infinite'
                 }} />
@@ -401,13 +376,13 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
               disabled={loading !== null}
               style={{
                 flex: 1,
-                padding: '14px 12px',
-                background: 'rgba(127, 176, 105, 0.12)',
-                border: '1px solid rgba(127, 176, 105, 0.2)',
-                borderRadius: '14px',
+                padding: '15px 12px',
+                background: 'rgba(255, 255, 255, 0.45)',
+                border: '1px solid rgba(255, 255, 255, 0.9)',
+                borderRadius: '999px',
                 fontSize: '0.95rem',
                 fontWeight: '500',
-                color: 'var(--matcha-dark, #4a6741)',
+                color: INK,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -416,10 +391,10 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
                 fontFamily: "'Roboto', -apple-system, sans-serif",
               }}
               onMouseEnter={(e) => {
-                if (!loading) e.currentTarget.style.background = 'rgba(127, 176, 105, 0.2)';
+                if (!loading) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.75)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(127, 176, 105, 0.12)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.45)';
               }}
             >
               {label}
@@ -433,9 +408,9 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
         <div style={{
           marginTop: '0.75rem',
           padding: '10px 12px',
-          background: 'rgba(127, 176, 105, 0.12)',
-          borderRadius: '10px',
-          color: 'var(--matcha-dark, #4a6741)',
+          background: 'rgba(255, 255, 255, 0.7)',
+          borderRadius: '16px',
+          color: INK,
           fontSize: '0.85rem',
           textAlign: 'center'
         }}>
@@ -447,9 +422,9 @@ export default function Auth({ onAuthSuccess: _onAuthSuccess }: AuthProps) {
         <div style={{
           marginTop: '0.75rem',
           padding: '10px 12px',
-          background: 'rgba(220, 53, 69, 0.1)',
-          borderRadius: '10px',
-          color: '#c0392b',
+          background: 'rgba(181, 86, 111, 0.12)',
+          borderRadius: '16px',
+          color: '#B5566F',
           fontSize: '0.85rem',
           textAlign: 'center'
         }}>
