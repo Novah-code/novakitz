@@ -15,47 +15,9 @@ import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
 import { isPremiumNow } from '../lib/premium';
 import AccountButton from './AccountButton';
+import AccountMenu from './AccountMenu';
+import SettingsSheet from './SettingsSheet';
 import BottomTabBar, { TAB_BAR_HEIGHT, SUB_SWITCH_SPACE, type TabId, type SubId } from './BottomTabBar';
-
-// Translations
-const translations = {
-  en: {
-    loading: 'Loading...',
-    home: 'Home',
-    dreamJournal: 'Inner Journal',
-    dreamPlaylist: 'Dream Playlist',
-    calendar: 'Calendar',
-    history: 'History',
-    insights: 'Reflection',
-    streak: 'Streak',
-    badges: 'Badges',
-    monthlyReport: 'Monthly Review',
-    community: 'Apricot Garden',
-    pricing: 'Pricing',
-    language: 'Language',
-    signOut: 'Sign Out',
-    signUp: 'Sign Up',
-    signIn: 'Sign In'
-  },
-  ko: {
-    loading: '로딩 중...',
-    home: '홈',
-    dreamJournal: '내면의 기록',
-    dreamPlaylist: '드림 플레이리스트',
-    calendar: '캘린더',
-    history: '기록',
-    insights: '리플렉션',
-    streak: '연속 기록',
-    badges: '뱃지',
-    monthlyReport: '먼슬리 리뷰',
-    community: '살구정원',
-    pricing: '요금제',
-    language: '언어',
-    signOut: '로그아웃',
-    signUp: '회원가입',
-    signIn: '로그인'
-  }
-};
 
 export default function SimpleDreamInterfaceWithAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -69,8 +31,10 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profileTab, setProfileTab] = useState<'profile' | 'account' | 'subscription'>('profile');
   // What the account button shows: their photo, or the first letter of their name.
-  const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string }>({ url: null, initial: '' });
+  const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string; name: string }>({ url: null, initial: '', name: '' });
   // True while the home screen is in a full-screen step (see SimpleDreamInterface).
   const [immersive, setImmersive] = useState(false);
 
@@ -123,7 +87,6 @@ export default function SimpleDreamInterfaceWithAuth() {
     setUser((prev) => (prev?.id === next?.id ? prev : next));
   }, []);
 
-  const t = translations[language];
 
   // Keep RevenueCat's identity in step with Supabase auth. Purchases must
   // attach to the signed-in account, since the webhook maps app_user_id
@@ -400,12 +363,12 @@ export default function SimpleDreamInterfaceWithAuth() {
    */
   useEffect(() => {
     if (!user) {
-      setAvatarInfo({ url: null, initial: '' });
+      setAvatarInfo({ url: null, initial: '', name: '' });
       return;
     }
     let cancelled = false;
     const fallback = (user.user_metadata?.name || user.email || '').toString().trim();
-    setAvatarInfo({ url: null, initial: fallback.charAt(0) });
+    setAvatarInfo({ url: null, initial: fallback.charAt(0), name: fallback.split('@')[0] });
 
     (async () => {
       try {
@@ -416,7 +379,7 @@ export default function SimpleDreamInterfaceWithAuth() {
           .maybeSingle();
         if (cancelled || !data) return;
         const name = (data.display_name || fallback).toString().trim();
-        setAvatarInfo({ url: data.avatar_url || null, initial: name.charAt(0) });
+        setAvatarInfo({ url: data.avatar_url || null, initial: name.charAt(0), name: name.split('@')[0] });
       } catch {
         // The letter from the account's own name is already showing.
       }
@@ -532,6 +495,12 @@ export default function SimpleDreamInterfaceWithAuth() {
     }
   };
 
+  const toggleLanguage = () => {
+    const next = language === 'en' ? 'ko' : 'en';
+    setLanguage(next);
+    localStorage.setItem('preferredLanguage', next);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -561,7 +530,9 @@ export default function SimpleDreamInterfaceWithAuth() {
     }
   };
 
-  const openProfileSettings = async () => {
+  const openProfileSettings = async (tab: 'profile' | 'account' | 'subscription' = 'profile') => {
+    setProfileTab(tab);
+    setShowSettings(false);
     setMenuOpen(false);
     await fetchUserProfile();
     setTimeout(() => setShowProfileSettings(true), 150);
@@ -583,6 +554,7 @@ export default function SimpleDreamInterfaceWithAuth() {
     : null;
 
   const selectTab = (tab: TabId) => {
+    setMenuOpen(false);
     if (tab === activeTab) return;
     setCalendarSelectedDate(null);
     if (tab === 'today') {
@@ -665,157 +637,39 @@ export default function SimpleDreamInterfaceWithAuth() {
         onClick={() => setMenuOpen(!menuOpen)}
       />
 
-      {/* Hamburger Menu Sidebar */}
+      {/*
+        The menu under the gear, and the settings sheet it leads to. They replace
+        the old right-hand drawer: the places are the tab bar now, so what is left
+        is four rows and a settings screen.
+      */}
       {menuOpen && (
-        <>
-          {/*
-            The drawer is translucent, and the home screen's two buttons showed
-            through it and sat on top of its Language row. They are not part of
-            this screen while it is open.
-          */}
-          <style>{`.home-actions { display: none !important; }`}</style>
-          {/* Backdrop */}
-          <div
-            onClick={() => setMenuOpen(false)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(30,41,35,0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 9998 }}
-          />
+        <AccountMenu
+          language={language}
+          signedIn={!!user}
+          isPremium={isPremium}
+          name={avatarInfo.name}
+          avatarUrl={avatarInfo.url}
+          initial={avatarInfo.initial}
+          onClose={() => setMenuOpen(false)}
+          onProfile={() => openProfileSettings('profile')}
+          onSignIn={() => { setMenuOpen(false); setIsGuestMode(true); }}
+          onPro={() => { setMenuOpen(false); goTo('/pricing/'); }}
+          onArchetype={() => { setMenuOpen(false); goTo('/archetype-test/'); }}
+          onSettings={() => { setMenuOpen(false); setShowSettings(true); }}
+        />
+      )}
 
-          {/* Sidebar */}
-          <div style={{
-            position: 'fixed', top: 0, right: 0,
-            width: 'min(280px, 80vw)', height: '100vh',
-            background: 'rgba(255,255,255,0.88)',
-            backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)',
-            borderLeft: '1px solid rgba(255,255,255,0.9)',
-            boxShadow: '-15px 0 50px rgba(0,0,0,0.1)',
-            zIndex: 9999,
-            display: 'flex', flexDirection: 'column',
-            padding: '40px 20px 32px', boxSizing: 'border-box',
-            fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
-            animation: 'slideInRight 0.3s ease-out',
-            overflow: 'hidden'
-          }}>
-            <style>{`@keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }`}</style>
-
-            {/*
-              * Room for the account button, which is fixed above this panel and
-              * turns into an X while the menu is open. The drawer used to carry
-              * a second close button of its own, directly under that one — two
-              * X's stacked in the same corner, both doing the same thing. The
-              * one that stays is the one you already pressed to get here.
-              */}
-            <div style={{ height: 44, flexShrink: 0 }} />
-
-            {/* Profile button - original style, only for logged in users */}
-            {user && (
-              <button onClick={openProfileSettings} style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8, flexShrink: 0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,176,105,0.1)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
-              >
-                <div style={{ position: 'relative' }}>
-                  {/* The same face as the account button, so the two read as one person. */}
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)', boxShadow: '0 2px 8px rgba(127,176,105,0.3)', color: '#fff', fontSize: 17, fontWeight: 600, textTransform: 'uppercase' }}>
-                    {avatarInfo.url
-                      // eslint-disable-next-line @next/next/no-img-element
-                      ? <img src={avatarInfo.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : avatarInfo.initial}
-                  </div>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="3" style={{ position: 'absolute', bottom: '-2px', right: '-4px' }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </div>
-
-                {/*
-                  * Say that the subscription is on.
-                  *
-                  * `isPremium` was computed here and handed only to
-                  * DreamInsights and ProfileSettings, so after paying the menu
-                  * looked exactly as it had before and the only proof was three
-                  * taps away under Profile → Subscription. Someone who has just
-                  * paid should be able to see it where they already are.
-                  */}
-                {isPremium && (
-                  <span style={{
-                    marginLeft: 8,
-                    padding: '3px 9px',
-                    borderRadius: 999,
-                    background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: '0.04em',
-                    boxShadow: '0 2px 6px rgba(122,179,130,0.35)',
-                  }}>
-                    PRO
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Menu list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflowY: 'auto' }}>
-              {/*
-                Home, Journal, Calendar, Reflection and Monthly Review used to be
-                rows here. They are the bottom tab bar now (BottomTabBar.tsx), and
-                keeping a second copy in the drawer meant two ways to do the same
-                thing that could disagree about which one was active. What is left
-                is what is not a place to be: pricing and the archetype test.
-              */}
-
-              {/* Pricing */}
-              <button onClick={() => { goTo('/pricing/'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                </span>
-                {t.pricing}
-              </button>
-
-              {/* My Archetype */}
-              <button onClick={() => { goTo('/archetype-test/'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </span>
-                {language === 'ko' ? '나의 아키타입' : 'My Archetype'}
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div style={{ marginTop: 'auto', paddingTop: 20, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Sign In for guests */}
-              {!user && (
-                <button onClick={() => setIsGuestMode(true)}
-                  style={{ width: '100%', padding: '12px 16px', background: 'rgba(122,179,130,0.18)', color: '#4A5D4E', border: 'none', borderRadius: 14, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s', fontFamily: 'inherit' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  {language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up'}
-                </button>
-              )}
-
-              {/* Language toggle */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#4A5D4E' }}>{t.language}</span>
-                <button onClick={() => { const nl = language === 'en' ? 'ko' : 'en'; setLanguage(nl); localStorage.setItem('preferredLanguage', nl); }}
-                  style={{ position: 'relative', width: 56, height: 28, background: '#7AB382', borderRadius: 20, border: 'none', cursor: 'pointer', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-                  <div style={{ position: 'absolute', top: 4, left: language === 'ko' ? 4 : 28, width: 20, height: 20, background: 'white', borderRadius: '50%', transition: 'left 0.3s ease', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }} />
-                  <span style={{ position: 'absolute', top: '50%', left: language === 'ko' ? 28 : 8, transform: 'translateY(-50%)', fontSize: 9, fontWeight: 700, color: 'white', letterSpacing: 0.5 }}>{language === 'ko' ? 'KO' : 'EN'}</span>
-                </button>
-              </div>
-
-              {/* Social links */}
-              <div style={{ display: 'flex', gap: 10, padding: '0 4px' }}>
-                <a href="https://instagram.com/novakitz" target="_blank" rel="noopener noreferrer"
-                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                </a>
-                <a href="mailto:hello@novakitz.com"
-                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </>
+      {showSettings && (
+        <SettingsSheet
+          language={language}
+          signedIn={!!user}
+          isPremium={isPremium}
+          onClose={() => setShowSettings(false)}
+          onToggleLanguage={toggleLanguage}
+          onOpenProfile={(tab) => openProfileSettings(tab)}
+          onSignIn={() => { setShowSettings(false); setIsGuestMode(true); }}
+          onSignOut={async () => { setShowSettings(false); await handleSignOut(); }}
+        />
       )}
 
       <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} />
@@ -996,6 +850,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             fetchUserProfile();
           }}
           isPremium={isPremium}
+          initialTab={profileTab}
         />
       )}
 
@@ -1085,7 +940,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         the home screen's own full-screen steps (writing a dream, reading a
         response, the mood flow). The mood flow also sits above it by z-index.
       */}
-      {!menuOpen && !isGuestMode && !showProfileSettings && !showStreak && !calendarSelectedDream && !immersive && (
+      {!showSettings && !isGuestMode && !showProfileSettings && !showStreak && !calendarSelectedDream && !immersive && (
         <>
           {/*
             The panels are full-screen overlays that each end at the bottom of

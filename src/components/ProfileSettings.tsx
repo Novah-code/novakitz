@@ -16,12 +16,14 @@ interface ProfileSettingsProps {
   onSave?: () => void;
   streak?: number;
   isPremium?: boolean;
+  /** Which tab to open on. The settings sheet uses this to land on Notifications. */
+  initialTab?: TabType;
 }
 
 type TabType = 'profile' | 'account' | 'subscription' | 'streak';
 
-export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false }: ProfileSettingsProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('profile');
+export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false, initialTab = 'profile' }: ProfileSettingsProps) {
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
