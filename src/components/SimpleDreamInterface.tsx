@@ -59,9 +59,10 @@ interface SimpleDreamInterfaceProps {
  */
 const PICKER_LAYOUTS = {
   // The grid as it always was, just centred on a full screen.
-  wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px' },
-  // Two columns of four, a little larger, to use the height.
-  tall: { columns: 2, size: '76px', gap: '40px 24px', label: '13px' },
+  wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px', maxWidth: '100%' },
+  // Two columns of four. 96px in a 320px-wide grid: at 76px in full-width columns the
+  // pebbles floated apart and left a hole in the middle (윤아님 chose this size, 2026-11-03).
+  tall: { columns: 2, size: '96px', gap: '34px 18px', label: '14px', maxWidth: '320px' },
 } as const;
 const PICKER_LAYOUT = PICKER_LAYOUTS.tall;
 
@@ -6103,6 +6104,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div onClick={(e) => e.stopPropagation()} style={{
               width: '100%',
+              maxWidth: PICKER_LAYOUT.maxWidth,
               display: 'grid',
               gridTemplateColumns: `repeat(${PICKER_LAYOUT.columns}, 1fr)`,
               gap: PICKER_LAYOUT.gap,
