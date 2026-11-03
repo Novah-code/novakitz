@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
+import HomeActions from './HomeActions';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
@@ -4123,6 +4124,19 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   ? '오늘 기분 고르기. 길게 누르면 꿈 기록'
                   : 'Check in with today’s mood. Press and hold to record a dream'
               }
+            />
+          )}
+
+          {/*
+            The circle's two doors as two buttons you can see. The circle itself
+            keeps both gestures — tap for mood, hold for a dream — for anyone who
+            already uses them. See HomeActions.
+          */}
+          {!showInput && !showResponse && !showHistory && !showEmotionModal && !showMoodCardFlow && (
+            <HomeActions
+              language={language}
+              onMood={() => setShowEmotionModal(true)}
+              onDream={() => setShowInput(true)}
             />
           )}
 
