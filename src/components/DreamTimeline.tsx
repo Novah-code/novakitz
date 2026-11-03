@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { EMOTIONS } from '../lib/emotions';
+import { dedupeTags } from '../lib/tags';
 
 interface DreamEntry {
   id: string;
@@ -41,45 +43,6 @@ const translations = {
   }
 };
 
-// Mood detection from tags
-function deriveMoodFromTags(tags: string[]): 'peaceful' | 'anxious' | 'joyful' | 'mysterious' | 'neutral' {
-  const tagString = tags.join(' ').toLowerCase();
-
-  if (tagString.includes('peaceful') || tagString.includes('calm') || tagString.includes('serene') ||
-      tagString.includes('평화') || tagString.includes('고요') || tagString.includes('차분')) {
-    return 'peaceful';
-  }
-  if (tagString.includes('anxious') || tagString.includes('fear') || tagString.includes('scared') ||
-      tagString.includes('불안') || tagString.includes('두려') || tagString.includes('걱정')) {
-    return 'anxious';
-  }
-  if (tagString.includes('joyful') || tagString.includes('happy') || tagString.includes('excited') ||
-      tagString.includes('기쁨') || tagString.includes('행복') || tagString.includes('즐거')) {
-    return 'joyful';
-  }
-  if (tagString.includes('mysterious') || tagString.includes('strange') || tagString.includes('surreal') ||
-      tagString.includes('신비') || tagString.includes('이상') || tagString.includes('묘한')) {
-    return 'mysterious';
-  }
-  return 'neutral';
-}
-
-const moodColors = {
-  peaceful: { primary: '#7FB069', secondary: '#A8D5A8', bg: '#E8F5E8' },
-  anxious: { primary: '#E07A5F', secondary: '#F4A261', bg: '#FFE8E0' },
-  joyful: { primary: '#F2CC8F', secondary: '#FFD93D', bg: '#FFF9E6' },
-  mysterious: { primary: '#81B29A', secondary: '#98C1D9', bg: '#E8F3F5' },
-  neutral: { primary: '#9CA3AF', secondary: '#D1D5DB', bg: '#F3F4F6' }
-};
-
-const moodEmojis = {
-  peaceful: '●',
-  anxious: '●',
-  joyful: '●',
-  mysterious: '●',
-  neutral: '●'
-};
-
 function getRelativeTime(date: string, language: 'en' | 'ko'): string {
   const t = translations[language];
   const dreamDate = new Date(date);
@@ -93,6 +56,33 @@ function getRelativeTime(date: string, language: 'en' | 'ko'): string {
   if (diffDays < 30) return `${Math.floor(diffDays / 7)}${t.weeksAgo}`;
   return `${Math.floor(diffDays / 30)}${t.monthsAgo}`;
 }
+
+/*
+ * A morning record is stored as "[감정 기록] 감정: … 장소: … 핵심 장면: …", with an
+ * 'emotion-record' tag. The timeline printed that text and tag as they are.
+ * This reads the record the way the journal view does: the scene (or the sleep
+ * and stress lines) as the preview, the chosen pebble as the dot, no internal tag.
+ */
+function readMoodRecord(dream: DreamEntry) {
+  const tags = [...(dream.autoTags || []), ...(dream.tags || [])];
+  if (!tags.includes('emotion-record') && !(dream.text ?? '').startsWith('[감정 기록]')) return null;
+  const clean = (dream.text ?? '').replace(/^\[감정 기록\] /, '').split('\n\n---\n\n')[0];
+  const lines = clean.split('\n');
+  const after = (k: string) => lines.find((l) => l.startsWith(k))?.slice(k.length).trim() ?? '';
+  const sceneStart = lines.findIndex((l) => l.startsWith('핵심 장면:'));
+  const scene = sceneStart >= 0 ? lines.slice(sceneStart).join(' ').slice('핵심 장면:'.length).trim() : '';
+  const feelings = [after('수면:'), after('스트레스:')].filter(Boolean).join(' · ');
+  const emotionLabel = tags.find((tg) => tg !== 'emotion-record') ?? after('감정:');
+  const emotion = EMOTIONS.find((e) => e.en === emotionLabel || e.ko === emotionLabel);
+  return {
+    preview: scene || feelings || clean.split('\n').filter((l) => !l.startsWith('감정:')).join(' ').trim(),
+    emotion,
+    tags: dedupeTags(tags.filter((tg) => tg !== 'emotion-record')),
+  };
+}
+
+const INK = '#2E3C33';
+const PINK = '#EDA3BC';
 
 export default function DreamTimeline({
   dreams,
@@ -116,234 +106,81 @@ export default function DreamTimeline({
 
   if (dreams.length === 0) {
     return (
-      <div
-        style={{
-          padding: '3rem',
-          textAlign: 'center',
-          color: '#9ca3af',
-          fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-        }}
-      >
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>💭</div>
+      <div style={{ padding: '3rem', textAlign: 'center', color: '#7d8f82', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif" }}>
         <div style={{ fontSize: '1.1rem' }}>{t.noDreams}</div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: '2rem 1rem',
-        maxWidth: '900px',
-        margin: '0 auto',
-        fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
-      }}
-    >
-      {/* Title */}
-      <h2
-        style={{
-          fontSize: '1.8rem',
-          fontWeight: 'bold',
-          marginBottom: '2rem',
-          color: '#374151',
-          textAlign: 'center'
-        }}
-      >
-        {t.title}
-      </h2>
-
-      {/* Timeline */}
+    <div style={{ padding: '1rem 0 2rem', maxWidth: '900px', margin: '0 auto', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif", color: INK }}>
       <div style={{ position: 'relative' }}>
         {/* Vertical line */}
-        <div
-          style={{
-            position: 'absolute',
-            left: '20px',
-            top: 0,
-            bottom: 0,
-            width: '2px',
-            background: 'linear-gradient(to bottom, #7FB069, #E5E7EB)',
-            zIndex: 0
-          }}
-        />
+        <div style={{ position: 'absolute', left: '19px', top: 0, bottom: 0, width: '2px', background: 'linear-gradient(to bottom, rgba(237,163,188,0.6), rgba(46,60,51,0.08))', zIndex: 0 }} />
 
-        {/* Dream entries */}
         {sortedDreams.map((dream, index) => {
-          const allTags = [...(dream.autoTags || []), ...(dream.tags || [])];
-          const mood = deriveMoodFromTags(allTags);
-          const colors = moodColors[mood];
-          const emoji = moodEmojis[mood];
+          const mood = readMoodRecord(dream);
+          const allTags = mood ? mood.tags : dedupeTags([...(dream.autoTags || []), ...(dream.tags || [])]);
           const isSelected = selectedDream === dream.id;
+          const title = mood ? (language === 'ko' ? '오늘의 기분' : "Today's Mood") : dream.title;
+          const preview = mood ? mood.preview : dream.text;
 
           return (
-            <div
-              key={dream.id}
-              style={{
-                position: 'relative',
-                marginBottom: '2.5rem',
-                paddingLeft: '60px',
-                animation: `slideIn 0.5s ease-out ${index * 0.1}s both`
-              }}
-            >
-              {/* Timeline dot */}
+            <div key={dream.id} style={{ position: 'relative', marginBottom: '1.5rem', paddingLeft: '52px', animation: `slideIn 0.5s ease-out ${index * 0.08}s both` }}>
+              {/* Timeline dot: the pebble for a morning, a pink dot for a dream */}
               <div
                 style={{
-                  position: 'absolute',
-                  left: '10px',
-                  top: '10px',
-                  width: '22px',
-                  height: '22px',
-                  borderRadius: '50%',
-                  background: colors.primary,
-                  border: '3px solid white',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                  zIndex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.7rem'
+                  position: 'absolute', left: mood?.emotion ? '4px' : '10px', top: '18px',
+                  width: mood?.emotion ? '32px' : '20px', height: mood?.emotion ? '32px' : '20px',
+                  borderRadius: mood?.emotion ? mood.emotion.borderRadius : '50%',
+                  background: mood?.emotion ? mood.emotion.color : PINK,
+                  border: '2px solid rgba(255,255,255,0.9)',
+                  boxShadow: '0 2px 8px rgba(40,60,45,0.12)', zIndex: 1,
                 }}
-              >
-                {emoji}
-              </div>
+              />
 
-              {/* Dream card */}
               <div
                 onClick={() => handleDreamClick(dream)}
                 style={{
-                  background: 'white',
-                  borderRadius: '16px',
-                  padding: '1.5rem',
-                  boxShadow: isSelected
-                    ? `0 8px 24px ${colors.primary}40`
-                    : '0 4px 12px rgba(0, 0, 0, 0.08)',
-                  border: isSelected
-                    ? `2px solid ${colors.primary}`
-                    : '2px solid transparent',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+                  backdropFilter: 'blur(22px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+                  borderRadius: '24px',
+                  padding: '18px 20px',
+                  border: isSelected ? `1.5px solid ${PINK}` : '1px solid rgba(255,255,255,0.85)',
+                  boxShadow: '0 8px 24px rgba(40,60,45,0.10), inset 0 1px 0 rgba(255,255,255,0.95)',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: isSelected ? 'scale(1.02)' : 'scale(1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.12)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }
+                  textAlign: 'left',
                 }}
               >
-                {/* Decorative gradient */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '4px',
-                    background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})`
-                  }}
-                />
-
-                {/* Date & relative time */}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '0.75rem'
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '0.85rem',
-                      fontWeight: '600',
-                      color: colors.primary
-                    }}
-                  >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.2, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase' }}>
                     {getRelativeTime(dream.date, language)}
                   </div>
-                  <div
-                    style={{
-                      fontSize: '0.75rem',
-                      color: '#9ca3af'
-                    }}
-                  >
+                  <div style={{ fontSize: 12, color: '#7d8f82' }}>
                     {new Date(dream.date).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US')}
                   </div>
                 </div>
 
-                {/* Dream title */}
-                {dream.title && (
-                  <h3
-                    style={{
-                      fontSize: '1.2rem',
-                      fontWeight: 'bold',
-                      marginBottom: '0.5rem',
-                      color: '#1f2937'
-                    }}
-                  >
-                    {dream.title}
+                {title && (
+                  <h3 style={{ fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? 18 : 24, fontWeight: language === 'ko' ? 500 : 400, margin: '0 0 8px', color: INK, lineHeight: 1.2 }}>
+                    {title}
                   </h3>
                 )}
 
-                {/* Dream text preview */}
-                <p
-                  style={{
-                    fontSize: '0.95rem',
-                    lineHeight: 1.6,
-                    color: '#6b7280',
-                    marginBottom: '1rem',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                  }}
-                >
-                  {dream.text}
+                <p style={{ fontSize: 15, lineHeight: 1.65, color: '#4A5D4E', margin: 0, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {preview}
                 </p>
 
-                {/* Tags */}
                 {allTags.length > 0 && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '0.5rem',
-                      marginTop: '1rem'
-                    }}
-                  >
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
                     {allTags.slice(0, 4).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        style={{
-                          background: colors.bg,
-                          color: colors.primary,
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '12px',
-                          fontSize: '0.8rem',
-                          fontWeight: '500'
-                        }}
-                      >
+                      <span key={idx} style={{ fontFamily: 'monospace', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', color: '#4A5D4E', padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>
                         #{tag}
                       </span>
                     ))}
                     {allTags.length > 4 && (
-                      <span
-                        style={{
-                          color: '#9ca3af',
-                          fontSize: '0.8rem',
-                          padding: '0.25rem 0.5rem'
-                        }}
-                      >
-                        +{allTags.length - 4}
-                      </span>
+                      <span style={{ color: '#7d8f82', fontSize: 12, padding: '4px 4px' }}>+{allTags.length - 4}</span>
                     )}
                   </div>
                 )}
@@ -355,14 +192,8 @@ export default function DreamTimeline({
 
       <style jsx>{`
         @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-30px); }
+          to { opacity: 1; transform: translateX(0); }
         }
       `}</style>
     </div>

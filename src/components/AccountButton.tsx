@@ -23,7 +23,7 @@ interface AccountButtonProps {
   onClick: () => void;
 }
 
-const INK = 'var(--matcha-dark, #4a6741)';
+const INK = '#2E3C33';
 const SIZE = 46;
 
 export default function AccountButton({ language, open, onClick }: AccountButtonProps) {

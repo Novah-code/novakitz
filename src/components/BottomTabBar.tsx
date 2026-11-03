@@ -52,10 +52,10 @@ const LABELS = {
   ko: { today: '오늘', journal: '저널', insights: '인사이트', history: '기록', calendar: '달력', reflection: '리플렉션', monthly: '월간 리뷰' },
 } as const;
 
-const INK = 'var(--matcha-dark, #4a6741)';
+const INK = '#2E3C33';
 // Darker than the app's usual sage: the labels sit on glass over a bright sky,
 // and at 10.5px the lighter tone read as washed out.
-const SAGE = '#566b5b';
+const SAGE = '#6b7d71';
 
 function Icon({ tab }: { tab: TabId }) {
   const common = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
@@ -106,6 +106,14 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
         strip right behind the switch. A dock of the bar's own paper under both
         makes the bottom of the screen one surface.
       */}
+      {/*
+        A dock under the switch and the bar, painted with the same sky as the
+        full-screen panels above it. `fixed` attachment makes the gradient cover
+        the viewport rather than the dock, so it lines up with the panel's own
+        and the bottom of the screen reads as one surface. It stops the home
+        screen (its Mood and Dream buttons) showing through the gap the panels
+        leave above the bar.
+      */}
       {pair && (
         <div
           aria-hidden="true"
@@ -116,9 +124,14 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             bottom: 0,
             height: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + SUB_SWITCH_SPACE}px)`,
             zIndex: 10002,
-            background: 'rgb(246, 243, 234)',
+            backgroundImage: 'var(--home-sky-day)',
+            backgroundColor: '#F4EEE5',
+            backgroundAttachment: 'fixed',
+            overflow: 'hidden',
           }}
-        />
+        >
+          <div className="home-scene__grain" aria-hidden="true" />
+        </div>
       )}
 
       {pair && (
@@ -158,8 +171,9 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                   fontSize: '12.5px',
                   fontWeight: on ? 600 : 500,
                   letterSpacing: '0.01em',
-                  color: on ? '#fff' : SAGE,
-                  background: on ? INK : 'transparent',
+                  color: on ? '#2E3C33' : SAGE,
+                  background: on ? 'rgba(255,255,255,0.96)' : 'transparent',
+                  boxShadow: on ? '0 2px 8px rgba(40,60,45,0.14)' : 'none',
                   transition: 'background 0.2s, color 0.2s',
                   fontFamily: 'inherit',
                   WebkitTapHighlightColor: 'transparent',
@@ -231,7 +245,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                   cursor: 'pointer',
                   color: on ? INK : SAGE,
                   background: on
-                    ? 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(232,241,232,0.92) 100%)'
+                    ? 'rgba(255,255,255,0.96)'
                     : 'transparent',
                   boxShadow: on
                     ? '0 3px 10px rgba(40, 60, 45, 0.14), inset 0 1px 0 rgba(255,255,255,1)'

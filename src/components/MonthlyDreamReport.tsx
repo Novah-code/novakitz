@@ -53,6 +53,9 @@ function IconCompass({ size = 16, color = 'currentColor' }) {
 function IconKey({ size = 16, color = 'currentColor' }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>;
 }
+function IconLock({ size = 16, color = 'currentColor' }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+}
 function IconArrowRight({ size = 14, color = 'currentColor' }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
 }
@@ -410,32 +413,32 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
   const moodPct = totalEntries > 0 ? (moodCount / totalEntries) * 100 : 50;
   const dreamPct = totalEntries > 0 ? (dreamCount / totalEntries) * 100 : 50;
 
-  const dayBg = (t: DayType) => t === 'both' ? '#7ea886' : t === 'mood' ? '#e8ce90' : t === 'dream' ? '#b8d6c0' : '#f0f5f2';
-  const dayBorder = (t: DayType) => t === 'both' ? '1px solid rgba(92,128,101,0.2)' : t === 'mood' ? '1px solid rgba(214,168,72,0.2)' : t === 'dream' ? '1px solid rgba(126,168,134,0.2)' : '1px solid rgba(232,239,233,0.5)';
+  const dayBg = (t: DayType) => t === 'both' ? '#C9B8F0' : t === 'mood' ? '#F6E2B3' : t === 'dream' ? '#B3D3F0' : 'rgba(255,255,255,0.55)';
+  const dayBorder = (t: DayType) => '1px solid rgba(255,255,255,0.8)';
 
   /* ── Loading ── */
   if (loading) return (
     <div style={{ padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
       <style>{`@keyframes mdr-spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ width: 44, height: 44, border: '3px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite' }} />
-      <p style={{ color: '#8ca693', fontSize: 14 }}>{language === 'ko' ? '리포트를 불러오는 중...' : 'Loading your report...'}</p>
+      <div style={{ width: 44, height: 44, border: '3px solid #e8efe9', borderTopColor: '#EDA3BC', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite' }} />
+      <p style={{ color: '#7d8f82', fontSize: 14 }}>{language === 'ko' ? '리포트를 불러오는 중...' : 'Loading your report...'}</p>
     </div>
   );
 
   /* ── No Data ── */
   if (!hasData) return (
     <div style={{ padding: '3rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-      <IconMoon size={48} color="#7ea886" />
-      <p style={{ fontSize: 16, color: '#334139', lineHeight: 1.6, maxWidth: 280 }}>
+      <IconMoon size={48} color="#7FAEDB" />
+      <p style={{ fontSize: 16, color: '#2E3C33', lineHeight: 1.6, maxWidth: 280 }}>
         {language === 'ko' ? '이번 달 기록된 꿈이 없습니다. 꿈을 기록하고 인사이트를 발견하세요!' : 'No dreams recorded this month. Start journaling to unlock insights!'}
       </p>
-      {onClose && <button onClick={onClose} style={{ padding: '12px 24px', background: '#7ea886', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{language === 'ko' ? '꿈 기록하러 가기' : 'Start Recording Dreams'}</button>}
+      {onClose && <button onClick={onClose} style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.96)', color: '#2E3C33', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>{language === 'ko' ? '꿈 기록하러 가기' : 'Start Recording Dreams'}</button>}
     </div>
   );
 
   /* ── Main ── */
   return (
-    <div className="mdr-body" style={{ fontFamily: 'inherit', color: '#334139', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
+    <div className="mdr-body" style={{ fontFamily: 'inherit', color: '#2E3C33', display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
       {/* The shell around this goes full-bleed on a phone; without matching
           heights here the report would still stop at 90% of the screen. */}
       <style>{`
@@ -449,26 +452,26 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
         .mdr-scroll::-webkit-scrollbar-thumb { background: #c6dfce; border-radius: 4px; }
         .mdr-day { transition: transform 0.2s; }
         .mdr-day:hover { transform: scale(1.15); }
-        .mdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
-        .mdr-journal:hover { color: #5c8065 !important; }
+        .mdr-close:hover { background: #f0f5f2 !important; color: #4A5D4E !important; }
+        .mdr-journal:hover { color: #4A5D4E !important; }
         .mdr-intention:hover { color: white !important; }
       `}</style>
 
       {/* ── Sticky Header ── */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
-          <IconCalendar size={17} color="#5c8065" />
+      <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(250,244,238,0.92) 0%, rgba(250,244,238,0.92) 75%, rgba(250,244,238,0) 100%)', borderBottom: 'none', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4A5D4E' }}>
+          <IconCalendar size={17} color="#4A5D4E" />
           {availableMonths.length > 1 ? (
             <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}
-              style={{ fontSize: 13, fontWeight: 700, color: '#5c8065', border: 'none', background: 'transparent', cursor: 'pointer', outline: 'none', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              style={{ fontSize: 13, fontWeight: 700, color: '#4A5D4E', border: 'none', background: 'transparent', cursor: 'pointer', outline: 'none', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {availableMonths.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           ) : (
             <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{monthLabel}</span>
           )}
-          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065' }}>{language === 'ko' ? '리뷰' : 'Review'}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4A5D4E' }}>{language === 'ko' ? '리뷰' : 'Review'}</span>
           {isPremium && (
-            <span style={{ marginLeft: 4, padding: '2px 8px', background: 'linear-gradient(to right, #e8ce90, #7ea886)', color: 'white', fontSize: 9, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <span style={{ marginLeft: 4, padding: '2px 8px', background: 'linear-gradient(to right, #F6E2B3, #EDA3BC)', color: '#2E3C33', fontSize: 9, fontWeight: 700, borderRadius: 99, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               {/* "Pro" everywhere the person can see it. The entitlement is
                   still called `premium` in RevenueCat and in the plan slug, and
                   renaming that would invalidate live subscriptions — but the
@@ -479,7 +482,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           )}
         </div>
         {onClose && (
-          <button className="mdr-close" onClick={onClose} style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#8ca693', display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}>
+          <button className="mdr-close" onClick={onClose} style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#7d8f82', display: 'flex', alignItems: 'center', transition: 'background 0.15s, color 0.15s' }}>
             <IconX size={20} />
           </button>
         )}
@@ -491,16 +494,16 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
         {/* 1. Narrative */}
         <section style={{ textAlign: 'center', paddingTop: 8 }}>
           {aiLoading && !aiInsights ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#8ca693', fontSize: 13 }}>
-              <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: '#7d8f82', fontSize: 13 }}>
+              <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#EDA3BC', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
               {language === 'ko' ? '분석 중...' : 'Analyzing...'}
             </div>
           ) : (
             <>
-              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#3d6044', marginBottom: 16, lineHeight: 1.25, fontFamily: 'Georgia, serif' }}>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: '#2E3C33', marginBottom: 16, lineHeight: 1.25, fontFamily: 'Georgia, serif' }}>
                 {aiInsights?.narrativeTitle || (language === 'ko' ? `${monthLabel}의 기록` : `${monthLabel} in Review`)}
               </h1>
-              <p style={{ color: '#5c8065', lineHeight: 1.7, maxWidth: 380, margin: '0 auto', fontSize: 14 }}>
+              <p style={{ color: '#4A5D4E', lineHeight: 1.7, maxWidth: 380, margin: '0 auto', fontSize: 14 }}>
                 {/*
                   * "1 dreams and 1 moods" was the English, and the second half
                   * was also claiming more than it could show: `moodCount` counts
@@ -520,22 +523,22 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
         </section>
 
         {/* 2. Moments of Pause */}
-        <section style={{ background: '#fff', border: '1px solid #e8efe9', borderRadius: 20, padding: 24, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginBottom: 8, margin: '0 0 8px' }}>
+        <section style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 28, padding: 24, boxShadow: '0 8px 24px rgba(40,60,45,0.10)' }}>
+          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', marginBottom: 8, margin: '0 0 8px' }}>
             {language === 'ko' ? '기록의 발자취' : 'Moments of Pause'}
           </h3>
-          <p style={{ textAlign: 'center', color: '#4a6b52', marginBottom: 24, fontSize: 14, fontWeight: 500 }}>
+          <p style={{ textAlign: 'center', color: '#4A5D4E', marginBottom: 24, fontSize: 14, fontWeight: 500 }}>
             {language === 'ko'
-              ? <>{`이달 `}<strong style={{ color: '#3d6044', fontSize: 20 }}>{activeDaysCount}</strong>{`일을 기록했습니다`}</>
-              : <>You took time to reflect on <strong style={{ color: '#3d6044', fontSize: 20, margin: '0 2px' }}>{activeDaysCount}</strong> days this month.</>}
+              ? <>{`이달 `}<strong style={{ color: '#2E3C33', fontSize: 20 }}>{activeDaysCount}</strong>{`일을 기록했습니다`}</>
+              : <>You took time to reflect on <strong style={{ color: '#2E3C33', fontSize: 20, margin: '0 2px' }}>{activeDaysCount}</strong> days this month.</>}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6 }}>
             {activityGrid.map(({ day, type }) => (
               <div key={day} className="mdr-day" title={`Day ${day}`} style={{ width: 24, height: 24, borderRadius: 6, flexShrink: 0, background: dayBg(type), border: dayBorder(type), boxShadow: type !== 'none' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none' }} />
             ))}
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20, fontSize: 11, fontWeight: 500, color: '#8ca693' }}>
-            {[{ bg: '#e8ce90', label: language === 'ko' ? '감정만' : 'Mood Only' }, { bg: '#b8d6c0', label: language === 'ko' ? '꿈만' : 'Dream Only' }, { bg: '#7ea886', label: language === 'ko' ? '둘 다' : 'Both' }].map(({ bg, label }) => (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 20, fontSize: 11, fontWeight: 500, color: '#7d8f82' }}>
+            {[{ bg: '#F6E2B3', label: language === 'ko' ? '감정만' : 'Mood Only' }, { bg: '#B3D3F0', label: language === 'ko' ? '꿈만' : 'Dream Only' }, { bg: '#C9B8F0', label: language === 'ko' ? '둘 다' : 'Both' }].map(({ bg, label }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <div style={{ width: 10, height: 10, borderRadius: 3, background: bg }} />{label}
               </div>
@@ -544,24 +547,24 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
         </section>
 
         {/* 3. Your Dual Logs */}
-        <section style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 24 }}>
-          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', margin: '0 0 20px' }}>
+        <section style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 28, padding: 24, boxShadow: '0 8px 24px rgba(40,60,45,0.10)' }}>
+          <h3 style={{ fontSize: 11, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center', margin: '0 0 20px' }}>
             {language === 'ko' ? '나의 두 가지 기록' : 'Your Dual Logs'}
           </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <IconSun size={20} color="#d6a848" />
-              <span style={{ fontSize: 26, fontWeight: 700, color: '#3d6044', lineHeight: 1.1, marginTop: 4 }}>{moodCount}</span>
-              <span style={{ fontSize: 10, color: '#8ca693', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '감정' : 'Moods'}</span>
+              <IconSun size={20} color="#C27A8C" />
+              <span style={{ fontSize: 26, fontWeight: 700, color: '#2E3C33', lineHeight: 1.1, marginTop: 4 }}>{moodCount}</span>
+              <span style={{ fontSize: 10, color: '#7d8f82', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '감정' : 'Moods'}</span>
             </div>
-            <div style={{ width: '45%', height: 12, borderRadius: 99, overflow: 'hidden', background: '#f0f5f2', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)', display: 'flex', flexShrink: 0 }}>
-              <div style={{ height: '100%', background: '#e8ce90', width: `${moodPct}%` }} />
-              <div style={{ height: '100%', background: '#7ea886', width: `${dreamPct}%` }} />
+            <div style={{ width: '45%', height: 12, borderRadius: 99, overflow: 'hidden', background: 'rgba(255,255,255,0.6)', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)', display: 'flex', flexShrink: 0 }}>
+              <div style={{ height: '100%', background: '#F6E2B3', width: `${moodPct}%` }} />
+              <div style={{ height: '100%', background: '#B3D3F0', width: `${dreamPct}%` }} />
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <IconMoon size={20} color="#7ea886" />
-              <span style={{ fontSize: 26, fontWeight: 700, color: '#3d6044', lineHeight: 1.1, marginTop: 4 }}>{dreamCount}</span>
-              <span style={{ fontSize: 10, color: '#8ca693', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '꿈' : 'Dreams'}</span>
+              <IconMoon size={20} color="#7FAEDB" />
+              <span style={{ fontSize: 26, fontWeight: 700, color: '#2E3C33', lineHeight: 1.1, marginTop: 4 }}>{dreamCount}</span>
+              <span style={{ fontSize: 10, color: '#7d8f82', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{language === 'ko' ? '꿈' : 'Dreams'}</span>
             </div>
           </div>
         </section>
@@ -572,7 +575,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
             <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, #dbece0)' }} />
-            <span style={{ fontSize: 9, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.12em', flexShrink: 0 }}>
               {language === 'ko' ? 'Pro 인사이트' : 'Pro Insights'}
             </span>
             <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, #dbece0)' }} />
@@ -589,9 +592,9 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
             * also when the reading for that month exists.
             */}
           {isCurrentMonthPreview && (
-            <div style={{ background: '#fffbea', border: '1px solid #e8ce90', borderRadius: 12, padding: '10px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <IconSparkles size={13} color="#d6a848" />
-              <p style={{ fontSize: 12, color: '#a07c2a', margin: 0, lineHeight: 1.5 }}>
+            <div style={{ background: 'rgba(255,248,225,0.8)', border: '1px solid #F6E2B3', borderRadius: 12, padding: '10px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <IconSparkles size={13} color="#C27A8C" />
+              <p style={{ fontSize: 12, color: '#8a6d2a', margin: 0, lineHeight: 1.5 }}>
                 {language === 'ko'
                   ? '이번 달이 아직 끝나지 않았어요. 프리뷰 분석이며 월말에 완성된 분석이 제공됩니다.'
                   : "This month isn't over yet. This is a preview — final analysis arrives at month end."}
@@ -603,13 +606,13 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
             {/* 4. AI Monthly Synthesis */}
-            <section style={{ background: 'linear-gradient(135deg, #f2f7f4 0%, #e8edea 100%)', borderRadius: 20, padding: 24, border: '1px solid #c6dfce', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -48, right: -48, width: 128, height: 128, background: '#e8ce90', borderRadius: '50%', opacity: 0.1, filter: 'blur(16px)', pointerEvents: 'none' }} />
+            <section style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', borderRadius: 28, padding: 24, border: '1px solid rgba(255,255,255,0.85)', boxShadow: '0 8px 24px rgba(40,60,45,0.12)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: -48, right: -48, width: 128, height: 128, background: '#F6E2B3', borderRadius: '50%', opacity: 0.1, filter: 'blur(16px)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 1 }}>
                 {/* Title — always visible */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <IconSparkles size={16} color="#d6a848" />
-                  <h3 style={{ fontSize: 11, fontWeight: 700, color: '#d6a848', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                  <IconSparkles size={16} color="#C27A8C" />
+                  <h3 style={{ fontSize: 11, fontWeight: 700, color: '#C27A8C', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
                     {language === 'ko' ? 'AI 월간 종합' : 'AI Monthly Synthesis'}
                   </h3>
                 </div>
@@ -624,7 +627,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                   * screen someone might pay to finish reading. The version
                   * that blurred a stock phrase was not.
                   */}
-                <h4 style={{ fontSize: 20, fontWeight: 800, color: '#3d6044', marginBottom: 12 }}>
+                <h4 style={{ fontSize: 20, fontWeight: 800, color: '#2E3C33', marginBottom: 12 }}>
                   {aiLoading && !aiInsights
                     ? (language === 'ko' ? '생성 중...' : 'Generating...')
                     : (aiInsights?.synthesisTheme || (language === 'ko' ? '이달의 패턴' : "This Month's Pattern"))}
@@ -632,28 +635,28 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                 <div style={{ position: 'relative' }}>
                   <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
                     {aiLoading && !aiInsights ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#8ca693', fontSize: 13 }}>
-                        <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7d8f82', fontSize: 13 }}>
+                        <div style={{ width: 13, height: 13, border: '2px solid #e8efe9', borderTopColor: '#EDA3BC', borderRadius: '50%', animation: 'mdr-spin 1s linear infinite', flexShrink: 0 }} />
                         {language === 'ko' ? '생성 중...' : 'Generating...'}
                       </div>
                     ) : (
                       <>
-                        <p style={{ fontSize: 13, color: '#5c8065', lineHeight: 1.7, marginBottom: 20 }}>
+                        <p style={{ fontSize: 13, color: '#4A5D4E', lineHeight: 1.7, marginBottom: 20 }}>
                           {aiInsights?.synthesisDescription || (language === 'ko' ? '이달의 감정과 꿈 사이의 연결 패턴을 분석하고 있습니다.' : 'Analyzing the connection patterns between your moods and dreams this month.')}
                         </p>
-                        <div style={{ background: 'white', borderRadius: 14, padding: 16, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #e8efe9' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 18, padding: 16, boxShadow: '0 4px 12px rgba(40,60,45,0.08)', border: '1px solid rgba(255,255,255,0.9)' }}>
                           <div style={{ display: 'flex', gap: 12 }}>
-                            <div style={{ flexShrink: 0, transform: 'rotate(180deg)', color: '#a4b8a9' }}><IconQuote size={20} color="#a4b8a9" /></div>
+                            <div style={{ flexShrink: 0, transform: 'rotate(180deg)', color: '#9aa89f' }}><IconQuote size={20} color="#9aa89f" /></div>
                             <div style={{ flex: 1 }}>
-                              <p style={{ fontSize: 13, fontWeight: 700, color: '#4a6b52', marginBottom: 10 }}>
+                              <p style={{ fontSize: 13, fontWeight: 700, color: '#4A5D4E', marginBottom: 10 }}>
                                 {aiInsights?.synthesisQuestion || (language === 'ko' ? '이달 꿈이 당신에게 전하는 메시지는 무엇인가요?' : 'What message are your dreams sending you this month?')}
                               </p>
                               {aiInsights?.deepDive && showDeepDive && (
-                                <p style={{ fontSize: 13, color: '#5c8065', lineHeight: 1.75, marginBottom: 10 }}>
+                                <p style={{ fontSize: 13, color: '#4A5D4E', lineHeight: 1.75, marginBottom: 10 }}>
                                   {aiInsights.deepDive}
                                 </p>
                               )}
-                              <button className="mdr-journal" onClick={() => setShowDeepDive(v => !v)} style={{ fontSize: 11, fontWeight: 700, color: '#7ea886', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
+                              <button className="mdr-journal" onClick={() => setShowDeepDive(v => !v)} style={{ fontSize: 11, fontWeight: 700, color: '#EDA3BC', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
                                 {language === 'ko' ? (showDeepDive ? '접기' : '더보기') : (showDeepDive ? 'Show less' : 'Read more')} <IconArrowRight size={13} />
                               </button>
                             </div>
@@ -665,8 +668,8 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                   {!isPremium && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                        <IconKey size={13} color="#7ea886" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
+                        <IconLock size={13} color="#4A5D4E" />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#4A5D4E' }}>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>
                       </div>
                     </div>
                   )}
@@ -678,8 +681,8 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
             <section>
               {/* Title — always visible */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, paddingLeft: 2 }}>
-                <IconCompass size={17} color="#7ea886" />
-                <h3 style={{ fontSize: 11, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
+                <IconCompass size={17} color="#EDA3BC" />
+                <h3 style={{ fontSize: 11, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>
                   {language === 'ko' ? '발견된 아키타입' : 'Discovered Archetypes'}
                 </h3>
               </div>
@@ -699,17 +702,17 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                       { name: language === 'ko' ? '아직 없음' : 'Not yet', category: '—', meaning: language === 'ko' ? '이번 달 기록이 아직 원형을 이룰 만큼 쌓이지 않았습니다.' : 'This month does not hold enough yet for an archetype to show.', iconType: 'key' as const },
                       { name: language === 'ko' ? '계속 기록하세요' : 'Keep recording', category: '—', meaning: language === 'ko' ? '꿈을 몇 번 더 적으면 반복되는 상이 드러납니다.' : 'A few more dreams and the recurring figures start to surface.', iconType: 'compass' as const },
                     ]).map((arch, i) => (
-                      <div key={i} style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                      <div key={i} style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 20, padding: 16, display: 'flex', flexDirection: 'column', gap: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#f0f5f2', color: '#7ea886', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            {arch.iconType === 'key' ? <IconKey size={16} color="#7ea886" /> : <IconCompass size={16} color="#7ea886" />}
+                          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.6)', color: '#EDA3BC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            {arch.iconType === 'key' ? <IconKey size={16} color="#EDA3BC" /> : <IconCompass size={16} color="#EDA3BC" />}
                           </div>
                           <div>
-                            <div style={{ fontWeight: 700, fontSize: 13, color: '#3d6044' }}>{arch.name}</div>
-                            <div style={{ fontSize: 9, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{arch.category}</div>
+                            <div style={{ fontWeight: 700, fontSize: 13, color: '#2E3C33' }}>{arch.name}</div>
+                            <div style={{ fontSize: 9, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{arch.category}</div>
                           </div>
                         </div>
-                        <p style={{ fontSize: 12, color: '#5c8065', lineHeight: 1.6, margin: 0 }}>{arch.meaning}</p>
+                        <p style={{ fontSize: 12, color: '#4A5D4E', lineHeight: 1.6, margin: 0 }}>{arch.meaning}</p>
                       </div>
                     ))}
                   </div>
@@ -717,8 +720,8 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                 {!isPremium && (
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                      <IconKey size={13} color="#7ea886" />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#5c8065' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
+                      <IconLock size={13} color="#4A5D4E" />
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#4A5D4E' }}>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>
                     </div>
                   </div>
                 )}
@@ -726,8 +729,8 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
             </section>
 
             {/* 6. Looking Ahead */}
-            <section style={{ background: '#3d6044', borderRadius: 20, padding: 24, color: 'white', position: 'relative', overflow: 'hidden', boxShadow: '0 4px 16px rgba(61,96,68,0.3)' }}>
-              <div style={{ position: 'absolute', bottom: -40, right: -40, width: 160, height: 160, background: '#5c8065', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', pointerEvents: 'none' }} />
+            <section style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 28, padding: 24, color: '#2E3C33', position: 'relative', overflow: 'hidden', boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+              <div style={{ position: 'absolute', bottom: -40, right: -40, width: 160, height: 160, background: '#4A5D4E', borderRadius: '50%', opacity: 0.5, filter: 'blur(20px)', pointerEvents: 'none' }} />
               <div style={{ position: 'relative', zIndex: 1 }}>
                 {/* Title — always visible */}
                 <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 12 }}>
@@ -736,18 +739,18 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
                 {/* Content */}
                 <div style={{ position: 'relative' }}>
                   <div style={{ filter: !isPremium ? 'blur(6px)' : 'none', pointerEvents: !isPremium ? 'none' : 'auto', userSelect: !isPremium ? 'none' : 'auto' }}>
-                    <p style={{ fontSize: 13, color: '#b8d6c0', lineHeight: 1.7, marginBottom: 20 }}>
+                    <p style={{ fontSize: 13, color: '#6b7d71', lineHeight: 1.7, marginBottom: 20 }}>
                       {aiInsights?.lookingAheadSuggestion || (language === 'ko' ? '다음 달을 위한 가이드를 준비하고 있습니다.' : 'Preparing your guidance for next month.')}
                     </p>
-                    <button className="mdr-intention" onClick={() => onClose?.()} style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
+                    <button className="mdr-intention" onClick={() => onClose?.()} style={{ fontSize: 12, fontWeight: 700, color: '#F6E2B3', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0, transition: 'color 0.15s' }}>
                       {language === 'ko' ? `${nextMonthLabel}에도 꿈 기록하기` : `Keep journaling in ${nextMonthLabel}`} <IconArrowRight size={15} />
                     </button>
                   </div>
                   {!isPremium && (
                     <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ background: 'rgba(61,96,68,0.7)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.2)' }}>
-                        <IconKey size={13} color="#e8ce90" />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#e8ce90' }}>{language === 'ko' ? 'Pro 전용' : 'Pro only'}</span>
+                      <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                        <IconLock size={13} color="#4A5D4E" />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#4A5D4E' }}>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>
                       </div>
                     </div>
                   )}
@@ -757,18 +760,19 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
 
             {/* Upgrade CTA for free users */}
             {!isPremium && (
-              <div style={{ background: 'white', border: '1px solid #e8efe9', borderRadius: 20, padding: '24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                <div style={{ marginBottom: 10, color: '#7ea886', display: 'flex', justifyContent: 'center' }}><IconSparkles size={24} color="#7ea886" /></div>
-                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#3d6044', marginBottom: 6 }}>
+              <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 28, padding: '24px', textAlign: 'center', boxShadow: '0 8px 24px rgba(40,60,45,0.10)' }}>
+                <div style={{ marginBottom: 10, color: '#EDA3BC', display: 'flex', justifyContent: 'center' }}><IconSparkles size={24} color="#EDA3BC" /></div>
+                <h3 style={{ fontSize: 15, fontWeight: 800, color: '#2E3C33', marginBottom: 6 }}>
                   {language === 'ko' ? 'Pro로 잠금 해제' : 'Unlock with Pro'}
                 </h3>
-                <p style={{ fontSize: 12, color: '#8ca693', lineHeight: 1.6, marginBottom: 16, maxWidth: 260, margin: '0 auto 16px' }}>
+                <p style={{ fontSize: 12, color: '#7d8f82', lineHeight: 1.6, marginBottom: 16, maxWidth: 260, margin: '0 auto 16px' }}>
                   {language === 'ko'
                     ? 'AI 월간 분석, 아키타입 발견, 다음 달 가이드를 모두 확인하세요'
                     : 'Access AI analysis, archetype discovery, and your personalized next-month guide'}
                 </p>
-                <button onClick={() => goTo('/pricing/')} style={{ padding: '12px 28px', background: '#7ea886', color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(126,168,134,0.35)' }}>
-                  {language === 'ko' ? 'Pro 시작하기' : 'Unlock Pro'}
+                <button onClick={() => goTo('/pricing/')} style={{ padding: '14px 32px', background: 'rgba(255,255,255,0.96)', color: '#2E3C33', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 6px 16px rgba(40,60,45,0.14)', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <IconLock size={15} />
+                  {language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}
                 </button>
               </div>
             )}

@@ -38,7 +38,7 @@ interface AccountMenuProps {
 // Titles in a deep green-grey, icons and accents in the app's green, so the two
 // read as different things instead of one wash of colour.
 const INK = '#2E3C33';
-const ACCENT = '#5C8D63';
+const ACCENT = '#5d6e63';
 
 const COPY = {
   en: {

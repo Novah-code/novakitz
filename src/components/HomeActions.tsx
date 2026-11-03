@@ -40,7 +40,7 @@ const LABELS = {
   ko: { mood: '무드', moodSub: '오늘 아침은?', dream: '꿈', dreamSub: '적어두기' },
 } as const;
 
-const INK = 'var(--matcha-dark, #4a6741)';
+const INK = '#2E3C33';
 
 function MoodIcon() {
   return (

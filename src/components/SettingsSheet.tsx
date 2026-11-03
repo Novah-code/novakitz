@@ -39,7 +39,8 @@ interface SettingsSheetProps {
 // Titles in a deep green-grey, icons and accents in the app's green, so the two
 // read as different things instead of one wash of colour.
 const INK = '#2E3C33';
-const ACCENT = '#5C8D63';
+const ACCENT = '#5d6e63';
+const LOCK_ICON = <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 
 const COPY = {
   en: {
@@ -47,7 +48,7 @@ const COPY = {
     done: 'Done',
     freeTitle: "You're on the Free plan",
     freeSub: 'Pro adds the monthly review and the patterns across your mornings.',
-    seePro: 'See Pro',
+    seePro: 'Unlock Pro',
     proTitle: "You're on Pro",
     proSub: 'Thank you. Everything is unlocked.',
     manage: 'Manage',
@@ -73,7 +74,7 @@ const COPY = {
     done: '완료',
     freeTitle: '무료 플랜을 이용 중이에요',
     freeSub: 'Pro는 월간 리뷰와, 아침들이 쌓여 보이는 패턴을 더해줘요.',
-    seePro: 'Pro 보기',
+    seePro: 'Pro 잠금 해제',
     proTitle: 'Pro를 이용 중이에요',
     proSub: '고맙습니다. 모든 기능이 열려 있어요.',
     manage: '관리',
@@ -278,11 +279,13 @@ export default function SettingsSheet(props: SettingsSheetProps) {
                   fontFamily: 'inherit',
                   fontSize: '16px',
                   fontWeight: 600,
-                  color: '#fff',
-                  background: 'linear-gradient(180deg, #7FB487 0%, #5E9168 100%)',
-                  boxShadow: '0 8px 20px rgba(80,130,90,0.32), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  color: '#2E3C33',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,243,234,0.86) 100%)',
+                  boxShadow: '0 8px 20px rgba(40,60,45,0.16), inset 0 1px 0 rgba(255,255,255,0.95)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >
+                {!isPremium && LOCK_ICON}
                 {isPremium ? t.manage : t.seePro}
               </button>
             </div>
@@ -320,8 +323,10 @@ export default function SettingsSheet(props: SettingsSheetProps) {
                       style={{
                         padding: '5px 12px',
                         borderRadius: '999px',
-                        color: language === l ? '#fff' : INK,
-                        background: language === l ? 'linear-gradient(180deg,#7FB487,#5E9168)' : 'transparent',
+                        color: INK,
+                        fontWeight: language === l ? 700 : 500,
+                        background: language === l ? 'rgba(255,255,255,0.96)' : 'transparent',
+                        boxShadow: language === l ? '0 2px 8px rgba(40,60,45,0.14)' : 'none',
                         opacity: language === l ? 1 : 0.7,
                       }}
                     >

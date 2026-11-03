@@ -359,7 +359,8 @@ const Chip = ({ label, svg, color, selected, onClick }: { label: string; svg?: (
  * screen is the same gradient the picker and the home screen use — no panel, no
  * scrim — and the controls are the white round buttons the rest of the app has.
  */
-const SkyBackdrop = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+const SkyBackdrop = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => {
+  const layer = (
   <div
     onClick={onClick}
     style={{
@@ -374,7 +375,10 @@ const SkyBackdrop = ({ children, onClick }: { children: React.ReactNode; onClick
     <div className="home-scene__grain" aria-hidden="true" />
     {children}
   </div>
-);
+  );
+  // On <body>, so the shell's own controls (gear, tab bar) never sit above it.
+  return typeof document === 'undefined' ? layer : createPortal(layer, document.body);
+};
 
 const roundControl: React.CSSProperties = {
   position: 'fixed',
@@ -409,7 +413,7 @@ const headingStyle = (isKo: boolean, enSize: number, koSize: number): React.CSSP
 
 const stepBody: React.CSSProperties = { width: '100%', flex: 1, display: 'flex', flexDirection: 'column' };
 
-const NextButton = ({ label, onClick, disabled, done, top = 48 }: { label: string; onClick: () => void; disabled?: boolean; done?: boolean; top?: number }) => (
+const NextButton = ({ label, onClick, disabled, done, top = 48 }: { label: React.ReactNode; onClick: () => void; disabled?: boolean; done?: boolean; top?: number }) => (
   <div style={{ marginTop: `${top}px`, marginBottom: 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}>
     <button
       onClick={onClick}
@@ -1606,3 +1610,6 @@ export function MoodCardJournalView({
   // Above the shell's own controls (gear, tab bar), which live in a different stacking context.
   return typeof document === 'undefined' ? view : createPortal(view, document.body);
 }
+
+// The shared pieces of the sky screens, for the other full-screen panels.
+export { SkyBackdrop, Container as SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl };

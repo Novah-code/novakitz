@@ -361,3 +361,16 @@
     padding: 18px 12px 14px;
   }
 }
+
+
+/*
+ * The sky palette (2026-11-03), colours only. The sheet keeps its design — cream
+ * paper, the heavy uppercase month, the ruled grid, the dark tally box and the
+ * two sparks — and only the accents that were gold and brick red follow the
+ * app's pink. Sits last so it wins over the values above.
+ */
+.dcal {
+  --gold: #eda3bc;
+  --sun: #c27a8c;
+  --ink: #2e3c33;
+}

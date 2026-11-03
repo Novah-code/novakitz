@@ -686,7 +686,8 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
-        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * On a phone this is the screen, not a card on it.
             *
@@ -696,13 +697,15 @@ export default function SimpleDreamInterfaceWithAuth() {
             */}
           <style>{`
             .mdr-card {
-              background: white;
+              background: transparent;
+              position: relative;
+              z-index: 2;
               border-radius: 20px;
               max-width: 600px;
               width: 92%;
               max-height: 90vh;
               overflow: hidden;
-              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+              box-shadow: none;
             }
             @media (max-width: 640px) {
               .mdr-card {
@@ -725,24 +728,25 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 20px 150px' }}>
+          <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it
             * put a card inside a card and printed the word "Calendar" directly
             * above the word "August".
             */}
-          <div style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ maxWidth: '560px', width: '100%', position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 16, zIndex: 3 }}>
               <button
                 onClick={() => {
                   setShowCalendar(false);
                   setCalendarSelectedDate(null);
                 }}
                 aria-label={language === 'ko' ? '닫기' : 'Close'}
-                style={{ background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: '#5C7061', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '50%', boxShadow: '0 2px 10px rgba(40,60,45,0.16)', cursor: 'pointer', color: '#2E3C33', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               >
-                ✕
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
               </button>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
@@ -771,8 +775,8 @@ export default function SimpleDreamInterfaceWithAuth() {
               if (selectedDreams.length === 0) return null;
 
               return (
-                <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '1rem' }}>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '24px', padding: '1.25rem', boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#7d8f82', fontFamily: 'monospace', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '1rem' }}>
                     {new Date(calendarSelectedDate).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -781,22 +785,15 @@ export default function SimpleDreamInterfaceWithAuth() {
                         key={dream.id}
                         onClick={() => openCalendarDream(dream)}
                         style={{
-                          padding: '12px 16px',
-                          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)',
-                          borderRadius: '10px',
-                          border: '1px solid rgba(127, 176, 105, 0.15)',
+                          padding: '14px 18px',
+                          background: 'rgba(255,255,255,0.7)',
+                          borderRadius: '18px',
+                          border: '1px solid rgba(255,255,255,0.9)',
                           cursor: 'pointer',
                           textAlign: 'left',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)';
                         }}
                       >
-                        <span style={{ fontSize: '0.95rem', fontWeight: '500', color: 'var(--matcha-dark)' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: '600', color: '#2E3C33' }}>
                           {dream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
                         </span>
                       </button>
@@ -811,24 +808,25 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Dream Detail Modal (from Calendar) */}
       {calendarSelectedDream && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '500px', width: '92%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+        <div onClick={() => setCalendarSelectedDream(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(60,50,70,0.32)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', zIndex: 20500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '32px', padding: 'clamp(1.5rem, 4vw, 2rem)', maxWidth: '460px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(40,30,60,0.28)', position: 'relative' }}>
             <button
               onClick={() => setCalendarSelectedDream(null)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#999' }}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
+              style={{ position: 'absolute', top: 14, right: 14, width: 40, height: 40, padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: '#2E3C33', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600', color: 'var(--matcha-dark)', paddingRight: '2rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? '1.3rem' : '1.9rem', fontWeight: language === 'ko' ? 500 : 400, color: '#2E3C33', paddingRight: '3rem', lineHeight: 1.2 }}>
               {calendarSelectedDream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
             </h3>
-            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--sage)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            <p style={{ margin: 0, fontSize: '1rem', color: '#4A5D4E', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
               {calendarSelectedDream.content?.split('\n\n---\n\n')[0] || ''}
             </p>
             {calendarSelectedDream.tags && calendarSelectedDream.tags.length > 0 && (
               <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {calendarSelectedDream.tags.map((tag: string, idx: number) => (
-                  <span key={idx} style={{ padding: '4px 10px', background: 'rgba(127, 176, 105, 0.15)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--matcha-dark)' }}>
+                  <span key={idx} style={{ padding: '4px 10px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '12px', fontSize: '0.8rem', fontFamily: 'monospace', fontWeight: 700, color: '#4A5D4E' }}>
                     {tag}
                   </span>
                 ))}

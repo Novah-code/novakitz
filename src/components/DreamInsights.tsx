@@ -110,9 +110,9 @@ const NEGATIVE_MOODS = new Set(['anxious', 'fearful', 'angry', 'sad', 'confused'
 
 function getMoodStyle(mood: string) {
   const m = mood.toLowerCase();
-  if (POSITIVE_MOODS.has(m)) return { color: '#7ea886', bg: '#ebf2ed' };
-  if (NEGATIVE_MOODS.has(m)) return { color: '#d6a848', bg: '#fbf4e6' };
-  return { color: '#5c8065', bg: '#e8efe9' };
+  if (POSITIVE_MOODS.has(m)) return { color: '#EDA3BC', bg: '#FBE4EC' };
+  if (NEGATIVE_MOODS.has(m)) return { color: '#C27A8C', bg: '#fbf4e6' };
+  return { color: '#4A5D4E', bg: '#e8efe9' };
 }
 
 function getSymbolInfo(keyword: string, category: string): { Icon: IconComponent; display: string } {
@@ -357,15 +357,15 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
   };
 
   return (
-    <div className="di-shell" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10001, fontFamily: 'inherit' }}>
+    <div className="di-shell" style={{ position: 'fixed', inset: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 10001, fontFamily: 'inherit' }}>
       <style>{`
         @keyframes di-spin { to { transform: rotate(360deg); } }
         .di-scroll::-webkit-scrollbar { width: 4px; }
         .di-scroll::-webkit-scrollbar-thumb { background: #c6dfce; border-radius: 4px; }
-        .di-row:hover { background: #f0f5f2 !important; }
-        .di-symbol-card:hover { border-color: #7ea886 !important; }
-        .di-hdr-close:hover { background: #f0f5f2 !important; color: #5c8065 !important; }
-        .di-cta-btn:hover { background: #d6a848 !important; }
+        .di-row:hover { background: rgba(255,255,255,0.5) !important; }
+        .di-symbol-card:hover { border-color: #EDA3BC !important; }
+        .di-hdr-close:hover { background: #f0f5f2 !important; color: #4A5D4E !important; }
+        .di-cta-btn:hover { background: #fff !important; }
 
         .di-shell { padding: clamp(12px,3vw,24px); }
         .di-card {
@@ -428,20 +428,20 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
         }
       `}</style>
 
-      <div className="di-card" style={{ position: 'relative', background: 'white', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="di-card" style={{ position: 'relative', background: 'transparent', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* ── Sticky Header ── */}
-        <div className="di-hdr" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #e8efe9', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#5c8065' }}>
+        <div className="di-hdr" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(250,244,238,0.92) 0%, rgba(250,244,238,0.92) 75%, rgba(250,244,238,0) 100%)', borderBottom: 'none', padding: '14px 20px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#2E3C33' }}>
             <BarChart3Icon size={17} />
-            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5c8065', margin: 0 }}>
+            <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#2E3C33', margin: 0 }}>
               {ko ? '리플렉션' : 'Reflection'}
             </h2>
           </div>
           <button
             className="di-hdr-close"
             onClick={onClose}
-            style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#8ca693', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s, color 0.15s' }}
+            style={{ padding: 8, marginRight: -8, borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: '#7d8f82', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.15s, color 0.15s' }}
           >
             <XIcon size={20} />
           </button>
@@ -452,50 +452,50 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
 
           {/* Title */}
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#3d6044', marginBottom: 4, margin: '0 0 4px 0' }}>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#2E3C33', marginBottom: 4, margin: '0 0 4px 0' }}>
               {ko ? '나의 패턴 발견하기' : 'Discover your patterns'}
             </h1>
-            <p style={{ fontSize: 13, color: '#8ca693', margin: 0 }}>
+            <p style={{ fontSize: 13, color: '#7d8f82', margin: 0 }}>
               {ko ? '최근 기록에서 발견한 객관적 인사이트' : 'Objective insights from your recent logs.'}
             </p>
           </div>
 
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
-              <div style={{ width: 40, height: 40, border: '3px solid #e8efe9', borderTopColor: '#7ea886', borderRadius: '50%', animation: 'di-spin 1s linear infinite' }} />
+              <div style={{ width: 40, height: 40, border: '3px solid #e8efe9', borderTopColor: '#EDA3BC', borderRadius: '50%', animation: 'di-spin 1s linear infinite' }} />
             </div>
           ) : (
             <>
               {/* ── Activity Overview (3-col) ── */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-                <div style={{ background: '#f0f5f2', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: '#3d6044', marginBottom: 2 }}>{stats?.totalDreams ?? 0}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '전체 기록' : 'Total Logs'}</div>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', boxShadow: '0 6px 18px rgba(40,60,45,0.08)', borderRadius: 22, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#2E3C33', marginBottom: 2 }}>{stats?.totalDreams ?? 0}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '전체 기록' : 'Total Logs'}</div>
                 </div>
-                <div style={{ background: '#f0f5f2', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: '#3d6044', marginBottom: 2 }}>{stats?.thisWeek ?? 0}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '이번 주' : 'This Week'}</div>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', boxShadow: '0 6px 18px rgba(40,60,45,0.08)', borderRadius: 22, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: '#2E3C33', marginBottom: 2 }}>{stats?.thisWeek ?? 0}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '이번 주' : 'This Week'}</div>
                 </div>
-                <div style={{ background: '#f0f5f2', border: '1px solid #dbece0', borderRadius: 16, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2, color: '#d6a848' }}>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(237,163,188,0.7)', borderRadius: 22, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2, color: '#C27A8C' }}>
                     <ActivityIcon size={16} />
                     <span style={{ fontSize: 22, fontWeight: 700 }}>{stats?.currentStreak ?? 0}</span>
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#8ca693', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '연속 기록' : 'Day Streak'}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#7d8f82', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{ko ? '연속 기록' : 'Day Streak'}</div>
                 </div>
               </div>
 
               {/* ── 1. 감정 패턴 (Waking Mind) ── */}
               <section>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <span style={{ color: '#d6a848', display: 'flex' }}><SunIcon size={18} /></span>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                  <span style={{ color: '#C27A8C', display: 'flex' }}><SunIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#2E3C33', margin: 0 }}>
                     {ko ? '감정 패턴' : 'The Waking Mind'}
                   </h3>
                 </div>
-                <div style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', boxShadow: '0 8px 24px rgba(40,60,45,0.10)', borderRadius: 26, padding: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {!stats?.moodPatterns.length ? (
-                    <p style={{ textAlign: 'center', color: '#8ca693', fontSize: 13, padding: '16px 0', margin: 0 }}>
+                    <p style={{ textAlign: 'center', color: '#7d8f82', fontSize: 13, padding: '16px 0', margin: 0 }}>
                       {ko ? '데이터가 충분하지 않습니다' : 'Not enough data yet'}
                     </p>
                   ) : stats.moodPatterns.map(({ mood, count, trend }, idx) => {
@@ -506,11 +506,11 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                           <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             {trend === 'down' ? <ArrowDownRightIcon size={15} /> : <ArrowUpRightIcon size={15} />}
                           </div>
-                          <span style={{ fontWeight: 700, color: '#3d6044', fontSize: 14, textTransform: 'capitalize' }}>{mood}</span>
+                          <span style={{ fontWeight: 700, color: '#2E3C33', fontSize: 14, textTransform: 'capitalize' }}>{mood}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          {trend === 'up' && <span style={{ fontSize: 9, fontWeight: 700, color: '#7ea886', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending</span>}
-                          <div style={{ padding: '3px 10px', background: 'white', border: '1px solid #e8efe9', borderRadius: 99, fontSize: 11, fontWeight: 700, color: '#8ca693' }}>{count}x</div>
+                          {trend === 'up' && <span style={{ fontSize: 9, fontWeight: 700, color: '#EDA3BC', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending</span>}
+                          <div style={{ padding: '3px 10px', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 99, fontSize: 11, fontWeight: 700, color: '#7d8f82' }}>{count}x</div>
                         </div>
                       </div>
                     );
@@ -521,14 +521,14 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
               {/* ── 2. 드림 패턴 (Sleeping Mind) ── */}
               <section>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <span style={{ color: '#7ea886', display: 'flex' }}><MoonIcon size={18} /></span>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                  <span style={{ color: '#7FAEDB', display: 'flex' }}><MoonIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#2E3C33', margin: 0 }}>
                     {ko ? '드림 패턴' : 'The Sleeping Mind'}
                   </h3>
                 </div>
-                <div style={{ background: '#ebf2ed', border: '1px solid #c6dfce', borderRadius: 20, padding: 20 }}>
+                <div style={{ background: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: 26, padding: 20 }}>
                   {!stats?.dreamSymbols.length ? (
-                    <p style={{ textAlign: 'center', color: '#8ca693', fontSize: 13, margin: 0 }}>
+                    <p style={{ textAlign: 'center', color: '#7d8f82', fontSize: 13, margin: 0 }}>
                       {ko ? '꿈 기록이 더 필요합니다' : 'Record more dreams to see symbols'}
                     </p>
                   ) : (
@@ -536,19 +536,19 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                       {stats.dreamSymbols.map(({ keyword, category, count, trend }, idx) => {
                         const { Icon, display } = getSymbolInfo(keyword, category);
                         return (
-                          <div key={idx} className="di-symbol-card" style={{ background: 'white', border: '1px solid rgba(198,223,206,0.5)', borderRadius: 16, padding: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'border-color 0.15s' }}>
+                          <div key={idx} className="di-symbol-card" style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 20, padding: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'border-color 0.15s' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#8ca693' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#7d8f82' }}>
                                 <Icon size={14} />
                                 <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{display}</span>
                               </div>
-                              <span style={{ color: trend === 'up' ? '#7ea886' : trend === 'down' ? '#d6a848' : '#a4b8a9', display: 'flex' }}>
+                              <span style={{ color: trend === 'up' ? '#EDA3BC' : trend === 'down' ? '#C27A8C' : '#a4b8a9', display: 'flex' }}>
                                 {trend === 'up' && <TrendingUpIcon size={13} />}
                                 {trend === 'down' && <TrendingDownIcon size={13} />}
                                 {trend === 'flat' && <MinusIcon size={13} />}
                               </span>
                             </div>
-                            <div style={{ fontSize: 18, fontWeight: 800, color: '#3d6044', marginBottom: 4, textTransform: 'capitalize' }}>{keyword}</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: '#2E3C33', marginBottom: 4, textTransform: 'capitalize' }}>{keyword}</div>
                             <div style={{ fontSize: 11, fontWeight: 700, color: '#a4b8a9' }}>{count} {ko ? '번 등장' : 'appearances'}</div>
                           </div>
                         );
@@ -561,21 +561,21 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
               {/* ── 3. Recent Sentiment ── */}
               <section>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <span style={{ color: '#8ca693', display: 'flex' }}><ActivityIcon size={18} /></span>
-                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#4a6b52', margin: 0 }}>
+                  <span style={{ color: '#7d8f82', display: 'flex' }}><ActivityIcon size={18} /></span>
+                  <h3 style={{ fontSize: 17, fontWeight: 700, color: '#2E3C33', margin: 0 }}>
                     {ko ? '최근 감정 스펙트럼' : 'Recent Sentiment'}
                   </h3>
                 </div>
-                <div style={{ background: '#fbfcfb', border: '1px solid #e8efe9', borderRadius: 20, padding: 20 }}>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', border: '1px solid rgba(255,255,255,0.85)', boxShadow: '0 8px 24px rgba(40,60,45,0.10)', borderRadius: 26, padding: 20 }}>
                   <div style={{ height: 16, width: '100%', borderRadius: 99, overflow: 'hidden', marginBottom: 16, display: 'flex', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}>
-                    <div style={{ width: `${stats?.sentimentBalance.positive ?? 0}%`, background: '#7ea886', transition: 'width 0.8s ease' }} />
-                    <div style={{ width: `${stats?.sentimentBalance.neutral ?? 0}%`, background: '#b8d6c0', transition: 'width 0.8s ease' }} />
-                    <div style={{ width: `${stats?.sentimentBalance.negative ?? 0}%`, background: '#e2ceb5', transition: 'width 0.8s ease' }} />
+                    <div style={{ width: `${stats?.sentimentBalance.positive ?? 0}%`, background: '#EDA3BC', transition: 'width 0.8s ease' }} />
+                    <div style={{ width: `${stats?.sentimentBalance.neutral ?? 0}%`, background: '#E6D7F5', transition: 'width 0.8s ease' }} />
+                    <div style={{ width: `${stats?.sentimentBalance.negative ?? 0}%`, background: '#F6E2B3', transition: 'width 0.8s ease' }} />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                     {[
-                      { color: '#7ea886', label: ko ? '안정' : 'Calm', pct: stats?.sentimentBalance.positive ?? 0, textColor: '#5c8065' },
-                      { color: '#b8d6c0', label: ko ? '활동' : 'Active', pct: stats?.sentimentBalance.neutral ?? 0, textColor: '#8ca693' },
+                      { color: '#EDA3BC', label: ko ? '안정' : 'Calm', pct: stats?.sentimentBalance.positive ?? 0, textColor: '#4A5D4E' },
+                      { color: '#b8d6c0', label: ko ? '활동' : 'Active', pct: stats?.sentimentBalance.neutral ?? 0, textColor: '#7d8f82' },
                       { color: '#e2ceb5', label: ko ? '무거움' : 'Heavy', pct: stats?.sentimentBalance.negative ?? 0, textColor: '#a49682' },
                     ].map(({ color, label, pct, textColor }) => (
                       <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: textColor }}>
@@ -607,21 +607,20 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
               <section style={{
                 position: 'relative',
                 overflow: 'hidden',
-                background: `
-                  radial-gradient(circle at 100% 0%, rgba(92,128,101,0.55) 0%, rgba(92,128,101,0) 55%),
-                  radial-gradient(circle at 0% 100%, rgba(44,74,50,0.6) 0%, rgba(44,74,50,0) 60%),
-                  #3d6044`,
-                borderRadius: 20, padding: 24, color: 'white', textAlign: 'center',
-                boxShadow: '0 4px 16px rgba(61,96,68,0.3)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+                backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+                border: '1px solid rgba(255,255,255,0.85)',
+                borderRadius: 28, padding: 24, color: '#2E3C33', textAlign: 'center',
+                boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)',
               }}>
                 <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   {isPremium ? (
                     <>
-                      <div style={{ marginBottom: 12, color: '#e8ce90', display: 'flex' }}><SparklesIcon size={24} /></div>
-                      <h3 style={{ fontSize: 17, fontWeight: 800, color: 'white', margin: '0 0 8px 0' }}>
+                      <div style={{ marginBottom: 12, color: '#EDA3BC', display: 'flex' }}><SparklesIcon size={24} /></div>
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: '#2E3C33', margin: '0 0 8px 0' }}>
                         {ko ? '월간 리뷰' : 'Monthly Review'}
                       </h3>
-                      <p style={{ fontSize: 13, color: '#b8d6c0', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
+                      <p style={{ fontSize: 13, color: '#6b7d71', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
                         {ko
                           ? '이번 달 꿈 패턴의 AI 심층 분석과 아키타입을 확인하세요.'
                           : 'See AI deep analysis and archetypes from this month\'s dream patterns.'}
@@ -629,18 +628,18 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                       <button
                         className="di-cta-btn"
                         onClick={() => { onClose(); onOpenMonthlyReview?.(); }}
-                        style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
+                        style={{ padding: '10px 24px', background: 'rgba(255,255,255,0.96)', color: '#2E3C33', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
                       >
                         {ko ? '월간 리뷰 바로가기' : 'Go to Monthly Review'}
                       </button>
                     </>
                   ) : (
                     <>
-                      <div style={{ marginBottom: 12, color: '#e8ce90', display: 'flex' }}><SparklesIcon size={24} /></div>
-                      <h3 style={{ fontSize: 17, fontWeight: 800, color: 'white', margin: '0 0 8px 0' }}>
+                      <div style={{ marginBottom: 12, color: '#EDA3BC', display: 'flex' }}><SparklesIcon size={24} /></div>
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: '#2E3C33', margin: '0 0 8px 0' }}>
                         {ko ? '이 패턴들이 의미하는 것은?' : 'What do these patterns mean?'}
                       </h3>
-                      <p style={{ fontSize: 13, color: '#b8d6c0', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
+                      <p style={{ fontSize: 13, color: '#6b7d71', maxWidth: 280, lineHeight: 1.6, margin: '0 0 20px 0' }}>
                         {ko
                           ? '월간 리뷰에서 AI 심층 분석, 아키타입 발견, 숨겨진 연결고리를 확인하세요.'
                           : 'Unlock deep AI synthesis, discovered archetypes, and hidden connections in your Monthly Review.'}
@@ -648,10 +647,10 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                       <button
                         className="di-cta-btn"
                         onClick={() => { goTo('/pricing/'); }}
-                        style={{ padding: '10px 24px', background: '#e8ce90', color: '#3d6044', border: 'none', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
+                        style={{ padding: '10px 24px', background: 'rgba(255,255,255,0.96)', color: '#2E3C33', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 99, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'background 0.15s' }}
                       >
                         <span style={{ display: 'flex' }}><LockIcon size={13} /></span>
-                        {ko ? 'Pro 인사이트 열기' : 'Unlock Pro Insights'}
+                        {ko ? 'Pro 잠금 해제' : 'Unlock Pro'}
                       </button>
                     </>
                   )}
