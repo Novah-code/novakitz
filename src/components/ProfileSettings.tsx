@@ -1,11 +1,10 @@
 'use client';
 
 import { goTo } from '../lib/platform';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import ReminderSettings from './ReminderSettings';
-import { loadStreak, nextMilestone, type Streak } from '../lib/streak';
 import { canAnalyzeDream } from '../lib/subscription';
 
 interface ProfileSettingsProps {
@@ -23,7 +22,6 @@ interface ProfileSettingsProps {
 type TabType = 'profile' | 'account' | 'subscription' | 'streak';
 
 export default function ProfileSettings({ user, profile, language, onClose, onSave, streak = 0, isPremium = false, initialTab = 'profile' }: ProfileSettingsProps) {
-  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(profile?.avatar_url || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,40 +48,20 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   }, [user.id]);
 
   const [username, setUsername] = useState(profile?.full_name || '');
-  const [website, setWebsite] = useState(profile?.website || '');
-  const [bio, setBio] = useState(profile?.bio || '');
   const [usernameError, setUsernameError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // Streak states
-  const [streakData, setStreakData] = useState<Streak | null>(null);
-  const [streakLoading, setStreakLoading] = useState(false);
-
-  const dayNames = language === 'ko'
-    ? ['일', '월', '화', '수', '목', '금', '토']
-    : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
   /*
-   * This tab used to count the streak itself, from dreams only, while the badge
-   * on the home screen counted dreams and check-ins through src/lib/streak.ts.
-   * Two counts of the same thing meant the badge could read 1 while this read 0
-   * — which looked like the streak had failed to save. There is one count now.
+   * One screen, no tabs. The sheet that opens this still says which part it
+   * wants — Notifications, or the plan — so that part is scrolled into view.
    */
-  const loadStreakData = useCallback(async () => {
-    setStreakLoading(true);
-    try {
-      setStreakData(await loadStreak(user.id));
-    } finally {
-      setStreakLoading(false);
-    }
-  }, [user.id]);
-
+  const planRef = useRef<HTMLDivElement>(null);
+  const remindersRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (activeTab === 'streak' && !streakData) {
-      loadStreakData();
-    }
-  }, [activeTab, streakData, loadStreakData]);
+    const target = initialTab === 'subscription' ? planRef.current : initialTab === 'account' ? remindersRef.current : null;
+    if (target) setTimeout(() => target.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
+  }, [initialTab]);
 
   const displayName = username || profile?.full_name || user.email?.split('@')[0] || 'User';
 
@@ -201,44 +179,46 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     }
   };
 
+  /*
+   * Name and photo only. Website and bio were saved from here and shown nowhere
+   * in the app, so the fields are gone — and they are left out of the upsert
+   * too, so whatever someone already saved stays in their row.
+   */
+  const dirty = username !== (profile?.full_name || '') || profileImage !== (profile?.avatar_url || null);
+
   const handleSave = async () => {
-    if (activeTab === 'profile') {
-      // Validate username
-      if (username) {
-        const validation = validateUsername(username);
-        if (!validation.isValid) {
-          setUsernameError(validation.error);
-          return;
-        }
+    if (username) {
+      const validation = validateUsername(username);
+      if (!validation.isValid) {
+        setUsernameError(validation.error);
+        return;
+      }
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: username,
+          avatar_url: profileImage,
+        }, { onConflict: 'user_id' });
+
+      if (error) throw error;
+
+      // Update nickname if changed
+      if (username && username !== profile?.full_name) {
+        await supabase
+          .from('nicknames')
+          .upsert({ user_id: user.id, nickname: username }, { onConflict: 'user_id' });
       }
 
-      setSaving(true);
-      try {
-        const { error } = await supabase
-          .from('user_profiles')
-          .upsert({
-            user_id: user.id,
-            full_name: username,
-            bio: bio,
-            website: website,
-            avatar_url: profileImage,
-          }, { onConflict: 'user_id' });
-
-        if (error) throw error;
-
-        // Update nickname if changed
-        if (username && username !== profile?.full_name) {
-          await supabase
-            .from('nicknames')
-            .upsert({ user_id: user.id, nickname: username }, { onConflict: 'user_id' });
-        }
-
-        onSave?.();
-      } catch (error) {
-        console.error('Error saving profile:', error);
-      } finally {
-        setSaving(false);
-      }
+      onSave?.();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -267,861 +247,254 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     }
   };
 
-  const tabs: { id: TabType; label: string; hasNotification?: boolean }[] = [
-    { id: 'profile', label: t.profile },
-    { id: 'account', label: t.account },
-    { id: 'subscription', label: t.subscription },
-    { id: 'streak', label: t.streak },
-  ];
+  /*
+   * The profile as one list on the home screen's sky.
+   *
+   * It was a white two-column dialog written for a desktop window: a grey
+   * sidebar, four tabs, floating-label boxes, website and bio fields that showed
+   * nowhere, and a streak tab that repeated the streak window. Now it is a photo
+   * and a name, then grouped rows — who you are, your plan, reminders — and the
+   * two things you can leave with at the bottom.
+   */
+  const INK = '#2E3C33';
+  const PINK = '#EDA3BC';
+  const ko = language === 'ko';
+  const displayFont = ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  const glass: React.CSSProperties = {
+    background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+    backdropFilter: 'blur(22px) saturate(180%)',
+    WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+    border: '1px solid rgba(255,255,255,0.85)',
+    boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.08)',
+  };
+  const group: React.CSSProperties = { ...glass, borderRadius: 28, width: '100%', boxSizing: 'border-box', overflow: 'hidden' };
+  const sectionLabel: React.CSSProperties = {
+    fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.2, color: '#7d8f82', fontWeight: 700,
+    margin: '0 0 10px 8px', textTransform: 'uppercase', textAlign: 'left',
+  };
+  const round: React.CSSProperties = {
+    width: 40, height: 40, padding: 0, borderRadius: '50%',
+    background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
+    boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: INK, cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  };
+  const ico = (path: React.ReactNode) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{path}</svg>
+  );
+  const chevron = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa89f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+  );
+  const row = (opts: { icon: React.ReactNode; title: string; value?: React.ReactNode; onClick?: () => void; chevron?: boolean; last?: boolean; danger?: boolean; trailing?: React.ReactNode; children?: React.ReactNode }) => (
+    <div
+      onClick={opts.onClick}
+      role={opts.onClick ? 'button' : undefined}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
+        borderBottom: opts.last ? 'none' : '1px solid rgba(46,60,51,0.08)',
+        cursor: opts.onClick ? 'pointer' : 'default', textAlign: 'left',
+        color: opts.danger ? '#B5566F' : INK,
+      }}
+    >
+      <span style={{ display: 'flex', flexShrink: 0, color: opts.danger ? '#B5566F' : '#5d6e63' }}>{opts.icon}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 16, fontWeight: 600 }}>{opts.title}</div>
+        {opts.value !== undefined && <div style={{ fontSize: 14, color: '#7d8f82', marginTop: 3, wordBreak: 'break-all' }}>{opts.value}</div>}
+        {opts.children}
+      </div>
+      {opts.trailing}
+      {opts.chevron && chevron}
+    </div>
+  );
 
   return (
     <div
+      className="profile-glass"
       style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(4px)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
+        position: 'fixed', inset: 0, zIndex: 10010,
+        backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5',
+        overflowY: 'auto', display: 'flex', justifyContent: 'center',
+        color: INK, fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
       }}
-      onClick={onClose}
     >
-      <div
-        className="profile-settings-modal"
-        style={{
-          background: 'white',
-          borderRadius: '12px',
-          width: '100%',
-          maxWidth: '800px',
-          height: '560px',
-          maxHeight: '90vh',
-          overflow: 'hidden',
-          display: 'flex',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Sidebar */}
-        <div className="profile-settings-sidebar" style={{
-          width: '240px',
-          background: '#fafafa',
-          padding: '24px',
-          borderRight: '1px solid #eee',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          {/* Profile Photo */}
-          <div className="profile-sidebar-photo" style={{
-            position: 'relative',
-            width: '100px',
-            height: '100px',
-            margin: '0 auto 16px',
+      <div className="home-scene__grain" aria-hidden="true" />
+
+      <button onClick={onClose} aria-label={ko ? '닫기' : 'Close'} style={{ ...round, position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 16, zIndex: 3 }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <div style={{
+        position: 'relative', zIndex: 2, width: '100%', maxWidth: 520, boxSizing: 'border-box', alignSelf: 'flex-start',
+        padding: 'calc(env(safe-area-inset-top, 0px) + 56px) 20px calc(env(safe-area-inset-bottom, 0px) + 48px)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Photo and name */}
+        <div style={{ position: 'relative', width: 96, height: 96 }}>
+          <div style={{
+            width: 96, height: 96, borderRadius: '50%',
+            background: profileImage ? `url(${profileImage}) center/cover` : 'linear-gradient(135deg, #F7C9B6 0%, #E6C9F2 55%, #F6E7B8 100%)',
+            border: '3px solid rgba(255,255,255,0.9)', boxShadow: '0 8px 24px rgba(40,60,45,0.16)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: displayFont, fontSize: 40, color: INK,
           }}>
-            <div style={{
-              width: '100px',
-              height: '100px',
-              borderRadius: '50%',
-              background: profileImage
-                ? `url(${profileImage}) center/cover`
-                : 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)',
-              position: 'relative',
-            }}>
-              {/* Edit button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: 'white',
-                  border: '1px solid #e5e5e5',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-            />
+            {!profileImage && (displayName[0] ?? '?').toUpperCase()}
           </div>
-
-          {/* Username Display */}
-          <div className="profile-sidebar-username" style={{ textAlign: 'center', marginBottom: '8px' }}>
-            <p style={{
-              fontSize: '16px',
-              fontWeight: '600',
-              color: '#111',
-              margin: 0,
-            }}>
-              {displayName}
-            </p>
-          </div>
-
-          {/* Streak Display */}
-          {streak > 0 && (
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              color: '#f59e0b',
-              fontSize: '14px',
-              fontWeight: '500',
-            }}>
-              <span>🔥</span>
-              <span>{streak} {t.days}</span>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <nav className="profile-sidebar-nav" style={{ flex: 1 }}>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  background: activeTab === tab.id ? '#f0f0f0' : 'transparent',
-                  border: 'none',
-                  borderRadius: '8px',
-                  textAlign: 'left',
-                  fontSize: '15px',
-                  color: activeTab === tab.id ? '#111' : '#666',
-                  fontWeight: activeTab === tab.id ? '500' : '400',
-                  cursor: 'pointer',
-                  marginBottom: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {tab.label}
-                {tab.hasNotification && (
-                  <span style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: '#22c55e',
-                  }} />
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* Sign Out Button */}
           <button
-            className="profile-sidebar-signout"
-            onClick={handleLogout}
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              background: 'transparent',
-              border: 'none',
-              borderRadius: '8px',
-              textAlign: 'left',
-              fontSize: '15px',
-              color: '#888',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              transition: 'all 0.15s',
-              marginTop: '8px',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f0f0f0';
-              e.currentTarget.style.color = '#666';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#888';
-            }}
+            onClick={() => fileInputRef.current?.click()}
+            aria-label={ko ? '사진 바꾸기' : 'Change photo'}
+            style={{ ...round, position: 'absolute', right: -6, bottom: -4, width: 32, height: 32 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            {t.logout}
           </button>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
         </div>
+        <p style={{ margin: '16px 0 0', fontFamily: displayFont, fontSize: ko ? 22 : 34, fontWeight: ko ? 500 : 400, lineHeight: 1.2, textAlign: 'center' }}>
+          {displayName}
+        </p>
+        {streak > 0 && (
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#7d8f82' }}>
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: PINK }} />
+            <span>{streak} {t.days}</span>
+          </div>
+        )}
 
-        {/* Main Content */}
-        <div className="profile-content" style={{
-          flex: 1,
-          padding: '24px 32px',
-          overflowY: 'auto',
-          position: 'relative',
-        }}>
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              width: '32px',
-              height: '32px',
-              background: '#e5e5e5',
-              border: 'none',
-              cursor: 'pointer',
-              color: '#888',
-              fontSize: '18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#d5d5d5'}
-            onMouseLeave={(e) => e.currentTarget.style.background = '#e5e5e5'}
-          >
-            ✕
-          </button>
-
-          {/* Title */}
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '400',
-            color: '#111',
-            marginBottom: '32px',
-            fontFamily: "'Times New Roman', serif",
-          }}>
-            {activeTab === 'profile' ? t.profile : activeTab === 'account' ? t.account : activeTab === 'streak' ? t.streak : t.subscription}
-          </h2>
-
-          {/* Profile Tab */}
-          {activeTab === 'profile' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Username */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.username}
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ color: '#888', marginRight: '2px' }}>@</span>
+        <div style={{ width: '100%', marginTop: 28, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* Who you are */}
+          <div>
+            <div style={group}>
+              {row({
+                icon: ico(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>),
+                title: ko ? '이름' : 'Name',
+                children: (
                   <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                      setUsernameError('');
-                    }}
-                    style={{
-                      flex: 1,
-                      border: 'none',
-                      outline: 'none',
-                      fontSize: '15px',
-                      color: '#111',
-                      background: 'transparent',
-                    }}
+                    type="text" value={username}
+                    onChange={(e) => { setUsername(e.target.value); setUsernameError(''); }}
+                    aria-label={ko ? '이름' : 'Name'}
+                    style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 14, color: '#5d6e63', fontFamily: 'inherit', padding: 0, marginTop: 3 }}
                   />
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2" style={{ cursor: 'pointer' }}>
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </div>
-                {usernameError && (
-                  <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '8px' }}>{usernameError}</p>
-                )}
-              </div>
-
-              {/* Website */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.website}
-                </label>
-                <input
-                  type="text"
-                  value={website}
-                  onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://"
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: '15px',
-                    color: '#111',
-                    background: 'transparent',
-                  }}
-                />
-              </div>
-
-              {/* Bio */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-                minHeight: '120px',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.bio}
-                </label>
-                <div style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  right: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {bio.length}/68
-                </div>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value.slice(0, 68))}
-                  maxLength={68}
-                  style={{
-                    width: '100%',
-                    height: '80px',
-                    border: 'none',
-                    outline: 'none',
-                    fontSize: '15px',
-                    color: '#111',
-                    background: 'transparent',
-                    resize: 'none',
-                    fontFamily: 'inherit',
-                  }}
-                />
-              </div>
-
-              {/* Save Button */}
+                ),
+                trailing: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa89f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>,
+              })}
+              {row({
+                icon: ico(<><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></>),
+                title: t.email,
+                value: user.email,
+                last: true,
+              })}
+            </div>
+            {usernameError && <p style={{ color: '#B5566F', fontSize: 13, margin: '8px 0 0 8px' }}>{usernameError}</p>}
+            {dirty && (
               <button
                 onClick={handleSave}
                 disabled={saving}
                 style={{
-                  alignSelf: 'flex-end',
-                  padding: '10px 24px',
-                  background: '#e5e5e5',
-                  color: '#555',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  opacity: saving ? 0.7 : 1,
-                  transition: 'all 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  if (!saving) {
-                    e.currentTarget.style.background = '#d5d5d5';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#e5e5e5';
+                  ...glass, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  height: 52, minWidth: 200, margin: '16px auto 0', padding: '0 26px', borderRadius: 26,
+                  fontFamily: 'inherit', fontSize: 15, fontWeight: 700, color: INK,
+                  cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.5 : 1,
                 }}
               >
                 {saving ? t.saving : t.save}
               </button>
+            )}
+          </div>
+
+          {/* Plan and readings */}
+          <div ref={planRef}>
+            <div style={sectionLabel}>{ko ? '플랜' : 'Plan'}</div>
+            <div style={group}>
+              {row({
+                icon: ico(<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/>),
+                title: isPremium ? t.premiumPlan : t.freePlan,
+                value: isPremium ? (ko ? 'Pro 이용 중' : 'Pro access') : (ko ? '무료 플랜' : 'Free plan'),
+                onClick: isPremium ? undefined : () => goTo('/pricing/'),
+                chevron: !isPremium,
+                last: !readings,
+              })}
+              {readings && row({
+                icon: ico(<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>),
+                title: ko ? '이번 달 AI 해석' : "This month's AI readings",
+                value: (readings.remaining > 0
+                  ? (ko ? `${readings.remaining}번 남았어요` : `${readings.remaining} left`)
+                  : (ko ? '이번 달은 다 썼어요' : 'None left this month'))
+                  + (!isPremium ? (ko ? ` · 월 ${readings.limit}회` : ` · ${readings.limit} a month`) : ''),
+                last: true,
+              })}
             </div>
-          )}
+            {/*
+              * The second sentence is the one that matters: someone checking
+              * this is worried the app is about to stop working, and the answer
+              * is that the ritual never does — only the model's reply waits.
+              * Stated even at zero, especially at zero.
+              */}
+            <p style={{ fontSize: 13, color: '#7d8f82', margin: '10px 8px 0', lineHeight: 1.6, textAlign: 'left' }}>
+              {ko
+                ? '조약돌, 꿈, 무드 기록은 횟수 제한 없이 언제나 무료예요.'
+                : 'Pebbles, dreams and mood records are always free, with no limit.'}
+            </p>
+          </div>
 
-          {/* Account Tab */}
-          {activeTab === 'account' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Nickname */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.username}
-                </label>
-                <p style={{ fontSize: '15px', color: '#111', margin: 0 }}>
-                  @{displayName}
-                </p>
+          {/* Reminders */}
+          <div ref={remindersRef}>
+            <div style={group}>
+              <div style={{ padding: '16px 20px' }}>
+                <ReminderSettings language={language} />
               </div>
-
-              {/* Email (smaller, secondary) */}
-              <div style={{
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                position: 'relative',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.email}
-                </label>
-                <p style={{ fontSize: '15px', color: '#666', margin: 0 }}>
-                  {user.email}
-                </p>
-              </div>
-
-              {/*
-                * What is left, and what is never rationed.
-                *
-                * The second sentence is the one that matters: someone checking
-                * this is worried the app is about to stop working, and the
-                * answer is that the ritual never does — only the model's reply
-                * waits. Stated even at zero, especially at zero.
-                */}
-              {readings && (
-                <div style={{ marginBottom: 24 }}>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#5C7061', marginBottom: 6 }}>
-                    {language === 'ko' ? '이번 달 AI 해석' : "This month's AI readings"}
-                  </label>
-                  <p style={{ fontSize: 15, color: '#2F3B33', margin: '0 0 4px', fontWeight: 600 }}>
-                    {readings.remaining > 0
-                      ? (language === 'ko'
-                          ? `${readings.remaining}번 남았어요`
-                          : `${readings.remaining} left`)
-                      : (language === 'ko' ? '이번 달은 다 썼어요' : 'None left this month')}
-                    {!isPremium && (
-                      <span style={{ fontSize: 13, fontWeight: 400, color: '#8a9a8f' }}>
-                        {language === 'ko' ? ` · 월 ${readings.limit}회` : ` · ${readings.limit} a month`}
-                      </span>
-                    )}
-                  </p>
-                  <p style={{ fontSize: 13, color: '#7d8f82', margin: 0, lineHeight: 1.55 }}>
-                    {language === 'ko'
-                      ? '조약돌, 꿈, 무드 기록은 횟수 제한 없이 언제나 무료예요.'
-                      : 'Pebbles, dreams and mood records are always free, with no limit.'}
-                  </p>
-                  {!isPremium && readings.remaining <= 2 && (
-                    <button
-                      onClick={() => goTo('/pricing/')}
-                      style={{
-                        marginTop: 10, padding: '8px 14px', borderRadius: 999,
-                        border: '1.5px solid rgba(122,179,130,0.45)', background: 'transparent',
-                        color: '#3d6044', fontSize: 13, fontWeight: 700,
-                        fontFamily: 'inherit', cursor: 'pointer',
-                      }}
-                    >
-                      {language === 'ko' ? '매일 받기 — Pro' : 'Get one every day — Pro'}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              <ReminderSettings language={language} />
-
-              {/*
-                * Sign out.
-                *
-                * The only other one is in the sidebar, and the sidebar collapses
-                * to a row of tabs on a phone with that button set to
-                * display: none — so on the device the app actually ships to,
-                * there was no way to sign out at all. Here it sits with the
-                * other account actions, at every width.
-                */}
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: '12px 16px',
-                  background: 'transparent',
-                  border: '1px solid #e5e5e5',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  color: '#666',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  width: 'fit-content',
-                  transition: 'all 0.15s',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#f7f7f7'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                {t.logout}
-              </button>
-
-              {/* Delete Account */}
-              {!showDeleteConfirm ? (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  style={{
-                    padding: '12px 16px',
-                    background: 'transparent',
-                    border: '1px solid #fecaca',
-                    borderRadius: '8px',
-                    fontSize: '15px',
-                    color: '#ef4444',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    transition: 'all 0.15s',
-                    marginTop: '20px',
-                    width: 'fit-content',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#fef2f2';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  {t.deleteAccount}
-                </button>
-              ) : (
-                <div style={{
-                  padding: '16px',
-                  background: '#fef2f2',
-                  border: '1px solid #fecaca',
-                  borderRadius: '8px',
-                  marginTop: '20px',
-                  width: 'fit-content',
-                }}>
-                  <p style={{ fontSize: '14px', color: '#dc2626', margin: '0 0 12px 0' }}>
-                    {t.deleteConfirm}
-                  </p>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      onClick={handleDeleteAccount}
-                      disabled={deleting}
-                      style={{
-                        padding: '10px 16px',
-                        background: '#dc2626',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: 'white',
-                        cursor: deleting ? 'not-allowed' : 'pointer',
-                        opacity: deleting ? 0.7 : 1,
-                      }}
-                    >
-                      {deleting ? (language === 'ko' ? '삭제 중...' : 'Deleting...') : (language === 'ko' ? '삭제' : 'Delete')}
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      disabled={deleting}
-                      style={{
-                        padding: '10px 16px',
-                        background: 'white',
-                        border: '1px solid #e5e5e5',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#666',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {language === 'ko' ? '취소' : 'Cancel'}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
-          )}
+          </div>
 
-          {/* Subscription Tab */}
-          {activeTab === 'subscription' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Current Plan */}
-              <div style={{
-                border: isPremium ? '1px solid #7FB069' : '1px solid #e5e5e5',
-                borderRadius: '8px',
-                padding: '16px',
-                position: 'relative',
-                background: isPremium
-                  ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.05) 0%, rgba(144, 238, 144, 0.05) 100%)'
-                  : 'transparent',
-              }}>
-                <label style={{
-                  position: 'absolute',
-                  top: '-10px',
-                  left: '12px',
-                  background: 'white',
-                  padding: '0 4px',
-                  fontSize: '12px',
-                  color: '#888',
-                }}>
-                  {t.plan}
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '1.5rem' }}>
-                    {isPremium ? '👑' : '✨'}
-                  </span>
-                  <div>
-                    <p style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: isPremium ? '#7FB069' : '#111',
-                      margin: 0
-                    }}>
-                      {isPremium ? t.premiumPlan : t.freePlan}
-                    </p>
-                    <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0 0' }}>
-                      {isPremium
-                        ? (language === 'ko' ? 'Pro 이용 중' : 'Pro access')
-                        : (language === 'ko' ? '무료 플랜' : 'Free plan')}
-                    </p>
-                  </div>
+          {/* Leaving */}
+          <div>
+            <div style={group}>
+              {row({
+                icon: ico(<><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></>),
+                title: t.logout,
+                onClick: handleLogout,
+                last: true,
+              })}
+            </div>
+
+            <p style={{ fontSize: 13, color: '#7d8f82', margin: '14px 8px 12px', lineHeight: 1.6, textAlign: 'left' }}>
+              {ko
+                ? '계정을 삭제하면 기록이 모두 사라지고 되돌릴 수 없어요.'
+                : 'Deleting your account removes your records and cannot be undone.'}
+            </p>
+
+            {!showDeleteConfirm ? (
+              <div style={{ ...group, background: 'rgba(181,86,111,0.08)', border: '1px solid rgba(181,86,111,0.28)', boxShadow: 'none' }}>
+                {row({
+                  icon: ico(<><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></>),
+                  title: t.deleteAccount,
+                  onClick: () => setShowDeleteConfirm(true),
+                  danger: true,
+                  last: true,
+                })}
+              </div>
+            ) : (
+              <div style={{ ...group, padding: '18px 20px', border: '1px solid rgba(181,86,111,0.35)' }}>
+                <p style={{ fontSize: 14, color: '#B5566F', margin: '0 0 14px', lineHeight: 1.6, textAlign: 'left' }}>{t.deleteConfirm}</p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button onClick={handleDeleteAccount} disabled={deleting} style={{ flex: 1, height: 46, borderRadius: 23, border: '1px solid rgba(181,86,111,0.4)', background: 'rgba(181,86,111,0.14)', color: '#B5566F', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.5 : 1 }}>
+                    {deleting ? (ko ? '삭제 중...' : 'Deleting...') : (ko ? '삭제' : 'Delete')}
+                  </button>
+                  <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting} style={{ ...glass, flex: 1, height: 46, borderRadius: 23, color: INK, fontFamily: 'inherit', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                    {ko ? '취소' : 'Cancel'}
+                  </button>
                 </div>
               </div>
-
-              {/* Upgrade button for free users */}
-              {!isPremium && (
-                <button
-                  onClick={() => { goTo('/pricing/'); }}
-                  style={{
-                    padding: '14px 20px',
-                    background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '15px',
-                    fontWeight: '600',
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {language === 'ko' ? 'Pro 업그레이드' : 'Upgrade to Pro'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Streak Tab */}
-          {activeTab === 'streak' && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', padding: '20px 0' }}>
-              {streakLoading ? (
-                <p style={{ color: '#666' }}>{language === 'ko' ? '로딩 중...' : 'Loading...'}</p>
-              ) : streakData ? (
-                <>
-                  {/* Streak Circle */}
-                  <div style={{
-                    position: 'relative',
-                    width: '120px',
-                    height: '120px',
-                  }}>
-                    <svg width="120" height="120" viewBox="0 0 120 120">
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#e5e5e5"
-                        strokeWidth="8"
-                      />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="54"
-                        fill="none"
-                        stroke="#7FB069"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                        strokeDasharray={`${Math.min(streakData.current / nextMilestone(streakData.current), 1) * 339.3} 339.3`}
-                        transform="rotate(-90 60 60)"
-                      />
-                    </svg>
-                    <div style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      fontSize: '36px',
-                      fontWeight: '600',
-                      color: '#333',
-                    }}>
-                      {streakData.current}
-                    </div>
-                  </div>
-
-                  {/*
-                    * The ring aims at the next round number rather than a fixed
-                    * seven, so it still has somewhere to go after the first week.
-                    */}
-                  <p style={{ fontSize: '13px', color: '#888', margin: '-12px 0 0' }}>
-                    {language === 'ko'
-                      ? `다음 ${nextMilestone(streakData.current)}일까지 · 총 ${streakData.total}일`
-                      : `${nextMilestone(streakData.current)} days next · ${streakData.total} days in total`}
-                  </p>
-
-                  {/*
-                    * One missed day a month is forgiven, and saying so is the
-                    * point — a streak that quietly survives a gap reads as a bug,
-                    * and the allowance only calms anyone who knows it exists.
-                    */}
-                  {streakData.forgiven > 0 && (
-                    <p style={{ fontSize: '12px', color: '#A8A8A8', margin: '-16px 0 0' }}>
-                      {language === 'ko'
-                        ? '이번 달 하루는 쉬어도 이어집니다'
-                        : 'One missed day a month is forgiven'}
-                    </p>
-                  )}
-
-                  {/* Week Days */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '12px',
-                    justifyContent: 'center',
-                  }}>
-                    {streakData.week.map((day) => (
-                      <div key={day.date} style={{ textAlign: 'center' }}>
-                        <div style={{
-                          fontSize: '12px',
-                          color: day.completed ? '#7FB069' : '#999',
-                          marginBottom: '8px',
-                          fontWeight: day.completed ? '600' : '400',
-                        }}>
-                          {/* Parsed as local parts — new Date('YYYY-MM-DD') is UTC midnight
-                              and lands on the previous day west of Greenwich. */}
-                          {dayNames[new Date(
-                            Number(day.date.slice(0, 4)),
-                            Number(day.date.slice(5, 7)) - 1,
-                            Number(day.date.slice(8, 10))
-                          ).getDay()]}
-                        </div>
-                        <div style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          background: day.completed ? '#7FB069' : '#e5e5e5',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
-                          {day.completed && (
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
-                              <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <p style={{ color: '#666' }}>{language === 'ko' ? '데이터를 불러올 수 없습니다' : 'Could not load data'}</p>
-              )}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
       <style>{`
-        @media (max-width: 640px) {
-          .profile-settings-modal {
-            flex-direction: column !important;
-            max-height: 92vh !important;
-            border-radius: 20px !important;
-          }
-          .profile-settings-sidebar {
-            width: 100% !important;
-            min-width: 0 !important;
-            border-right: none !important;
-            border-bottom: 1px solid #f0f0f0 !important;
-            padding: 12px 12px 8px !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            flex-shrink: 0 !important;
-          }
-          .profile-sidebar-photo {
-            display: none !important;
-          }
-          .profile-sidebar-username {
-            display: none !important;
-          }
-          .profile-sidebar-signout {
-            display: none !important;
-          }
-          .profile-sidebar-nav {
-            flex-direction: row !important;
-            flex: 1 !important;
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch !important;
-            gap: 4px !important;
-            scrollbar-width: none !important;
-          }
-          .profile-sidebar-nav::-webkit-scrollbar {
-            display: none !important;
-          }
-          .profile-sidebar-nav button {
-            white-space: nowrap !important;
-            flex-shrink: 0 !important;
-            padding: 8px 14px !important;
-            font-size: 14px !important;
-            margin-bottom: 0 !important;
-          }
-          .profile-content {
-            padding: 16px !important;
-            overflow-y: auto !important;
-          }
-        }
+        .profile-glass .reminder-settings { margin-top: 0; padding-top: 0; border-top: none; }
+        .profile-glass .reminder-heading { font-family: monospace; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #7d8f82; font-weight: 700; margin-bottom: 8px; }
+        .profile-glass .reminder-label { color: ${INK}; font-size: 15px; }
+        .profile-glass .reminder-time { background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.9); color: ${INK}; border-radius: 12px; padding: 6px 10px; }
+        .profile-glass .reminder-note { color: #7d8f82; }
       `}</style>
     </div>
   );
