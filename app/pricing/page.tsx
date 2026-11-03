@@ -7,9 +7,41 @@ import { startCheckout, restorePurchases } from '../../src/lib/checkout';
 import { loadPricing, type PlanPricing } from '../../src/lib/revenuecat';
 import Toast, { ToastType } from '../../src/components/Toast';
 import FAQItem from '../../src/components/FAQItem';
-import { G, panel } from '../../src/lib/uiTokens';
+import '../../src/styles/home-scene.css';
 
-function Check({ color = G.green }: { color?: string }) {
+/*
+ * The pricing page on the home screen's sky (2026-11-03), like the screens in
+ * the app. The palette is local on purpose: the shared tokens in uiTokens are
+ * still what the support page and the FAQ are built from, and they move when
+ * those do.
+ */
+const P = {
+  ink: '#2E3C33',
+  base: '#4A5D4E',
+  light: '#7d8f82',
+  pink: '#EDA3BC',
+  rose: '#C27A8C',
+} as const;
+
+const GLASS = 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)';
+const panel: React.CSSProperties = {
+  background: GLASS,
+  backdropFilter: 'blur(22px) saturate(180%)',
+  WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+  border: '1px solid rgba(255,255,255,0.85)',
+  borderRadius: 28,
+  boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)',
+};
+const pill: React.CSSProperties = {
+  width: '100%', padding: '16px 20px', borderRadius: 999, fontSize: 15, fontWeight: 700,
+  fontFamily: 'inherit', cursor: 'pointer', color: P.ink,
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(246,243,234,0.86) 100%)',
+  border: '1px solid rgba(255,255,255,0.9)',
+  boxShadow: '0 8px 20px rgba(40,60,45,0.14), inset 0 1px 0 rgba(255,255,255,0.95)',
+  transition: 'transform 0.15s, box-shadow 0.15s',
+};
+
+function Check({ color = P.pink }: { color?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" width={18} height={18} style={{ flexShrink: 0, marginTop: 2 }}
       stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -282,40 +314,45 @@ export default function PricingPage() {
     },
   ];
 
-  const S = { fontFamily: "'Playfair Display', Georgia, serif" } as React.CSSProperties;
+  const S = { fontFamily: "var(--font-display), Georgia, serif", fontWeight: 400 } as React.CSSProperties;
   const M = { fontFamily: 'monospace' } as React.CSSProperties;
 
   return (
-    <div style={{ minHeight: '100vh', background: G.bgMain, overflowX: 'hidden', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', overflowX: 'hidden', position: 'relative', color: P.ink }}>
 
-      {/* Ambient blobs */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: 'rgba(181,218,185,0.6)', filter: 'blur(80px)', top: -100, left: -100 }} />
-        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'rgba(253,232,181,0.4)', filter: 'blur(80px)', bottom: -100, right: -50 }} />
-        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(217,210,233,0.5)', filter: 'blur(80px)', top: '40%', left: '30%' }} />
-      </div>
+      {/* The sky is its own fixed layer: `background-attachment: fixed` is ignored on iOS. */}
+      <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', pointerEvents: 'none' }} />
+      <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed', zIndex: 0 }} />
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(48px,8vw,80px) 24px', position: 'relative', zIndex: 1 }}>
 
         {/* ── Header ── */}
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <span style={{ ...M, fontSize: 11, letterSpacing: 2, color: G.green, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
+          <span style={{ ...M, fontSize: 11, letterSpacing: 2, color: P.light, fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: 16 }}>
             {ko ? '1분 아침 리추얼' : 'A 1-minute morning ritual'}
           </span>
-          <h1 style={{ ...S, fontSize: 'clamp(36px,6vw,48px)', fontWeight: 700, color: G.textDark, margin: '0 0 40px', letterSpacing: -0.5 }}>
+          <h1 style={{ ...S, fontSize: 'clamp(44px,8vw,60px)', color: P.ink, margin: '0 0 40px', letterSpacing: 0 }}>
             {ko ? '요금제' : 'Pricing'}
           </h1>
 
-          <div style={{ ...panel, maxWidth: 680, margin: '0 auto', padding: 'clamp(24px,4vw,40px)', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <p style={{ margin: 0, fontSize: 16, lineHeight: 1.7, color: G.textDark, whiteSpace: 'pre-line' }}>
+          {/*
+            * No card around the opening lines. They sat in a frosted panel the same
+            * size and weight as the plan cards below, which made the first thing on
+            * the page look like a fourth plan. As type on the sky they read as an
+            * introduction: the two facts quietly, the line that follows them large,
+            * and the question in the display italic.
+            */}
+          <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <p style={{ ...S, margin: 0, fontSize: 'clamp(20px,4.6vw,24px)', lineHeight: 1.5, color: P.base, whiteSpace: 'pre-line', textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
               {ko
                 ? "비틀즈의 Paul McCartney는 꿈에서 들은 멜로디로 'Yesterday'를 만들었고,\nThomas Edison은 아이디어를 얻기 위해 의도적으로 낮잠을 활용했습니다."
                 : "Paul McCartney composed 'Yesterday' from a melody he heard in a dream.\nThomas Edison deliberately used naps to spark ideas."}
             </p>
-            <p style={{ margin: 0, fontSize: 16, lineHeight: 1.6, color: G.textDark }}>
+            <span aria-hidden="true" style={{ display: 'block', width: 36, height: 2, borderRadius: 2, background: P.pink, margin: '30px 0' }} />
+            <p style={{ ...S, margin: 0, fontSize: 'clamp(28px,6vw,36px)', lineHeight: 1.2, color: P.ink, textWrap: 'balance' as React.CSSProperties['textWrap'] }}>
               {ko ? '위대한 통찰은 종종 우리가 잠든 사이 시작됩니다.' : 'Great insights often begin while we sleep.'}
             </p>
-            <p style={{ ...S, fontSize: 20, fontStyle: 'italic', color: G.green, margin: '8px 0 0' }}>
+            <p style={{ ...S, margin: '22px 0 0', fontSize: 'clamp(24px,5vw,30px)', fontStyle: 'italic', color: P.rose }}>
               {ko ? '당신은 어떤 꿈을 꾸고 있나요?' : 'What are you dreaming about?'}
             </p>
           </div>
@@ -324,10 +361,10 @@ export default function PricingPage() {
         {/* ── Pricing Cards ── */}
         <div style={{ marginBottom: 100 }}>
           <div style={{ textAlign: 'center', marginBottom: 50 }}>
-            <h2 style={{ ...S, fontSize: 32, color: G.textDark, margin: '0 0 10px' }}>
+            <h2 style={{ ...S, fontSize: 'clamp(30px,6vw,40px)', color: P.ink, margin: '0 0 10px' }}>
               {ko ? '플랜 선택하기' : 'Choose Your Plan'}
             </h2>
-            <p style={{ fontSize: 15, color: G.textLight, margin: 0 }}>
+            <p style={{ fontSize: 15, color: P.light, margin: 0 }}>
               {ko ? '당신의 무의식을 탐험하고 꿈을 기록하세요' : 'Explore your unconscious and record your dreams'}
             </p>
           </div>
@@ -336,25 +373,23 @@ export default function PricingPage() {
 
             {/* Free */}
             <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column', opacity: 0.92 }}>
-              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Free</h3>
-              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '가입만 하면' : 'Just sign up'}</p>
+              <h3 style={{ ...S, fontSize: 30, color: P.ink, margin: '0 0 6px' }}>Free</h3>
+              <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '가입만 하면' : 'Just sign up'}</p>
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 42, fontWeight: 700, color: G.textLight, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <div style={{ fontSize: 44, fontWeight: 700, color: P.light, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
                   $0
                 </div>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
                 {freeFeatures.map((f, i) => (
-                  <li key={i} style={{ fontSize: 14, color: G.textDark, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                  <li key={i} style={{ fontSize: 14, color: P.ink, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
                     <Check />{f}
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() => goTo('/')}
-                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: 'transparent', border: `1px solid ${G.textLight}`, color: G.textLight, transition: 'background 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.03)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                style={{ ...pill, background: 'rgba(255,255,255,0.45)', boxShadow: 'none' }}
               >
                 {ko ? '무료로 시작하기' : 'Start free'}
               </button>
@@ -362,30 +397,28 @@ export default function PricingPage() {
 
             {/* Pro */}
             <div style={{ ...panel, padding: '40px 30px', display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>Pro</h3>
-              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
+              <h3 style={{ ...S, fontSize: 30, color: P.ink, margin: '0 0 6px' }}>Pro</h3>
+              <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '매월 구독' : 'Monthly subscription'}</p>
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                  {pricing.premium?.priceString ?? '$5.99'} <span style={{ fontSize: 14, fontWeight: 400, color: G.textLight }}>/ {ko ? '월' : 'mo'}</span>
+                <div style={{ fontSize: 44, fontWeight: 700, color: P.ink, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  {pricing.premium?.priceString ?? '$5.99'} <span style={{ fontSize: 14, fontWeight: 400, color: P.light }}>/ {ko ? '월' : 'mo'}</span>
                 </div>
                 {pricing.premium?.intro && (
-                  <div style={{ marginTop: 8, fontSize: 13, fontWeight: 600, color: G.green }}>
+                  <div style={{ marginTop: 8, fontSize: 13, fontWeight: 600, color: P.rose }}>
                     {introLine(pricing.premium.intro, pricing.premium.priceString, ko)}
                   </div>
                 )}
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
                 {premiumFeatures.map((f, i) => (
-                  <li key={i} style={{ fontSize: 14, color: G.textDark, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                  <li key={i} style={{ fontSize: 14, color: P.ink, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
                     <Check />{f}
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() => handleBuy('premium')}
-                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: 'rgba(255,255,255,0.4)', border: `1px solid ${G.green}`, color: G.green, transition: 'background 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(122,179,130,0.12)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.4)'; }}
+                style={pill}
               >
                 {(pricing.premium?.intro && introCta(pricing.premium.intro, ko))
                   ?? (ko ? 'Pro 시작하기' : 'Start Pro')}
@@ -393,20 +426,20 @@ export default function PricingPage() {
             </div>
 
             {/* Yearly – Popular */}
-            <div style={{ ...panel, border: `2px solid ${G.green}`, background: 'rgba(255,255,255,0.7)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: 'white', letterSpacing: 1, borderRadius: '12px 24px 12px 24px', background: G.green, boxShadow: '0 4px 10px rgba(0,0,0,0.1)', whiteSpace: 'nowrap' }}>
+            <div style={{ ...panel, border: `2px solid ${P.pink}`, boxShadow: '0 12px 32px rgba(237,163,188,0.30), inset 0 1px 0 rgba(255,255,255,0.95)', padding: '40px 30px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', padding: '6px 18px', ...M, fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: 1, borderRadius: 999, background: P.pink, boxShadow: '0 4px 12px rgba(237,163,188,0.45)', whiteSpace: 'nowrap' }}>
                 POPULAR
               </div>
-              <h3 style={{ ...S, fontSize: 24, fontWeight: 700, color: G.textDark, margin: '0 0 6px' }}>{ko ? '연간' : 'Yearly'}</h3>
-              <p style={{ fontSize: 13, color: G.textLight, margin: '0 0 24px' }}>{ko ? '연간 구독' : 'Annual subscription'}</p>
+              <h3 style={{ ...S, fontSize: 30, color: P.ink, margin: '0 0 6px' }}>{ko ? '연간' : 'Yearly'}</h3>
+              <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '연간 구독' : 'Annual subscription'}</p>
               <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 42, fontWeight: 700, color: G.green, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 16, color: G.textLight, textDecoration: 'line-through', opacity: 0.7 }}>$71.88</span>
+                <div style={{ fontSize: 44, fontWeight: 700, color: P.ink, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 16, color: P.light, textDecoration: 'line-through', opacity: 0.7 }}>$71.88</span>
                   {pricing.yearly?.priceString ?? '$49.99'}
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 14, color: G.textLight }}>{ko ? '연간 결제' : 'per year'}</span>
-                  <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(122,179,130,0.15)', color: G.green, borderRadius: 8, fontWeight: 700 }}>30% Off</span>
+                  <span style={{ fontSize: 14, color: P.light }}>{ko ? '연간 결제' : 'per year'}</span>
+                  <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(237,163,188,0.25)', color: P.rose, borderRadius: 8, fontWeight: 700 }}>30% Off</span>
                 </div>
                 {/*
                   The offer that was configured in August and that nobody was
@@ -415,23 +448,23 @@ export default function PricingPage() {
                   sheet will contradict.
                 */}
                 {pricing.yearly?.intro && (
-                  <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 10, background: 'rgba(122,179,130,0.14)', fontSize: 13, fontWeight: 700, color: G.green }}>
+                  <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 10, background: 'rgba(237,163,188,0.20)', fontSize: 13, fontWeight: 700, color: P.ink }}>
                     {introLine(pricing.yearly.intro, pricing.yearly.priceString, ko)}
                   </div>
                 )}
               </div>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1 }}>
                 {yearlyFeatures.map((f, i) => (
-                  <li key={i} style={{ fontSize: 14, color: i === 0 ? G.green : G.textDark, fontWeight: i === 0 ? 700 : 400, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
+                  <li key={i} style={{ fontSize: 14, color: P.ink, fontWeight: i === 0 ? 700 : 400, display: 'flex', alignItems: 'flex-start', gap: 10, lineHeight: 1.5 }}>
                     <Check />{f}
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() => handleBuy('yearly')}
-                style={{ width: '100%', padding: 15, borderRadius: 16, fontSize: 15, fontWeight: 700, cursor: 'pointer', background: G.green, border: `1px solid ${G.green}`, color: 'white', boxShadow: '0 6px 15px rgba(122,179,130,0.3)', transition: 'all 0.2s' }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(122,179,130,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(122,179,130,0.3)'; }}
+                style={{ ...pill, boxShadow: '0 10px 24px rgba(237,163,188,0.40), inset 0 1px 0 rgba(255,255,255,0.95)', border: `1px solid ${P.pink}` }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
               >
                 {(pricing.yearly?.intro && introCta(pricing.yearly.intro, ko))
                   ?? (ko ? '연간 구독 시작하기' : 'Start Yearly')}
@@ -444,10 +477,10 @@ export default function PricingPage() {
         {/* ── Why Record Dreams ── */}
         <div style={{ marginBottom: 100 }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <h2 style={{ ...S, fontSize: 32, color: G.textDark, margin: '0 0 14px' }}>
+            <h2 style={{ ...S, fontSize: 'clamp(30px,6vw,40px)', color: P.ink, margin: '0 0 14px' }}>
               {ko ? '우리는 왜 꿈과 감정을 기록해야 할까요?' : 'Why should we record our dreams and emotions?'}
             </h2>
-            <p style={{ fontSize: 15, color: G.textLight, margin: 0, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+            <p style={{ fontSize: 15, color: P.light, margin: 0, lineHeight: 1.8, whiteSpace: 'pre-line' }}>
               {ko
                 ? "꿈과 감정은 우리 무의식의 언어입니다.\n매일 아침 사라지는 꿈 속에, 당신이 미처 말하지 못한 감정이 담겨 있습니다.\n기록하고 분석할 때 비로소 내면의 지도가 완성됩니다."
                 : 'Dreams and emotions are the language of your unconscious.\nEvery morning, the dreams that fade away carry feelings you never had words for.\nRecording and analyzing them is how you map your inner world.'}
@@ -458,14 +491,14 @@ export default function PricingPage() {
             {whyCards.map((card, i) => (
               <div key={i} style={{ ...panel, padding: '35px 25px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {card.icon}
-                <h3 style={{ fontSize: 18, color: G.textDark, margin: 0, lineHeight: 1.4 }}>{card.title}</h3>
-                <p style={{ fontSize: 14, color: G.textBase, lineHeight: 1.7, margin: 0 }}>{card.desc}</p>
+                <h3 style={{ fontSize: 18, color: P.ink, margin: 0, lineHeight: 1.4 }}>{card.title}</h3>
+                <p style={{ fontSize: 14, color: P.base, lineHeight: 1.7, margin: 0 }}>{card.desc}</p>
               </div>
             ))}
           </div>
 
           <div style={{ textAlign: 'center' }}>
-            <h4 style={{ fontSize: 18, color: G.textDark, margin: '0 0 20px' }}>
+            <h4 style={{ fontSize: 18, color: P.ink, margin: '0 0 20px' }}>
               {ko ? "기록하지 않은 꿈과 감정은 사라지지만, 기록된 것들은 '자산'이 됩니다." : "Unrecorded dreams and emotions disappear, but recorded ones become assets."}
             </h4>
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
@@ -473,12 +506,12 @@ export default function PricingPage() {
                 ? ['막연한 불안감의 원인을 찾고 싶을 때', '남들이 모르는 창의적인 영감이 필요할 때', '진정한 나 자신(Self)을 만나고 싶을 때']
                 : ['When you want to find the cause of vague anxiety', 'When you need creative inspiration', 'When you want to meet your true Self']
               ).map((pill, i) => (
-                <div key={i} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.8)', borderRadius: 30, fontSize: 13, color: G.textBase }}>
+                <div key={i} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: 30, fontSize: 13, color: P.base }}>
                   {pill}
                 </div>
               ))}
             </div>
-            <p style={{ ...S, fontSize: 20, fontStyle: 'italic', color: G.green, whiteSpace: 'pre-line', margin: 0 }}>
+            <p style={{ ...S, fontSize: 26, fontStyle: 'italic', color: P.rose, whiteSpace: 'pre-line', margin: 0 }}>
               {ko
                 ? '노바키츠는 사라지는 꿈과 감정을 붙잡아,\n당신 내면의 선명한 지도로 만들어드립니다.'
                 : 'Novakitz captures your fleeting dreams and emotions\nand turns them into a clear map of your inner life.'}
@@ -490,11 +523,11 @@ export default function PricingPage() {
         <div style={{ maxWidth: 800, margin: '0 auto 60px' }}>
           {faqCategories.map((cat, ci) => (
             <div key={ci}>
-              <h2 style={{ ...S, fontSize: 24, color: G.green, margin: ci === 0 ? '0 0 20px' : '40px 0 20px', paddingBottom: 10, borderBottom: '1px solid rgba(122,179,130,0.3)' }}>
+              <h2 style={{ ...S, fontSize: 30, color: P.ink, margin: ci === 0 ? '0 0 20px' : '40px 0 20px', paddingBottom: 10, borderBottom: '1px solid rgba(46,60,51,0.12)' }}>
                 {cat.title}
               </h2>
               {cat.items.map((item, ii) => (
-                <FAQItem key={ii} q={item.q} a={item.a} />
+                <FAQItem key={ii} q={item.q} a={item.a} tone="sky" />
               ))}
             </div>
           ))}
@@ -502,27 +535,25 @@ export default function PricingPage() {
 
         {/* ── Bottom CTA ── */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <p style={{ fontSize: 16, color: G.textLight, marginBottom: 16 }}>
+          <p style={{ fontSize: 16, color: P.light, marginBottom: 16 }}>
             {ko ? '아직 고민 중이신가요? 먼저 무료로 시작해보세요' : 'Still thinking? Start for free first'}
           </p>
           <button
             onClick={() => router.push('/')}
-            style={{ padding: '14px 32px', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(12px)', color: G.green, border: `2px solid ${G.green}`, borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = G.green; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.5)'; e.currentTarget.style.color = G.green; }}
+            style={{ ...pill, width: 'auto', padding: '16px 36px', fontSize: 16 }}
           >
             {ko ? '무료로 시작하기' : 'Try Free First'}
           </button>
         </div>
 
         {/* Restore, then the legal links. */}
-        <div style={{ textAlign: 'center', paddingTop: '1.25rem', borderTop: '1px solid rgba(122,179,130,0.2)' }}>
+        <div style={{ textAlign: 'center', paddingTop: '1.25rem', borderTop: '1px solid rgba(46,60,51,0.10)' }}>
           <button
             onClick={handleRestore}
             disabled={restoring}
             style={{
               background: 'none', border: 'none', padding: '4px 8px', marginBottom: 10,
-              color: G.green, fontSize: 13, fontWeight: 600,
+              color: P.base, fontSize: 13, fontWeight: 600,
               textDecoration: 'underline', cursor: restoring ? 'default' : 'pointer',
               opacity: restoring ? 0.6 : 1,
             }}
@@ -546,11 +577,11 @@ export default function PricingPage() {
             */}
           {[['Terms', '/legal/terms/'], ['Privacy', '/legal/privacy/'], ['Refund', '/legal/refund/']].map(([label, href], i) => (
             <span key={i}>
-              {i > 0 && <span style={{ fontSize: 11, color: G.textLight, margin: '0 4px' }}>·</span>}
+              {i > 0 && <span style={{ fontSize: 11, color: P.light, margin: '0 4px' }}>·</span>}
               <a
                 href={href}
                 onClick={(e) => { e.preventDefault(); goTo(href); }}
-                style={{ fontSize: 11, color: G.textLight, textDecoration: 'none', margin: '0 6px' }}
+                style={{ fontSize: 11, color: P.light, textDecoration: 'none', margin: '0 6px' }}
               >
                 {label}
               </a>
@@ -571,15 +602,14 @@ export default function PricingPage() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 24,
-            background: 'rgba(232,243,234,0.72)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'rgba(60,50,70,0.32)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
           }}
         >
           <div
             style={{
               ...panel,
-              background: 'rgba(255,255,255,0.85)',
               maxWidth: 380,
               width: '100%',
               padding: '40px 32px',
@@ -592,24 +622,24 @@ export default function PricingPage() {
                 height: 56,
                 margin: '0 auto 20px',
                 borderRadius: '50%',
-                background: `linear-gradient(135deg, ${G.green} 0%, #5C8D63 100%)`,
+                background: P.pink,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#fff',
+                color: P.ink,
                 fontSize: 26,
-                boxShadow: '0 6px 18px rgba(122,179,130,0.35)',
+                boxShadow: '0 6px 18px rgba(237,163,188,0.45)',
               }}
               aria-hidden="true"
             >
               ✓
             </div>
 
-            <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: G.textDark, letterSpacing: '-0.01em' }}>
+            <h2 style={{ ...S, margin: 0, fontSize: 30, color: P.ink }}>
               {ko ? 'Pro가 시작되었습니다' : 'Welcome to Pro'}
             </h2>
 
-            <p style={{ margin: '12px 0 24px', fontSize: 14, lineHeight: 1.6, color: G.textBase }}>
+            <p style={{ margin: '12px 0 24px', fontSize: 14, lineHeight: 1.6, color: P.base }}>
               {ko
                 ? '이제 매일 아침 해석을 받고, 매달 꿈 리뷰를 볼 수 있어요.'
                 : 'A reading every morning, and a monthly review of your dreams.'}
@@ -617,18 +647,7 @@ export default function PricingPage() {
 
             <button
               onClick={() => goTo('/')}
-              style={{
-                width: '100%',
-                padding: '15px 20px',
-                borderRadius: 999,
-                border: 'none',
-                cursor: 'pointer',
-                background: `linear-gradient(135deg, ${G.green} 0%, #5C8D63 100%)`,
-                color: '#fff',
-                fontSize: 15,
-                fontWeight: 600,
-                boxShadow: '0 6px 18px rgba(122,179,130,0.3)',
-              }}
+              style={pill}
             >
               {ko ? '시작하기' : 'Start your morning'}
             </button>
