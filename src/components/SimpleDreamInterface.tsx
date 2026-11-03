@@ -41,6 +41,13 @@ interface SimpleDreamInterfaceProps {
   initialShowHistory?: boolean;
   onHistoryClose?: () => void;
   onGuestAnalyze?: () => void; // Called when guest tries to analyze - prompt login
+  /**
+   * Reports whether the person is in a step that should have the whole screen:
+   * writing a dream, reading a response, or inside the mood flow. The shell
+   * hides its bottom tab bar for these, since a bar under a half-written dream
+   * invites leaving it.
+   */
+  onImmersiveChange?: (immersive: boolean) => void;
 }
 
 // Client-side only PulseDots component to avoid SSR issues
@@ -215,7 +222,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -320,6 +327,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [showEmotionModal, setShowEmotionModal] = useState(false);
   const [showMoodCardFlow, setShowMoodCardFlow] = useState(false);
+
+  // Tell the shell when this screen wants to be alone. See onImmersiveChange.
+  const immersive = showInput || showResponse || showMoodCardFlow || showEmotionModal;
+  useEffect(() => {
+    onImmersiveChange?.(immersive);
+  }, [immersive, onImmersiveChange]);
   const [selectedEmotionLabel, setSelectedEmotionLabel] = useState('');
   const [dreamRefreshTrigger, setDreamRefreshTrigger] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);

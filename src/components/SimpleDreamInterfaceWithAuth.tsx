@@ -14,6 +14,7 @@ import DreamCalendar from './DreamCalendar';
 import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
 import { isPremiumNow } from '../lib/premium';
+import BottomTabBar, { TAB_BAR_HEIGHT, SUB_SWITCH_SPACE, type TabId, type SubId } from './BottomTabBar';
 
 // Translations
 const translations = {
@@ -67,6 +68,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  // True while the home screen is in a full-screen step (see SimpleDreamInterface).
+  const [immersive, setImmersive] = useState(false);
 
   /*
    * The drawer's panels are one at a time.
@@ -529,6 +532,37 @@ export default function SimpleDreamInterfaceWithAuth() {
     setTimeout(() => setShowProfileSettings(true), 150);
   };
 
+  /*
+   * Which tab is showing, derived from the panel flags rather than stored, so it
+   * cannot drift from what is actually on screen.
+   */
+  const activeTab: TabId =
+    showHistory || showCalendar ? 'journal'
+    : showInsights || showMonthlyReport ? 'insights'
+    : 'today';
+  const activeSub: SubId | null =
+    showHistory ? 'history'
+    : showCalendar ? 'calendar'
+    : showInsights ? 'insights'
+    : showMonthlyReport ? 'monthly'
+    : null;
+
+  const selectTab = (tab: TabId) => {
+    if (tab === activeTab) return;
+    setCalendarSelectedDate(null);
+    if (tab === 'today') {
+      openPanel(null);
+      return;
+    }
+    // Guests tapping a place that needs an account get the sign-in panel.
+    handleGuestAction(() => openPanel(tab === 'journal' ? 'history' : 'insights'));
+  };
+
+  const selectSub = (sub: SubId) => {
+    setCalendarSelectedDate(null);
+    openPanel(sub);
+  };
+
   console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
 
   // Only show loading on initial load, not on profile checks
@@ -712,75 +746,13 @@ export default function SimpleDreamInterfaceWithAuth() {
 
             {/* Menu list */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflowY: 'auto' }}>
-              {/* Home */}
-              {(() => {
-                const isActive = !showHistory && !showCalendar && !showInsights && !showMonthlyReport;
-                return (
-                  <button onClick={() => { setShowHistory(false); setShowCalendar(false); setShowInsights(false); setShowStreak(false); setShowMonthlyReport(false); setMenuOpen(false); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    </span>
-                    {t.home}
-                  </button>
-                );
-              })()}
-
-              {/* Dream Journal */}
-              {(() => {
-                const isActive = showHistory;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('history'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                    </span>
-                    {t.dreamJournal}
-                  </button>
-                );
-              })()}
-
-              {/* Calendar */}
-              {(() => {
-                const isActive = showCalendar;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('calendar'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </span>
-                    {t.calendar}
-                  </button>
-                );
-              })()}
-
-              {/* Reflection */}
-              {(() => {
-                const isActive = showInsights;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('insights'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    </span>
-                    {t.insights}
-                  </button>
-                );
-              })()}
-
-              {/* Monthly Review */}
-              {(() => {
-                const isActive = showMonthlyReport;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('monthly'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                    </span>
-                    {t.monthlyReport}
-                  </button>
-                );
-              })()}
+              {/*
+                Home, Journal, Calendar, Reflection and Monthly Review used to be
+                rows here. They are the bottom tab bar now (BottomTabBar.tsx), and
+                keeping a second copy in the drawer meant two ways to do the same
+                thing that could disagree about which one was active. What is left
+                is what is not a place to be: pricing and the archetype test.
+              */}
 
               {/* Pricing */}
               <button onClick={() => { goTo('/pricing/'); }}
@@ -838,7 +810,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         </>
       )}
 
-      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} />
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} />
 
       {/* Dream Insights Modal */}
       {showInsights && user && (
@@ -891,7 +863,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it
@@ -1095,6 +1067,38 @@ export default function SimpleDreamInterfaceWithAuth() {
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
           </div>
         </div>
+      )}
+
+      {/*
+        Bottom tab bar — POST_LAUNCH §0.
+
+        Steps aside for anything that wants the whole screen: the drawer, the
+        sign-in panel, settings, the streak popup, a selected calendar day, and
+        the home screen's own full-screen steps (writing a dream, reading a
+        response, the mood flow). The mood flow also sits above it by z-index.
+      */}
+      {!menuOpen && !isGuestMode && !showProfileSettings && !showStreak && !calendarSelectedDream && !immersive && (
+        <>
+          {/*
+            The panels are full-screen overlays that each end at the bottom of
+            the screen. Shortening them by the bar's height, rather than adding
+            bottom padding inside each one, keeps their own scroll areas and
+            headers untouched. The floating switch needs a little more room, so
+            only the tabs that have one get it.
+          */}
+          <style>{`
+            .dream-history, .di-shell, .mdr-shell, .cal-shell {
+              bottom: calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + (activeTab === 'today' ? 0 : SUB_SWITCH_SPACE)}px) !important;
+            }
+          `}</style>
+          <BottomTabBar
+            language={language}
+            active={activeTab}
+            sub={activeSub}
+            onSelectTab={selectTab}
+            onSelectSub={selectSub}
+          />
+        </>
       )}
 
     </>
