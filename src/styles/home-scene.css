@@ -10,6 +10,17 @@
  * three colour fields and a curve behind an already busy painting, and the
  * screen stopped having one subject. Reverted, deliberately.
  *
+ * 2026-11-03: the field changed from one flat blue to soft blooms of peach,
+ * lavender and butter on cream (the day scene). This is closer to the dawn
+ * version than to the flat blue, so the reason it was reverted is worth
+ * restating, and why this one is different. That version put a blue-to-pink sky
+ * AND a green hill AND a curve behind the painting — saturated colour and
+ * structure. Here there is no hill and no horizon, the fields are low-contrast
+ * pastels, and the painted disc is the only saturated thing on the screen, so it
+ * still wins the eye. That is a judgement from screenshots at phone size, not
+ * from a phone: if the screen stops having one subject again, go back to a
+ * single colour — `--sky` below is the only line to change.
+ *
  * Two things from that version stayed, because they were fixes rather than
  * decoration: the bloom is a radial gradient instead of a wide box-shadow
  * (large blurs composite in tiles and the tile edges showed as faint
@@ -26,6 +37,12 @@
 .home-scene--day {
   --field: #5BB0F5;
   --field-deep: #4FA4EE;
+  /* Three blooms over cream: warm top-left, lavender right, butter at the foot. */
+  --sky:
+    radial-gradient(circle at 12% 10%, rgba(255, 190, 165, 0.95) 0%, rgba(255, 190, 165, 0) 52%),
+    radial-gradient(circle at 92% 28%, rgba(196, 180, 255, 0.90) 0%, rgba(196, 180, 255, 0) 54%),
+    radial-gradient(circle at 40% 100%, rgba(255, 228, 150, 0.95) 0%, rgba(255, 228, 150, 0) 58%),
+    linear-gradient(180deg, #F7F1E8 0%, #F2ECE2 100%);
   --halo: rgba(255, 255, 255, 0.55);
   --halo-fade: rgba(255, 255, 255, 0);
 }
@@ -33,12 +50,13 @@
 .home-scene--night {
   --field: #1B2A5E;
   --field-deep: #141F47;
+  --sky: linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
   --halo: rgba(150, 180, 255, 0.35);
   --halo-fade: rgba(150, 180, 255, 0);
 }
 
 .home-scene {
-  background-image: linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
+  background-image: var(--sky);
   transition: background-image 900ms ease;
 }
 
