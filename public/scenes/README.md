@@ -41,3 +41,10 @@ it — otherwise WebP at quality ~82 is typically a third of the size for the sa
 result, and the app bundle ships inside the binary where every megabyte counts
 against the download. Update `SCENE_SOURCES` in `HomeScene.tsx` if you change
 the extension.
+
+## Tulip (2026-11-03)
+
+The home screen now shows `tulip-day.png` — a transparent 1124×1124 PNG, the
+flower with its own soft red edge and a 50px transparent margin — instead of the
+circular landscape. No circle is cut around it. `scene-day.png` and
+`SceneArt.tsx` stay as the fallback if the tulip file fails to load.

@@ -212,6 +212,42 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.6' intercept='-0.3'/%3E%3CfeFuncG type='linear' slope='1.6' intercept='-0.3'/%3E%3CfeFuncB type='linear' slope='1.6' intercept='-0.3'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23m)'/%3E%3C/svg%3E");
 }
 
+/*
+ * The tulip. The portal stays the same size as the landscape disc so the tap
+ * target and the glow behind it are unchanged; the flower is drawn larger than
+ * the portal (156%, which includes the 50px transparent margin the file now carries so its soft edge never meets the image boundary) because the file keeps a margin around the petals (the flower
+ * is ~88% of the square) and the flower is meant to fill the screen. The file
+ * carries its own soft red edge, so there is no extra drop shadow here. It opens once, then breathes. No turn: a tulip turning
+ * upside down is not the same picture.
+ */
+.home-scene__flower {
+  position: absolute;
+  inset: 0;
+  display: block;
+  animation: home-scene-open 1700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-scene__flower-art {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 156%;
+  height: 156%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  animation: home-scene-flower-breathe 7s ease-in-out 1700ms infinite;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+@keyframes home-scene-flower-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.022); }
+}
+
 @keyframes home-scene-breathe {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.022); }
@@ -273,7 +309,9 @@
   }
   /* The flower still arrives, it just arrives already open and still. */
   .home-scene__bloom,
-  .home-scene__bloom-art {
+  .home-scene__bloom-art,
+  .home-scene__flower,
+  .home-scene__flower-art {
     animation: none;
   }
   .home-scene {
