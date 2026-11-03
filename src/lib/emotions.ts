@@ -33,6 +33,25 @@ export const EMOTIONS: Emotion[] = [
   { key: 'low',      en: 'Low',      ko: '무기력', color: 'rgba(226,232,240,0.7)', borderRadius: '16px',                              moodValue: 1 },
 ];
 
+/**
+ * A richer tone for each pebble, for screens that show it large against cream.
+ *
+ * `color` above is the calendar's fill and is deliberately pale; on a cream
+ * field it would all but vanish. `body` is the lit face of the pebble and
+ * `light` the glow it gives off. Kept beside the pebbles so the picker and the
+ * today's-mood card read from one place.
+ */
+export const PEBBLE_GLOW: Record<string, { body: string; light: string }> = {
+  anxious:  { body: '#CFC4F2', light: '#B6A6EC' },
+  fear:     { body: '#BFDCE7', light: '#8FC3D6' },
+  peaceful: { body: '#BFE3C2', light: '#8CCB92' },
+  joyful:   { body: '#FFE39A', light: '#FFCB57' },
+  lonely:   { body: '#C9D4E2', light: '#9FB2CB' },
+  hopeful:  { body: '#D3F0BF', light: '#A8DE8C' },
+  anger:    { body: '#FFC5B5', light: '#FF9680' },
+  low:      { body: '#D5DDEA', light: '#AEBBD2' },
+};
+
 const BY_KEY = new Map(EMOTIONS.map((e) => [e.key, e]));
 
 export function emotionByKey(key: string | null | undefined): Emotion | null {

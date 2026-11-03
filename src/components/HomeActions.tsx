@@ -144,7 +144,6 @@ export default function HomeActions({ language, onMood, onDream }: HomeActionsPr
 
   return (
     <div
-      className="home-actions"
       style={{
         position: 'fixed',
         left: 0,

@@ -8,6 +8,8 @@ import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
 import HomeActions from './HomeActions';
+import TodayMoodCard from './TodayMoodCard';
+import { localDate } from '../lib/streak';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
@@ -329,6 +331,43 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [showEmotionModal, setShowEmotionModal] = useState(false);
   const [showMoodCardFlow, setShowMoodCardFlow] = useState(false);
 
+  /*
+   * Today's pebble, for the card on the home screen. Read from the check-in the
+   * moment the app opens and again whenever it is brought forward, since a
+   * backgrounded Capacitor app can come back the next morning still holding
+   * yesterday's. A guest's pebble is not saved anywhere, so for them it is only
+   * what they picked this session.
+   */
+  const [todayEmotion, setTodayEmotion] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user) {
+      setTodayEmotion(null);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('checkins')
+          .select('emotion')
+          .eq('user_id', user.id)
+          .eq('check_date', localDate(new Date()))
+          .eq('time_of_day', 'morning')
+          .maybeSingle();
+        if (!cancelled) setTodayEmotion(data?.emotion ?? null);
+      } catch {
+        // No card is better than a wrong one.
+      }
+    };
+    load();
+    const onVisible = () => { if (!document.hidden) load(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [user]);
+
   // Tell the shell when this screen wants to be alone. See onImmersiveChange.
   const immersive = showInput || showResponse || showMoodCardFlow || showEmotionModal;
   useEffect(() => {
@@ -355,6 +394,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const emotion = emotionList[idx];
     setShowEmotionModal(false);
     setSelectedEmotionLabel(emotion.label);
+    setTodayEmotion(emotion.key);
     setShowMoodCardFlow(true);
     if (!user) return; // guest: just show card
     try {
@@ -4133,11 +4173,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             already uses them. See HomeActions.
           */}
           {!showInput && !showResponse && !showHistory && !showEmotionModal && !showMoodCardFlow && (
-            <HomeActions
-              language={language}
-              onMood={() => setShowEmotionModal(true)}
-              onDream={() => setShowInput(true)}
-            />
+            <>
+              {todayEmotion && (
+                <TodayMoodCard
+                  language={language}
+                  emotionKey={todayEmotion}
+                  onChange={() => setShowEmotionModal(true)}
+                />
+              )}
+              <HomeActions
+                language={language}
+                onMood={() => setShowEmotionModal(true)}
+                onDream={() => setShowInput(true)}
+              />
+            </>
           )}
 
 
