@@ -321,8 +321,8 @@ function arcanaArtChildren(id: string): React.ReactNode {
 // ── Standalone sub-components (must be outside MoodCardFlow to avoid remount on each render)
 
 const ProgressBar = ({ pct }: { pct: number }) => (
-  <div style={{ width: '100%', height: '3px', background: 'rgba(0,0,0,0.06)', borderRadius: '2px', marginBottom: '28px', overflow: 'hidden' }}>
-    <div style={{ height: '100%', width: `${pct}%`, background: '#7AB382', borderRadius: '2px', transition: 'width 0.4s ease' }} />
+  <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.55)', borderRadius: '2px', marginBottom: '36px', overflow: 'hidden' }}>
+    <div style={{ height: '100%', width: `${pct}%`, background: '#EDA3BC', borderRadius: '2px', transition: 'width 0.4s ease' }} />
   </div>
 );
 
@@ -330,68 +330,143 @@ const Chip = ({ label, svg, color, selected, onClick }: { label: string; svg?: (
   <button
     onClick={onClick}
     style={{
-      padding: '10px 16px',
-      borderRadius: '20px',
-      border: selected ? '1.5px solid #7AB382' : '1.5px solid rgba(255,255,255,0.9)',
-      background: selected ? '#7AB382' : 'rgba(255,255,255,0.65)',
+      padding: '17px 24px',
+      borderRadius: '30px',
+      border: selected ? '1.5px solid rgba(46,60,51,0.32)' : '1.5px solid rgba(255,255,255,0.9)',
+      background: selected ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.55)',
       color: '#4A5D4E',
-      fontSize: '13px',
+      fontSize: '17px',
       fontWeight: selected ? 600 : 400,
       cursor: 'pointer',
       transition: 'all 0.22s ease',
-      boxShadow: selected ? '0 4px 12px rgba(122,179,130,0.3)' : '0 2px 8px rgba(0,0,0,0.04)',
+      boxShadow: selected ? '0 6px 16px rgba(40,60,45,0.14)' : '0 2px 8px rgba(0,0,0,0.04)',
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
-      display: 'flex', alignItems: 'center', gap: '6px',
+      display: 'flex', alignItems: 'center', gap: '9px',
     }}
   >
-    {svg && svg(selected ? '#fff' : (color ?? '#4A5D4E'))}
-    <span style={{ color: selected ? '#fff' : '#4A5D4E' }}>{label}</span>
+    {svg && svg(color ?? '#4A5D4E')}
+    <span style={{ color: selected ? '#2E3C33' : '#4A5D4E' }}>{label}</span>
   </button>
+);
+
+/*
+ * The screens after the pebble, on the home screen's own sky.
+ *
+ * They used to be a mint panel on a dark scrim, which made the one step you take
+ * after choosing a pebble feel like leaving the app for a dialog. Now the whole
+ * screen is the same gradient the picker and the home screen use — no panel, no
+ * scrim — and the controls are the white round buttons the rest of the app has.
+ */
+const SkyBackdrop = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+  <div
+    onClick={onClick}
+    style={{
+      position: 'fixed', inset: 0,
+      backgroundImage: 'var(--home-sky-day)',
+      backgroundColor: '#F4EEE5',
+      zIndex: 21000,
+      display: 'flex', justifyContent: 'center',
+      overflowY: 'auto',
+    }}
+  >
+    <div className="home-scene__grain" aria-hidden="true" />
+    {children}
+  </div>
+);
+
+const roundControl: React.CSSProperties = {
+  position: 'fixed',
+  top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+  width: '40px', height: '40px',
+  background: 'rgba(255,255,255,0.92)',
+  border: '1px solid rgba(255,255,255,0.9)',
+  borderRadius: '50%',
+  boxShadow: '0 2px 10px rgba(40,60,45,0.16)',
+  cursor: 'pointer',
+  color: '#2E3C33',
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  zIndex: 3,
+  padding: 0,
+};
+
+/*
+ * The button at the foot of every step: the home screen's glass pill with the
+ * round arrow. `marginTop: auto` in a column that fills the screen puts it at the
+ * bottom, where the thumb is, and lets the content above it start at the top.
+ */
+/* The display face the "is saved" line uses; Instrument Serif has no Hangul, so Korean keeps the UI face (globals.css). */
+const headingStyle = (isKo: boolean, enSize: number, koSize: number): React.CSSProperties => ({
+  fontSize: isKo ? `${koSize}px` : `${enSize}px`,
+  fontWeight: isKo ? 500 : 400,
+  letterSpacing: isKo ? '-0.5px' : '0',
+  lineHeight: 1.25,
+  color: '#2E3C33',
+  textAlign: 'center',
+  fontFamily: isKo ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif',
+});
+
+const stepBody: React.CSSProperties = { width: '100%', flex: 1, display: 'flex', flexDirection: 'column' };
+
+const NextButton = ({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) => (
+  <div style={{ marginTop: '48px', marginBottom: 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        position: 'relative', overflow: 'hidden',
+        // As wide as its words (plus a floor so short ones don't shrink to a dot), centred.
+        width: 'auto', minWidth: '240px', height: '56px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px',
+        padding: '0 8px 0 26px',
+        borderRadius: '30px',
+        border: '1px solid rgba(255,255,255,0.85)',
+        cursor: disabled ? 'default' : 'pointer',
+        fontFamily: 'inherit', fontSize: '16px', fontWeight: 700, textAlign: 'left',
+        color: '#2E3C33',
+        opacity: disabled ? 0.45 : 1,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+        backdropFilter: 'blur(22px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+        boxShadow: disabled ? 'none' : '0 8px 24px rgba(40,60,45,0.16), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.08)',
+        transition: 'opacity 0.2s, box-shadow 0.2s',
+        WebkitTapHighlightColor: 'transparent',
+      }}
+    >
+      <span>{label}</span>
+      <span aria-hidden="true" style={{
+        width: '40px', height: '40px', borderRadius: '50%',
+        background: 'rgba(255,255,255,0.96)',
+        color: '#2E3C33',
+        boxShadow: '0 2px 8px rgba(40,60,45,0.16)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+    </button>
+  </div>
 );
 
 const Container = ({ children, onBack, onClose }: { children: React.ReactNode; onBack?: () => void; onClose: () => void }) => (
   <div style={{
-    width: '90%', maxWidth: '360px',
-    background: '#EAF4EC',
-    borderRadius: '32px',
-    padding: '56px 24px 36px',
-    boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
     position: 'relative',
-    maxHeight: 'calc(100vh - 40px)',
-    overflowY: 'auto',
+    zIndex: 2,
+    width: '100%', maxWidth: '520px',
+    boxSizing: 'border-box',
+    // Starts at the top, just under the round controls, and uses the full height.
+    padding: 'calc(env(safe-area-inset-top, 0px) + 68px) 22px calc(env(safe-area-inset-bottom, 0px) + 28px)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   }}>
     {onBack && (
-      <button
-        onClick={onBack}
-        style={{
-          position: 'absolute', top: '16px', left: '16px',
-          width: '32px', height: '32px',
-          background: 'rgba(0,0,0,0.06)',
-          border: 'none', borderRadius: '50%',
-          cursor: 'pointer',
-          color: '#4A5D4E',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <button onClick={(e) => { e.stopPropagation(); onBack(); }} aria-label="Back" style={{ ...roundControl, left: '16px' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
     )}
-    <button
-      onClick={onClose}
-      style={{
-        position: 'absolute', top: '16px', right: '16px',
-        width: '32px', height: '32px',
-        background: 'rgba(0,0,0,0.06)',
-        border: 'none', borderRadius: '50%',
-        cursor: 'pointer', fontSize: '13px',
-        color: '#4A5D4E',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}
-    >✕</button>
+    <button onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label="Close" style={{ ...roundControl, right: '16px' }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
     {children}
   </div>
 );
@@ -797,62 +872,76 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   // STEP: blurred card
   // ==============================
   if (step === 'blurred') return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.4)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      zIndex: 21000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
-    }}>
+    <SkyBackdrop onClick={onClose}>
       <Container onClose={onClose}>
-        <div onClick={e => e.stopPropagation()} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <p style={{ fontSize: '15px', fontWeight: 600, color: '#4A5D4E', marginBottom: '20px', textAlign: 'center', lineHeight: 1.5 }}>
+        <div onClick={e => e.stopPropagation()} style={{ ...stepBody, alignItems: 'center' }}>
+          {/* Instrument Serif has no Hangul, so Korean keeps the UI face (globals.css). */}
+          <p style={{ ...headingStyle(isKo, 42, 24), margin: 0 }}>
             {isKo ? `'${selectedEmotion}' 기록했어요` : `'${selectedEmotion}' is saved`}
           </p>
 
-          <CardFrame />
+          {/* The pebble that was chosen, as the picker drew it — the object of this moment. */}
+          <div style={{ marginTop: 'clamp(32px, 10vh, 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span aria-hidden="true" style={{
+              position: 'absolute', inset: '-26px', borderRadius: '50%',
+              background: `radial-gradient(circle, ${getEmotionPebble(selectedEmotion).background.replace('0.9)', '0.55)')} 0%, rgba(255,255,255,0) 68%)`,
+              filter: 'blur(10px)',
+            }} />
+            <div style={{
+              position: 'relative', width: '156px', height: '156px',
+              background: getEmotionPebble(selectedEmotion).background,
+              borderRadius: getEmotionPebble(selectedEmotion).borderRadius,
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.8)',
+              boxShadow: '8px 8px 24px rgba(0,0,0,0.07), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 6px rgba(255,255,255,0.8)',
+            }} />
+          </div>
+          </div>
 
-          <div style={{ marginTop: '24px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-            {/* Button 1: Dream recording */}
-            <button
-              onClick={() => { setIsEgoMode(false); setStep('record-place'); }}
-              style={{
-                width: '88%', padding: '15px 20px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)',
-                color: '#fff', border: 'none',
-                fontSize: '14px', fontWeight: 700,
-                boxShadow: '0 8px 20px rgba(122,179,130,0.3)',
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative',
-              }}
-            >
-              {/* Short enough to stay on one line at 88% of a phone panel. */}
-              <span style={{ whiteSpace: 'nowrap' }}>{isKo ? '꿈 기억나요?' : 'Remember a dream?'}</span>
-              <svg style={{ position: 'absolute', right: 20 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-
-            {/* Button 2: Ego check-in */}
-            <button
-              onClick={() => { setIsEgoMode(true); setStep('ego-sleep'); }}
-              style={{
-                width: '88%', padding: '14px 20px',
-                borderRadius: '16px',
-                background: 'rgba(255,255,255,0.6)',
-                border: '1.5px solid rgba(122,179,130,0.4)',
-                color: '#4A5D4E', fontSize: '13px', fontWeight: 600,
-                backdropFilter: 'blur(8px)',
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                position: 'relative',
-              }}
-            >
-              <span style={{ whiteSpace: 'nowrap' }}>{isKo ? '무드만 확인' : 'Check your mood'}</span>
-              <svg style={{ position: 'absolute', right: 20 }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </button>
+          <div style={{ marginTop: '80px', marginBottom: 'auto', width: '100%', display: 'grid', gridTemplateColumns: 'auto', justifyContent: 'center', gap: '12px' }}>
+            {/* The two doors, as glass pills with the white round control — same as the home buttons. */}
+            {([
+              { key: 'dream', label: isKo ? '꿈 기억나요?' : 'Remember a dream?', primary: true,
+                go: () => { setIsEgoMode(false); setStep('record-place'); },
+                icon: <polyline points="9 18 15 12 9 6" /> },
+              { key: 'mood', label: isKo ? '무드만 확인' : 'Check your mood', primary: false,
+                go: () => { setIsEgoMode(true); setStep('ego-sleep'); },
+                icon: <polyline points="9 18 15 12 9 6" /> },
+            ] as const).map(b => (
+              <button
+                key={b.key}
+                onClick={b.go}
+                style={{
+                  position: 'relative', overflow: 'hidden',
+                  // The grid column is as wide as the longer label, so both pills match it
+                  // and their arrows line up.
+                  width: '100%', height: '56px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '28px',
+                  padding: '0 8px 0 26px',
+                  borderRadius: '30px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit', textAlign: 'left',
+                  color: '#2E3C33',
+                  fontSize: '15px', fontWeight: b.primary ? 700 : 600,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+                  backdropFilter: 'blur(22px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(22px) saturate(180%)',
+                  border: '1px solid rgba(255,255,255,0.85)',
+                  boxShadow: '0 8px 24px rgba(40,60,45,0.16), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.08)',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>{b.label}</span>
+                <span aria-hidden="true" style={{
+                  position: 'relative', width: '40px', height: '40px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.96)', boxShadow: '0 2px 8px rgba(40,60,45,0.14)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{b.icon}</svg>
+                </span>
+              </button>
+            ))}
 
             {readingsLeft !== null && readingsLeft <= 2 && (
               <p style={{ fontSize: 12, color: '#7d8f82', margin: '4px 0 0', textAlign: 'center', lineHeight: 1.5 }}>
@@ -868,33 +957,25 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           </div>
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   // ==============================
   // STEP: record-place
   // ==============================
   if (step === 'record-place') return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.4)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      zIndex: 21000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
-    }}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('blurred')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={33} />
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: '8px' }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
             {isKo ? '어떤 장소였나요?' : 'Where was it?'}
           </p>
-          <p style={{ fontSize: '12px', color: '#8BA390', textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
             {isKo ? '여러 개 선택할 수 있어요' : 'You can select multiple'}
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: '20px' }}>
             {placeOptions.map((opt) => {
               const label = isKo ? opt.label : opt.en;
               return (
@@ -925,7 +1006,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               style={{
                 width: '100%', padding: '12px 14px',
                 background: 'rgba(255,255,255,0.8)',
-                border: '1.5px solid #7AB382', borderRadius: '12px',
+                border: '1.5px solid rgba(46,60,51,0.30)', borderRadius: '12px',
                 fontSize: '14px', color: '#4A5D4E',
                 fontFamily: 'inherit', outline: 'none',
                 boxSizing: 'border-box', marginBottom: '16px',
@@ -933,49 +1014,28 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             />
           )}
 
-          <button
-            onClick={() => setStep('record-person')}
-            disabled={selectedPlaces.length === 0 && !customPlace}
-            style={{
-              width: '100%', padding: '14px',
-              background: (selectedPlaces.length > 0 || customPlace) ? '#4A5D4E' : 'rgba(0,0,0,0.1)',
-              color: '#fff', border: 'none', borderRadius: '14px',
-              fontSize: '14px', fontWeight: 700,
-              cursor: (selectedPlaces.length > 0 || customPlace) ? 'pointer' : 'not-allowed',
-              marginTop: '8px',
-            }}
-          >
-            {isKo ? '다음' : 'Next'}
-          </button>
+          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('record-person')} disabled={selectedPlaces.length === 0 && !customPlace} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   // ==============================
   // STEP: record-person
   // ==============================
   if (step === 'record-person') return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.4)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      zIndex: 21000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
-    }}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('record-place')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={66} />
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: '8px' }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
             {isKo ? '누가 나왔나요?' : 'Who appeared?'}
           </p>
-          <p style={{ fontSize: '12px', color: '#8BA390', textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
             {isKo ? '여러 명 선택할 수 있어요' : 'You can select multiple'}
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: '20px' }}>
             {personOptions.map((opt) => {
               const label = isKo ? opt.label : opt.en;
               return (
@@ -1006,7 +1066,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               style={{
                 width: '100%', padding: '12px 14px',
                 background: 'rgba(255,255,255,0.8)',
-                border: '1.5px solid #7AB382', borderRadius: '12px',
+                border: '1.5px solid rgba(46,60,51,0.30)', borderRadius: '12px',
                 fontSize: '14px', color: '#4A5D4E',
                 fontFamily: 'inherit', outline: 'none',
                 boxSizing: 'border-box', marginBottom: '16px',
@@ -1014,49 +1074,28 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             />
           )}
 
-          <button
-            onClick={() => setStep('record-scene')}
-            disabled={selectedPersons.length === 0 && !customPerson}
-            style={{
-              width: '100%', padding: '14px',
-              background: (selectedPersons.length > 0 || customPerson) ? '#4A5D4E' : 'rgba(0,0,0,0.1)',
-              color: '#fff', border: 'none', borderRadius: '14px',
-              fontSize: '14px', fontWeight: 700,
-              cursor: (selectedPersons.length > 0 || customPerson) ? 'pointer' : 'not-allowed',
-              marginTop: '8px',
-            }}
-          >
-            {isKo ? '다음' : 'Next'}
-          </button>
+          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('record-scene')} disabled={selectedPersons.length === 0 && !customPerson} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   // ==============================
   // STEP: record-scene
   // ==============================
   if (step === 'record-scene') return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.4)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      zIndex: 21000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '20px',
-    }}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('record-person')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={100} />
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: '8px' }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
             {isKo ? '무엇을 하고 있었나요?' : 'What were you doing?'}
           </p>
-          <p style={{ fontSize: '12px', color: '#8BA390', textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
             {isKo ? '핵심 장면을 짧게 적어주세요' : 'Briefly describe the key scene'}
           </p>
 
-          <div style={{ position: 'relative', marginBottom: '20px' }}>
+          <div style={{ position: 'relative', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: 0 }}>
             <textarea
               value={isRecordingScene ? (isKo ? '음성 인식 중...' : 'Listening...') : sceneText}
               onChange={e => setSceneText(e.target.value)}
@@ -1065,7 +1104,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 : 'e.g. I was being chased, then suddenly I could fly.'}
               disabled={isRecordingScene}
               style={{
-                width: '100%', height: '110px',
+                width: '100%', height: '280px',
                 background: 'rgba(255,255,255,0.65)',
                 border: '1.5px solid rgba(255,255,255,0.9)',
                 borderRadius: '14px', padding: '14px', paddingBottom: '44px',
@@ -1074,7 +1113,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 resize: 'none', boxSizing: 'border-box',
                 transition: 'border-color 0.2s',
               }}
-              onFocus={e => { e.target.style.borderColor = '#7AB382'; }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(46,60,51,0.30)'; }}
               onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.9)'; }}
             />
             {canUseVoice && (
@@ -1088,8 +1127,8 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 position: 'absolute', bottom: '10px', right: '10px',
                 width: '32px', height: '32px', borderRadius: '50%',
                 border: 'none',
-                background: isRecordingScene ? 'rgba(255,68,68,0.12)' : 'rgba(122,179,130,0.15)',
-                color: isRecordingScene ? '#ff4444' : '#7AB382',
+                background: isRecordingScene ? 'rgba(255,68,68,0.12)' : 'rgba(255,255,255,0.85)',
+                color: isRecordingScene ? '#ff4444' : '#4A5D4E',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.2s',
               }}
@@ -1108,20 +1147,10 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             )}
           </div>
 
-          <button
-            onClick={handleFinishRecord}
-            style={{
-              width: '100%', padding: '14px',
-              background: '#4A5D4E',
-              color: '#fff', border: 'none', borderRadius: '14px',
-              fontSize: '14px', fontWeight: 700, cursor: 'pointer',
-            }}
-          >
-            {isKo ? '카드 열기' : 'Reveal card'}
-          </button>
+          <NextButton label={isKo ? '카드 열기' : 'Reveal card'} onClick={handleFinishRecord} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   // ==============================
@@ -1158,39 +1187,38 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   // ==============================
   // STEP: ego-sleep / ego-stress / ego-free — condition check-in
   // ==============================
-  const egoBackdrop = { position: 'fixed' as const, inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', zIndex: 21000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' };
-
+  
   const EgoChip = ({ label, value, setter, svg }: { label: string; value: string; setter: (v: string) => void; svg: React.ReactNode }) => (
     <button
       onClick={() => setter(label)}
       style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '12px 16px', borderRadius: 20,
-        background: value === label ? '#4A5D4E' : 'rgba(255,255,255,0.6)',
-        color: value === label ? '#fff' : '#4A5D4E',
-        border: value === label ? 'none' : '1px solid rgba(255,255,255,0.9)',
-        fontSize: 13, fontWeight: value === label ? 600 : 400,
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '17px 24px', borderRadius: 30,
+        background: value === label ? 'rgba(255,255,255,0.96)' : 'rgba(255,255,255,0.55)',
+        color: value === label ? '#2E3C33' : '#4A5D4E',
+        border: value === label ? '1.5px solid rgba(46,60,51,0.32)' : '1.5px solid rgba(255,255,255,0.9)',
+        fontSize: 17, fontWeight: value === label ? 600 : 400,
         cursor: 'pointer', transition: 'all 0.2s',
-        boxShadow: value === label ? '0 6px 14px rgba(74,93,78,0.25)' : '0 3px 8px rgba(0,0,0,0.04)',
+        boxShadow: value === label ? '0 6px 16px rgba(40,60,45,0.14)' : '0 3px 8px rgba(0,0,0,0.04)',
       }}
     >
-      <span style={{ display: 'flex', color: value === label ? '#fff' : '#7AB382' }}>{svg}</span>
+      <span style={{ display: 'flex', color: '#7AB382' }}>{svg}</span>
       {label}
     </button>
   );
 
   if (step === 'ego-sleep') return (
-    <div style={egoBackdrop}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('blurred')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={33} />
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: 8 }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: 12 }}>
             {isKo ? '간밤의 수면은 어땠나요?' : 'How did you sleep last night?'}
           </p>
-          <p style={{ fontSize: 13, color: '#8BA390', textAlign: 'center', marginBottom: 28, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 14, color: '#7d8f82', textAlign: 'center', marginBottom: 32, lineHeight: 1.5 }}>
             {isKo ? '무의식의 에너지가 얼마나 충전되었는지 확인합니다' : 'Check how recharged your unconscious energy is'}
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 28 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: 0 }}>
             {([
               { label: isKo ? '아주 푹 잤어요' : 'Slept great', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> },
               { label: isKo ? '평범했어요' : 'Average', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> },
@@ -1200,29 +1228,24 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               <EgoChip key={o.label} label={o.label} value={selectedSleep} setter={setSelectedSleep} svg={o.svg} />
             ))}
           </div>
-          <button
-            onClick={() => setStep('ego-stress')}
-            disabled={!selectedSleep}
-            style={{ width: '100%', padding: '15px', borderRadius: 16, background: selectedSleep ? '#4A5D4E' : 'rgba(74,93,78,0.2)', color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: selectedSleep ? 'pointer' : 'default', boxShadow: selectedSleep ? '0 8px 20px rgba(74,93,78,0.2)' : 'none' }}>
-            {isKo ? '다음' : 'Next'}
-          </button>
+          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('ego-stress')} disabled={!selectedSleep} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   if (step === 'ego-stress') return (
-    <div style={egoBackdrop}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('ego-sleep')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={66} />
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: 8 }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: 12 }}>
             {isKo ? '현재 체감하는 스트레스는?' : "What's your current stress level?"}
           </p>
-          <p style={{ fontSize: 13, color: '#8BA390', textAlign: 'center', marginBottom: 28, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 14, color: '#7d8f82', textAlign: 'center', marginBottom: 32, lineHeight: 1.5 }}>
             {isKo ? '그림자(Shadow)가 억압하고 있는 무게를 확인합니다' : 'Check the weight your Shadow is suppressing'}
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 28 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: 0 }}>
             {([
               { label: isKo ? '아주 가벼움' : 'Very light', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
               { label: isKo ? '적당한 긴장감' : 'Some tension', svg: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> },
@@ -1232,36 +1255,31 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               <EgoChip key={o.label} label={o.label} value={selectedStress} setter={setSelectedStress} svg={o.svg} />
             ))}
           </div>
-          <button
-            onClick={() => setStep('ego-free')}
-            disabled={!selectedStress}
-            style={{ width: '100%', padding: '15px', borderRadius: 16, background: selectedStress ? '#4A5D4E' : 'rgba(74,93,78,0.2)', color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: selectedStress ? 'pointer' : 'default', boxShadow: selectedStress ? '0 8px 20px rgba(74,93,78,0.2)' : 'none' }}>
-            {isKo ? '다음' : 'Next'}
-          </button>
+          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('ego-free')} disabled={!selectedStress} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   if (step === 'ego-free') return (
-    <div style={egoBackdrop}>
+    <SkyBackdrop>
       <Container onBack={() => setStep('ego-stress')} onClose={onClose}>
-        <div style={{ width: '100%' }}>
+        <div style={stepBody}>
           <ProgressBar pct={100} />
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#4A5D4E', textAlign: 'center', marginBottom: 8 }}>
+          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: 12 }}>
             {isKo ? '지금 느껴지는 감정을 적어보세요' : 'Write about what you\'re feeling right now'}
           </p>
-          <p style={{ fontSize: 13, color: '#8BA390', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 14, color: '#7d8f82', textAlign: 'center', marginBottom: 24, lineHeight: 1.5 }}>
             {isKo ? '감정의 원인이나 몸의 감각도 함께 적어도 좋아요 (선택)' : 'You can also describe the cause or a physical sensation (optional)'}
           </p>
-          <div style={{ position: 'relative', marginBottom: 20 }}>
+          <div style={{ position: 'relative', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: 0 }}>
             <textarea
               value={isRecordingEgo ? (isKo ? '음성 인식 중...' : 'Listening...') : egoFreeText}
               onChange={e => setEgoFreeText(e.target.value)}
               placeholder={isKo ? '예: 오늘 중요한 회의가 있어서 명치가 답답하다.' : 'e.g. Big meeting today, feeling tightness in my chest.'}
               disabled={isRecordingEgo}
-              rows={4}
-              style={{ width: '100%', borderRadius: 14, border: '1.5px solid rgba(122,179,130,0.3)', background: 'rgba(255,255,255,0.7)', padding: '14px 16px', paddingBottom: '44px', fontSize: 14, lineHeight: 1.7, color: '#4A5D4E', resize: 'none', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+              rows={9}
+              style={{ width: '100%', borderRadius: 14, border: '1.5px solid rgba(255,255,255,0.9)', background: 'rgba(255,255,255,0.65)', padding: '14px 16px', paddingBottom: '44px', fontSize: 14, lineHeight: 1.7, color: '#4A5D4E', resize: 'none', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
             />
             {canUseVoice && (
             <button
@@ -1274,8 +1292,8 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
                 position: 'absolute', bottom: '10px', right: '10px',
                 width: '32px', height: '32px', borderRadius: '50%',
                 border: 'none',
-                background: isRecordingEgo ? 'rgba(255,68,68,0.12)' : 'rgba(122,179,130,0.15)',
-                color: isRecordingEgo ? '#ff4444' : '#7AB382',
+                background: isRecordingEgo ? 'rgba(255,68,68,0.12)' : 'rgba(255,255,255,0.85)',
+                color: isRecordingEgo ? '#ff4444' : '#4A5D4E',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.2s',
               }}
@@ -1293,15 +1311,10 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             </button>
             )}
           </div>
-          <button
-            onClick={handleFinishEgo}
-            style={{ width: '100%', padding: '15px', borderRadius: 16, background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)', color: '#fff', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 20px rgba(122,179,130,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            {isKo ? '카드 열기' : 'Reveal card'}
-          </button>
+          <NextButton label={isKo ? '카드 열기' : 'Reveal card'} onClick={handleFinishEgo} />
         </div>
       </Container>
-    </div>
+    </SkyBackdrop>
   );
 
   // ==============================
