@@ -6090,7 +6090,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               * take there anyway.
               */}
             <p style={{
-              fontSize: language === 'ko' ? '16px' : '26px',
+              fontSize: language === 'ko' ? '24px' : '40px',
               fontWeight: language === 'ko' ? 500 : 400,
               color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
               letterSpacing: language === 'ko' ? '-0.5px' : '0',
