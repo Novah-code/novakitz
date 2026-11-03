@@ -98,42 +98,61 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
   const PINK = '#EDA3BC';
   const ko = language === 'ko';
   const displayFont = ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  /*
+   * A window, not a page: a dimmed backdrop and a framed card that carries the
+   * same sky as the screens around it, so what is inside is the full-screen
+   * design in a frame. Tapping outside closes it.
+   */
   const shell = (children: React.ReactNode) => (
     <div
+      onClick={onClose}
       style={{
-        position: 'fixed', inset: 0,
-        backgroundImage: 'var(--home-sky-day)',
-        backgroundColor: '#F4EEE5',
-        zIndex: 20500,
-        display: 'flex', justifyContent: 'center',
-        overflowY: 'auto',
+        position: 'fixed', inset: 0, zIndex: 20500,
+        background: 'rgba(60,50,70,0.32)',
+        backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '20px',
         fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
         color: INK,
       }}
     >
-      <div className="home-scene__grain" aria-hidden="true" />
-      {children}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative', overflow: 'hidden',
+          width: '100%', maxWidth: 400, maxHeight: '100%', overflowY: 'auto',
+          boxSizing: 'border-box',
+          borderRadius: 36,
+          backgroundImage: 'var(--home-sky-day)',
+          backgroundColor: '#F4EEE5',
+          border: '1px solid rgba(255,255,255,0.85)',
+          boxShadow: '0 24px 60px rgba(40,30,60,0.28), inset 0 1px 0 rgba(255,255,255,0.9)',
+        }}
+      >
+        <div className="home-scene__grain" aria-hidden="true" />
+        {children}
+      </div>
     </div>
   );
 
   if (loading || !streakData) {
     return shell(
-      <p style={{ position: 'relative', zIndex: 2, alignSelf: 'center', fontSize: 15, opacity: 0.6 }}>
+      <p style={{ position: 'relative', zIndex: 2, margin: 0, padding: '60px 20px', textAlign: 'center', fontSize: 15, opacity: 0.6 }}>
         {language === 'ko' ? '로딩 중...' : 'Loading...'}
       </p>
     );
   }
 
   const target = nextMilestone(streakData.currentStreak);
-  const RING = 168;
-  const R = 74;
+  const RING = 148;
+  const R = 65;
   const CIRC = 2 * Math.PI * R;
 
   return shell(
     <div style={{
       position: 'relative', zIndex: 2,
-      width: '100%', maxWidth: '520px', boxSizing: 'border-box',
-      padding: 'calc(env(safe-area-inset-top, 0px) + 68px) 22px calc(env(safe-area-inset-bottom, 0px) + 28px)',
+      width: '100%', boxSizing: 'border-box',
+      padding: '68px 20px 32px',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
       {/* Share and close: white round controls, top right, like the gear. */}
@@ -141,7 +160,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         onClick={handleShare}
         aria-label={t.share}
         style={{
-          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: '66px',
+          position: 'absolute', top: 14, right: 64,
           width: 40, height: 40, padding: 0, borderRadius: '50%',
           background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
           boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: INK, cursor: 'pointer',
@@ -159,7 +178,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         onClick={onClose}
         aria-label={t.close}
         style={{
-          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: '16px',
+          position: 'absolute', top: 14, right: 14,
           width: 40, height: 40, padding: 0, borderRadius: '50%',
           background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
           boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: INK, cursor: 'pointer',
@@ -171,7 +190,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
 
       {showCopied && (
         <div style={{
-          position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 62px)', right: '16px', zIndex: 3,
+          position: 'absolute', top: 62, right: 14, zIndex: 3,
           background: 'rgba(255,255,255,0.94)', color: INK, padding: '8px 16px', borderRadius: 16,
           fontSize: '0.85rem', boxShadow: '0 4px 12px rgba(40,60,45,0.16)',
         }}>
@@ -179,7 +198,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         </div>
       )}
 
-      <p style={{ margin: 0, textAlign: 'center', lineHeight: 1.25, fontFamily: displayFont, fontSize: ko ? 24 : 40, fontWeight: ko ? 500 : 400, letterSpacing: ko ? '-0.5px' : 0 }}>
+      <p style={{ margin: 0, textAlign: 'center', lineHeight: 1.25, fontFamily: displayFont, fontSize: ko ? 22 : 36, fontWeight: ko ? 500 : 400, letterSpacing: ko ? '-0.5px' : 0 }}>
         {t.title}
       </p>
 
@@ -193,7 +212,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
       </p>
 
       {/* Ring */}
-      <div style={{ position: 'relative', width: RING, height: RING, marginTop: 'clamp(28px, 7vh, 64px)' }}>
+      <div style={{ position: 'relative', width: RING, height: RING, marginTop: 30 }}>
         <svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`} style={{ transform: 'rotate(-90deg)' }}>
           <circle cx={RING / 2} cy={RING / 2} r={R} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="10" />
           <circle
@@ -203,15 +222,15 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
           />
         </svg>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-          <div style={{ fontFamily: displayFont, fontSize: 60, fontWeight: 400, lineHeight: 1 }}>{streakData.currentStreak}</div>
+          <div style={{ fontFamily: displayFont, fontSize: 52, fontWeight: 400, lineHeight: 1 }}>{streakData.currentStreak}</div>
           <div style={{ fontSize: 13, color: '#7d8f82', marginTop: 6 }}>/ {target}</div>
         </div>
       </div>
 
       {/* Week */}
       <div style={{
-        width: '100%', marginTop: 'clamp(28px, 6vh, 52px)',
-        display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6,
+        width: '100%', marginTop: 34,
+        display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4,
       }}>
         {streakData.weekDays.map((day, idx) => (
           <div key={idx} style={{ textAlign: 'center' }}>
@@ -219,7 +238,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
               {day.day}
             </div>
             <div style={{
-              width: 42, height: 42, borderRadius: '50%', margin: '0 auto',
+              width: 38, height: 38, borderRadius: '50%', margin: '0 auto',
               background: day.completed ? PINK : 'rgba(255,255,255,0.55)',
               border: '1px solid rgba(255,255,255,0.8)',
               boxShadow: day.completed ? '0 4px 12px rgba(237,163,188,0.35)' : 'none',
