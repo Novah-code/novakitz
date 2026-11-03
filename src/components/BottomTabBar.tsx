@@ -27,8 +27,15 @@
 export type TabId = 'today' | 'journal' | 'insights';
 export type SubId = 'history' | 'calendar' | 'insights' | 'monthly';
 
-/** Height of the bar's own row, above the home indicator. The panels shrink by this. */
-export const TAB_BAR_HEIGHT = 62;
+/** Height of the capsule itself. */
+const CAPSULE_HEIGHT = 64;
+/** Gap between the capsule and the home indicator. */
+const CAPSULE_GAP = 10;
+/**
+ * Space the bar reserves above the home indicator: the capsule, the gap under
+ * it, and a little air on top. The panels shrink by this.
+ */
+export const TAB_BAR_HEIGHT = CAPSULE_HEIGHT + CAPSULE_GAP + 10;
 /** Height the floating switch takes when it is showing, including its gap. */
 export const SUB_SWITCH_SPACE = 56;
 
@@ -46,7 +53,9 @@ const LABELS = {
 } as const;
 
 const INK = 'var(--matcha-dark, #4a6741)';
-const SAGE = 'var(--sage, #6f8574)';
+// Darker than the app's usual sage: the labels sit on glass over a bright sky,
+// and at 10.5px the lighter tone read as washed out.
+const SAGE = '#566b5b';
 
 function Icon({ tab }: { tab: TabId }) {
   const common = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true };
@@ -119,17 +128,17 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             position: 'fixed',
             left: '50%',
             transform: 'translateX(-50%)',
-            bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 10}px)`,
+            bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 4}px)`,
             zIndex: 10003,
             display: 'flex',
             gap: '2px',
             padding: '3px',
             borderRadius: '999px',
-            background: 'rgba(250, 248, 240, 0.88)',
-            backdropFilter: 'blur(18px) saturate(160%)',
-            WebkitBackdropFilter: 'blur(18px) saturate(160%)',
-            border: '1px solid rgba(92, 112, 97, 0.16)',
-            boxShadow: '0 4px 14px rgba(40, 60, 45, 0.10)',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(244,241,231,0.78) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            boxShadow: '0 6px 18px rgba(40, 60, 45, 0.14), inset 0 1px 0 rgba(255,255,255,0.95)',
           }}
         >
           {pair.map((p) => {
@@ -163,22 +172,45 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
         </div>
       )}
 
+      {/*
+        A capsule that floats above the content rather than a strip fixed to the
+        edge — the shape in the reference (Opal). It is glass, so what scrolls
+        under it stays faintly visible, and the active tab is a raised pill that
+        fills its slot, not just a tinted icon.
+      */}
       <nav
         aria-label={language === 'ko' ? '주요 메뉴' : 'Main'}
         style={{
           position: 'fixed',
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: `calc(env(safe-area-inset-bottom, 0px) + ${CAPSULE_GAP}px)`,
           zIndex: 10002,
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          background: 'rgba(250, 248, 240, 0.86)',
-          backdropFilter: 'blur(22px) saturate(170%)',
-          WebkitBackdropFilter: 'blur(22px) saturate(170%)',
-          borderTop: '1px solid rgba(92, 112, 97, 0.14)',
+          display: 'flex',
+          justifyContent: 'center',
+          padding: '0 18px',
+          pointerEvents: 'none',
         }}
       >
-        <div style={{ display: 'flex', maxWidth: '520px', margin: '0 auto', height: `${TAB_BAR_HEIGHT}px` }}>
+        <div
+          style={{
+            pointerEvents: 'auto',
+            display: 'flex',
+            gap: '4px',
+            width: '100%',
+            maxWidth: '420px',
+            height: `${CAPSULE_HEIGHT}px`,
+            padding: '6px',
+            boxSizing: 'border-box',
+            borderRadius: `${CAPSULE_HEIGHT / 2}px`,
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(244,241,231,0.62) 100%)',
+            backdropFilter: 'blur(26px) saturate(190%)',
+            WebkitBackdropFilter: 'blur(26px) saturate(190%)',
+            border: '1px solid rgba(255, 255, 255, 0.75)',
+            boxShadow:
+              '0 12px 32px rgba(40, 60, 45, 0.20), 0 2px 6px rgba(40, 60, 45, 0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.10)',
+          }}
+        >
           {tabs.map((tab) => {
             const on = active === tab;
             return (
@@ -194,31 +226,25 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '3px',
-                  border: 'none',
-                  background: 'transparent',
+                  border: on ? '1px solid rgba(255,255,255,0.9)' : '1px solid transparent',
+                  borderRadius: `${(CAPSULE_HEIGHT - 12) / 2}px`,
                   cursor: 'pointer',
                   color: on ? INK : SAGE,
-                  opacity: on ? 1 : 0.78,
+                  background: on
+                    ? 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(232,241,232,0.92) 100%)'
+                    : 'transparent',
+                  boxShadow: on
+                    ? '0 3px 10px rgba(40, 60, 45, 0.14), inset 0 1px 0 rgba(255,255,255,1)'
+                    : 'none',
                   fontFamily: 'inherit',
                   WebkitTapHighlightColor: 'transparent',
-                  transition: 'color 0.2s, opacity 0.2s',
+                  transition: 'background 0.25s, box-shadow 0.25s, color 0.2s',
                 }}
               >
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '46px',
-                    height: '28px',
-                    borderRadius: '14px',
-                    background: on ? 'rgba(127, 176, 105, 0.2)' : 'transparent',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  <Icon tab={tab} />
+                <Icon tab={tab} />
+                <span style={{ fontSize: '10.5px', fontWeight: on ? 600 : 500, letterSpacing: '0.04em', opacity: on ? 1 : 0.85 }}>
+                  {t[tab]}
                 </span>
-                <span style={{ fontSize: '10.5px', fontWeight: on ? 600 : 500, letterSpacing: '0.04em' }}>{t[tab]}</span>
               </button>
             );
           })}
