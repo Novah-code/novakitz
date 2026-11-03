@@ -656,15 +656,12 @@ export default function SimpleDreamInterfaceWithAuth() {
   return (
     <>
       {/*
-        Account button (top right). It opens the drawer, which now only holds
-        what is about the account — the places moved to the bottom tab bar.
+        Settings gear (top right). It opens the drawer, which now only holds what
+        is about the account — the places moved to the bottom tab bar.
       */}
       <AccountButton
         language={language}
         open={menuOpen}
-        signedIn={!!user}
-        avatarUrl={avatarInfo.url}
-        initial={avatarInfo.initial}
         onClick={() => setMenuOpen(!menuOpen)}
       />
 
