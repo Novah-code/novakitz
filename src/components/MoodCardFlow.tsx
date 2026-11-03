@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
@@ -1505,100 +1506,103 @@ export function MoodCardJournalView({
   const affirmation = arcanaAffirmations[arcanaIdForView]?.[isKo ? 'ko' : 'en'] ?? (isKo ? '오늘도 당신은 충분합니다.' : 'You are enough today.');
   const recordKeywords = [places, persons].filter(Boolean).join(', ') || (scene ? scene.slice(0, 40) : '');
 
-  return (
-    /*
-     * Opaque, not frosted.
-     *
-     * The scrim and the sheet were both translucent and both relied on a
-     * backdrop-filter to blur what showed through. In this webview that blur
-     * does not reliably composite, so nothing was blurred and the screen behind
-     * came through at full clarity — the wordmark, the search field and the
-     * Card/List/Timeline tabs sat on top of the person's own dream, unreadable.
-     * The same fault has now taken out the mood card, the dawn sky, the
-     * Reflection CTA and this.
-     *
-     * A sheet that covers 90% of the screen has nothing to gain from showing
-     * what is under it, so it simply does not.
-     */
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(45,58,48,0.5)', zIndex: 21000 }}>
+  const pebble = getEmotionPebble(emotion);
+  const recordText = [places ? `${isKo ? '장소' : 'Place'}: ${places}` : '', persons ? `${isKo ? '등장' : 'Who'}: ${persons}` : '', scene || ''].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)');
+
+  /*
+   * The saved record, in the same design as the screen that made it: the home
+   * sky, a glass card per section, the chosen pebble small inside the original
+   * record. It was a white sheet; the old note about opaque-versus-frosted still
+   * holds, and a full-screen sky is opaque too.
+   */
+  const view = (
+    <SkyBackdrop>
+      {/* Share, Edit, close: round white controls (and one pill), top right. */}
+      <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 16, display: 'flex', gap: 10, alignItems: 'center', zIndex: 3 }}>
+        {onShare && (
+          <button onClick={onShare} aria-label={isKo ? '공유' : 'Share'} style={{ ...roundControl, position: 'static' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          </button>
+        )}
+        {onEdit && (
+          <button onClick={onEdit} style={{ ...roundControl, position: 'static', width: 'auto', padding: '0 18px', borderRadius: 20, fontSize: 14, fontWeight: 700, fontFamily: 'inherit' }}>
+            {isKo ? '수정' : 'Edit'}
+          </button>
+        )}
+        <button onClick={onClose} aria-label={isKo ? '닫기' : 'Close'} style={{ ...roundControl, position: 'static' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, width: '100%', height: '90%',
-        background: '#FBFCFB',
-        borderRadius: '32px 32px 0 0', borderTop: '1px solid rgba(255,255,255,1)',
-        display: 'flex', flexDirection: 'column', boxShadow: '0 -10px 40px rgba(74,93,78,0.12)', overflow: 'hidden',
+        position: 'relative', zIndex: 2, width: '100%', maxWidth: '520px', boxSizing: 'border-box',
+        padding: 'calc(env(safe-area-inset-top, 0px) + 68px) 22px calc(env(safe-area-inset-bottom, 0px) + 40px)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
-        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', width: 40, height: 4, background: 'rgba(0,0,0,0.1)', borderRadius: 2, zIndex: 40 }} />
+        <p style={{ ...headingStyle(isKo, 40, 24), margin: 0 }}>{isKo ? '오늘의 기분' : "Today's Mood"}</p>
+        <div style={{ fontSize: 13, color: '#7d8f82', margin: '10px 0 26px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {nickname && (
+            <>by <span style={{ color: '#4A5D4E', fontWeight: 500 }}>{nickname}</span><span>•</span></>
+          )}
+          <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{dateStr}</span>
+        </div>
 
-        {/* Action bar with share / edit / close */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', padding: '20px 20px', boxSizing: 'border-box', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 30 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {onShare && (
-              <button onClick={onShare} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-              </button>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {onEdit && (
-              <button onClick={onEdit} style={{ padding: '6px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', fontSize: 12, fontWeight: 600, color: '#4A5D4E', cursor: 'pointer', fontFamily: 'Georgia, serif' }}>
-                {isKo ? '수정' : 'Edit'}
-              </button>
-            )}
-            <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#4A5D4E' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
+        <div style={{
+          width: 110, height: 150, borderRadius: 22, flexShrink: 0,
+          background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`,
+          border: '2px solid rgba(255,255,255,0.85)',
+          boxShadow: '8px 10px 22px rgba(74,93,78,0.16), -4px -4px 14px rgba(255,255,255,0.8), inset 3px 3px 8px rgba(255,255,255,0.7)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+        }}>
+          <div style={{ width: 54, height: 70, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
+        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: 1.2, color: '#7d8f82', fontWeight: 700, textAlign: 'center', margin: '16px 0 18px' }}>
+          {card.arcana} · {card.name.toUpperCase()}
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 30, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {dedupeTags(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name]).map(tag => (
+            <span key={tag} style={{ fontFamily: 'monospace', fontSize: 12, padding: '6px 12px', borderRadius: 14, background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', color: '#4A5D4E', fontWeight: 700 }}>#{tag}</span>
+          ))}
+        </div>
+
+        <div style={{ width: '100%', marginBottom: 22 }}>
+          <div style={sectionLabel}>ORIGINAL RECORD</div>
+          <div style={{ ...glassCard, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+            <div aria-hidden="true" style={{
+              width: 34, height: 34, flexShrink: 0, marginTop: 3,
+              background: pebble.background, borderRadius: pebble.borderRadius,
+              border: '1px solid rgba(255,255,255,0.8)',
+              boxShadow: '2px 2px 6px rgba(0,0,0,0.07), -2px -2px 6px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)',
+            }} />
+            <div style={{ fontSize: 15, lineHeight: 1.7, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left', minWidth: 0 }}>{recordText}</div>
           </div>
         </div>
 
-        {/* Visual header — tarot card only */}
-        <div style={{ width: '100%', height: '38%', position: 'relative', flexShrink: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: 12, background: `radial-gradient(circle at 50% 100%, ${card.from}55 0%, transparent 70%)`, borderBottom: '1px solid rgba(255,255,255,0.5)', paddingTop: 28 }}>
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 220, height: 160, background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 70%)', filter: 'blur(20px)', zIndex: 0 }} />
-          <div style={{ width: 100, height: 135, borderRadius: 22, background: `linear-gradient(145deg, ${card.from}, ${card.mid}, ${card.to})`, border: '2px solid rgba(255,255,255,0.85)', boxShadow: `10px 10px 25px rgba(74,93,78,0.12), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 8px rgba(255,255,255,1), inset -3px -3px 10px ${card.from}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', zIndex: 1 }}>
-            <div style={{ width: 50, height: 65, borderRadius: '45% 55% 45% 55% / 55% 45% 55% 45%', background: `radial-gradient(ellipse at center, ${cardCore(card)} 0%, ${cardCore(card)}B3 55%, transparent 80%)`, filter: 'blur(2px)', opacity: 0.9 }} />
-          </div>
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#7AB382', fontWeight: 700, opacity: 0.9, textAlign: 'center', zIndex: 1 }}>{card.arcana} · {card.name.toUpperCase()}</div>
-        </div>
-
-        {/* Scrollable content */}
-        <div style={{ flex: 1, padding: '28px 24px 40px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-            {dedupeTags(keywords.length > 0 ? [emotion, ...keywords.slice(0, 2)] : [emotion, card.name]).map(tag => (
-              <span key={tag} style={{ fontFamily: 'monospace', fontSize: 11, padding: '4px 10px', borderRadius: 12, background: 'rgba(122,179,130,0.15)', color: '#4A5D4E', fontWeight: 700 }}>#{tag}</span>
-            ))}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 6px' }}>
-            <div style={{ width: 20, height: 20, borderRadius: getEmotionPebble(emotion).borderRadius, flexShrink: 0, background: getEmotionPebble(emotion).background, boxShadow: `2px 2px 5px rgba(0,0,0,0.08), -1px -1px 4px rgba(255,255,255,0.7)`, border: '1px solid rgba(255,255,255,0.8)' }} />
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 30, fontWeight: 700, margin: 0, color: '#2D3748' }}>Today&apos;s Mood</h1>
-          </div>
-          <div style={{ fontSize: 13, color: '#718096', marginBottom: 26, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {nickname && (
-              <>by <span style={{ color: '#4A5D4E', fontWeight: 500 }}>{nickname}</span><span>•</span></>
-            )}
-            <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{dateStr}</span>
-          </div>
-
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>ORIGINAL RECORD</div>
-          <div style={{ background: 'rgba(255,255,255,0.65)', borderRadius: 16, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 26, boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.5)' }}>
-            <div style={{ fontSize: 15, lineHeight: 1.7, fontWeight: 300, color: '#4A5D4E', whiteSpace: 'pre-line' }}>
-              {[places ? `${isKo ? '장소' : 'Place'}: ${places}` : '', persons ? `${isKo ? '등장' : 'Who'}: ${persons}` : '', scene || ''].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)')}
+        {analysis && (
+          <div style={{ width: '100%', marginBottom: 22 }}>
+            <div style={sectionLabel}>READING</div>
+            <div style={glassCard}>
+              <div style={{ fontSize: 15, lineHeight: 1.85, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left' }}>
+                {analysis.split(/(\*\*[^*]+\*\*)/).map((chunk, ci) =>
+                  chunk.startsWith('**') && chunk.endsWith('**')
+                    ? <strong key={ci} style={{ fontWeight: 700, color: '#2E3C33' }}>{chunk.slice(2, -2)}</strong>
+                    : <span key={ci}>{chunk}</span>
+                )}
+              </div>
             </div>
           </div>
+        )}
 
-          {analysis && (
-            <>
-              <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>READING</div>
-              <div style={{ paddingLeft: 20, borderLeft: '2px solid #7AB382', marginBottom: 26 }}>
-                <div style={{ fontSize: 15, lineHeight: 1.85, fontWeight: 300, color: '#4A5D4E', whiteSpace: 'pre-line' }}>{analysis}</div>
-              </div>
-            </>
-          )}
-
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 1, color: '#718096', marginBottom: 12, fontWeight: 700 }}>TODAY&apos;S AFFIRMATION</div>
-          <div style={{ background: 'rgba(255,255,255,0.65)', borderRadius: 16, padding: '18px 20px', border: '1px solid rgba(255,255,255,0.9)', marginBottom: 32, boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.5)', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, lineHeight: 1.75, color: '#4A5D4E', fontWeight: 300, fontStyle: 'italic', whiteSpace: 'pre-line' }}>{affirmation}</div>
+        <div style={{ width: '100%' }}>
+          <div style={sectionLabel}>TODAY&apos;S AFFIRMATION</div>
+          <div style={{ ...glassCard, textAlign: 'center' }}>
+            <div style={{ fontSize: 15, lineHeight: 1.8, color: '#4A5D4E', fontStyle: 'italic', whiteSpace: 'pre-line' }}>{affirmation}</div>
           </div>
         </div>
       </div>
-    </div>
+    </SkyBackdrop>
   );
+  // Above the shell's own controls (gear, tab bar), which live in a different stacking context.
+  return typeof document === 'undefined' ? view : createPortal(view, document.body);
 }
