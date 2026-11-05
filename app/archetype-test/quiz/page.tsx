@@ -4,7 +4,8 @@ import { goTo } from '../../../src/lib/platform';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ARCHETYPE_QUIZ_QUESTIONS, getQuizProgress } from '../../../src/lib/archetypeQuiz';
-import ArchetypeTestNav from '../../../src/components/ArchetypeTestNav';
+import ArchetypeShell, { Heading, PillButton, Progress, glass } from '../../../src/components/ArchetypeShell';
+import { INK, BASE, LIGHT, PINK, displayFont } from '../../../src/lib/skyUi';
 import '../../globals.css';
 
 export default function ArchetypeQuiz() {
@@ -79,206 +80,76 @@ export default function ArchetypeQuiz() {
     return null;
   }
 
+  const ko = language === 'ko';
+  const total = ARCHETYPE_QUIZ_QUESTIONS.length;
+
   return (
-    <>
-      <ArchetypeTestNav language={language} />
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
-        padding: 'clamp(1rem, 3vw, 2rem) clamp(0.5rem, 2vw, 1rem)'
-      }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {/* Header with Progress */}
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '2rem',
-          marginBottom: '2rem',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+    <ArchetypeShell
+      language={language}
+      onBack={currentQuestion > 0 ? handlePrevious : undefined}
+    >
+      <Progress pct={((currentQuestion + 1) / total) * 100} />
+      <p style={{ margin: '12px 0 22px', textAlign: 'center', fontSize: 13, letterSpacing: 0.4, color: LIGHT }}>
+        {ko ? `질문 ${currentQuestion + 1} / ${total}` : `Question ${currentQuestion + 1} / ${total}`}
+      </p>
+
+      <Heading ko={ko} size={32} koSize={22} style={{ lineHeight: ko ? 1.45 : 1.2 }}>
+        {question.question[language]}
+      </Heading>
+
+      <div style={{ display: 'grid', gap: 12, marginTop: 28 }}>
+        {question.options.map((option, index) => {
+          const on = selectedOption === index;
+          return (
             <button
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
+              key={index}
+              onClick={() => handleSelectOption(index)}
+              aria-pressed={on}
               style={{
-                padding: '8px 16px',
-                background: currentQuestion === 0 ? '#f3f4f6' : '#7FB069',
-                color: currentQuestion === 0 ? '#9ca3af' : 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                cursor: currentQuestion === 0 ? 'not-allowed' : 'pointer',
-                marginRight: '1rem'
+                ...glass,
+                width: '100%',
+                padding: '16px 18px',
+                borderRadius: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                fontSize: 15,
+                lineHeight: 1.55,
+                color: INK,
+                cursor: 'pointer',
+                ...(on ? { background: 'rgba(255,255,255,0.97)', border: `1.5px solid ${INK}` } : {}),
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
-              ← 이전
-            </button>
-            <div style={{
-              flex: 1,
-              height: '8px',
-              background: '#e5e7eb',
-              borderRadius: '4px',
-              overflow: 'hidden'
-            }}>
-              <div style={{
-                width: `${((currentQuestion + 1) / ARCHETYPE_QUIZ_QUESTIONS.length) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #7FB069 0%, #8BC34A 100%)',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-          </div>
-          <p style={{
-            fontSize: '14px',
-            color: '#6b7280',
-            textAlign: 'center',
-            margin: 0
-          }}>
-            {language === 'ko'
-              ? `질문 ${currentQuestion + 1} / ${ARCHETYPE_QUIZ_QUESTIONS.length}`
-              : `Question ${currentQuestion + 1} / ${ARCHETYPE_QUIZ_QUESTIONS.length}`}
-          </p>
-        </div>
-
-        {/* Question Card */}
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: 'clamp(1.5rem, 5vw, 3rem)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          marginBottom: '2rem'
-        }}>
-          {/* Question */}
-          <div style={{ marginBottom: '2rem' }}>
-            <div style={{
-              display: 'inline-block',
-              padding: '6px 12px',
-              background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.1) 0%, rgba(139, 195, 74, 0.1) 100%)',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '600',
-              color: '#7FB069',
-              marginBottom: '1rem'
-            }}>
-              Q{currentQuestion + 1}
-            </div>
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              lineHeight: '1.4',
-              margin: 0
-            }}>
-              {question.question[language]}
-            </h2>
-          </div>
-
-          {/* Options */}
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelectOption(index)}
+              <span
+                aria-hidden="true"
                 style={{
-                  width: '100%',
-                  padding: '20px',
-                  background: selectedOption === index
-                    ? 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%)'
-                    : 'white',
-                  border: `2px solid ${selectedOption === index ? '#7FB069' : '#e5e7eb'}`,
-                  borderRadius: '12px',
-                  fontSize: '15px',
-                  color: '#1f2937',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s ease',
-                  position: 'relative'
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  border: `1.5px solid ${on ? PINK : 'rgba(74,93,78,0.35)'}`,
+                  background: on ? PINK : 'transparent',
+                  boxShadow: on ? 'inset 0 0 0 4px rgba(255,255,255,0.95)' : 'none',
                 }}
-                onMouseEnter={(e) => {
-                  if (selectedOption !== index) {
-                    e.currentTarget.style.borderColor = 'rgba(127, 176, 105, 0.5)';
-                    e.currentTarget.style.background = 'rgba(249, 250, 251, 1)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (selectedOption !== index) {
-                    e.currentTarget.style.borderColor = '#e5e7eb';
-                    e.currentTarget.style.background = 'white';
-                  }
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {/* Radio Button */}
-                  <div style={{
-                    width: '20px',
-                    height: '20px',
-                    borderRadius: '50%',
-                    border: `2px solid ${selectedOption === index ? '#7FB069' : '#d1d5db'}`,
-                    marginRight: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    {selectedOption === index && (
-                      <div style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        background: '#7FB069'
-                      }} />
-                    )}
-                  </div>
-                  {/* Option Text */}
-                  <span style={{ flex: 1 }}>
-                    {option.text[language]}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Next Button */}
-        <button
-          onClick={handleNext}
-          disabled={selectedOption === null}
-          style={{
-            width: '100%',
-            padding: '16px',
-            background: selectedOption !== null
-              ? 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)'
-              : '#e5e7eb',
-            color: selectedOption !== null ? 'white' : '#9ca3af',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: selectedOption !== null ? 'pointer' : 'not-allowed',
-            boxShadow: selectedOption !== null ? '0 4px 12px rgba(127, 176, 105, 0.3)' : 'none',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          {isLastQuestion
-            ? (language === 'ko' ? '결과 보기' : 'See Results')
-            : (language === 'ko' ? '다음 질문' : 'Next Question')}
-        </button>
-
-        {/* Skip Note */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: '1.5rem',
-          fontSize: '13px',
-          color: '#9ca3af'
-        }}>
-          <p>
-            {language === 'ko'
-              ? '🔒 모든 답변은 익명으로 처리되며 외부에 공유되지 않습니다'
-              : '🔒 All answers are anonymous and not shared externally'}
-          </p>
-        </div>
+              />
+              <span style={{ flex: 1 }}>{option.text[language]}</span>
+            </button>
+          );
+        })}
       </div>
-    </div>
-    </>
+
+      <div style={{ marginTop: 28 }}>
+        <PillButton onClick={handleNext} disabled={selectedOption === null}>
+          {isLastQuestion ? (ko ? '결과 보기' : 'See Results') : (ko ? '다음 질문' : 'Next Question')}
+        </PillButton>
+      </div>
+
+      <p style={{ margin: '22px 0 0', textAlign: 'center', fontSize: 12.5, color: LIGHT }}>
+        {ko ? '모든 답변은 익명으로 처리되며 외부에 공유되지 않습니다' : 'All answers are anonymous and not shared externally'}
+      </p>
+    </ArchetypeShell>
   );
 }
