@@ -5988,7 +5988,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
 
-            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '4px' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '20px' }}>
             <div onClick={(e) => e.stopPropagation()} style={{
               width: '100%',
               maxWidth: PICKER_LAYOUT.maxWidth,
