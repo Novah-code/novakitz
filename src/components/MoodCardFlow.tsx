@@ -372,7 +372,7 @@ const SkyBackdrop = ({ children, onClick }: { children: React.ReactNode; onClick
       overflowY: 'auto',
     }}
   >
-    <div className="home-scene__grain" aria-hidden="true" />
+    <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />
     {children}
   </div>
   );

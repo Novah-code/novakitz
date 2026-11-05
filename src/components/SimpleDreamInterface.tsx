@@ -4384,7 +4384,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               overflowY: 'auto',
               overflowX: 'hidden'
             }}>
-              <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed' }} />
+              <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" style={{ position: 'fixed' }} />
               {/* Ambient blobs */}
               {/* Header */}
               <div style={{
@@ -4904,10 +4904,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 })}
                 {savedDreams.length === 0 && (
                   <div style={{
-                    position: 'absolute',
-                    top: '50%',
+                    // Centred on the screen. It was `absolute` inside the list, which is
+                    // taller than the screen, so on a phone the first line landed behind
+                    // the tab bar and the second was out of sight.
+                    position: 'fixed',
+                    top: '45%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'none',
                     textAlign: 'center',
                     color: '#64748b',
                     fontSize: '18px',

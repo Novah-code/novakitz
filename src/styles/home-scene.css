@@ -213,6 +213,28 @@
 }
 
 /*
+ * The same grain, drawn without a blend mode, for screens that scroll.
+ *
+ * `overlay` needs the sky underneath it to be in the same compositing group. On a
+ * full-screen panel that scrolls (Inner Journal, the calendar, profile, the mood
+ * flow) iOS keeps the panel's own background in a separate layer, so the grain
+ * blended with nothing and was laid on as a flat 60% grey: a muddy, speckled
+ * sky (seen on a phone, 2026-11-05). This version is light and dark specks with
+ * their own transparency, so it looks the same wherever it sits. Strength was
+ * matched to the overlay version by measurement on the same sky (high-frequency
+ * deviation 2.7 vs 2.9, in Chromium; not measured in WebKit).
+ */
+.home-scene__grain--flat {
+  opacity: 1;
+  mix-blend-mode: normal;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.2 0 0 0 -0.1'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.14 0 0 0 0.07'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23b)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.2 0 0 0 -0.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23c)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.14 0 0 0 0.07'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23d)'/%3E%3C/svg%3E");
+}
+
+/*
  * The tulip. The portal stays the same size as the landscape disc so the tap
  * target and the glow behind it are unchanged; the flower is drawn larger than
  * the portal (156%, which includes the 50px transparent margin the file now carries so its soft edge never meets the image boundary) because the file keeps a margin around the petals (the flower

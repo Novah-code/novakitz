@@ -729,7 +729,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       {/* Calendar Modal */}
       {showCalendar && user && (
         <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 20px 150px' }}>
-          <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed' }} />
+          <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it

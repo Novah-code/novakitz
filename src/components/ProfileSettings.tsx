@@ -316,7 +316,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         color: INK, fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
       }}
     >
-      <div className="home-scene__grain" aria-hidden="true" />
+      <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />
 
       <button onClick={onClose} aria-label={ko ? '닫기' : 'Close'} style={{ ...round, position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 16, zIndex: 3 }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>

@@ -108,9 +108,11 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
       */}
       {/*
         A dock under the switch and the bar, painted with the same sky as the
-        full-screen panels above it. `fixed` attachment makes the gradient cover
-        the viewport rather than the dock, so it lines up with the panel's own
-        and the bottom of the screen reads as one surface. It stops the home
+        full-screen panels above it. The sky is a viewport-tall layer pinned to the
+        dock's bottom edge, so it lines up with the panel's own and the bottom of
+        the screen reads as one surface. (`background-attachment: fixed` did this
+        on desktop but iOS ignores it, so the whole sky was squeezed into the dock
+        and showed as a butter-yellow band — seen on a phone, 2026-11-05.) It stops the home
         screen (its Mood and Dream buttons) showing through the gap the panels
         leave above the bar.
       */}
@@ -124,13 +126,21 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             bottom: 0,
             height: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + SUB_SWITCH_SPACE}px)`,
             zIndex: 10002,
-            backgroundImage: 'var(--home-sky-day)',
             backgroundColor: '#F4EEE5',
-            backgroundAttachment: 'fixed',
             overflow: 'hidden',
           }}
         >
-          <div className="home-scene__grain" aria-hidden="true" />
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: '100dvh',
+              backgroundImage: 'var(--home-sky-day)',
+            }}
+          />
+          <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />
         </div>
       )}
 
