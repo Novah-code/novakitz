@@ -62,7 +62,7 @@ const PICKER_LAYOUTS = {
   wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px', maxWidth: '100%' },
   // Two columns of four. 96px in a 320px-wide grid: at 76px in full-width columns the
   // pebbles floated apart and left a hole in the middle (윤아님 chose this size, 2026-11-03).
-  tall: { columns: 2, size: '96px', gap: '34px 18px', label: '14px', maxWidth: '320px' },
+  tall: { columns: 2, size: '80px', gap: '26px 20px', label: '13px', maxWidth: '300px' },
 } as const;
 const PICKER_LAYOUT = PICKER_LAYOUTS.tall;
 
@@ -5944,11 +5944,13 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               zIndex: 2,
               width: '100%', height: '100%',
               boxSizing: 'border-box',
-              padding: 'calc(env(safe-area-inset-top, 0px) + 78px) 24px calc(env(safe-area-inset-bottom, 0px) + 40px)',
+              padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px)',
               position: 'relative',
               textAlign: 'center',
               display: 'flex', flexDirection: 'column',
               overflowY: 'auto',
+              overscrollBehavior: 'contain',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
             {/*
@@ -5976,7 +5978,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             <p style={{
               fontSize: language === 'ko' ? '24px' : '40px',
               fontWeight: language === 'ko' ? 500 : 400,
-              color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
+              color: '#4A5D4E', marginBottom: '24px', marginTop: '10px',
               letterSpacing: language === 'ko' ? '-0.5px' : '0',
               fontFamily: language === 'ko'
                 ? "'S-CoreDream', sans-serif"
@@ -5985,7 +5987,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
 
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '4px' }}>
             <div onClick={(e) => e.stopPropagation()} style={{
               width: '100%',
               maxWidth: PICKER_LAYOUT.maxWidth,
