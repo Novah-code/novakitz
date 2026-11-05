@@ -85,20 +85,25 @@ export default function TodayMoodCard({ language, emotionKey, onChange }: TodayM
         }}
       >
         {/* The glow bleeding in from the corner, in the pebble's own light. */}
+        {/* The glow is clipped by its own layer: on iOS a blurred child escapes the rounded
+            corners of a parent that only has overflow: hidden, so the colour spilled out of the frame. */}
         <span
           aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: '-26px',
-            top: '-40px',
-            width: '150px',
-            height: '150px',
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${glow.light}88 0%, ${glow.light}00 70%)`,
-            filter: 'blur(6px)',
-            pointerEvents: 'none',
-          }}
-        />
+          style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', overflow: 'hidden', isolation: 'isolate', WebkitMaskImage: '-webkit-radial-gradient(white, black)', pointerEvents: 'none' }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              right: '-26px',
+              top: '-40px',
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${glow.light}88 0%, ${glow.light}00 70%)`,
+            }}
+          />
+          </span>
 
         {/*
           The pebble as the picker draws it — the pale fill, white rim and soft

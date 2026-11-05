@@ -247,20 +247,25 @@ export default function SettingsSheet(props: SettingsSheetProps) {
               boxShadow: '0 6px 20px rgba(40,60,45,0.10), inset 0 1px 0 #fff',
             }}
           >
+            {/* The glow is clipped by its own layer: on iOS a blurred child escapes the rounded
+                corners of a parent that only has overflow: hidden, so the colour spilled out of the frame. */}
             <span
               aria-hidden="true"
-              style={{
-                position: 'absolute',
-                right: '-30px',
-                bottom: '-48px',
-                width: '190px',
-                height: '190px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,184,150,0.70) 0%, rgba(210,176,255,0.40) 48%, rgba(210,176,255,0) 72%)',
-                filter: 'blur(8px)',
-                pointerEvents: 'none',
-              }}
-            />
+              style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', overflow: 'hidden', isolation: 'isolate', WebkitMaskImage: '-webkit-radial-gradient(white, black)', pointerEvents: 'none' }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  right: '-30px',
+                  bottom: '-48px',
+                  width: '190px',
+                  height: '190px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(255,184,150,0.70) 0%, rgba(210,176,255,0.40) 48%, rgba(210,176,255,0) 72%)',
+                }}
+              />
+              </span>
             <div style={{ position: 'relative' }}>
               <div style={{ fontSize: '17px', fontWeight: 600, color: INK }}>{isPremium ? t.proTitle : t.freeTitle}</div>
               <div style={{ marginTop: '4px', fontSize: '13.5px', lineHeight: 1.4, color: INK, opacity: 0.68, maxWidth: '88%' }}>

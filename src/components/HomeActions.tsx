@@ -95,22 +95,27 @@ export default function HomeActions({ language, onMood, onDream }: HomeActionsPr
         the body woke, and cool for the dream. They are the pebbles' own tones,
         so the two buttons read as part of the same family as what they open.
       */}
+      {/* The glow is clipped by its own layer: on iOS a blurred child escapes the rounded
+          corners of a parent that only has overflow: hidden, so the colour spilled out of the frame. */}
       <span
         aria-hidden="true"
-        style={{
-          position: 'absolute',
-          right: '-18px',
-          bottom: '-34px',
-          width: '104px',
-          height: '104px',
-          borderRadius: '50%',
-          background: kind === 'mood'
-            ? 'radial-gradient(circle, rgba(255,184,150,0.85) 0%, rgba(255,176,196,0.45) 45%, rgba(255,176,196,0) 72%)'
-            : 'radial-gradient(circle, rgba(184,166,255,0.80) 0%, rgba(160,200,255,0.42) 45%, rgba(160,200,255,0) 72%)',
-          filter: 'blur(6px)',
-          pointerEvents: 'none',
-        }}
-      />
+        style={{ position: 'absolute', inset: 0, borderRadius: 'inherit', overflow: 'hidden', isolation: 'isolate', WebkitMaskImage: '-webkit-radial-gradient(white, black)', pointerEvents: 'none' }}
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            right: '-18px',
+            bottom: '-34px',
+            width: '104px',
+            height: '104px',
+            borderRadius: '50%',
+            background: kind === 'mood'
+              ? 'radial-gradient(circle, rgba(255,184,150,0.85) 0%, rgba(255,176,196,0.45) 45%, rgba(255,176,196,0) 72%)'
+              : 'radial-gradient(circle, rgba(184,166,255,0.80) 0%, rgba(160,200,255,0.42) 45%, rgba(160,200,255,0) 72%)',
+          }}
+        />
+        </span>
       <span style={{ position: 'relative', display: 'flex', flexShrink: 0 }}>{kind === 'mood' ? <MoodIcon /> : <DreamIcon />}</span>
       <span style={{ position: 'relative', display: 'flex', flexDirection: 'column', lineHeight: 1.2, minWidth: 0, flex: 1 }}>
         <span style={{ fontSize: '15px', fontWeight: 600 }}>{kind === 'mood' ? t.mood : t.dream}</span>
