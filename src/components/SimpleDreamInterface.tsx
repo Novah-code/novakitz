@@ -27,6 +27,7 @@ import Toast, { ToastType } from './Toast';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
 import { EMOTIONS, emotionLabel } from '../lib/emotions';
+import AuraOrb from './AuraOrb';
 import { goTo } from '../lib/platform';
 import { authHeader } from '../lib/authHeader';
 
@@ -62,7 +63,7 @@ const PICKER_LAYOUTS = {
   wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px', maxWidth: '100%' },
   // Two columns of four. 96px in a 320px-wide grid: at 76px in full-width columns the
   // pebbles floated apart and left a hole in the middle (윤아님 chose this size, 2026-11-03).
-  tall: { columns: 2, size: '80px', gap: '26px 20px', label: '13px', maxWidth: '300px' },
+  tall: { columns: 2, size: '80px', gap: '36px 20px', label: '13px', maxWidth: '300px' },
 } as const;
 const PICKER_LAYOUT = PICKER_LAYOUTS.tall;
 
@@ -6002,22 +6003,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   onClick={() => handleEmotionSelect(idx)}
                   style={{
                     display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: '10px',
+                    alignItems: 'center', gap: '14px',
                     cursor: 'pointer',
                     transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px) scale(1.05)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
                 >
-                  <div style={{
-                    width: PICKER_LAYOUT.size, height: PICKER_LAYOUT.size,
-                    backgroundColor: emotion.color,
-                    borderRadius: emotion.borderRadius,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.8)',
-                    boxShadow: '4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 2px 2px 4px rgba(255,255,255,0.8)',
-                    transition: 'all 0.3s ease',
-                  }} />
+                  <AuraOrb emotionKey={emotion.key} index={idx} />
                   <span style={{
                     fontSize: PICKER_LAYOUT.label, fontWeight: 500,
                     color: '#4A5D4E', opacity: 0.8,
