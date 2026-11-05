@@ -1,40 +1,53 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Roboto, Instrument_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import UpdateNotification from "../src/components/UpdateNotification";
 import CapacitorBridge from "../src/components/CapacitorBridge";
 
-const inter = Inter({
+/*
+ * The three faces, served from app/fonts/ rather than fetched from Google at
+ * build time.
+ *
+ * They were next/font/google. That downloads the font when `next build` runs,
+ * and on 2026-11-05 the download came back as something the loader could not
+ * parse ("Cannot read properties of null (reading '1')"), which stopped the app
+ * build on 윤아님's Mac and once on Vercel — with nothing wrong in the code. The
+ * files below are the same Latin subsets Google serves (taken from the
+ * @fontsource packages), so the faces and their metrics are unchanged and the
+ * build no longer needs a network. Hangul still comes from S-CoreDream.
+ */
+const inter = localFont({
+  src: "./fonts/inter-latin-wght-normal.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
-  display: 'swap',
+  weight: "100 900",
+  display: "swap",
   preload: true,
 });
 
-const roboto = Roboto({
+const roboto = localFont({
+  src: [
+    { path: "./fonts/roboto-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/roboto-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/roboto-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/roboto-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-roboto",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
 /*
- * The morning screens' display face.
- *
- * Loaded through next/font rather than a <link> to fonts.googleapis.com
- * because the app runs from capacitor://localhost as a static export — a
- * remote stylesheet would leave the heading in the fallback face whenever the
- * phone is offline, which for a morning app is often. next/font copies the
- * file into the bundle at build time.
+ * The morning screens' display face (Instrument Serif, regular only — italics
+ * are synthesised, as they were before). Bundled so the heading is right when
+ * the phone is offline, which for a morning app is often.
  */
-const instrumentSerif = Instrument_Serif({
+const instrumentSerif = localFont({
+  src: "./fonts/instrument-serif-latin-400-normal.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
   weight: "400",
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
