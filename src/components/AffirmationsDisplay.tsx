@@ -18,6 +18,8 @@ interface AffirmationsDisplayProps {
   language?: 'en' | 'ko';
   onClose?: () => void;
   isPremium?: boolean;
+  /** Shown when there is nothing for today (the card around it stays visible). */
+  emptyText?: string;
 }
 
 export default function AffirmationsDisplay({
@@ -27,7 +29,8 @@ export default function AffirmationsDisplay({
   dreamId,
   language = 'en',
   onClose,
-  isPremium = false
+  isPremium = false,
+  emptyText
 }: AffirmationsDisplayProps) {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +102,11 @@ export default function AffirmationsDisplay({
     );
   }
 
-  if (!affirmations.length) return null;
+  if (!affirmations.length) {
+    return emptyText ? (
+      <div style={{ padding: '2px 0', color: '#7d8f82', fontSize: 14, lineHeight: 1.6, fontStyle: 'italic' }}>{emptyText}</div>
+    ) : null;
+  }
 
   const displayList = affirmations.slice(0, 3);
 

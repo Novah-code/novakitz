@@ -38,6 +38,12 @@ const CAPSULE_GAP = 10;
 export const TAB_BAR_HEIGHT = CAPSULE_HEIGHT + CAPSULE_GAP + 10;
 /** Height the floating switch takes when it is showing, including its gap. */
 export const SUB_SWITCH_SPACE = 56;
+/**
+ * Journal's switch (Calendar | Entries) sits at the top of the screen, next to
+ * the close/settings button, so it takes no room above the bar. Insights'
+ * switch is still the floating one at the bottom.
+ */
+export const subSwitchSpace = (tab: TabId): number => (tab === 'insights' ? SUB_SWITCH_SPACE : 0);
 
 interface BottomTabBarProps {
   language: 'en' | 'ko';
@@ -89,11 +95,12 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
   const t = LABELS[language];
 
   const tabs: TabId[] = ['today', 'journal', 'insights'];
+  const switchAtTop = active === 'journal';
 
   // Only the two tabs that hold a pair of screens get the floating switch.
   const pair: Array<{ id: SubId; label: string }> | null =
     active === 'journal'
-      ? [{ id: 'history', label: t.history }, { id: 'calendar', label: t.calendar }]
+      ? [{ id: 'calendar', label: t.calendar }, { id: 'history', label: t.history }]
       : active === 'insights'
         ? [{ id: 'insights', label: t.reflection }, { id: 'monthly', label: t.monthly }]
         : null;
@@ -124,7 +131,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             left: 0,
             right: 0,
             bottom: 0,
-            height: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + SUB_SWITCH_SPACE}px)`,
+            height: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + subSwitchSpace(active)}px)`,
             zIndex: 10002,
             backgroundColor: '#F4EEE5',
             overflow: 'hidden',
@@ -151,7 +158,9 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             position: 'fixed',
             left: '50%',
             transform: 'translateX(-50%)',
-            bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 4}px)`,
+            ...(switchAtTop
+              ? { top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }
+              : { bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 4}px)` }),
             zIndex: 10003,
             display: 'flex',
             gap: '2px',
@@ -176,9 +185,10 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                 style={{
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '7px 16px',
+                  padding: switchAtTop ? '0 18px' : '7px 16px',
+                  height: switchAtTop ? 34 : undefined,
                   borderRadius: '999px',
-                  fontSize: '12.5px',
+                  fontSize: switchAtTop ? '13.5px' : '12.5px',
                   fontWeight: on ? 600 : 500,
                   letterSpacing: '0.01em',
                   color: on ? '#2E3C33' : SAGE,

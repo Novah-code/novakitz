@@ -17,7 +17,8 @@ import { isPremiumNow } from '../lib/premium';
 import AccountButton from './AccountButton';
 import AccountMenu from './AccountMenu';
 import SettingsSheet from './SettingsSheet';
-import BottomTabBar, { TAB_BAR_HEIGHT, SUB_SWITCH_SPACE, type TabId, type SubId } from './BottomTabBar';
+import BottomTabBar, { TAB_BAR_HEIGHT, subSwitchSpace, type TabId, type SubId } from './BottomTabBar';
+import AffirmationsDisplay from './AffirmationsDisplay';
 
 export default function SimpleDreamInterfaceWithAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -562,7 +563,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       return;
     }
     // Guests tapping a place that needs an account get the sign-in panel.
-    handleGuestAction(() => openPanel(tab === 'journal' ? 'history' : 'insights'));
+    handleGuestAction(() => openPanel(tab === 'journal' ? 'calendar' : 'insights'));
   };
 
   const selectSub = (sub: SubId) => {
@@ -728,7 +729,7 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 20px 150px' }}>
+        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 20px 40px' }}>
           <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * No white card around the calendar any more. The sheet brings its
@@ -802,6 +803,28 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </div>
               );
             })()}
+
+            {/*
+              Today's affirmation under the calendar. The calendar is the first thing the
+              Journal tab shows now, and the month is mostly empty below the grid early on.
+              Same card look as the one on Entries; it reads today's saved affirmations, and
+              says what fills it when there are none.
+            */}
+            <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '24px', padding: '18px 22px', boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)', position: 'relative', overflow: 'hidden' }}>
+              <span aria-hidden="true" style={{ position: 'absolute', fontSize: '110px', color: '#EDA3BC', opacity: 0.18, right: '16px', top: '-18px', fontFamily: 'serif', pointerEvents: 'none', lineHeight: 1 }}>✧</span>
+              <p style={{ fontFamily: "'Roboto Mono', monospace", fontSize: '11px', color: '#7d8f82', letterSpacing: '2px', margin: '0 0 10px', textTransform: 'uppercase', position: 'relative' }}>
+                Today&apos;s Affirmation
+              </p>
+              <div style={{ position: 'relative' }}>
+                <AffirmationsDisplay
+                  user={user}
+                  checkInTime={new Date().getHours() < 12 ? 'morning' : 'evening'}
+                  language={language || 'en'}
+                  isPremium={isPremium}
+                  emptyText={language === 'ko' ? '꿈을 기록하면 오늘의 확언이 여기에 나타나요.' : 'Record a dream and today\'s affirmation will appear here.'}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -945,7 +968,7 @@ export default function SimpleDreamInterfaceWithAuth() {
           */}
           <style>{`
             .dream-history, .di-shell, .mdr-shell, .cal-shell {
-              bottom: calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + (activeTab === 'today' ? 0 : SUB_SWITCH_SPACE)}px) !important;
+              bottom: calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + subSwitchSpace(activeTab)}px) !important;
             }
           `}</style>
           <BottomTabBar
