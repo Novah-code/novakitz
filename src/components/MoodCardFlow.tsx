@@ -10,6 +10,8 @@ import { isPremiumNow } from '../lib/premium';
 import { addSingleAffirmation } from '../lib/affirmations';
 import { authHeader } from '../lib/authHeader';
 import { dedupeTags } from '../lib/tags';
+import AuraOrb from './AuraOrb';
+import { emotionKeyFromLabel } from '../lib/emotions';
 
 interface MoodCardFlowProps {
   selectedEmotion: string;
@@ -905,19 +907,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
           {/* The pebble that was chosen, as the picker drew it — the object of this moment. */}
           <div style={{ marginTop: 'clamp(32px, 10vh, 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
           <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span aria-hidden="true" style={{
-              position: 'absolute', inset: '-26px', borderRadius: '50%',
-              background: `radial-gradient(circle, ${getEmotionPebble(selectedEmotion).background.replace('0.9)', '0.55)')} 0%, rgba(255,255,255,0) 68%)`,
-              filter: 'blur(10px)',
-            }} />
-            <div style={{
-              position: 'relative', width: '156px', height: '156px',
-              background: getEmotionPebble(selectedEmotion).background,
-              borderRadius: getEmotionPebble(selectedEmotion).borderRadius,
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.8)',
-              boxShadow: '8px 8px 24px rgba(0,0,0,0.07), -6px -6px 18px rgba(255,255,255,0.9), inset 3px 3px 6px rgba(255,255,255,0.8)',
-            }} />
+            <AuraOrb emotionKey={emotionKeyFromLabel(selectedEmotion) ?? 'peaceful'} size={190} />
           </div>
           </div>
 
@@ -1351,7 +1341,6 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const persons = showCustomPerson ? (customPerson ? [customPerson] : []) : selectedPersons;
   const recordKeywords = [...places, ...persons].join(', ') || (sceneText ? sceneText.slice(0, 40) : '');
 
-  const pebble = getEmotionPebble(selectedEmotion);
   return (
     <SkyBackdrop>
       <Container onClose={onClose}>
@@ -1394,12 +1383,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             <div style={sectionLabel}>ORIGINAL RECORD</div>
             <div style={{ ...glassCard, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
               {/* The pebble that was chosen, small, where the record starts. */}
-              <div aria-hidden="true" style={{
-                width: 34, height: 34, flexShrink: 0, marginTop: 3,
-                background: pebble.background, borderRadius: pebble.borderRadius,
-                border: '1px solid rgba(255,255,255,0.8)',
-                boxShadow: '2px 2px 6px rgba(0,0,0,0.07), -2px -2px 6px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)',
-              }} />
+              <div style={{ marginTop: 3, flexShrink: 0 }}><AuraOrb emotionKey={emotionKeyFromLabel(selectedEmotion) ?? 'peaceful'} size={34} /></div>
               <div style={{ fontSize: 15, lineHeight: 1.7, fontWeight: 400, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left', minWidth: 0 }}>
                 {isEgoMode ? [
                   selectedSleep ? `${isKo ? '수면' : 'Sleep'}: ${selectedSleep}` : '',
@@ -1510,7 +1494,6 @@ export function MoodCardJournalView({
   const affirmation = arcanaAffirmations[arcanaIdForView]?.[isKo ? 'ko' : 'en'] ?? (isKo ? '오늘도 당신은 충분합니다.' : 'You are enough today.');
   const recordKeywords = [places, persons].filter(Boolean).join(', ') || (scene ? scene.slice(0, 40) : '');
 
-  const pebble = getEmotionPebble(emotion);
   const recordText = [places ? `${isKo ? '장소' : 'Place'}: ${places}` : '', persons ? `${isKo ? '등장' : 'Who'}: ${persons}` : '', scene || ''].filter(Boolean).join('\n') || (isKo ? '(기록 없음)' : '(no details recorded)');
 
   /*
@@ -1573,12 +1556,7 @@ export function MoodCardJournalView({
         <div style={{ width: '100%', marginBottom: 22 }}>
           <div style={sectionLabel}>ORIGINAL RECORD</div>
           <div style={{ ...glassCard, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-            <div aria-hidden="true" style={{
-              width: 34, height: 34, flexShrink: 0, marginTop: 3,
-              background: pebble.background, borderRadius: pebble.borderRadius,
-              border: '1px solid rgba(255,255,255,0.8)',
-              boxShadow: '2px 2px 6px rgba(0,0,0,0.07), -2px -2px 6px rgba(255,255,255,0.9), inset 1px 1px 2px rgba(255,255,255,0.8)',
-            }} />
+            <div style={{ marginTop: 3, flexShrink: 0 }}><AuraOrb emotionKey={emotionKeyFromLabel(emotion) ?? 'peaceful'} size={34} /></div>
             <div style={{ fontSize: 15, lineHeight: 1.7, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left', minWidth: 0 }}>{recordText}</div>
           </div>
         </div>

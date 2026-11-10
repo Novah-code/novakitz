@@ -1,5 +1,6 @@
 'use client';
 
+import AuraOrb from './AuraOrb';
 import { emotionByKey, emotionLabel, PEBBLE_GLOW } from '../lib/emotions';
 
 /**
@@ -110,19 +111,9 @@ export default function TodayMoodCard({ language, emotionKey, onChange }: TodayM
           raised shadow — so the card shows the thing that was tapped, not a new
           version of it.
         */}
-        <span
-          style={{
-            position: 'relative',
-            flexShrink: 0,
-            width: '52px',
-            height: '52px',
-            backgroundColor: emotion.color,
-            borderRadius: emotion.borderRadius,
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.8)',
-            boxShadow: '4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 2px 2px 4px rgba(255,255,255,0.8)',
-          }}
-        />
+        <span style={{ position: 'relative', display: 'flex', flexShrink: 0 }}>
+          <AuraOrb emotionKey={emotionKey} size={52} />
+        </span>
 
         <span style={{ position: 'relative', display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
           <span

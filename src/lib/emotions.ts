@@ -71,3 +71,10 @@ export function emotionLabel(e: Emotion, language: 'en' | 'ko'): string {
  * chose.
  */
 export const LEGACY_FILL = 'rgba(226,232,240,0.55)';
+
+/** The key for an emotion's English or Korean label, e.g. 'Joyful' or '기쁨' -> 'joyful'. */
+export function emotionKeyFromLabel(label: string | null | undefined): string | null {
+  if (!label) return null;
+  const e = EMOTIONS.find((x) => x.en === label || x.ko === label || x.key === label);
+  return e ? e.key : null;
+}

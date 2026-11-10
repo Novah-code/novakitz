@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { EMOTIONS } from '../lib/emotions';
 import { dedupeTags } from '../lib/tags';
+import AuraOrb from './AuraOrb';
 
 interface DreamEntry {
   id: string;
@@ -127,17 +128,22 @@ export default function DreamTimeline({
 
           return (
             <div key={dream.id} style={{ position: 'relative', marginBottom: '1.5rem', paddingLeft: '52px', animation: `slideIn 0.5s ease-out ${index * 0.08}s both` }}>
-              {/* Timeline dot: the pebble for a morning, a pink dot for a dream */}
-              <div
-                style={{
-                  position: 'absolute', left: mood?.emotion ? '4px' : '10px', top: '18px',
-                  width: mood?.emotion ? '32px' : '20px', height: mood?.emotion ? '32px' : '20px',
-                  borderRadius: mood?.emotion ? mood.emotion.borderRadius : '50%',
-                  background: mood?.emotion ? mood.emotion.color : PINK,
-                  border: '2px solid rgba(255,255,255,0.9)',
-                  boxShadow: '0 2px 8px rgba(40,60,45,0.12)', zIndex: 1,
-                }}
-              />
+              {/* Timeline dot: the aura for a morning, a pink dot for a dream */}
+              {mood?.emotion ? (
+                <div style={{ position: 'absolute', left: '4px', top: '18px', zIndex: 1 }}>
+                  <AuraOrb emotionKey={mood.emotion.key} size={32} />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    position: 'absolute', left: '10px', top: '18px',
+                    width: '20px', height: '20px', borderRadius: '50%',
+                    background: PINK,
+                    border: '2px solid rgba(255,255,255,0.9)',
+                    boxShadow: '0 2px 8px rgba(40,60,45,0.12)', zIndex: 1,
+                  }}
+                />
+              )}
 
               <div
                 onClick={() => handleDreamClick(dream)}

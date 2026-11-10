@@ -11,8 +11,8 @@ import { PEBBLE_GLOW } from '../lib/emotions';
  * she sent. Colours are the same `PEBBLE_GLOW` pair the rest of the app already
  * reads, so a mood is recognisably the same colour everywhere.
  *
- * Sizes are for an 80px cell; the glow reaches about 23px past it, so the
- * parent needs room around the cell.
+ * `size` is the cell in px (default 80, the picker's). The glow reaches about 29%
+ * of the size past the cell, so the parent needs room around it.
  */
 
 /** Width, height (px) and tilt (deg) of the lit body, per emotion. */
@@ -37,13 +37,17 @@ const SPECKS: Array<[number, number, number]> = [
 
 const layer: CSSProperties = { position: 'absolute', left: '50%', top: '50%' };
 
-export default function AuraOrb({ emotionKey, index }: { emotionKey: string; index: number }) {
+export default function AuraOrb({ emotionKey, index = 0, size = 80 }: { emotionKey: string; index?: number; size?: number }) {
   const glow = PEBBLE_GLOW[emotionKey] ?? PEBBLE_GLOW.low;
   const { w, h, rot } = SILHOUETTE[emotionKey] ?? SILHOUETTE.peaceful;
   const turn = `translate(-50%, -50%) rotate(${rot}deg)`;
 
+  const scale = size / 80;
+
   return (
-    <div aria-hidden="true" style={{ position: 'relative', width: 80, height: 80 }}>
+    <div aria-hidden="true" style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      {/* Drawn once at 80px and scaled, so every size is the same picture. */}
+      <div style={{ position: 'absolute', left: 0, top: 0, width: 80, height: 80, transform: `scale(${scale})`, transformOrigin: '0 0' }}>
       {/* The halo: the same shape, larger and fainter. */}
       <div
         style={{
@@ -85,6 +89,7 @@ export default function AuraOrb({ emotionKey, index }: { emotionKey: string; ind
           }}
         />
       ))}
+      </div>
     </div>
   );
 }
