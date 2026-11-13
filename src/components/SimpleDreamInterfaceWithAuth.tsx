@@ -753,6 +753,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
+                language={language}
                 dreams={dreams}
                 checkins={checkinsByDate}
                 onDateSelect={(date) => setCalendarSelectedDate(date)}

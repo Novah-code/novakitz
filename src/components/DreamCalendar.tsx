@@ -3,8 +3,10 @@
 import { useState, useMemo } from 'react';
 import { Dream } from '../lib/supabase';
 import '../styles/dream-calendar.css';
+import { emotionByKey, emotionLabel } from '../lib/emotions';
 
 interface DreamCalendarProps {
+  language?: 'en' | 'ko';
   dreams: Dream[];
   onDateSelect: (date: string) => void;
   selectedDate: string | null;
@@ -134,6 +136,8 @@ function moodKey(mood?: string | null): string | null {
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS_KO = ['일', '월', '화', '수', '목', '금', '토'];
+const MONTHS_KO = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
 
 function isNoDream(d: Dream) {
   return Boolean(
@@ -159,7 +163,8 @@ function Sparkle({ className }: { className: string }) {
   );
 }
 
-export default function DreamCalendar({ dreams, onDateSelect, selectedDate, checkins }: DreamCalendarProps) {
+export default function DreamCalendar({ dreams, onDateSelect, selectedDate, checkins, language = 'en' }: DreamCalendarProps) {
+  const ko = language === 'ko';
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const year = currentDate.getFullYear();
@@ -256,14 +261,24 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cells]);
 
+  /** A legend name in the reader's language: the emotion's own label, or a plain word for the two non-emotions. */
+  const legendLabel = (key: string): string => {
+    if (!ko) return key;
+    const e = emotionByKey(key);
+    if (e) return emotionLabel(e, 'ko');
+    if (key === 'logged') return '기록함';
+    if (key === 'rest') return '쉬는 날';
+    return key;
+  };
+
   return (
     <div className="dcal">
       <Sparkle className="dcal__spark dcal__spark--a" />
 
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h3 className="dcal__month">{MONTHS[month]}</h3>
-          <div className="dcal__year">{year}</div>
+          <h3 className="dcal__month">{ko ? MONTHS_KO[month] : MONTHS[month]}</h3>
+          <div className="dcal__year">{ko ? `${year}년` : year}</div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
@@ -271,27 +286,27 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
             <button
               className="dcal__nav"
               onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
-              aria-label="Previous month"
+              aria-label={ko ? '이전 달' : 'Previous month'}
             >
               <Chevron dir="left" />
             </button>
             <button
               className="dcal__nav"
               onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
-              aria-label="Next month"
+              aria-label={ko ? '다음 달' : 'Next month'}
             >
               <Chevron dir="right" />
             </button>
           </div>
           <button className="dcal__today-btn" onClick={() => setCurrentDate(new Date())}>
-            Today
+            {ko ? '오늘' : 'Today'}
           </button>
         </div>
       </div>
 
       <div className="dcal__grid">
         <div className="dcal__week">
-          {WEEKDAYS.map(d => <span key={d}>{d}</span>)}
+          {(ko ? WEEKDAYS_KO : WEEKDAYS).map(d => <span key={d}>{d}</span>)}
         </div>
 
         {weeks.map((week, wi) => (
@@ -351,7 +366,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
           {legend.map(([name, color]) => (
             <span className="dcal__legend-item" key={name}>
               <span className="dcal__swatch" style={{ background: color }} />
-              {name}
+              {legendLabel(name)}
             </span>
           ))}
         </div>
@@ -363,7 +378,7 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
         <Sparkle className="dcal__spark dcal__spark--b" />
         <span className="dcal__foot-count">{loggedDays}</span>
         <span className="dcal__foot-label">
-          {loggedDays === 1 ? 'morning this month' : 'mornings this month'}
+          {ko ? '이번 달 아침' : loggedDays === 1 ? 'morning this month' : 'mornings this month'}
         </span>
       </div>
     </div>

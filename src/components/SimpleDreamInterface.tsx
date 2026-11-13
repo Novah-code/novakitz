@@ -4389,7 +4389,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               {/* Ambient blobs */}
               {/* Header */}
               <div style={{
-                padding: '72px 24px 0',
+                padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 24px 0',
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
@@ -4487,6 +4487,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   flexDirection: 'column'
                 }}>
                   <DreamCalendar
+                    language={language}
                     /*
                      * `savedDreams`, not `filteredDreams`. The filter above
                      * drops "no dream" markers with a comment saying they are

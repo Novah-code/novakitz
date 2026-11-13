@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { loadStreak } from '../lib/streak';
+import { emotionByKey, emotionLabel } from '../lib/emotions';
 
 interface DreamInsightsProps {
   user: User;
@@ -506,7 +507,7 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
                           <div style={{ width: 32, height: 32, borderRadius: '50%', background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             {trend === 'down' ? <ArrowDownRightIcon size={15} /> : <ArrowUpRightIcon size={15} />}
                           </div>
-                          <span style={{ fontWeight: 700, color: '#2E3C33', fontSize: 14, textTransform: 'capitalize' }}>{mood}</span>
+                          <span style={{ fontWeight: 700, color: '#2E3C33', fontSize: 14, textTransform: 'capitalize' }}>{(() => { const e = emotionByKey(mood.toLowerCase()); return e ? emotionLabel(e, ko ? 'ko' : 'en') : mood; })()}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           {trend === 'up' && <span style={{ fontSize: 9, fontWeight: 700, color: '#EDA3BC', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trending</span>}
