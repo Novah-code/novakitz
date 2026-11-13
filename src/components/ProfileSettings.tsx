@@ -6,6 +6,7 @@ import { supabase, UserProfile } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import ReminderSettings from './ReminderSettings';
 import { canAnalyzeDream } from '../lib/subscription';
+import { authHeader } from '../lib/authHeader';
 
 interface ProfileSettingsProps {
   user: User;
@@ -222,28 +223,74 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
     }
   };
 
+  const [deleteError, setDeleteError] = useState('');
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.location.href = '/';
   };
 
+  /*
+   * Deleting the account is done by the server (app/api/delete-account), because
+   * only it can remove the sign-in record and every table. The browser could only
+   * empty six tables and sign out, which left the account itself — and the mood
+   * check-ins, affirmations and keywords — in place.
+   *
+   * If the server route cannot be reached at all (an older web deploy without the
+   * route, or no network), the previous behaviour is kept as a floor rather than
+   * leaving the person unable to remove anything: their rows are deleted from here
+   * and they are signed out. A real refusal from the route is shown, not papered over.
+   */
   const handleDeleteAccount = async () => {
     setDeleting(true);
-    try {
-      // Delete user data from various tables
-      await supabase.from('dreams').delete().eq('user_id', user.id);
-      await supabase.from('user_profiles').delete().eq('user_id', user.id);
-      await supabase.from('nicknames').delete().eq('user_id', user.id);
-      await supabase.from('community_posts').delete().eq('user_id', user.id);
-      await supabase.from('community_likes').delete().eq('user_id', user.id);
-      await supabase.from('user_subscriptions').delete().eq('user_id', user.id);
+    setDeleteError('');
 
-      // Sign out and redirect
+    const finish = async () => {
       await supabase.auth.signOut();
       window.location.href = '/';
+    };
+
+    let routeMissing = false;
+    try {
+      const res = await fetch('/api/delete-account', { method: 'POST', headers: { ...(await authHeader()) } });
+      if (res.ok) return finish();
+      if (res.status === 404 || res.status === 405) {
+        routeMissing = true;
+      } else {
+        const body = await res.json().catch(() => null);
+        console.error('Error deleting account:', res.status, body);
+        setDeleteError(language === 'ko'
+          ? '계정을 삭제하지 못했어요. 잠시 후 다시 시도하거나 문의해 주세요.'
+          : 'We could not delete your account. Please try again in a moment, or contact support.');
+        setDeleting(false);
+        return;
+      }
     } catch (error) {
-      console.error('Error deleting account:', error);
-      setDeleting(false);
+      console.error('Delete-account route unreachable:', error);
+      // With no connection nothing can be deleted from here either; say so rather
+      // than signing out and letting it look done.
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        setDeleteError(language === 'ko'
+          ? '인터넷에 연결되어 있지 않아요. 연결한 뒤 다시 시도해 주세요.'
+          : 'You are offline. Connect to the internet and try again.');
+        setDeleting(false);
+        return;
+      }
+      routeMissing = true;
+    }
+
+    if (routeMissing) {
+      const tables = [
+        'post_likes', 'community_likes', 'community_posts', 'dream_patterns', 'dream_keywords',
+        'daily_intentions', 'evening_reflections', 'affirmations', 'unconscious_profiles',
+        'checkins', 'dreams', 'nicknames', 'user_subscriptions', 'user_profiles',
+      ];
+      for (const table of tables) {
+        // Errors (a table that does not exist, a policy that forbids it) must not stop the rest.
+        const { error } = await supabase.from(table).delete().eq('user_id', user.id);
+        if (error) console.warn(`Could not clear ${table}:`, error.message);
+      }
+      await finish();
     }
   };
 
@@ -474,7 +521,13 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
               </div>
             ) : (
               <div style={{ ...group, padding: '18px 20px', border: '1px solid rgba(181,86,111,0.35)' }}>
-                <p style={{ fontSize: 14, color: '#B5566F', margin: '0 0 14px', lineHeight: 1.6, textAlign: 'left' }}>{t.deleteConfirm}</p>
+                <p style={{ fontSize: 14, color: '#B5566F', margin: '0 0 8px', lineHeight: 1.6, textAlign: 'left' }}>{t.deleteConfirm}</p>
+                <p style={{ fontSize: 13, color: '#7d8f82', margin: '0 0 14px', lineHeight: 1.6, textAlign: 'left' }}>
+                  {ko
+                    ? '구독 중이라면 계정을 삭제해도 구독은 자동으로 해지되지 않아요. iPhone 설정 > Apple 계정 > 구독에서 해지해 주세요.'
+                    : 'If you have a subscription, deleting your account does not cancel it. Cancel it in iPhone Settings > Apple Account > Subscriptions.'}
+                </p>
+                {deleteError && <p style={{ fontSize: 13, color: '#B5566F', fontWeight: 700, margin: '0 0 12px', lineHeight: 1.5, textAlign: 'left' }}>{deleteError}</p>}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button onClick={handleDeleteAccount} disabled={deleting} style={{ flex: 1, height: 46, borderRadius: 23, border: '1px solid rgba(181,86,111,0.4)', background: 'rgba(181,86,111,0.14)', color: '#B5566F', fontFamily: 'inherit', fontSize: 15, fontWeight: 700, cursor: deleting ? 'default' : 'pointer', opacity: deleting ? 0.5 : 1 }}>
                     {deleting ? (ko ? '삭제 중...' : 'Deleting...') : (ko ? '삭제' : 'Delete')}
