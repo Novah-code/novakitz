@@ -147,7 +147,8 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
               backgroundImage: 'var(--home-sky-day)',
             }}
           />
-          <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />
+          {/* Reflection's panel has no grain of its own, so a grained dock showed as a band under it. */}
+          {sub !== 'insights' && <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />}
         </div>
       )}
 
