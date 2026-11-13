@@ -716,7 +716,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 max-height: 100%;
                 border-radius: 0;
                 box-shadow: none;
-                padding-top: env(safe-area-inset-top);
+                /* The report's own header carries the top inset (see .mdr-hdr), so its paper
+                   reaches the top edge instead of starting in a band below the status bar. */
                 padding-bottom: env(safe-area-inset-bottom);
               }
             }

@@ -444,6 +444,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       <style>{`
         @media (max-width: 640px) {
           .mdr-body { height: 100%; max-height: 100% !important; }
+          .mdr-hdr { padding-top: calc(14px + env(safe-area-inset-top, 0px)) !important; }
         }
       `}</style>
       <style>{`
@@ -458,7 +459,7 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
       `}</style>
 
       {/* ── Sticky Header ── */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(250,244,238,0.92) 0%, rgba(250,244,238,0.92) 75%, rgba(250,244,238,0) 100%)', borderBottom: 'none', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+      <div className="mdr-hdr" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'linear-gradient(180deg, rgba(250,244,238,0.92) 0%, rgba(250,244,238,0.92) 75%, rgba(250,244,238,0) 100%)', borderBottom: 'none', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#4A5D4E' }}>
           <IconCalendar size={17} color="#4A5D4E" />
           {availableMonths.length > 1 ? (
