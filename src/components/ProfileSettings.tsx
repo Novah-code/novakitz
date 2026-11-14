@@ -306,7 +306,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
   const INK = '#2E3C33';
   const PINK = '#EDA3BC';
   const ko = language === 'ko';
-  const displayFont = ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  const displayFont = ko ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif';
   const glass: React.CSSProperties = {
     background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
     backdropFilter: 'blur(22px) saturate(180%)',
@@ -360,7 +360,7 @@ export default function ProfileSettings({ user, profile, language, onClose, onSa
         position: 'fixed', inset: 0, zIndex: 10010,
         backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5',
         overflowY: 'auto', display: 'flex', justifyContent: 'center',
-        color: INK, fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        color: INK, fontFamily: ko ? "'Pretendard', sans-serif" : "'Roboto', sans-serif",
       }}
     >
       <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />

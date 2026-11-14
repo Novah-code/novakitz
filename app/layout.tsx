@@ -16,7 +16,7 @@ import CapacitorBridge from "../src/components/CapacitorBridge";
  * build on 윤아님's Mac and once on Vercel — with nothing wrong in the code. The
  * files below are the same Latin subsets Google serves (taken from the
  * @fontsource packages), so the faces and their metrics are unchanged and the
- * build no longer needs a network. Hangul still comes from S-CoreDream.
+ * build no longer needs a network. Hangul comes from Pretendard (body) and Gowun Batang (headings), in public/fonts.
  */
 const inter = localFont({
   src: "./fonts/inter-latin-wght-normal.woff2",

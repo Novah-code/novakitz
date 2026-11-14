@@ -97,7 +97,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
   const INK = '#2E3C33';
   const PINK = '#EDA3BC';
   const ko = language === 'ko';
-  const displayFont = ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  const displayFont = ko ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif';
   /*
    * A window, not a page: a dimmed backdrop and a framed card that carries the
    * same sky as the screens around it, so what is inside is the full-screen
@@ -112,7 +112,7 @@ export default function StreakPopup({ user, language, onClose }: StreakPopupProp
         backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '20px',
-        fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        fontFamily: ko ? "'Pretendard', sans-serif" : "'Roboto', sans-serif",
         color: INK,
       }}
     >

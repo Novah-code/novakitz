@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Dream } from '../lib/supabase';
 import '../styles/dream-calendar.css';
-import { emotionByKey, emotionLabel } from '../lib/emotions';
+import { emotionByKey, emotionShownLabel } from '../lib/emotions';
 
 interface DreamCalendarProps {
   language?: 'en' | 'ko';
@@ -263,9 +263,9 @@ export default function DreamCalendar({ dreams, onDateSelect, selectedDate, chec
 
   /** A legend name in the reader's language: the emotion's own label, or a plain word for the two non-emotions. */
   const legendLabel = (key: string): string => {
-    if (!ko) return key;
     const e = emotionByKey(key);
-    if (e) return emotionLabel(e, 'ko');
+    if (e) return emotionShownLabel(e);
+    if (!ko) return key;
     if (key === 'logged') return '기록함';
     if (key === 'rest') return '쉬는 날';
     return key;

@@ -26,7 +26,7 @@ import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
-import { EMOTIONS, emotionLabel } from '../lib/emotions';
+import { EMOTIONS, emotionLabel, emotionShownLabel } from '../lib/emotions';
 import AuraOrb from './AuraOrb';
 import { goTo } from '../lib/platform';
 import { authHeader } from '../lib/authHeader';
@@ -216,7 +216,7 @@ const translations = {
     charactersReady: '준비됨',
     brewing: '분석 중...',
     brew: '분석하기',
-    dreamJournal: '내면의 기록',
+    dreamJournal: 'Inner Journal',
     showing: '표시 중',
     of: '/',
     dreams: '개의 꿈',
@@ -407,6 +407,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const emotionList = EMOTIONS.map((e) => ({
     key: e.key,
     label: emotionLabel(e, language),
+    shown: emotionShownLabel(e),
     color: e.color,
     borderRadius: e.borderRadius,
     moodValue: e.moodValue,
@@ -2184,7 +2185,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           background: #e8f5e8 !important;
         }
         body {
-          font-family: ${language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
+          font-family: ${language === 'ko' ? "'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
           color: #1f2937;
           overflow-x: hidden;
         }
@@ -4398,7 +4399,8 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 paddingBottom: '14px',
               }}>
                 {/* Title */}
-                <h1 style={{ ...headingStyle(language === 'ko', 40, 24), textAlign: 'left', margin: '0 0 20px' }}>
+                {/* "Inner Journal" is the feature's name in every language, so it keeps the English display face even in Korean. */}
+                <h1 style={{ ...headingStyle(false, 40, 24), textAlign: 'left', margin: '0 0 20px' }}>
                   {t.dreamJournal}
                 </h1>
 
@@ -5972,7 +5974,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
             {/*
               * Instrument Serif on the heading only — the pebbles and their
-              * labels stay in the UI face. Korean keeps S-CoreDream because
+              * labels stay in the UI face. Korean keeps its own face because
               * Instrument Serif has no Hangul, and `html[lang="ko"] *` in
               * globals.css carries `!important`, so an inline face could not
               * take there anyway.
@@ -5983,7 +5985,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               color: '#4A5D4E', marginBottom: '24px', marginTop: '10px',
               letterSpacing: language === 'ko' ? '-0.5px' : '0',
               fontFamily: language === 'ko'
-                ? "'S-CoreDream', sans-serif"
+                ? "'KoDisplay', 'Pretendard', serif"
                 : "var(--font-display), Georgia, serif",
             }}>
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
@@ -6015,9 +6017,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <span style={{
                     fontSize: PICKER_LAYOUT.label, fontWeight: 500,
                     color: '#4A5D4E', opacity: 0.8,
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+                    fontFamily: language === 'ko' ? "'Pretendard', sans-serif" : 'inherit',
                   }}>
-                    {emotion.label}
+                    {emotion.shown}
                   </span>
                 </div>
               ))}

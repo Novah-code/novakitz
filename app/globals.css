@@ -1,42 +1,26 @@
+/*
+ * Korean faces, served from public/fonts so the app needs no network for them.
+ *
+ * Pretendard (variable, one file) is the body and interface face. It replaced
+ * S-CoreDream on 2026-11-14: S-CoreDream is round and heavy, and next to the
+ * thin serif the English screens use it read as a different app.
+ *
+ * KoDisplay is Gowun Batang Regular, cut down to the 2,350 everyday Hangul
+ * syllables (KS X 1001), Latin and common punctuation — 200 KB instead of 8 MB.
+ * It is for headings only, the Korean counterpart of Instrument Serif. A rare
+ * syllable outside that set falls through to Pretendard rather than a box.
+ */
 @font-face {
-    font-family: 'S-CoreDream';
-    font-weight: 300;
-    src: url('/fonts/S-CoreDream-3Light.woff') format('woff');
+    font-family: 'Pretendard';
+    font-weight: 45 920;
+    src: url('/fonts/PretendardVariable.woff2') format('woff2-variations');
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'S-CoreDream';
+    font-family: 'KoDisplay';
     font-weight: 400;
-    src: url('/fonts/S-CoreDream-4Regular.woff') format('woff');
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'S-CoreDream';
-    font-weight: 500;
-    src: url('/fonts/S-CoreDream-5Medium.woff') format('woff');
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'S-CoreDream';
-    font-weight: 600;
-    src: url('/fonts/S-CoreDream-6Bold.woff') format('woff');
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'S-CoreDream';
-    font-weight: 700;
-    src: url('/fonts/S-CoreDream-7ExtraBold.woff') format('woff');
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'S-CoreDream';
-    font-weight: 800;
-    src: url('/fonts/S-CoreDream-8Heavy.woff') format('woff');
+    src: url('/fonts/GowunBatang-Regular.subset.woff2') format('woff2');
     font-display: swap;
 }
 
@@ -55,11 +39,33 @@ html[lang="en"] [class*="response"] {
     font-family: Georgia, 'Times New Roman', serif !important;
 }
 
-/* 한국어 버전: 모든 요소 에스코어 드림 */
+/* 한국어 버전: 모든 요소 프리텐다드, 제목은 고운바탕 */
 html[lang="ko"],
 html[lang="ko"] body,
 html[lang="ko"] * {
-    font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/*
+ * Headings opt in by naming KoDisplay in their inline style (displayFont in
+ * src/lib/skyUi.ts). The rule above is !important, so an inline face cannot win
+ * on its own; this one is more specific and also !important.
+ */
+html[lang="ko"] [style*="KoDisplay"] {
+    /* Latin letters (an emotion's English name, "Inner Journal") come from the English
+       display face; Hangul, which it does not have, falls through to KoDisplay. */
+    font-family: var(--font-display), 'KoDisplay', 'Pretendard', serif !important;
+}
+
+/* Headings that are English even in the Korean UI keep the English display face. */
+html[lang="ko"] [style*="--font-display"] {
+    font-family: var(--font-display), Georgia, serif !important;
+}
+
+/* Break Korean at word spaces, not inside a word ("있다/는"), but never overflow. */
+html[lang="ko"] body {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
 }
 
 :root {
@@ -688,7 +694,7 @@ html[lang="ko"] button,
 html[lang="ko"] .dream-title-input,
 html[lang="ko"] input,
 html[lang="ko"] textarea {
-    font-family: 'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
 /* Success message */

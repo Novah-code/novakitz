@@ -470,7 +470,7 @@ export default function UserProfileForm({ user, profile, onComplete }: UserProfi
       padding: '2rem',
       paddingTop: 'calc(2rem + env(safe-area-inset-top, 0px))',
       paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
-      fontFamily: preferredLanguage === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif"
+      fontFamily: preferredLanguage === 'ko' ? "'Pretendard', sans-serif" : "'Roboto', sans-serif"
     }}>
       <div style={{
         width: '100%',

@@ -107,14 +107,14 @@ export default function DreamTimeline({
 
   if (dreams.length === 0) {
     return (
-      <div style={{ padding: '3rem', textAlign: 'center', color: '#7d8f82', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif" }}>
+      <div style={{ padding: '3rem', textAlign: 'center', color: '#7d8f82', fontFamily: language === 'ko' ? "'Pretendard', sans-serif" : "'Roboto', sans-serif" }}>
         <div style={{ fontSize: '1.1rem' }}>{t.noDreams}</div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '1rem 0 2rem', maxWidth: '900px', margin: '0 auto', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif", color: INK }}>
+    <div style={{ padding: '1rem 0 2rem', maxWidth: '900px', margin: '0 auto', fontFamily: language === 'ko' ? "'Pretendard', sans-serif" : "'Roboto', sans-serif", color: INK }}>
       <div style={{ position: 'relative' }}>
         {/* Vertical line */}
         <div style={{ position: 'absolute', left: '19px', top: 0, bottom: 0, width: '2px', background: 'linear-gradient(to bottom, rgba(237,163,188,0.6), rgba(46,60,51,0.08))', zIndex: 0 }} />
@@ -169,7 +169,7 @@ export default function DreamTimeline({
                 </div>
 
                 {title && (
-                  <h3 style={{ fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? 18 : 24, fontWeight: language === 'ko' ? 500 : 400, margin: '0 0 8px', color: INK, lineHeight: 1.2 }}>
+                  <h3 style={{ fontFamily: language === 'ko' ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? 18 : 24, fontWeight: language === 'ko' ? 500 : 400, margin: '0 0 8px', color: INK, lineHeight: 1.2 }}>
                     {title}
                   </h3>
                 )}

@@ -11,7 +11,7 @@ import { addSingleAffirmation } from '../lib/affirmations';
 import { authHeader } from '../lib/authHeader';
 import { dedupeTags } from '../lib/tags';
 import AuraOrb from './AuraOrb';
-import { emotionKeyFromLabel } from '../lib/emotions';
+import { emotionKeyFromLabel, EMOTIONS } from '../lib/emotions';
 
 interface MoodCardFlowProps {
   selectedEmotion: string;
@@ -410,7 +410,7 @@ const headingStyle = (isKo: boolean, enSize: number, koSize: number): React.CSSP
   lineHeight: 1.25,
   color: '#2E3C33',
   textAlign: 'center',
-  fontFamily: isKo ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif',
+  fontFamily: isKo ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif',
 });
 
 const stepBody: React.CSSProperties = { width: '100%', flex: 1, display: 'flex', flexDirection: 'column' };
@@ -901,7 +901,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
         <div onClick={e => e.stopPropagation()} style={{ ...stepBody, alignItems: 'center' }}>
           {/* Instrument Serif has no Hangul, so Korean keeps the UI face (globals.css). */}
           <p style={{ ...headingStyle(isKo, 42, 24), margin: 0 }}>
-            {isKo ? `'${selectedEmotion}' 기록했어요` : `'${selectedEmotion}' is saved`}
+            {(() => { const k = emotionKeyFromLabel(selectedEmotion); const shown = k ? EMOTIONS.find((x) => x.key === k)!.en : selectedEmotion; return isKo ? `'${shown}' 기록했어요` : `'${shown}' is saved`; })()}
           </p>
 
           {/* The pebble that was chosen, as the picker drew it — the object of this moment. */}
@@ -1442,13 +1442,13 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               disabled={saving || saved}
               onClick={handleSave}
               label={saved
-                ? (isKo ? '내면의 기록에 저장됨' : 'Saved to Inner Journal')
+                ? (isKo ? 'Inner Journal에 저장됨' : 'Saved to Inner Journal')
                 : saving
                   ? (isKo ? '저장 중...' : 'Saving...')
-                  : (isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal')}
+                  : (isKo ? 'Inner Journal에 저장하기' : 'Save to Inner Journal')}
             />
           ) : (
-            <NextButton top={32} onClick={() => setShowLoginPrompt(true)} label={isKo ? '내면의 기록에 저장하기' : 'Save to Inner Journal'} />
+            <NextButton top={32} onClick={() => setShowLoginPrompt(true)} label={isKo ? 'Inner Journal에 저장하기' : 'Save to Inner Journal'} />
           )}
         </div>
       </Container>

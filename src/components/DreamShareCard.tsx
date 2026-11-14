@@ -151,7 +151,7 @@ export default function DreamShareCard({
             padding: '2.5rem',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
             color: 'white',
-            fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+            fontFamily: language === 'ko' ? "'Pretendard', sans-serif" : "'Roboto', sans-serif",
             position: 'relative',
             overflow: 'hidden'
           }}

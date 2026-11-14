@@ -1,0 +1,11 @@
+Fonts bundled in Novakitz
+
+Pretendard (PretendardVariable.woff2)
+  Copyright (c) 2021 Kil Hyung-jin. SIL Open Font License 1.1.
+  https://github.com/orioncactus/pretendard
+
+Gowun Batang (GowunBatang-Regular.subset.woff2 — Hangul/Latin subset)
+  Copyright (c) 2020 The Gowun Batang Project Authors (https://github.com/yangheeryu/Gowun-Batang).
+  SIL Open Font License 1.1. https://openfontlicense.org
+
+Inter, Roboto and Instrument Serif (app/fonts) are also under the SIL Open Font License 1.1.

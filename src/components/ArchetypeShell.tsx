@@ -60,7 +60,7 @@ export default function ArchetypeShell({ language, onLanguageChange, onBack, bac
         minHeight: '100vh',
         position: 'relative',
         color: INK,
-        fontFamily: ko ? "'S-CoreDream', sans-serif" : "'Roboto', sans-serif",
+        fontFamily: ko ? "'Pretendard', sans-serif" : "'Roboto', sans-serif",
       }}
     >
       {/* The sky is its own fixed layer: `background-attachment: fixed` is ignored on iOS. */}

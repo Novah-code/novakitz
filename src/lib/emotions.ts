@@ -58,6 +58,18 @@ export function emotionByKey(key: string | null | undefined): Emotion | null {
   return key ? BY_KEY.get(key) ?? null : null;
 }
 
+/**
+ * What the screen shows for an emotion: the English word, in Korean too.
+ *
+ * 윤아님 chose this on 2026-11-14 — a bare "희망" on a card read as blunt, and the
+ * English names sit better with the glowing lights. It is for display only.
+ * `emotionLabel` still returns the Korean word, which is what is written into
+ * a dream's text and tags, so records stay readable the way they always were.
+ */
+export function emotionShownLabel(e: Emotion): string {
+  return e.en;
+}
+
 export function emotionLabel(e: Emotion, language: 'en' | 'ko'): string {
   return language === 'ko' ? e.ko : e.en;
 }

@@ -842,7 +842,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
-            <h3 style={{ margin: '0 0 1rem 0', fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? '1.3rem' : '1.9rem', fontWeight: language === 'ko' ? 500 : 400, color: '#2E3C33', paddingRight: '3rem', lineHeight: 1.2 }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontFamily: language === 'ko' ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? '1.3rem' : '1.9rem', fontWeight: language === 'ko' ? 500 : 400, color: '#2E3C33', paddingRight: '3rem', lineHeight: 1.2 }}>
               {calendarSelectedDream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
             </h3>
             <p style={{ margin: 0, fontSize: '1rem', color: '#4A5D4E', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>

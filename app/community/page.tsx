@@ -70,7 +70,7 @@ export default function CommunityPage() {
       minHeight: '100vh',
       background: '#f5f5f5',
       fontFamily: language === 'ko'
-        ? "'S-CoreDream', -apple-system, sans-serif"
+        ? "'Pretendard', -apple-system, sans-serif"
         : "'Roboto', -apple-system, sans-serif"
     }}>
       {/* Header - Cosmos Style */}
@@ -257,7 +257,7 @@ export default function CommunityPage() {
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Roboto', -apple-system, sans-serif"
+            fontFamily: language === 'ko' ? "'Pretendard', -apple-system, sans-serif" : "'Roboto', -apple-system, sans-serif"
           }}>
             <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
 
@@ -281,7 +281,7 @@ export default function CommunityPage() {
                 onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                <span>{language === 'ko' ? '내면의 기록' : 'Inner Journal'}</span>
+                <span>Inner Journal</span>
               </button>
 
               <button
@@ -593,7 +593,7 @@ export default function CommunityPage() {
                 fontWeight: '600',
                 color: 'var(--matcha-dark)',
                 marginBottom: '0.75rem',
-                fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, sans-serif" : "'Georgia', serif",
+                fontFamily: language === 'ko' ? "'Pretendard', -apple-system, sans-serif" : "'Georgia', serif",
                 letterSpacing: language === 'ko' ? '0' : '0.5px'
               }}>
                 {language === 'ko'

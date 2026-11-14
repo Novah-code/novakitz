@@ -2253,6 +2253,17 @@ Apple이 Next Steps에 적어준 문장이 그대로 설계도입니다:
   (아키타입 랜딩의 "내 프로필 보기"로만 열림), `guest-results` API가 `http://ip-api.com`을 부름(서버에서, 암호화 안 됨), `console.log` 174개(사용자 id가 찍히는 곳 포함).
 - **이 수정은 다음 빌드(7 이상)에 들어갑니다.** 심사 중인 6에는 없으므로, 승인 후 바로 1.0.2로 낼지 정해야 합니다.
 
+### 한글 폰트 교체와 Inner Journal 제목 (2026-11-14, 푸시 완료 — 다음 빌드부터)
+
+- **S-CoreDream → Pretendard(본문·UI) + 고운바탕(제목)**. 영어가 가는 세리프 제목 + 산세리프 본문이라, 한국어도 같은 구조로 맞췄습니다(시안 4개 중 윤아님이 3번 선택).
+  고운바탕은 KS X 1001 한글 2,350자 + 영문·기호만 남겨 **204KB**로 줄였고(`public/fonts/GowunBatang-Regular.subset.woff2`), 그 밖의 드문 글자는 Pretendard로 대체됩니다.
+  앱의 한글 폰트 용량은 약 2.1MB → 2.2MB로 비슷합니다. S-CoreDream 파일은 지웠습니다. 라이선스 표기: `public/fonts/FONT-LICENSES.txt`.
+- 제목이 한글 폰트를 쓰려면 `[style*="KoDisplay"]` 규칙을 거칩니다(`html[lang="ko"] *`가 `!important`라서 인라인으로는 안 바뀜). 영어 단어는 영어 제목 글꼴로, 한글은 고운바탕으로 나옵니다.
+- 한국어 줄바꿈을 단어 단위로(`word-break: keep-all`).
+- **Inner Journal**은 한국어에서도 영어 그대로(기록 탭 제목, 커뮤니티, "Inner Journal에 저장하기").
+- **감정 이름은 한국어 화면에서도 영어**(Anxious, Fear, …)로 표시합니다. 화면 표시만 바꿨고, 꿈 기록에 저장되는 글자는 예전처럼 한국어입니다(`emotionShownLabel` vs `emotionLabel`).
+- **못 본 것:** 실기기 글꼴 렌더링, 긴 한국어 문장이 있는 화면(꿈 해석, 약관, 요금제), 한글 입력 중 글꼴, 앱 전체 화면에서 `word-break: keep-all`이 넘침을 만드는 곳이 없는지.
+
 ### 요금제 페이지 (2026-11-03, 푸시 완료)
 
 홈 하늘 배경, 유리 플랜 카드, 흰 알약 구매 버튼, 핑크 체크·Yearly 강조. 맨 위에 소개 글(McCartney 문장,

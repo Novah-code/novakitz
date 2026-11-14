@@ -1,7 +1,7 @@
 'use client';
 
 import AuraOrb from './AuraOrb';
-import { emotionByKey, emotionLabel, PEBBLE_GLOW } from '../lib/emotions';
+import { emotionByKey, emotionShownLabel, PEBBLE_GLOW } from '../lib/emotions';
 
 /**
  * Today's mood, as one card at the top of the Today tab. POST_LAUNCH §7-0 (the Ready
@@ -39,7 +39,7 @@ export default function TodayMoodCard({ language, emotionKey, onChange }: TodayM
   if (!emotion || !glow) return null;
 
   const ko = language === 'ko';
-  const name = emotionLabel(emotion, language);
+  const name = emotionShownLabel(emotion);
 
   return (
     <div
@@ -118,7 +118,7 @@ export default function TodayMoodCard({ language, emotionKey, onChange }: TodayM
         <span style={{ position: 'relative', display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
           <span
             style={{
-              fontFamily: ko ? "'S-CoreDream', sans-serif" : MONO,
+              fontFamily: ko ? "'Pretendard', sans-serif" : MONO,
               fontSize: ko ? '12px' : '10.5px',
               letterSpacing: ko ? '0' : '0.16em',
               textTransform: ko ? 'none' : 'uppercase',
@@ -131,7 +131,7 @@ export default function TodayMoodCard({ language, emotionKey, onChange }: TodayM
           <span
             style={{
               marginTop: '2px',
-              fontFamily: ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif',
+              fontFamily: ko ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif',
               fontSize: ko ? '21px' : '32px',
               fontWeight: ko ? 500 : 400,
               lineHeight: 1.1,

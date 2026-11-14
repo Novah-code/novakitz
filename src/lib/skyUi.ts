@@ -34,7 +34,7 @@ export const skyCard: CSSProperties = {
 };
 
 export const displayFont = (ko: boolean): string =>
-  ko ? "'S-CoreDream', sans-serif" : 'var(--font-display), Georgia, serif';
+  ko ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif';
 
 export const heading = (ko: boolean, en = 32, kr = 22): CSSProperties => ({
   fontFamily: displayFont(ko),
