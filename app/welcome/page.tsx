@@ -535,7 +535,7 @@ html[lang="ko"] .lp-h1.ko, html[lang="ko"] .lp-h1.ko span, html[lang="ko"] .lp-h
 .lp-h1.ko span:first-child { font-weight: 600; font-size: .4em; letter-spacing: -.3px; line-height: 1.3; }
 .lp-h1.ko span:last-child { font-weight: 520; font-size: 1.04em; letter-spacing: -1.5px; line-height: 1.15; }
 .lp-h1 + .lp-store { margin-top: 26px; }
-html[lang="en"] .lp-sub { font-size: clamp(13px, 1.1vw, 14.5px); }
+html[lang="en"] .lp-sub { font-size: clamp(13px, 1.1vw, 14.5px); line-height: 1.25; }
 .lp-sub { white-space: pre-line; margin: 14px 0 22px; max-width: 520px; font-size: clamp(14px, 1.3vw, 16px); line-height: 1.5; color: ${BASE}; }
 .lp-store { display: inline-flex; align-items: center; gap: 10px; background: ${INK}; color: #fff !important; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 15.5px; box-shadow: 0 10px 28px rgba(40,60,45,.22); transition: transform .2s; }
 .lp-store:hover { transform: translateY(-2px); }
