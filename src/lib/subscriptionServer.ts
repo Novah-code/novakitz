@@ -57,6 +57,20 @@ export async function checkQuota(userId: string): Promise<Quota> {
     // column is filled in from the browser's local calendar, so for anyone east
     // of UTC it can land on the last day of the previous month — fine for the
     // client, which reads back what it wrote, but not something to key on here.
+    /*
+     * Every AI reading counts, of either kind.
+     *
+     * The line is between recording and reading, not between dreams and
+     * moods. Choosing a pebble, writing the dream, answering the mood cards,
+     * the calendar, the streak, the affirmation — all free, always, with no
+     * limit. What is rationed is the model being asked to say something back,
+     * because that is the part that costs money each time.
+     *
+     * It is also the only version that can be said in one sentence, which
+     * matters more than it sounds: "writing is free, readings are seven a
+     * month" is something a person can hold in their head, and "dream
+     * readings count but mood readings do not" is not.
+     */
     const { count, error } = await supabase
       .from('ai_usage')
       .select('id', { count: 'exact', head: true })

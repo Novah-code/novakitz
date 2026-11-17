@@ -11,49 +11,14 @@ import DreamInsights from './DreamInsights';
 import StreakPopup from './StreakPopup';
 import MonthlyDreamReport from './MonthlyDreamReport';
 import DreamCalendar from './DreamCalendar';
-import AIUsageWidget from './AIUsageWidget';
 import ProfileSettings from './ProfileSettings';
 import { identify, forgetUser } from '../lib/revenuecat';
-
-// Translations
-const translations = {
-  en: {
-    loading: 'Loading...',
-    home: 'Home',
-    dreamJournal: 'Inner Journal',
-    dreamPlaylist: 'Dream Playlist',
-    calendar: 'Calendar',
-    history: 'History',
-    insights: 'Reflection',
-    streak: 'Streak',
-    badges: 'Badges',
-    monthlyReport: 'Monthly Review',
-    community: 'Apricot Garden',
-    pricing: 'Pricing',
-    language: 'Language',
-    signOut: 'Sign Out',
-    signUp: 'Sign Up',
-    signIn: 'Sign In'
-  },
-  ko: {
-    loading: '로딩 중...',
-    home: '홈',
-    dreamJournal: '내면의 기록',
-    dreamPlaylist: '드림 플레이리스트',
-    calendar: '캘린더',
-    history: '기록',
-    insights: '리플렉션',
-    streak: '연속 기록',
-    badges: '뱃지',
-    monthlyReport: '먼슬리 리뷰',
-    community: '살구정원',
-    pricing: '요금제',
-    language: '언어',
-    signOut: '로그아웃',
-    signUp: '회원가입',
-    signIn: '로그인'
-  }
-};
+import { isPremiumNow } from '../lib/premium';
+import AccountButton from './AccountButton';
+import AccountMenu from './AccountMenu';
+import SettingsSheet from './SettingsSheet';
+import BottomTabBar, { TAB_BAR_HEIGHT, subSwitchSpace, type TabId, type SubId } from './BottomTabBar';
+import AffirmationsDisplay from './AffirmationsDisplay';
 
 export default function SimpleDreamInterfaceWithAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -67,6 +32,12 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [showInsights, setShowInsights] = useState(false);
   const [showStreak, setShowStreak] = useState(false);
   const [showMonthlyReport, setShowMonthlyReport] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profileTab, setProfileTab] = useState<'profile' | 'account' | 'subscription'>('profile');
+  // What the account button shows: their photo, or the first letter of their name.
+  const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string; name: string }>({ url: null, initial: '', name: '' });
+  // True while the home screen is in a full-screen step (see SimpleDreamInterface).
+  const [immersive, setImmersive] = useState(false);
 
   /*
    * The drawer's panels are one at a time.
@@ -117,7 +88,6 @@ export default function SimpleDreamInterfaceWithAuth() {
     setUser((prev) => (prev?.id === next?.id ? prev : next));
   }, []);
 
-  const t = translations[language];
 
   // Keep RevenueCat's identity in step with Supabase auth. Purchases must
   // attach to the signed-in account, since the webhook maps app_user_id
@@ -362,84 +332,65 @@ export default function SimpleDreamInterfaceWithAuth() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Check premium status when user changes
+  /*
+   * Premium status.
+   *
+   * This used to return early when there was no `user`, because the only
+   * source was a `user_subscriptions` row keyed on the Supabase id. That is
+   * no longer true: a purchase made while signed out lives on RevenueCat's
+   * anonymous app user id, and `isPremiumNow` asks the store when the
+   * database has nothing to say. So it now runs whether or not anyone is
+   * signed in — otherwise the person who just paid without an account would
+   * watch the paywall stay shut.
+   *
+   * It re-runs on sign-in as well, which is when `identify()` has aliased any
+   * anonymous purchase onto the account.
+   */
   useEffect(() => {
-    const checkPremiumStatus = async () => {
-      if (!user) {
-        setIsPremium(false);
-        return;
-      }
+    let cancelled = false;
 
+    (async () => {
+      const premium = await isPremiumNow(user?.id ?? null);
+      if (!cancelled) setIsPremium(premium);
+    })();
+
+    return () => { cancelled = true; };
+  }, [user]);
+
+  /*
+   * The account button's face. Read once per account rather than from
+   * `userProfile`, which is only filled in when settings are opened — the button
+   * is on screen long before that.
+   */
+  useEffect(() => {
+    if (!user) {
+      setAvatarInfo({ url: null, initial: '', name: '' });
+      return;
+    }
+    let cancelled = false;
+    const fallback = (user.user_metadata?.name || user.email || '').toString().trim();
+    setAvatarInfo({ url: null, initial: fallback.charAt(0), name: fallback.split('@')[0] });
+
+    (async () => {
       try {
-        // Get premium plan ID first
-        const { data: premiumPlans } = await supabase
-          .from('subscription_plans')
-          .select('id')
-          .eq('plan_slug', 'premium')
-          .maybeSingle();
-
-        const premiumPlanId = premiumPlans?.id;
-        console.log('📋 Premium plan ID:', premiumPlanId);
-
-        if (!premiumPlanId) {
-          console.log('❌ Could not find premium plan');
-          setIsPremium(false);
-          return;
-        }
-
-        const { data: subscription } = await supabase
-          .from('user_subscriptions')
-          .select('id, status, plan_id, expires_at')
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('avatar_url, display_name')
           .eq('user_id', user.id)
-          .eq('status', 'active')
-          .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
           .maybeSingle();
-
-        if (subscription) {
-          // Check if subscription is not expired
-          const isExpired = subscription.expires_at && new Date(subscription.expires_at) < new Date();
-
-          /*
-           * A premium row with no expiry used to mean a Lifetime purchase, and
-           * the app labelled it that way. There is no Lifetime plan any more —
-           * it was taken off the paywall — so the only rows without an expiry
-           * now are comped ones: the demo account for review, and anything
-           * granted from the admin screen. They get Pro, because that is the
-           * only paid tier there is.
-           */
-          console.log('📋 Subscription details:', {
-            subscription_id: subscription.id,
-            status: subscription.status,
-            plan_id: subscription.plan_id,
-            premium_plan_id: premiumPlanId,
-            expires_at: subscription.expires_at,
-            isExpired
-          });
-
-          if (!isExpired) {
-            const isPremiumValue = subscription.plan_id === premiumPlanId;
-            console.log('✅ Setting isPremium to:', isPremiumValue);
-            setIsPremium(isPremiumValue);
-          } else {
-            console.log('⏳ Subscription expired, setting isPremium to false');
-            setIsPremium(false);
-          }
-        } else {
-          console.log('❌ No subscription found');
-          setIsPremium(false);
-        }
-      } catch (error) {
-        console.error('Error checking premium status:', error);
-        setIsPremium(false);
+        if (cancelled || !data) return;
+        const name = (data.display_name || fallback).toString().trim();
+        setAvatarInfo({ url: data.avatar_url || null, initial: name.charAt(0), name: name.split('@')[0] });
+      } catch {
+        // The letter from the account's own name is already showing.
       }
-    };
+    })();
 
-    checkPremiumStatus();
+    return () => { cancelled = true; };
   }, [user]);
 
   // Load dreams for calendar
-  useEffect(() => {
-    const loadDreams = async () => {
+  const loadDreams = useCallback(async () => {
       if (!user) {
         setDreams([]);
         setCheckinsByDate({});
@@ -449,15 +400,31 @@ export default function SimpleDreamInterfaceWithAuth() {
       try {
         /* Loaded whether or not any dream exists — a month of pebbles and no
            writing is the ordinary case, not an edge one. */
+        /*
+         * Every check-in for the day, not only the ones filed as 'morning'.
+         *
+         * The pebble used to be written as an 'evening' row whenever it was
+         * tapped after noon, and this query asked for mornings — so an
+         * afternoon pebble saved correctly and then never appeared anywhere.
+         * New ones are always 'morning' now (see handleEmotionSelect), but the
+         * rows already written that way are still in the table and are still
+         * days that happened.
+         *
+         * Keyed by date, so a date holding both an old evening row and a
+         * morning row collapses to one square rather than counting twice; the
+         * morning wins because the ritual is what that colour is describing.
+         */
         const { data: checkinRows } = await supabase
           .from('checkins')
-          .select('check_date, emotion')
-          .eq('user_id', user.id)
-          .eq('time_of_day', 'morning');
+          .select('check_date, time_of_day, emotion')
+          .eq('user_id', user.id);
         if (checkinRows) {
           const map: Record<string, { emotion: string | null }> = {};
+          const isMorning: Record<string, boolean> = {};
           checkinRows.forEach((c: any) => {
+            if (map[c.check_date] && isMorning[c.check_date]) return;
             map[c.check_date] = { emotion: c.emotion ?? null };
+            isMorning[c.check_date] = c.time_of_day === 'morning';
           });
           setCheckinsByDate(map);
         }
@@ -484,10 +451,30 @@ export default function SimpleDreamInterfaceWithAuth() {
       } catch (error) {
         console.error('Exception loading dreams:', error);
       }
-    };
-
-    loadDreams();
   }, [user]);
+
+  useEffect(() => {
+    loadDreams();
+  }, [loadDreams]);
+
+  /*
+   * And again every time the calendar is opened.
+   *
+   * This ran on sign-in and never again, so `dreams` and `checkinsByDate` were
+   * whatever existed when the app launched. Record a dream at 4am, open the
+   * menu, tap Calendar — the morning you just wrote is not there, and will not
+   * be until the app is killed and relaunched. It saved correctly every time;
+   * the calendar was reading a list fetched before it existed.
+   *
+   * Refetching on open rather than notifying from each place that writes: the
+   * mood flow, the long-press dream form and delete all change what the month
+   * should look like, and they sit at different depths under this component.
+   * One request when a panel opens is cheaper than keeping three call sites
+   * correct, and it cannot go stale by being forgotten at a fourth.
+   */
+  useEffect(() => {
+    if (showCalendar) loadDreams();
+  }, [showCalendar, loadDreams]);
 
   /**
    * Open one dream from the calendar, fetching the text the list left behind.
@@ -507,6 +494,12 @@ export default function SimpleDreamInterfaceWithAuth() {
         current?.id === dream.id ? { ...current, content: data.content } : current
       );
     }
+  };
+
+  const toggleLanguage = () => {
+    const next = language === 'en' ? 'ko' : 'en';
+    setLanguage(next);
+    localStorage.setItem('preferredLanguage', next);
   };
 
   const handleSignOut = async () => {
@@ -538,10 +531,44 @@ export default function SimpleDreamInterfaceWithAuth() {
     }
   };
 
-  const openProfileSettings = async () => {
+  const openProfileSettings = async (tab: 'profile' | 'account' | 'subscription' = 'profile') => {
+    setProfileTab(tab);
+    setShowSettings(false);
     setMenuOpen(false);
     await fetchUserProfile();
     setTimeout(() => setShowProfileSettings(true), 150);
+  };
+
+  /*
+   * Which tab is showing, derived from the panel flags rather than stored, so it
+   * cannot drift from what is actually on screen.
+   */
+  const activeTab: TabId =
+    showHistory || showCalendar ? 'journal'
+    : showInsights || showMonthlyReport ? 'insights'
+    : 'today';
+  const activeSub: SubId | null =
+    showHistory ? 'history'
+    : showCalendar ? 'calendar'
+    : showInsights ? 'insights'
+    : showMonthlyReport ? 'monthly'
+    : null;
+
+  const selectTab = (tab: TabId) => {
+    setMenuOpen(false);
+    if (tab === activeTab) return;
+    setCalendarSelectedDate(null);
+    if (tab === 'today') {
+      openPanel(null);
+      return;
+    }
+    // Guests tapping a place that needs an account get the sign-in panel.
+    handleGuestAction(() => openPanel(tab === 'journal' ? 'calendar' : 'insights'));
+  };
+
+  const selectSub = (sub: SubId) => {
+    setCalendarSelectedDate(null);
+    openPanel(sub);
   };
 
   console.log('Render check - user:', !!user, 'hasProfile:', hasProfile, 'loading:', loading, 'checkingProfile:', checkingProfile);
@@ -601,259 +628,52 @@ export default function SimpleDreamInterfaceWithAuth() {
   // Show main app (for both logged-in users and guests)
   return (
     <>
-      {/* Hamburger Menu Button (Top Right) */}
-      <button
+      {/*
+        Settings gear (top right). It opens the drawer, which now only holds what
+        is about the account — the places moved to the bottom tab bar.
+      */}
+      <AccountButton
+        language={language}
+        open={menuOpen}
         onClick={() => setMenuOpen(!menuOpen)}
-        style={{
-          position: 'fixed',
-          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-          right: 'calc(env(safe-area-inset-right, 0px) + 20px)',
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.5)',
-          borderRadius: '12px',
-          cursor: 'pointer',
-          padding: '12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '5px',
-          transition: 'all 0.3s',
-          zIndex: 10000,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)'
-        }}
-        aria-label="Menu"
-      >
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          transform: menuOpen ? 'rotate(45deg) translateY(8px)' : 'none'
-        }}></div>
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          opacity: menuOpen ? 0 : 1
-        }}></div>
-        <div style={{
-          width: '24px',
-          height: '2.5px',
-          background: 'var(--matcha-dark)',
-          borderRadius: '2px',
-          transition: 'all 0.3s',
-          transform: menuOpen ? 'rotate(-45deg) translateY(-8px)' : 'none'
-        }}></div>
-      </button>
+      />
 
-      {/* Hamburger Menu Sidebar */}
+      {/*
+        The menu under the gear, and the settings sheet it leads to. They replace
+        the old right-hand drawer: the places are the tab bar now, so what is left
+        is four rows and a settings screen.
+      */}
       {menuOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setMenuOpen(false)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(30,41,35,0.4)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', zIndex: 9998 }}
-          />
-
-          {/* Sidebar */}
-          <div style={{
-            position: 'fixed', top: 0, right: 0,
-            width: 'min(280px, 80vw)', height: '100vh',
-            background: 'rgba(255,255,255,0.88)',
-            backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)',
-            borderLeft: '1px solid rgba(255,255,255,0.9)',
-            boxShadow: '-15px 0 50px rgba(0,0,0,0.1)',
-            zIndex: 9999,
-            display: 'flex', flexDirection: 'column',
-            padding: '40px 20px 32px', boxSizing: 'border-box',
-            fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
-            animation: 'slideInRight 0.3s ease-out',
-            overflow: 'hidden'
-          }}>
-            <style>{`@keyframes slideInRight { from { transform: translateX(100%) } to { transform: translateX(0) } }`}</style>
-
-            {/*
-              * Room for the hamburger, which is fixed above this panel and
-              * turns into an X while the menu is open. The drawer used to carry
-              * a second close button of its own, directly under that one — two
-              * X's stacked in the same corner, both doing the same thing. The
-              * one that stays is the one you already pressed to get here.
-              */}
-            <div style={{ height: 44, flexShrink: 0 }} />
-
-            {/* Profile button - original style, only for logged in users */}
-            {user && (
-              <button onClick={openProfileSettings} style={{ padding: '1rem 0.5rem', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8, flexShrink: 0 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127,176,105,0.1)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
-              >
-                <div style={{ position: 'relative' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #7FB069 0%, #9BC88B 50%, #B8D4A8 100%)', boxShadow: '0 2px 8px rgba(127,176,105,0.3)' }} />
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="3" style={{ position: 'absolute', bottom: '-2px', right: '-4px' }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </div>
-
-                {/*
-                  * Say that the subscription is on.
-                  *
-                  * `isPremium` was computed here and handed only to
-                  * DreamInsights and ProfileSettings, so after paying the menu
-                  * looked exactly as it had before and the only proof was three
-                  * taps away under Profile → Subscription. Someone who has just
-                  * paid should be able to see it where they already are.
-                  */}
-                {isPremium && (
-                  <span style={{
-                    marginLeft: 8,
-                    padding: '3px 9px',
-                    borderRadius: 999,
-                    background: 'linear-gradient(135deg, #7AB382 0%, #5C8D63 100%)',
-                    color: '#fff',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: '0.04em',
-                    boxShadow: '0 2px 6px rgba(122,179,130,0.35)',
-                  }}>
-                    PRO
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Menu list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, overflowY: 'auto' }}>
-              {/* Home */}
-              {(() => {
-                const isActive = !showHistory && !showCalendar && !showInsights && !showMonthlyReport;
-                return (
-                  <button onClick={() => { setShowHistory(false); setShowCalendar(false); setShowInsights(false); setShowStreak(false); setShowMonthlyReport(false); setMenuOpen(false); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    </span>
-                    {t.home}
-                  </button>
-                );
-              })()}
-
-              {/* Dream Journal */}
-              {(() => {
-                const isActive = showHistory;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('history'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-                    </span>
-                    {t.dreamJournal}
-                  </button>
-                );
-              })()}
-
-              {/* Calendar */}
-              {(() => {
-                const isActive = showCalendar;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('calendar'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    </span>
-                    {t.calendar}
-                  </button>
-                );
-              })()}
-
-              {/* Reflection */}
-              {(() => {
-                const isActive = showInsights;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('insights'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    </span>
-                    {t.insights}
-                  </button>
-                );
-              })()}
-
-              {/* Monthly Review */}
-              {(() => {
-                const isActive = showMonthlyReport;
-                return (
-                  <button onClick={() => handleGuestAction(() => { openPanel('monthly'); setMenuOpen(false); })}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: isActive ? '1px solid rgba(122,179,130,0.4)' : '1px solid transparent', background: isActive ? 'rgba(122,179,130,0.15)' : 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: isActive ? 700 : 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: isActive ? 'inset 0 2px 5px rgba(255,255,255,0.6), 0 4px 12px rgba(122,179,130,0.1)' : 'none' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: isActive ? 1 : 0.6, color: isActive ? '#7AB382' : 'currentColor', flexShrink: 0 }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                    </span>
-                    {t.monthlyReport}
-                  </button>
-                );
-              })()}
-
-              {/* Pricing */}
-              <button onClick={() => { goTo('/pricing/'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                </span>
-                {t.pricing}
-              </button>
-
-              {/* My Archetype */}
-              <button onClick={() => { goTo('/archetype-test/'); }}
-                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px', borderRadius: 16, border: '1px solid transparent', background: 'transparent', color: '#4A5D4E', fontSize: 15, fontWeight: 500, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, opacity: 0.6, flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </span>
-                {language === 'ko' ? '나의 아키타입' : 'My Archetype'}
-              </button>
-            </div>
-
-            {/* Footer */}
-            <div style={{ marginTop: 'auto', paddingTop: 20, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Sign In for guests */}
-              {!user && (
-                <button onClick={() => setIsGuestMode(true)}
-                  style={{ width: '100%', padding: '12px 16px', background: 'rgba(122,179,130,0.18)', color: '#4A5D4E', border: 'none', borderRadius: 14, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s', fontFamily: 'inherit' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                  {language === 'ko' ? '로그인 / 회원가입' : 'Sign In / Sign Up'}
-                </button>
-              )}
-
-              {/* Language toggle */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 4px' }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#4A5D4E' }}>{t.language}</span>
-                <button onClick={() => { const nl = language === 'en' ? 'ko' : 'en'; setLanguage(nl); localStorage.setItem('preferredLanguage', nl); }}
-                  style={{ position: 'relative', width: 56, height: 28, background: '#7AB382', borderRadius: 20, border: 'none', cursor: 'pointer', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)' }}>
-                  <div style={{ position: 'absolute', top: 4, left: language === 'ko' ? 4 : 28, width: 20, height: 20, background: 'white', borderRadius: '50%', transition: 'left 0.3s ease', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }} />
-                  <span style={{ position: 'absolute', top: '50%', left: language === 'ko' ? 28 : 8, transform: 'translateY(-50%)', fontSize: 9, fontWeight: 700, color: 'white', letterSpacing: 0.5 }}>{language === 'ko' ? 'KO' : 'EN'}</span>
-                </button>
-              </div>
-
-              {/* Social links */}
-              <div style={{ display: 'flex', gap: 10, padding: '0 4px' }}>
-                <a href="https://instagram.com/novakitz" target="_blank" rel="noopener noreferrer"
-                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                </a>
-                <a href="mailto:hello@novakitz.com"
-                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4A5D4E', textDecoration: 'none', boxShadow: 'inset 2px 2px 5px rgba(255,255,255,0.8)', transition: 'all 0.2s' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </>
+        <AccountMenu
+          language={language}
+          signedIn={!!user}
+          isPremium={isPremium}
+          name={avatarInfo.name}
+          avatarUrl={avatarInfo.url}
+          initial={avatarInfo.initial}
+          onClose={() => setMenuOpen(false)}
+          onProfile={() => openProfileSettings('profile')}
+          onSignIn={() => { setMenuOpen(false); setIsGuestMode(true); }}
+          onPro={() => { setMenuOpen(false); goTo('/pricing/'); }}
+          onArchetype={() => { setMenuOpen(false); goTo('/archetype-test/'); }}
+          onSettings={() => { setMenuOpen(false); setShowSettings(true); }}
+        />
       )}
 
-      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} />
+      {showSettings && (
+        <SettingsSheet
+          language={language}
+          signedIn={!!user}
+          isPremium={isPremium}
+          onClose={() => setShowSettings(false)}
+          onToggleLanguage={toggleLanguage}
+          onOpenProfile={(tab) => openProfileSettings(tab)}
+          onSignIn={() => { setShowSettings(false); setIsGuestMode(true); }}
+          onSignOut={async () => { setShowSettings(false); await handleSignOut(); }}
+        />
+      )}
+
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} />
 
       {/* Dream Insights Modal */}
       {showInsights && user && (
@@ -867,7 +687,8 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Monthly Dream Report Modal */}
       {showMonthlyReport && user && (
-        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="mdr-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="home-scene__grain" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * On a phone this is the screen, not a card on it.
             *
@@ -877,13 +698,15 @@ export default function SimpleDreamInterfaceWithAuth() {
             */}
           <style>{`
             .mdr-card {
-              background: white;
+              background: transparent;
+              position: relative;
+              z-index: 2;
               border-radius: 20px;
               max-width: 600px;
               width: 92%;
               max-height: 90vh;
               overflow: hidden;
-              box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+              box-shadow: none;
             }
             @media (max-width: 640px) {
               .mdr-card {
@@ -893,7 +716,8 @@ export default function SimpleDreamInterfaceWithAuth() {
                 max-height: 100%;
                 border-radius: 0;
                 box-shadow: none;
-                padding-top: env(safe-area-inset-top);
+                /* The report's own header carries the top inset (see .mdr-hdr), so its paper
+                   reaches the top edge instead of starting in a band below the status bar. */
                 padding-bottom: env(safe-area-inset-bottom);
               }
             }
@@ -906,28 +730,30 @@ export default function SimpleDreamInterfaceWithAuth() {
 
       {/* Calendar Modal */}
       {showCalendar && user && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div className="cal-shell" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', zIndex: 10001, overflowY: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 20px 40px' }}>
+          <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" style={{ position: 'fixed' }} />
           {/*
             * No white card around the calendar any more. The sheet brings its
             * own paper, its own shadow and its own month title, so wrapping it
             * put a card inside a card and printed the word "Calendar" directly
             * above the word "August".
             */}
-          <div style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ maxWidth: '560px', width: '100%', position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 12px)', right: 16, zIndex: 3 }}>
               <button
                 onClick={() => {
                   setShowCalendar(false);
                   setCalendarSelectedDate(null);
                 }}
                 aria-label={language === 'ko' ? '닫기' : 'Close'}
-                style={{ background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: '#5C7061', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                style={{ background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '50%', boxShadow: '0 2px 10px rgba(40,60,45,0.16)', cursor: 'pointer', color: '#2E3C33', width: '40px', height: '40px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               >
-                ✕
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
               </button>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <DreamCalendar
+                language={language}
                 dreams={dreams}
                 checkins={checkinsByDate}
                 onDateSelect={(date) => setCalendarSelectedDate(date)}
@@ -952,8 +778,8 @@ export default function SimpleDreamInterfaceWithAuth() {
               if (selectedDreams.length === 0) return null;
 
               return (
-                <div style={{ background: 'white', borderRadius: '16px', padding: '1.25rem', boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }}>
-                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--matcha-dark)', marginBottom: '1rem' }}>
+                <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '24px', padding: '1.25rem', boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#7d8f82', fontFamily: 'monospace', letterSpacing: '1.2px', textTransform: 'uppercase', marginBottom: '1rem' }}>
                     {new Date(calendarSelectedDate).toLocaleDateString(language === 'ko' ? 'ko-KR' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -962,22 +788,15 @@ export default function SimpleDreamInterfaceWithAuth() {
                         key={dream.id}
                         onClick={() => openCalendarDream(dream)}
                         style={{
-                          padding: '12px 16px',
-                          background: 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)',
-                          borderRadius: '10px',
-                          border: '1px solid rgba(127, 176, 105, 0.15)',
+                          padding: '14px 18px',
+                          background: 'rgba(255,255,255,0.7)',
+                          borderRadius: '18px',
+                          border: '1px solid rgba(255,255,255,0.9)',
                           cursor: 'pointer',
                           textAlign: 'left',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.15) 0%, rgba(139, 195, 74, 0.1) 100%)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(127, 176, 105, 0.08) 0%, rgba(139, 195, 74, 0.05) 100%)';
                         }}
                       >
-                        <span style={{ fontSize: '0.95rem', fontWeight: '500', color: 'var(--matcha-dark)' }}>
+                        <span style={{ fontSize: '1rem', fontWeight: '600', color: '#2E3C33' }}>
                           {dream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
                         </span>
                       </button>
@@ -986,30 +805,53 @@ export default function SimpleDreamInterfaceWithAuth() {
                 </div>
               );
             })()}
+
+            {/*
+              Today's affirmation under the calendar. The calendar is the first thing the
+              Journal tab shows now, and the month is mostly empty below the grid early on.
+              Same card look as the one on Entries; it reads today's saved affirmations, and
+              says what fills it when there are none.
+            */}
+            <div style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)', backdropFilter: 'blur(22px) saturate(180%)', WebkitBackdropFilter: 'blur(22px) saturate(180%)', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '24px', padding: '18px 22px', boxShadow: '0 8px 24px rgba(40,60,45,0.12), inset 0 1px 0 rgba(255,255,255,0.95)', position: 'relative', overflow: 'hidden' }}>
+              <span aria-hidden="true" style={{ position: 'absolute', fontSize: '110px', color: '#EDA3BC', opacity: 0.18, right: '16px', top: '-18px', fontFamily: 'serif', pointerEvents: 'none', lineHeight: 1 }}>✧</span>
+              <p style={{ fontFamily: "'Roboto Mono', monospace", fontSize: '11px', color: '#7d8f82', letterSpacing: '2px', margin: '0 0 10px', textTransform: 'uppercase', position: 'relative' }}>
+                Today&apos;s Affirmation
+              </p>
+              <div style={{ position: 'relative' }}>
+                <AffirmationsDisplay
+                  user={user}
+                  checkInTime={new Date().getHours() < 12 ? 'morning' : 'evening'}
+                  language={language || 'en'}
+                  isPremium={isPremium}
+                  emptyText={language === 'ko' ? '꿈을 기록하면 오늘의 확언이 여기에 나타나요.' : 'Record a dream and today\'s affirmation will appear here.'}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* Dream Detail Modal (from Calendar) */}
       {calendarSelectedDream && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(1.25rem, 4vw, 2rem)', maxWidth: '500px', width: '92%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative' }}>
+        <div onClick={() => setCalendarSelectedDream(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(60,50,70,0.32)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', zIndex: 20500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ backgroundImage: 'var(--home-sky-day)', backgroundColor: '#F4EEE5', border: '1px solid rgba(255,255,255,0.85)', borderRadius: '32px', padding: 'clamp(1.5rem, 4vw, 2rem)', maxWidth: '460px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 24px 60px rgba(40,30,60,0.28)', position: 'relative' }}>
             <button
               onClick={() => setCalendarSelectedDream(null)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#999' }}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
+              style={{ position: 'absolute', top: 14, right: 14, width: 40, height: 40, padding: 0, borderRadius: '50%', background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)', boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: '#2E3C33', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', fontWeight: '600', color: 'var(--matcha-dark)', paddingRight: '2rem' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontFamily: language === 'ko' ? "'KoDisplay', 'Pretendard', serif" : 'var(--font-display), Georgia, serif', fontSize: language === 'ko' ? '1.3rem' : '1.9rem', fontWeight: language === 'ko' ? 500 : 400, color: '#2E3C33', paddingRight: '3rem', lineHeight: 1.2 }}>
               {calendarSelectedDream.title || (language === 'ko' ? '제목 없음' : 'Untitled')}
             </h3>
-            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--sage)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            <p style={{ margin: 0, fontSize: '1rem', color: '#4A5D4E', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
               {calendarSelectedDream.content?.split('\n\n---\n\n')[0] || ''}
             </p>
             {calendarSelectedDream.tags && calendarSelectedDream.tags.length > 0 && (
               <div style={{ marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {calendarSelectedDream.tags.map((tag: string, idx: number) => (
-                  <span key={idx} style={{ padding: '4px 10px', background: 'rgba(127, 176, 105, 0.15)', borderRadius: '12px', fontSize: '0.75rem', color: 'var(--matcha-dark)' }}>
+                  <span key={idx} style={{ padding: '4px 10px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '12px', fontSize: '0.8rem', fontFamily: 'monospace', fontWeight: 700, color: '#4A5D4E' }}>
                     {tag}
                   </span>
                 ))}
@@ -1031,6 +873,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             fetchUserProfile();
           }}
           isPremium={isPremium}
+          initialTab={profileTab}
         />
       )}
 
@@ -1044,62 +887,57 @@ export default function SimpleDreamInterfaceWithAuth() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
-            zIndex: 10001,
+            background: 'rgba(60,50,70,0.32)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            zIndex: 20600,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '12px',
             padding: '20px'
           }}
         >
           {/*
-            The close button used to be pinned inside the card's top-right
-            corner, where it sat on top of the Apple button's label. Outside the
-            card it cannot collide with anything, and the backdrop closes the
-            panel too — which matters now that "Maybe later" is gone. That line
-            was a third way to say no on a panel someone opened themselves.
+            The home sky in a rounded frame, like the streak window. The close is
+            a round control inside the frame's top right; the frame is padded
+            enough at the top that it cannot reach the first button. Tapping the
+            backdrop closes the panel as well.
           */}
-          <div style={{ width: '92%', maxWidth: '380px', display: 'flex', justifyContent: 'flex-end' }}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: 'relative',
+              overflow: 'hidden',
+              backgroundImage: 'var(--home-sky-day)',
+              backgroundColor: '#F4EEE5',
+              border: '1px solid rgba(255,255,255,0.85)',
+              borderRadius: '32px',
+              padding: '34px 24px 26px',
+              maxWidth: '380px',
+              width: '100%',
+              boxSizing: 'border-box',
+              boxShadow: '0 24px 60px rgba(40,30,60,0.28), inset 0 1px 0 rgba(255,255,255,0.9)',
+              textAlign: 'center',
+            }}
+          >
+            <div className="home-scene__grain" aria-hidden="true" />
             <button
               onClick={() => setIsGuestMode(false)}
               aria-label={language === 'ko' ? '닫기' : 'Close'}
               style={{
-                background: 'rgba(255, 255, 255, 0.9)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '34px',
-                height: '34px',
-                fontSize: '17px',
-                cursor: 'pointer',
-                color: 'var(--matcha-dark)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                position: 'absolute', top: 14, right: 14, zIndex: 3,
+                width: 40, height: 40, padding: 0, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.92)', border: '1px solid rgba(255,255,255,0.9)',
+                boxShadow: '0 2px 10px rgba(40,60,45,0.16)', color: '#2E3C33', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
-              ✕
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
-          </div>
-
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'rgba(255, 255, 255, 0.85)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              borderRadius: '24px',
-              padding: 'clamp(1.5rem, 4vw, 2rem)',
-              maxWidth: '380px',
-              width: '92%',
-              boxShadow: '0 8px 32px rgba(127, 176, 105, 0.15), 0 0 0 1px rgba(255,255,255,0.5) inset',
-              textAlign: 'center',
-              border: '1px solid rgba(127, 176, 105, 0.2)'
-            }}
-          >
+            <p style={{ position: 'relative', zIndex: 2, margin: '4px 0 24px', fontFamily: "var(--font-display), Georgia, serif", fontSize: 36, color: '#2E3C33', lineHeight: 1.1 }}>
+              Novakitz
+            </p>
+            <div style={{ position: 'relative', zIndex: 2 }}>
             {/*
               The sales pitch that used to sit here — a headline asking whether
               you wanted to brew your dreams, and a badge counting the free
@@ -1108,8 +946,41 @@ export default function SimpleDreamInterfaceWithAuth() {
               inside, not another round of persuasion.
             */}
             <Auth onAuthSuccess={() => setIsGuestMode(false)} />
+            </div>
           </div>
         </div>
+      )}
+
+      {/*
+        Bottom tab bar — POST_LAUNCH §0.
+
+        Steps aside for anything that wants the whole screen: the drawer, the
+        sign-in panel, settings, the streak popup, a selected calendar day, and
+        the home screen's own full-screen steps (writing a dream, reading a
+        response, the mood flow). The mood flow also sits above it by z-index.
+      */}
+      {!showSettings && !isGuestMode && !showProfileSettings && !showStreak && !calendarSelectedDream && !immersive && (
+        <>
+          {/*
+            The panels are full-screen overlays that each end at the bottom of
+            the screen. Shortening them by the bar's height, rather than adding
+            bottom padding inside each one, keeps their own scroll areas and
+            headers untouched. The floating switch needs a little more room, so
+            only the tabs that have one get it.
+          */}
+          <style>{`
+            .dream-history, .di-shell, .mdr-shell, .cal-shell {
+              bottom: calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + subSwitchSpace(activeTab)}px) !important;
+            }
+          `}</style>
+          <BottomTabBar
+            language={language}
+            active={activeTab}
+            sub={activeSub}
+            onSelectTab={selectTab}
+            onSelectSub={selectSub}
+          />
+        </>
       )}
 
     </>

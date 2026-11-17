@@ -15,15 +15,15 @@ import '../styles/reminder-settings.css';
 const copy = {
   en: {
     heading: 'Daily reminders',
-    morning: 'Morning — record your dream',
-    evening: 'Evening — reflect on today',
+    morning: 'Morning',
+    evening: 'Evening',
     webNote: 'Reminders are available in the Novakitz app.',
     denied: 'Notifications are turned off for Novakitz. Enable them in your device settings to use reminders.',
   },
   ko: {
     heading: '데일리 리마인더',
-    morning: '아침 — 꿈 기록하기',
-    evening: '저녁 — 하루 돌아보기',
+    morning: '아침',
+    evening: '저녁',
     webNote: '리마인더는 Novakitz 앱에서 사용할 수 있습니다.',
     denied: '알림이 꺼져 있습니다. 기기 설정에서 Novakitz 알림을 허용해 주세요.',
   },

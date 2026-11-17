@@ -27,6 +27,15 @@ const BLOOM_SOURCES = {
   night: '/scenes/bloom-night.png',
 } as const;
 
+/*
+ * The tulip is the home screen now (2026-11-03). It is a transparent PNG cut
+ * to the flower, not a square painting: no circle is cut around it, because a
+ * circle slices the petal tips. It sits on the same bloom of light the
+ * landscape did. If the file is missing the landscape disc below still draws,
+ * so a bad deploy cannot leave the home screen empty.
+ */
+const TULIP_SOURCE = '/scenes/tulip-day.png';
+
 interface HomeSceneProps {
   /**
    * The disc keeps the orb's press semantics: a short tap opens the emotion
@@ -48,6 +57,7 @@ export default function HomeScene({
   const { scene, canToggle, toggle } = useTimeOfDay();
   const [artMissing, setArtMissing] = useState(false);
   const [bloomMissing, setBloomMissing] = useState(false);
+  const [tulipMissing, setTulipMissing] = useState(false);
 
   return (
     <div className={`home-scene home-scene--${scene}`}>
@@ -64,6 +74,16 @@ export default function HomeScene({
         onTouchEnd={onPressEnd}
         aria-label={label}
       >
+        {!tulipMissing ? (
+          <span className="home-scene__flower">
+            <img
+              className="home-scene__flower-art"
+              src={TULIP_SOURCE}
+              alt=""
+              onError={() => setTulipMissing(true)}
+            />
+          </span>
+        ) : (
         <span className="home-scene__disc">
           {artMissing ? (
             <SceneArt className="home-scene__art" />
@@ -92,6 +112,7 @@ export default function HomeScene({
             </span>
           )}
         </span>
+        )}
       </button>
 
       {canToggle && (

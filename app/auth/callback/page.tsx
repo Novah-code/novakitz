@@ -72,13 +72,32 @@ export default function AuthCallback() {
     handleAuthCallback();
   }, [router]);
 
+  /*
+   * Inline styles, and English.
+   *
+   * This was Tailwind, which emits nothing in this project, so the screen that
+   * shows while a Google or Apple sign-in comes back was unstyled black text on
+   * white. It is brief, but it is the first thing a person sees after handing
+   * over their account, and App Review sees it too — in Korean, hardcoded,
+   * whatever language the rest of the app was showing.
+   */
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-matcha-light via-white to-matcha-green">
-      <div className="glass-strong p-8 rounded-xl text-center">
-        <div className="hero-teacup mb-4">🍵</div>
-        <h2 className="text-2xl font-semibold mb-2">로그인 처리 중...</h2>
-        <p className="text-gray-600">잠시만 기다려 주세요</p>
-        <div className="spinner mt-4"></div>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #E8F5E8 0%, #FFFFFF 55%, #D9EBDC 100%)',
+        padding: 24,
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 14 }}>🍵</div>
+        <h2 style={{ fontSize: 18, fontWeight: 600, color: '#2F3B33', margin: '0 0 6px' }}>
+          Signing you in…
+        </h2>
+        <p style={{ fontSize: 14, color: '#6b7280', margin: 0 }}>One moment.</p>
       </div>
     </div>
   );

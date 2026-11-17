@@ -244,7 +244,21 @@ export async function POST(request: NextRequest) {
     // The monthly limit was enforced only in the browser, so calling this route
     // directly bypassed it. Guests are left alone here: they have no row to
     // count against, and gating them is a product decision rather than a fix.
-    if (mode === 'dream' && userId) {
+    /*
+     * `ego` is in here too now.
+     *
+     * The mood reading was gated in the browser (canAnalyzeDream, called by
+     * handleFinishEgo) and nowhere else, which is the exact shape of the bug
+     * the comment above describes for dreams: the check exists, and calling
+     * the route directly walks past it. The two are the same kind of request —
+     * a model asked to say something back — so they are counted and limited
+     * the same way.
+     *
+     * `monthly` stays out: it is one call per account per month for the
+     * monthly review, and spending someone's morning readings on the screen
+     * that summarises their month would be a strange thing to charge for.
+     */
+    if ((mode === 'dream' || mode === 'ego') && userId) {
       const quota = await checkQuota(userId);
       if (!quota.allowed) {
         return NextResponse.json(

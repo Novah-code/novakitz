@@ -253,7 +253,7 @@ function handleDreamRecord(user: KakaoUser): KakaoSkillResponse {
   return buildResponse([
     textCard(
       '🌙 꿈을 기록하세요',
-      'AI가 융 심리학 기반으로 당신의 꿈을 분석해드립니다.\n\n기록한 꿈은 월간 리포트로 패턴을 분석해드려요.',
+      'AI가 당신의 꿈을 읽어드립니다.\n\n기록한 꿈은 월간 리포트로 패턴을 분석해드려요.',
       [{ action: 'webLink', label: '꿈 기록 시작', webLinkUrl: `${baseUrl}?mode=dream&ref=kakao&uid=${user.id}` }]
     ),
   ]);

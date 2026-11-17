@@ -10,11 +10,35 @@
  * three colour fields and a curve behind an already busy painting, and the
  * screen stopped having one subject. Reverted, deliberately.
  *
+ * 2026-11-03: the field changed from one flat blue to soft blooms of peach,
+ * lavender and butter on cream (the day scene). This is closer to the dawn
+ * version than to the flat blue, so the reason it was reverted is worth
+ * restating, and why this one is different. That version put a blue-to-pink sky
+ * AND a green hill AND a curve behind the painting — saturated colour and
+ * structure. Here there is no hill and no horizon, the fields are low-contrast
+ * pastels, and the painted disc is the only saturated thing on the screen, so it
+ * still wins the eye. That is a judgement from screenshots at phone size, not
+ * from a phone: if the screen stops having one subject again, go back to a
+ * single colour — `--sky` below is the only line to change.
+ *
  * Two things from that version stayed, because they were fixes rather than
  * decoration: the bloom is a radial gradient instead of a wide box-shadow
  * (large blurs composite in tiles and the tile edges showed as faint
  * rectangles across the sky), and the grain is measured rather than guessed.
  */
+
+/*
+ * The day sky, defined once. Three blooms over cream: warm top-left, lavender
+ * right, butter at the foot. The home scene wears it, and so does the pebble
+ * picker, which is a screen of its own and should read as the same room.
+ */
+:root {
+  --home-sky-day:
+    radial-gradient(circle at 12% 10%, rgba(255, 190, 165, 0.95) 0%, rgba(255, 190, 165, 0) 52%),
+    radial-gradient(circle at 92% 28%, rgba(196, 180, 255, 0.90) 0%, rgba(196, 180, 255, 0) 54%),
+    radial-gradient(circle at 40% 100%, rgba(255, 228, 150, 0.95) 0%, rgba(255, 228, 150, 0) 58%),
+    linear-gradient(180deg, #F7F1E8 0%, #F2ECE2 100%);
+}
 
 .home-scene {
   position: fixed;
@@ -26,6 +50,7 @@
 .home-scene--day {
   --field: #5BB0F5;
   --field-deep: #4FA4EE;
+  --sky: var(--home-sky-day);
   --halo: rgba(255, 255, 255, 0.55);
   --halo-fade: rgba(255, 255, 255, 0);
 }
@@ -33,12 +58,13 @@
 .home-scene--night {
   --field: #1B2A5E;
   --field-deep: #141F47;
+  --sky: linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
   --halo: rgba(150, 180, 255, 0.35);
   --halo-fade: rgba(150, 180, 255, 0);
 }
 
 .home-scene {
-  background-image: linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
+  background-image: var(--sky);
   transition: background-image 900ms ease;
 }
 
@@ -186,6 +212,64 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='1.6' intercept='-0.3'/%3E%3CfeFuncG type='linear' slope='1.6' intercept='-0.3'/%3E%3CfeFuncB type='linear' slope='1.6' intercept='-0.3'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23m)'/%3E%3C/svg%3E");
 }
 
+/*
+ * The same grain, drawn without a blend mode, for screens that scroll.
+ *
+ * `overlay` needs the sky underneath it to be in the same compositing group. On a
+ * full-screen panel that scrolls (Inner Journal, the calendar, profile, the mood
+ * flow) iOS keeps the panel's own background in a separate layer, so the grain
+ * blended with nothing and was laid on as a flat 60% grey: a muddy, speckled
+ * sky (seen on a phone, 2026-11-05). This version is light and dark specks with
+ * their own transparency, so it looks the same wherever it sits. Strength was
+ * matched to the overlay version by measurement on the same sky (high-frequency
+ * deviation 2.7 vs 2.9, in Chromium; not measured in WebKit).
+ */
+.home-scene__grain--flat {
+  opacity: 1;
+  mix-blend-mode: normal;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.2 0 0 0 -0.1'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.14 0 0 0 0.07'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23b)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.2 0 0 0 -0.1'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23c)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.35' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.14 0 0 0 0.07'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23d)'/%3E%3C/svg%3E");
+}
+
+/*
+ * The tulip. The portal stays the same size as the landscape disc so the tap
+ * target and the glow behind it are unchanged; the flower is drawn larger than
+ * the portal (156%, which includes the 50px transparent margin the file now carries so its soft edge never meets the image boundary) because the file keeps a margin around the petals (the flower
+ * is ~88% of the square) and the flower is meant to fill the screen. The file
+ * carries its own soft red edge, so there is no extra drop shadow here. It opens once, then breathes. No turn: a tulip turning
+ * upside down is not the same picture.
+ */
+.home-scene__flower {
+  position: absolute;
+  inset: 0;
+  display: block;
+  animation: home-scene-open 1700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-scene__flower-art {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 156%;
+  height: 156%;
+  transform: translate(-50%, -50%);
+  object-fit: contain;
+  animation: home-scene-flower-breathe 7s ease-in-out 1700ms infinite;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+@keyframes home-scene-flower-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.022); }
+}
+
 @keyframes home-scene-breathe {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.022); }
@@ -247,7 +331,9 @@
   }
   /* The flower still arrives, it just arrives already open and still. */
   .home-scene__bloom,
-  .home-scene__bloom-art {
+  .home-scene__bloom-art,
+  .home-scene__flower,
+  .home-scene__flower-art {
     animation: none;
   }
   .home-scene {

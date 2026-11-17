@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { getBadgeIcon } from './BadgeIcons';
+import '../styles/home-scene.css';
+import { scrim, skyCard, pillWhite, heading, BASE } from '../lib/skyUi';
 
 interface BadgeNotificationProps {
   badgeType: string;
@@ -74,94 +76,49 @@ export default function BadgeNotification({ badgeType, onClose, language }: Badg
       <div
         onClick={handleClose}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.4)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 10000,
+          ...scrim,
+          zIndex: 20600,
           opacity: visible ? 1 : 0,
-          transition: 'opacity 0.3s ease'
+          transition: 'opacity 0.3s ease',
         }}
       />
 
       {/* Badge Notification Card */}
       <div
         style={{
+          ...skyCard,
           position: 'fixed',
           top: '50%',
           left: '50%',
-          transform: `translate(-50%, -50%) scale(${visible ? 1 : 0.8})`,
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
-          backdropFilter: 'blur(20px)',
-          borderRadius: '24px',
-          padding: '40px 32px',
-          maxWidth: '400px',
+          transform: `translate(-50%, -50%) scale(${visible ? 1 : 0.85})`,
+          borderRadius: 32,
+          padding: '40px 28px 28px',
+          maxWidth: 380,
           width: '90%',
-          boxShadow: '0 20px 60px rgba(127, 176, 105, 0.3), 0 0 0 1px rgba(127, 176, 105, 0.2)',
-          zIndex: 10001,
+          zIndex: 20601,
           opacity: visible ? 1 : 0,
           transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          textAlign: 'center'
+          textAlign: 'center',
         }}
       >
-        {/* Celebratory Badge Icon */}
-        <div style={{
-          marginBottom: '24px',
-          animation: visible ? 'bounce 0.6s ease' : 'none'
-        }}>
-          {getBadgeIcon(badgeType, 96)}
+        <div className="home-scene__grain" aria-hidden="true" />
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ marginBottom: 20, animation: visible ? 'bounce 0.6s ease' : 'none' }}>
+            {getBadgeIcon(badgeType, 96)}
+          </div>
+
+          <h2 style={{ ...heading(language === 'ko', 32, 22), marginBottom: 10 }}>
+            {badgeNames[badgeType as keyof typeof badgeNames]?.[language] || 'New Badge!'}
+          </h2>
+
+          <p style={{ margin: '0 0 26px 0', fontSize: '0.95rem', color: BASE, lineHeight: 1.6 }}>
+            {badgeDescriptions[badgeType as keyof typeof badgeDescriptions]?.[language] || 'Congratulations!'}
+          </p>
+
+          <button onClick={handleClose} style={pillWhite}>
+            {language === 'en' ? 'Continue' : '계속하기'}
+          </button>
         </div>
-
-        {/* Badge Title */}
-        <h2 style={{
-          margin: '0 0 12px 0',
-          fontSize: '1.5rem',
-          fontWeight: 600,
-          color: 'var(--matcha-dark)',
-          fontFamily: "'Cormorant', serif"
-        }}>
-          {badgeNames[badgeType as keyof typeof badgeNames]?.[language] || 'New Badge!'}
-        </h2>
-
-        {/* Badge Description */}
-        <p style={{
-          margin: '0 0 28px 0',
-          fontSize: '0.95rem',
-          color: 'rgba(0, 0, 0, 0.6)',
-          lineHeight: 1.5
-        }}>
-          {badgeDescriptions[badgeType as keyof typeof badgeDescriptions]?.[language] || 'Congratulations!'}
-        </p>
-
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          style={{
-            padding: '12px 32px',
-            background: 'linear-gradient(135deg, #7FB069 0%, #8BC34A 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
-          }}
-        >
-          {language === 'en' ? 'Continue' : '계속하기'}
-        </button>
       </div>
 
       <style jsx>{`

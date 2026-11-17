@@ -12,14 +12,15 @@ import { G } from '../lib/uiTokens';
  * is generous enough for the longest answer here; a taller one would clip, so
  * keep answers to a paragraph or two.
  */
-export default function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
+export default function FAQItem({ q, a, tone = 'green' }: { q: string; a: React.ReactNode; tone?: 'green' | 'sky' }) {
   const [open, setOpen] = useState(false);
+  const sky = tone === 'sky';
   return (
     <div style={{
       marginBottom: 12,
-      background: open ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)',
+      background: sky ? (open ? 'linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(246,243,234,0.72) 100%)' : 'rgba(255,255,255,0.55)') : (open ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)'),
       border: `1px solid ${open ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)'}`,
-      borderRadius: 16, overflow: 'hidden',
+      borderRadius: sky ? 24 : 16, overflow: 'hidden',
       transition: 'all 0.3s ease',
       boxShadow: open ? '0 10px 20px rgba(0,0,0,0.02)' : 'none',
     }}>
@@ -32,9 +33,9 @@ export default function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
           cursor: 'pointer', textAlign: 'left',
         }}
       >
-        <span style={{ fontSize: 15, fontWeight: 500, color: G.textDark, paddingRight: '1rem' }}>{q}</span>
+        <span style={{ fontSize: 15, fontWeight: 500, color: sky ? '#2E3C33' : G.textDark, paddingRight: '1rem' }}>{q}</span>
         <span aria-hidden="true" style={{
-          fontFamily: 'monospace', fontSize: 20, color: G.green, flexShrink: 0,
+          fontFamily: 'monospace', fontSize: 20, color: sky ? '#C27A8C' : G.green, flexShrink: 0,
           transition: 'transform 0.3s', display: 'inline-block',
           transform: open ? 'rotate(45deg)' : 'none',
         }}>+</span>
@@ -44,7 +45,7 @@ export default function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
         transition: 'max-height 0.3s ease',
         padding: open ? '0 24px 20px' : '0 24px 0',
       }}>
-        <div style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: G.textBase, whiteSpace: 'pre-line' }}>{a}</div>
+        <div style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: sky ? '#4A5D4E' : G.textBase, whiteSpace: 'pre-line' }}>{a}</div>
       </div>
     </div>
   );

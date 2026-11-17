@@ -1,40 +1,53 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Roboto, Instrument_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import UpdateNotification from "../src/components/UpdateNotification";
 import CapacitorBridge from "../src/components/CapacitorBridge";
 
-const inter = Inter({
+/*
+ * The three faces, served from app/fonts/ rather than fetched from Google at
+ * build time.
+ *
+ * They were next/font/google. That downloads the font when `next build` runs,
+ * and on 2026-11-05 the download came back as something the loader could not
+ * parse ("Cannot read properties of null (reading '1')"), which stopped the app
+ * build on 윤아님's Mac and once on Vercel — with nothing wrong in the code. The
+ * files below are the same Latin subsets Google serves (taken from the
+ * @fontsource packages), so the faces and their metrics are unchanged and the
+ * build no longer needs a network. Hangul comes from Pretendard (body) and Gowun Batang (headings), in public/fonts.
+ */
+const inter = localFont({
+  src: "./fonts/inter-latin-wght-normal.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
-  display: 'swap',
+  weight: "100 900",
+  display: "swap",
   preload: true,
 });
 
-const roboto = Roboto({
+const roboto = localFont({
+  src: [
+    { path: "./fonts/roboto-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/roboto-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/roboto-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/roboto-latin-700-normal.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-roboto",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
 /*
- * The morning screens' display face.
- *
- * Loaded through next/font rather than a <link> to fonts.googleapis.com
- * because the app runs from capacitor://localhost as a static export — a
- * remote stylesheet would leave the heading in the fallback face whenever the
- * phone is offline, which for a morning app is often. next/font copies the
- * file into the bundle at build time.
+ * The morning screens' display face (Instrument Serif, regular only — italics
+ * are synthesised, as they were before). Bundled so the heading is right when
+ * the phone is offline, which for a morning app is often.
  */
-const instrumentSerif = Instrument_Serif({
+const instrumentSerif = localFont({
+  src: "./fonts/instrument-serif-latin-400-normal.woff2",
   variable: "--font-display",
-  subsets: ["latin"],
   weight: "400",
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
@@ -47,11 +60,11 @@ export const metadata: Metadata = {
     default: "Novakitz",
     template: "%s | Novakitz"
   },
-  description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track your dreams, uncover archetypes, and receive personalized daily affirmations. 무의식 탐험과 AI 꿈 분석으로 자기 성장을 경험하세요.",
+  description: "A one-minute morning ritual. Record how you woke up, write the dream while you still have it, and read it back — with a calendar, a monthly review and a daily affirmation drawn from what you actually recorded. 아침 1분, 오늘의 기분과 꿈을 기록하고 다시 읽어보세요.",
   keywords: [
-    "dream journal", "dream interpretation", "AI dream analysis", "Jungian psychology",
-    "archetypes", "subconscious mind", "dream diary", "self discovery", "personal growth",
-    "꿈 해석", "꿈 분석", "꿈 일기", "무의식", "융 심리학", "아키타입", "자기 성장"
+    "morning ritual", "dream journal", "dream interpretation", "mood tracker",
+    "dream diary", "self discovery", "personal growth", "reflection", "affirmations",
+    "모닝루틴", "꿈 해석", "꿈 일기", "감정 기록", "자기 성장", "확언"
   ],
   authors: [{ name: "Novakitz" }],
   creator: "Novakitz",
@@ -68,8 +81,8 @@ export const metadata: Metadata = {
     alternateLocale: "ko_KR",
     url: "https://www.novakitz.com",
     siteName: "Novakitz",
-    title: "Novakitz - AI Inner Journal & Jungian Analysis",
-    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis. Track dreams, uncover archetypes, and grow.",
+    title: "Novakitz - A Morning Ritual for Dreams and Moods",
+    description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: [
       {
         url: "/og-image.png",
@@ -83,8 +96,8 @@ export const metadata: Metadata = {
   // Twitter Card - 트위터/X 공유 시 표시
   twitter: {
     card: "summary_large_image",
-    title: "Novakitz - AI Inner Journal & Jungian Analysis",
-    description: "Discover the hidden messages in your dreams with AI-powered Jungian analysis.",
+    title: "Novakitz - A Morning Ritual for Dreams and Moods",
+    description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: ["/og-image.png"],
     creator: "@novakitz",
   },

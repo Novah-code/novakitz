@@ -41,7 +41,7 @@ export interface Streak {
 }
 
 /** Local calendar date as YYYY-MM-DD. Not UTC — a streak is about the user's day. */
-function localDate(d: Date): string {
+export function localDate(d: Date): string {
   return (
     d.getFullYear() +
     '-' +

@@ -14,14 +14,31 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;');
 }
 
+/*
+ * Styles are written out as `style="…"`, not as classes.
+ *
+ * They used to be Tailwind classes. Tailwind is in package.json and wired into
+ * PostCSS, but no stylesheet imports it, so it compiles to nothing and every
+ * class here named a rule that did not exist. The documents rendered as the
+ * browser's defaults: Times, black on white, edge to edge.
+ */
+const STYLE = {
+  h1: 'color:#4a7a5f;font-size:26px;font-weight:700;line-height:1.3;margin:0 0 16px',
+  h2: 'color:#4a7a5f;font-size:20px;font-weight:600;line-height:1.35;margin:32px 0 12px',
+  h3: 'color:#4a7a5f;font-size:16px;font-weight:600;line-height:1.4;margin:24px 0 8px',
+  p: 'color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px',
+  list: 'color:#374151;font-size:15px;line-height:1.7;margin:0 0 14px;padding-left:22px',
+  li: 'margin-bottom:4px',
+  hr: 'border:none;border-top:1px solid #e5e7eb;margin:32px 0',
+  strong: 'font-weight:600;color:#1f2937',
+  a: 'color:#4a7a5f;text-decoration:underline',
+} as const;
+
 /** Bold and links, applied to the text inside a block. */
 function inline(s: string): string {
   return escapeHtml(s)
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
-    .replace(
-      /\[(.+?)\]\((.+?)\)/g,
-      '<a href="$2" class="text-[#5a9370] underline">$1</a>'
-    );
+    .replace(/\*\*(.+?)\*\*/g, `<strong style="${STYLE.strong}">$1</strong>`)
+    .replace(/\[(.+?)\]\((.+?)\)/g, `<a href="$2" style="${STYLE.a}">$1</a>`);
 }
 
 /**
@@ -29,9 +46,7 @@ function inline(s: string): string {
  *
  * This existed already and the pages never called it — they rendered the raw
  * file, so visitors read `**Last Updated**` and `## 3.1 Account Creation` as
- * literal text. The Tailwind typography plugin is not installed either, so the
- * `prose-*` classes those pages carried styled nothing. Both are why a reviewer
- * opening the privacy policy link saw a wall of asterisks and hashes.
+ * literal text — which is what a reviewer opening the privacy policy link saw.
  *
  * It is written line by line rather than with a stack of global regexes. The
  * previous version wrapped list items with `/(<li>.*<\/li>)/s` — greedy, and
@@ -45,20 +60,18 @@ function inline(s: string): string {
 export function convertMarkdownToHtml(markdown: string): string {
   const out: string[] = [];
   let list: string[] = [];
+  /* Which kind of list is open — bullets and numbers cannot share one block. */
+  let listTag: 'ul' | 'ol' = 'ul';
   let para: string[] = [];
 
   const flushList = () => {
     if (list.length === 0) return;
-    out.push(
-      `<ul class="list-disc pl-6 space-y-1 my-4 text-gray-700">${list.join('')}</ul>`
-    );
+    out.push(`<${listTag} style="${STYLE.list}">${list.join('')}</${listTag}>`);
     list = [];
   };
   const flushPara = () => {
     if (para.length === 0) return;
-    out.push(
-      `<p class="text-gray-700 leading-relaxed my-4">${inline(para.join(' '))}</p>`
-    );
+    out.push(`<p style="${STYLE.p}">${inline(para.join(' '))}</p>`);
     para = [];
   };
   const flush = () => {
@@ -78,28 +91,38 @@ export function convertMarkdownToHtml(markdown: string): string {
     if (heading) {
       flush();
       const level = heading[1].length;
-      const size =
-        level === 1
-          ? 'text-3xl font-bold mt-8 mb-4'
-          : level === 2
-            ? 'text-2xl font-semibold mt-8 mb-3'
-            : 'text-lg font-semibold mt-6 mb-2';
-      out.push(
-        `<h${level} class="text-[#4a7a5f] ${size}">${inline(heading[2])}</h${level}>`
-      );
+      const style = level === 1 ? STYLE.h1 : level === 2 ? STYLE.h2 : STYLE.h3;
+      out.push(`<h${level} style="${style}">${inline(heading[2])}</h${level}>`);
       continue;
     }
 
     if (/^(-{3,}|\*{3,})$/.test(line.trim())) {
       flush();
-      out.push('<hr class="my-8 border-gray-200" />');
+      out.push(`<hr style="${STYLE.hr}" />`);
+      continue;
+    }
+
+    /*
+     * Numbered steps are a list too. The refund policy walks through how to ask
+     * for one in three numbered steps, and with only bullets recognised those
+     * three ran together into a single paragraph reading "1. Email Us ... 2.
+     * Include Information ... 3. Response Time".
+     */
+    const numbered = /^\s*\d+\.\s+(.*)$/.exec(line);
+    if (numbered) {
+      flushPara();
+      if (listTag !== 'ol') flushList();
+      listTag = 'ol';
+      list.push(`<li style="${STYLE.li}">${inline(numbered[1])}</li>`);
       continue;
     }
 
     const bullet = /^\s*[-*]\s+(.*)$/.exec(line);
     if (bullet) {
       flushPara();
-      list.push(`<li>${inline(bullet[1])}</li>`);
+      if (listTag !== 'ul') flushList();
+      listTag = 'ul';
+      list.push(`<li style="${STYLE.li}">${inline(bullet[1])}</li>`);
       continue;
     }
 

@@ -6,21 +6,28 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
+import { isPremiumNow } from '../lib/premium';
+import HomeActions from './HomeActions';
+import TodayMoodCard from './TodayMoodCard';
+import { localDate } from '../lib/streak';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
 import { dedupeTags, hasTag } from '../lib/tags';
 import BadgeNotification from './BadgeNotification';
 import StreakPopup from './StreakPopup';
+import NotificationPrompt from './NotificationPrompt';
+import { shouldOfferMorningReminder } from '../lib/notifications';
 import StreakBadge from './StreakBadge';
 import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
 import HomeScene from './HomeScene';
-import MoodCardFlow, { MoodCardJournalView } from './MoodCardFlow';
+import MoodCardFlow, { MoodCardJournalView, SkyBackdrop, SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
 import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
-import { EMOTIONS, emotionLabel } from '../lib/emotions';
+import { EMOTIONS, emotionLabel, emotionShownLabel } from '../lib/emotions';
+import AuraOrb from './AuraOrb';
 import { goTo } from '../lib/platform';
 import { authHeader } from '../lib/authHeader';
 
@@ -38,7 +45,27 @@ interface SimpleDreamInterfaceProps {
   initialShowHistory?: boolean;
   onHistoryClose?: () => void;
   onGuestAnalyze?: () => void; // Called when guest tries to analyze - prompt login
+  /**
+   * Reports whether the person is in a step that should have the whole screen:
+   * writing a dream, reading a response, or inside the mood flow. The shell
+   * hides its bottom tab bar for these, since a bar under a half-written dream
+   * invites leaving it.
+   */
+  onImmersiveChange?: (immersive: boolean) => void;
 }
+
+/*
+ * How the pebble picker lays out its eight pebbles now that it has the whole
+ * screen. The pebbles themselves are unchanged.
+ */
+const PICKER_LAYOUTS = {
+  // The grid as it always was, just centred on a full screen.
+  wide: { columns: 4, size: '56px', gap: '44px 10px', label: '11px', maxWidth: '100%' },
+  // Two columns of four. 96px in a 320px-wide grid: at 76px in full-width columns the
+  // pebbles floated apart and left a hole in the middle (윤아님 chose this size, 2026-11-03).
+  tall: { columns: 2, size: '80px', gap: '36px 20px', label: '13px', maxWidth: '300px' },
+} as const;
+const PICKER_LAYOUT = PICKER_LAYOUTS.tall;
 
 // Client-side only PulseDots component to avoid SSR issues
 const PulseDots = () => {
@@ -189,7 +216,7 @@ const translations = {
     charactersReady: '준비됨',
     brewing: '분석 중...',
     brew: '분석하기',
-    dreamJournal: '내면의 기록',
+    dreamJournal: 'Inner Journal',
     showing: '표시 중',
     of: '/',
     dreams: '개의 꿈',
@@ -212,7 +239,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -255,6 +282,16 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const [editAutoTags, setEditAutoTags] = useState<string[]>([]);
   const [newBadge, setNewBadge] = useState<string | null>(null);
   const [showStreakPopup, setShowStreakPopup] = useState(false);
+  /*
+   * The morning-reminder ask, queued rather than shown.
+   *
+   * It has to come after a morning has been recorded — that is the whole
+   * point, the question is about something the person just did — but the
+   * streak popup already occupies that moment. So recording sets this, and the
+   * ask appears once the streak popup is out of the way. Two sheets stacked on
+   * top of each other is how both get dismissed without being read.
+   */
+  const [notificationAskQueued, setNotificationAskQueued] = useState(false);
   // Bumped whenever the ritual is completed so the badge recounts without a reload.
   const [streakRefresh, setStreakRefresh] = useState(0);
   const [newTag, setNewTag] = useState<string>('');
@@ -307,6 +344,57 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [showEmotionModal, setShowEmotionModal] = useState(false);
   const [showMoodCardFlow, setShowMoodCardFlow] = useState(false);
+
+  /*
+   * Today's pebble, for the card on the home screen. Read from the check-in the
+   * moment the app opens and again whenever it is brought forward, since a
+   * backgrounded Capacitor app can come back the next morning still holding
+   * yesterday's. A guest's pebble is not saved anywhere, so for them it is only
+   * what they picked this session.
+   */
+  const [todayEmotion, setTodayEmotion] = useState<string | null>(null);
+  useEffect(() => {
+    if (!user) {
+      setTodayEmotion(null);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('checkins')
+          .select('emotion')
+          .eq('user_id', user.id)
+          .eq('check_date', localDate(new Date()))
+          .eq('time_of_day', 'morning')
+          .maybeSingle();
+        if (!cancelled) setTodayEmotion(data?.emotion ?? null);
+      } catch {
+        // No card is better than a wrong one.
+      }
+    };
+    load();
+    const onVisible = () => { if (!document.hidden) load(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [user]);
+
+  // With no visible close button, Escape is the keyboard's way out of the picker.
+  useEffect(() => {
+    if (!showEmotionModal) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowEmotionModal(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showEmotionModal]);
+
+  // Tell the shell when this screen wants to be alone. See onImmersiveChange.
+  const immersive = showInput || showResponse || showMoodCardFlow || showEmotionModal;
+  useEffect(() => {
+    onImmersiveChange?.(immersive);
+  }, [immersive, onImmersiveChange]);
   const [selectedEmotionLabel, setSelectedEmotionLabel] = useState('');
   const [dreamRefreshTrigger, setDreamRefreshTrigger] = useState(0);
   const turbulenceRef = useRef<SVGFETurbulenceElement>(null);
@@ -319,6 +407,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
   const emotionList = EMOTIONS.map((e) => ({
     key: e.key,
     label: emotionLabel(e, language),
+    shown: emotionShownLabel(e),
     color: e.color,
     borderRadius: e.borderRadius,
     moodValue: e.moodValue,
@@ -328,6 +417,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     const emotion = emotionList[idx];
     setShowEmotionModal(false);
     setSelectedEmotionLabel(emotion.label);
+    setTodayEmotion(emotion.key);
     setShowMoodCardFlow(true);
     if (!user) return; // guest: just show card
     try {
@@ -341,7 +431,24 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
         String(now.getMonth() + 1).padStart(2, '0') +
         '-' +
         String(now.getDate()).padStart(2, '0');
-      const timeOfDay = now.getHours() < 12 ? 'morning' : 'evening';
+      /*
+       * Always 'morning', whatever the clock says.
+       *
+       * This was `now.getHours() < 12 ? 'morning' : 'evening'`, and every
+       * screen that draws the day back — the calendar, Reflection, the monthly
+       * review — reads `.eq('time_of_day', 'morning')`. So a pebble tapped at
+       * noon or later was written as an evening row that nothing ever read: the
+       * day stayed blank, and the person who had just recorded it was looking
+       * at an empty square.
+       *
+       * The column exists because `checkins` is unique on
+       * (user_id, check_date, time_of_day) and an older twice-a-day check-in
+       * feature needed the two halves. That feature is gone. What is left is
+       * one pebble a day meaning "how I woke up" — which is a morning whether
+       * it is recorded at 6am or at 3pm — so pinning it makes the uniqueness
+       * key one row per day, and the later tap corrects the earlier one.
+       */
+      const timeOfDay = 'morning';
       // Upsert, not insert: checkins is unique on (user_id, check_date,
       // time_of_day), so checking in a second time the same morning came back
       // 409 and the mood was quietly dropped — along with the day's streak.
@@ -478,13 +585,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
                  * anger are all 2 — so selecting mood alone could not tell the
                  * calendar which pebble was pressed.
                  */
+                /*
+                 * No time_of_day filter — see the note on the same query in
+                 * SimpleDreamInterfaceWithAuth. A pebble tapped after noon used
+                 * to be stored as an evening row, and asking only for mornings
+                 * hid it. Keyed by date so one day is one square either way.
+                 */
                 .select('check_date, time_of_day, mood, emotion, energy_level')
-                .eq('user_id', user.id)
-                .eq('time_of_day', 'morning');
+                .eq('user_id', user.id);
               if (checkinData) {
                 const map: Record<string, { mood: number; emotion: string | null; energy_level: number }> = {};
+                const isMorning: Record<string, boolean> = {};
                 checkinData.forEach((c: any) => {
+                  if (map[c.check_date] && isMorning[c.check_date]) return;
                   map[c.check_date] = { mood: c.mood, emotion: c.emotion ?? null, energy_level: c.energy_level };
+                  isMorning[c.check_date] = c.time_of_day === 'morning';
                 });
                 setCheckinsByDate(map);
               }
@@ -513,45 +628,21 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
 
     // Load premium status and AI usage
     const loadPremiumStatus = async () => {
-      if (user) {
-        try {
-          // Check if user has active premium subscription
-          const { data: subscription } = await supabase
-            .from('user_subscriptions')
-            .select(`
-              *,
-              subscription_plans:plan_id(
-                plan_slug,
-                ai_interpretations_per_month
-              )
-            `)
-            .eq('user_id', user.id)
-            .eq('status', 'active')
-            .maybeSingle();
+      try {
+        /*
+         * Runs signed out too. Someone who bought without an account holds the
+         * entitlement on RevenueCat's anonymous id, and `isPremiumNow` asks the
+         * store when the database has no row to offer.
+         */
+        setIsPremium(await isPremiumNow(user?.id ?? null));
 
-          console.log('🔍 Premium status check:', {
-            userID: user.id,
-            hasSubscription: !!subscription,
-            subscriptionData: subscription ? {
-              status: subscription.status,
-              plan: subscription.subscription_plans?.plan_slug,
-              ai_limit: subscription.subscription_plans?.ai_interpretations_per_month
-            } : null
-          });
-
-          const isPremiumUser = subscription && subscription.subscription_plans?.plan_slug === 'premium';
-          setIsPremium(isPremiumUser || false);
-
-          console.log('✅ isPremium set to:', isPremiumUser || false);
-
-          // Load AI usage
-          const usage = await getRemainingAIInterpretations(user.id);
-          setRemainingAIUsage(usage);
-
-          console.log('AI usage loaded:', usage);
-        } catch (error) {
-          console.error('Error loading premium status:', error);
+        // Usage is counted per account, so there is nothing to count without
+        // one. A signed-out buyer is on Pro, which has no monthly limit.
+        if (user) {
+          setRemainingAIUsage(await getRemainingAIInterpretations(user.id));
         }
+      } catch (error) {
+        console.error('Error loading premium status:', error);
       }
     };
     loadPremiumStatus();
@@ -2094,7 +2185,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           background: #e8f5e8 !important;
         }
         body {
-          font-family: ${language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
+          font-family: ${language === 'ko' ? "'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif" : "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif"};
           color: #1f2937;
           overflow-x: hidden;
         }
@@ -2982,7 +3073,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         .dream-date {
           font-family: 'Roboto Mono', monospace;
           font-size: 11px;
-          color: #8BA390;
+          color: #7d8f82;
           display: flex;
           align-items: center;
           gap: 5px;
@@ -2990,7 +3081,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
         }
 
         .dream-date strong {
-          color: #7AB382;
+          color: #5d6e63;
           font-family: 'Noto Sans KR', -apple-system, sans-serif;
           font-weight: 500;
           font-size: 12px;
@@ -3110,6 +3201,69 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
         .dream-detail-close:hover {
           background: rgba(255, 255, 255, 0.3);
+        }
+
+        /*
+         * The sky version of the written-dream window (2026-11-03): a frosted
+         * scrim, the home gradient in a rounded frame, ink text, white round
+         * controls. The classes above are the old green-and-white look; these
+         * sit after them and use !important only where the markup carries an
+         * inline style.
+         */
+        .dream-detail-overlay {
+          background: rgba(60, 50, 70, 0.32);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          z-index: 20500;
+        }
+        .dream-detail-modal {
+          background-image: var(--home-sky-day);
+          background-color: #F4EEE5;
+          border: 1px solid rgba(255, 255, 255, 0.85);
+          border-radius: 32px;
+          box-shadow: 0 24px 60px rgba(40, 30, 60, 0.28);
+          overflow: hidden;
+        }
+        .dream-detail-header {
+          background: transparent !important;
+          border-bottom: none;
+          color: #2E3C33;
+        }
+        .dream-detail-title {
+          font-family: var(--font-display), Georgia, serif;
+          font-weight: 400;
+          font-size: 34px;
+          line-height: 1.15;
+          color: #2E3C33;
+        }
+        .dream-detail-date { color: #7d8f82; opacity: 1; font-family: 'Roboto Mono', monospace; font-size: 12px; }
+        .dream-detail-share-btn, .dream-detail-edit-btn {
+          background: rgba(255, 255, 255, 0.92) !important;
+          color: #2E3C33 !important;
+          border: 1px solid rgba(255, 255, 255, 0.9) !important;
+          box-shadow: 0 2px 10px rgba(40, 60, 45, 0.16);
+          width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important;
+          border-radius: 50% !important; padding: 0 !important;
+          display: flex !important; align-items: center; justify-content: center;
+        }
+        .dream-detail-content { font-family: inherit; color: #4A5D4E; }
+        .dream-detail-response {
+          background: linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.85);
+          border-left: 1px solid rgba(255, 255, 255, 0.85);
+          border-radius: 24px;
+          box-shadow: 0 8px 24px rgba(40, 60, 45, 0.10), inset 0 1px 0 rgba(255,255,255,0.95);
+        }
+        .dream-detail-response-title { color: #7d8f82; font-family: monospace; letter-spacing: 1.2px; text-transform: uppercase; font-size: 11px; }
+        .dream-detail-response-text { color: #4A5D4E; }
+        .dream-detail-modal .btn-primary, .dream-detail-modal .btn-secondary {
+          background: linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%) !important;
+          color: #2E3C33 !important;
+          border: 1px solid rgba(255,255,255,0.85) !important;
+          box-shadow: 0 8px 24px rgba(40,60,45,0.16), inset 0 1px 0 rgba(255,255,255,0.95) !important;
+          border-radius: 28px !important;
+          font-family: inherit !important;
+          font-weight: 700 !important;
         }
 
         @media (max-width: 768px) {
@@ -3931,10 +4085,12 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             padding: 5px;
             max-height: calc(100vh - 10px);
             overflow-y: auto;
-            top: 5px !important;
-            left: 5px !important;
-            right: 5px !important;
-            bottom: 5px !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            max-height: none;
+            padding: 0;
           }
           
           .dream-history-header {
@@ -4099,130 +4255,116 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
             />
           )}
 
+          {/*
+            The circle's two doors as two buttons you can see. The circle itself
+            keeps both gestures — tap for mood, hold for a dream — for anyone who
+            already uses them. See HomeActions.
+          */}
+          {!showInput && !showResponse && !showHistory && !showEmotionModal && !showMoodCardFlow && (
+            <>
+              {todayEmotion && (
+                <TodayMoodCard
+                  language={language}
+                  emotionKey={todayEmotion}
+                  onChange={() => setShowEmotionModal(true)}
+                />
+              )}
+              <HomeActions
+                language={language}
+                onMood={() => setShowEmotionModal(true)}
+                onDream={() => setShowInput(true)}
+              />
+            </>
+          )}
+
 
 
           {showInput && (
-            <div className="modal-overlay" onClick={() => setShowInput(false)}>
-              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-header">
-                  <div className="flex justify-center">
-                    <div className="user-avatar">
-                      <div className="loading-dots">
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                        <div className="loading-dot"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-body">
-                  {!isRecording && (
-                    <>
+            /*
+             * The dream form on the home sky, like the mood flow: no scrim, no
+             * white card, the same glass fields and pill button. The counter used
+             * to read "67/10 characters Ready" once past ten, which was a
+             * sentence nobody wrote; it now only shows while there is still
+             * something to reach.
+             */
+            <SkyBackdrop>
+              <SkyContainer onClose={() => setShowInput(false)}>
+                <div style={stepBody}>
+                  <p style={{ ...headingStyle(language === 'ko', 40, 24), margin: '0 0 28px' }}>
+                    {language === 'ko' ? '꿈 적어두기' : 'Write it down'}
+                  </p>
+
+                  {!isRecording ? (
+                    <div style={{ ...glassCard, padding: '4px 20px', marginBottom: 16 }}>
                       <input
                         type="text"
-                        className="dream-title-input"
                         value={dreamTitle}
                         onChange={(e) => setDreamTitle(e.target.value)}
                         placeholder={t.titlePlaceholder}
+                        style={{ width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 17, color: '#2E3C33', fontFamily: 'inherit', padding: '14px 0' }}
                       />
-                    </>
-                  )}
-                  {isRecording && (
-                    <div className="recording-indicator" style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '10px',
-                      padding: '10px 0',
-                      marginBottom: '10px'
-                    }}>
-                      <div className="recording-dot" style={{
-                        width: '8px',
-                        height: '8px',
-                        backgroundColor: '#ff4444',
-                        borderRadius: '50%',
-                        animation: 'pulse 1s infinite'
-                      }}></div>
-                      <span style={{color: '#7FB069', fontWeight: '500', fontFamily: 'Georgia, "Times New Roman", Times, serif', fontSize: '14px'}}>
-                        {t.listeningVoice}
-                      </span>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '10px 0', marginBottom: 6 }}>
+                      <div style={{ width: 8, height: 8, backgroundColor: '#ff4444', borderRadius: '50%', animation: 'pulse 1s infinite' }} />
+                      <span style={{ color: '#5d6e63', fontWeight: 500, fontSize: 14 }}>{t.listeningVoice}</span>
                     </div>
                   )}
 
-
-                  <div className="dream-input-shell">
+                  <div style={{ ...glassCard, position: 'relative', padding: 0 }}>
                     <textarea
-                      className="dream-input"
                       value={dreamText}
                       onChange={(e) => setDreamText(e.target.value)}
                       placeholder={isRecording ? t.voiceInProgress : t.dreamPlaceholder}
-                      rows={4}
                       autoFocus={!isRecording}
                       disabled={isRecording}
-                      style={{ paddingBottom: '44px' }}
-                    />
-                    {/* Voice recording button */}
-                    {canUseVoice && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isRecording) {
-                          recognitionRef.current?.stop();
-                          setIsRecording(false);
-                        } else {
-                          startVoiceRecording();
-                        }
-                      }}
                       style={{
-                        position: 'absolute',
-                        bottom: '10px',
-                        right: '10px',
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '50%',
-                        border: 'none',
-                        background: isRecording ? 'rgba(255,68,68,0.12)' : 'rgba(122,179,130,0.15)',
-                        color: isRecording ? '#ff4444' : '#7AB382',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s',
-                        flexShrink: 0,
+                        width: '100%', height: 280, boxSizing: 'border-box', border: 'none', outline: 'none',
+                        background: 'transparent', resize: 'none', fontFamily: 'inherit',
+                        fontSize: 16, lineHeight: 1.7, color: '#2E3C33', padding: '20px 22px 60px',
                       }}
-                      title={isRecording ? (language === 'ko' ? '녹음 중지' : 'Stop recording') : (language === 'ko' ? '음성 입력' : 'Voice input')}
-                    >
-                      {isRecording ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                          <line x1="12" y1="19" x2="12" y2="22"/>
-                        </svg>
-                      )}
-                    </button>
+                    />
+                    {canUseVoice && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isRecording) {
+                            recognitionRef.current?.stop();
+                            setIsRecording(false);
+                          } else {
+                            startVoiceRecording();
+                          }
+                        }}
+                        style={{ ...roundControl, position: 'absolute', top: 'auto', bottom: 12, right: 12, width: 40, height: 40, background: isRecording ? 'rgba(255,68,68,0.14)' : 'rgba(255,255,255,0.92)', color: isRecording ? '#ff4444' : '#2E3C33', zIndex: 1 }}
+                        title={isRecording ? (language === 'ko' ? '녹음 중지' : 'Stop recording') : (language === 'ko' ? '음성 입력' : 'Voice input')}
+                      >
+                        {isRecording ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        ) : (
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="22"/>
+                          </svg>
+                        )}
+                      </button>
                     )}
                   </div>
-                  <div className={`char-counter ${dreamText.trim().length >= 10 ? 'sufficient' : ''}`}>
-                    {dreamText.trim().length}/10 characters {dreamText.trim().length >= 10 ? t.charactersReady : ''}
-                  </div>
-                </div>
-                <div className="modal-actions" style={{display: 'flex', gap: '12px'}}>
-                  <button
+                  {dreamText.trim().length < 10 && (
+                    <div style={{ fontSize: 13, color: '#7d8f82', margin: '10px 8px 0', textAlign: 'right' }}>
+                      {dreamText.trim().length}/10
+                    </div>
+                  )}
+
+                  <NextButton
+                    top={28}
+                    label={isLoading ? t.brewing : t.brew}
                     onClick={handleSubmitDream}
                     disabled={!dreamText.trim() || dreamText.trim().length < 10 || isLoading}
-                    className="btn-primary"
-                    style={{flex: 1}}
-                  >
-                    {isLoading ? t.brewing : t.brew}
-                  </button>
+                  />
                 </div>
-              </div>
-            </div>
+              </SkyContainer>
+            </SkyBackdrop>
           )}
 
 
@@ -4233,32 +4375,37 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               left: 0,
               right: 0,
               bottom: 0,
+              // The old class draws this as a rounded card inset by 20px; on the sky it is the whole screen.
+              borderRadius: 0,
+              padding: 0,
+              boxShadow: 'none',
               zIndex: 1000,
-              background: '#E8F3EA',
+              // The home sky, like the screens around it; the green wash and its blobs are gone.
+              backgroundImage: 'var(--home-sky-day)',
+              backgroundColor: '#F4EEE5',
               overflowY: 'auto',
               overflowX: 'hidden'
             }}>
+              <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" style={{ position: 'fixed' }} />
               {/* Ambient blobs */}
-              <div style={{ position: 'fixed', top: '-10%', right: '-5%', width: '420px', height: '420px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(122,179,130,0.22) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
-              <div style={{ position: 'fixed', bottom: '5%', left: '-8%', width: '360px', height: '360px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,163,59,0.14) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', zIndex: 0 }} />
-              <div style={{ position: 'fixed', top: '40%', left: '30%', width: '280px', height: '280px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(122,179,130,0.12) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', zIndex: 0 }} />
               {/* Header */}
               <div style={{
-                padding: '72px 24px 0',
+                padding: 'calc(env(safe-area-inset-top, 0px) + 64px) 24px 0',
                 position: 'sticky',
                 top: 0,
                 zIndex: 10,
-                background: 'rgba(232,243,234,0.88)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
+                // Fades out at the bottom edge so there is no hard band where the list scrolls under it.
+                background: 'linear-gradient(180deg, rgba(250,244,238,0.9) 0%, rgba(250,244,238,0.9) 78%, rgba(250,244,238,0) 100%)',
+                paddingBottom: '14px',
               }}>
                 {/* Title */}
-                <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '32px', fontWeight: 700, color: '#3A4A3E', margin: '0 0 20px', letterSpacing: '-0.5px' }}>
+                {/* "Inner Journal" is the feature's name in every language, so it keeps the English display face even in Korean. */}
+                <h1 style={{ ...headingStyle(false, 40, 24), textAlign: 'left', margin: '0 0 20px' }}>
                   {t.dreamJournal}
                 </h1>
 
                 {/* Search + view toggles — always visible, no toggle button */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '16px', borderBottom: '1px solid rgba(122,179,130,0.15)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingBottom: '16px', borderBottom: '1px solid rgba(46,60,51,0.08)' }}>
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     background: 'rgba(255,255,255,0.6)',
@@ -4278,7 +4425,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   </div>
                   <div style={{ display: 'flex', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '14px', padding: '3px', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', flexShrink: 0 }}>
                     {[['card', t.card], ['list', language === 'ko' ? '목록' : 'List'], ['timeline', t.timeline]].map(([mode, label]) => (
-                      <button key={mode} onClick={() => { setViewMode(mode as any); }} style={{ padding: '6px 12px', borderRadius: '10px', border: 'none', background: viewMode === mode ? 'white' : 'transparent', color: viewMode === mode ? '#3A4A3E' : '#8BA390', fontWeight: viewMode === mode ? 600 : 400, fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: viewMode === mode ? '0 2px 8px rgba(0,0,0,0.05)' : 'none', whiteSpace: 'nowrap' }}>{label}</button>
+                      <button key={mode} onClick={() => { setViewMode(mode as any); }} style={{ padding: '6px 12px', borderRadius: '10px', border: 'none', background: viewMode === mode ? 'white' : 'transparent', color: viewMode === mode ? '#2E3C33' : '#7d8f82', fontWeight: viewMode === mode ? 700 : 500, fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s', boxShadow: viewMode === mode ? '0 2px 8px rgba(0,0,0,0.05)' : 'none', whiteSpace: 'nowrap' }}>{label}</button>
                     ))}
                   </div>
                 </div>
@@ -4303,9 +4450,9 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   transition: 'padding 0.2s',
                 }}>
                   {/* decorative symbol */}
-                  <span style={{ position: 'absolute', fontSize: '120px', color: '#7AB382', opacity: 0.07, right: '20px', top: '-20px', fontFamily: 'serif', pointerEvents: 'none', lineHeight: 1 }}>✧</span>
+                  <span style={{ position: 'absolute', fontSize: '120px', color: '#EDA3BC', opacity: 0.18, right: '20px', top: '-20px', fontFamily: 'serif', pointerEvents: 'none', lineHeight: 1 }}>✧</span>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontFamily: "'Roboto Mono', monospace", fontSize: '11px', color: '#7AB382', letterSpacing: '2px', margin: '0 0 10px', textTransform: 'uppercase' }}>
+                    <p style={{ fontFamily: "'Roboto Mono', monospace", fontSize: '11px', color: '#7d8f82', letterSpacing: '2px', margin: '0 0 10px', textTransform: 'uppercase' }}>
                       {language === 'ko' ? "Today's Affirmation" : "Today's Affirmation"}
                     </p>
                     {showDailyRituals && user ? (
@@ -4342,6 +4489,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   flexDirection: 'column'
                 }}>
                   <DreamCalendar
+                    language={language}
                     /*
                      * `savedDreams`, not `filteredDreams`. The filter above
                      * drops "no dream" markers with a comment saying they are
@@ -4414,19 +4562,19 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                           display: 'flex',
                           justifyContent: 'space-between',
                           alignItems: 'center',
-                          padding: '14px 16px',
-                          borderBottom: '1px solid rgba(0,0,0,0.06)',
+                          padding: '18px 20px',
+                          marginBottom: 10,
                           cursor: 'pointer',
-                          borderRadius: '8px',
-                          transition: 'background 0.15s'
+                          borderRadius: '22px',
+                          background: 'linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(246,243,234,0.66) 100%)',
+                          border: '1px solid rgba(255,255,255,0.85)',
+                          boxShadow: '0 6px 18px rgba(40,60,45,0.08), inset 0 1px 0 rgba(255,255,255,0.95)',
                         }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(127,176,105,0.07)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                       >
-                        <span style={{ fontSize: '15px', color: '#1f2937', fontWeight: 500, flex: 1, marginRight: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '16px', color: '#2E3C33', fontWeight: 600, flex: 1, marginRight: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {(dream as any).tags?.includes('emotion-record') ? "Today's Mood" : ((dream as any).title || (language === 'ko' ? '제목 없음' : 'Untitled'))}
                         </span>
-                        <span style={{ fontSize: '13px', color: '#9ca3af', flexShrink: 0 }}>{dateStr}</span>
+                        <span style={{ fontSize: '13px', color: '#7d8f82', flexShrink: 0 }}>{dateStr}</span>
                       </div>
                     );
                   })}
@@ -4760,10 +4908,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                 })}
                 {savedDreams.length === 0 && (
                   <div style={{
-                    position: 'absolute',
-                    top: '50%',
+                    // Centred on the screen. It was `absolute` inside the list, which is
+                    // taller than the screen, so on a phone the first line landed behind
+                    // the tab bar and the second was out of sight.
+                    position: 'fixed',
+                    top: '45%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'none',
                     textAlign: 'center',
                     color: '#64748b',
                     fontSize: '18px',
@@ -4811,48 +4963,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
               </>
               )}
 
-              {/* Close Button - Bottom Footer */}
-              <div style={{
-                padding: '16px 24px',
-                borderTop: '1px solid rgba(122,179,130,0.2)',
-                background: 'rgba(232,243,234,0.85)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                display: 'flex',
-                justifyContent: 'center',
-                flexShrink: 0,
-                position: 'relative',
-                zIndex: 1
-              }}>
-                <button
-                  onClick={() => {
-                    setShowHistory(false);
-                    onHistoryClose?.();
-                  }}
-                  style={{
-                    padding: '10px 32px',
-                    background: 'rgba(255,255,255,0.6)',
-                    color: '#3A4A3E',
-                    border: '1px solid rgba(122,179,130,0.35)',
-                    borderRadius: '14px',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : undefined
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(122,179,130,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.6)';
-                  }}
-                >
-                  {language === 'ko' ? '닫기' : 'Close'}
-                </button>
-              </div>
+              {/* No bottom Close: the tab bar is how you leave the journal now. */}
               </div>
             </div>
           )}
@@ -5147,7 +5258,17 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
                     >
-                      {language === 'ko' ? '수정' : 'Edit'}
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-label={language === 'ko' ? '수정' : 'Edit'}><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+                    </button>
+
+                    {/* Close: a round control with the others, like the streak window. */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSelectedDream(null); }}
+                      className="dream-detail-edit-btn"
+                      aria-label={language === 'ko' ? '닫기' : 'Close'}
+                      style={{ border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
                     </button>
                   </div>
                   <div className="dream-detail-title">{selectedDream.title || t.dreamEntry}</div>
@@ -5305,43 +5426,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                     </div>
                   </div>
 
-                  {/* Close button at the bottom */}
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '32px',
-                    paddingBottom: '16px'
-                  }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedDream(null);
-                      }}
-                      style={{
-                        background: 'linear-gradient(135deg, #7fb069 0%, #a8d5a8 100%)',
-                        border: 'none',
-                        borderRadius: '24px',
-                        padding: '12px 32px',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: 'white',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: '0 4px 12px rgba(127, 176, 105, 0.3)',
-                        fontFamily: language === 'ko' ? "'S-CoreDream', -apple-system, BlinkMacSystemFont, sans-serif" : 'Georgia, serif'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(127, 176, 105, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(127, 176, 105, 0.3)';
-                      }}
-                    >
-                      {language === 'ko' ? '닫기' : 'Close'}
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -5349,120 +5433,52 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           })()}
 
           {showResponse && (
-            <div className="modal-overlay" onClick={() => !isLoading && setShowResponse(false)}>
-              {isLoading ? (
-                <div className="loading-container-transparent" onClick={(e) => e.stopPropagation()}>
-                  <div className="loading-analysis">
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      width: '100%',
-                      minHeight: '400px',
-                      textAlign: 'center'
-                    }}>
-                      {/* Simple Matcha Image */}
-                      <div style={{
-                        width: '100%',
-                        maxWidth: '200px',
-                        aspectRatio: '1197/1669',
-                        margin: '0 auto'
-                      }}>
-                        <div
-                          style={{
-                            backgroundImage: 'url(/matcha-frame1.png?v=8)',
-                            backgroundSize: 'contain',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'center',
-                            width: '100%',
-                            height: '100%',
-                            aspectRatio: '1197/1669'
-                          }}
-                        />
-                      </div>
-
-                      {/* Pulsing Dots Loading Bar */}
-                      <PulseDots />
-
-                      {/* Simple Text */}
-                      <p style={{
-                        fontFamily: 'Georgia, "Times New Roman", Times, serif',
-                        color: 'white',
-                        textAlign: 'center',
-                        margin: '0',
-                        fontSize: '18px',
-                        fontWeight: '500',
-                        textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                      }}>
-                        Whisking up wisdom from your dream
-                      </p>
-                    </div>
+            isLoading ? (
+              /* Waiting for the reading, on the sky. */
+              <SkyBackdrop>
+                <div style={{ position: 'relative', zIndex: 2, alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 24 }}>
+                  <div style={{ width: 150, aspectRatio: '1197/1669', backgroundImage: 'url(/matcha-frame1.png?v=8)', backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
+                  <div style={{ display: 'flex', gap: 8, margin: '26px 0 18px' }}>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: '#EDA3BC', animation: `dream-wait 1.2s ease-in-out ${i * 0.15}s infinite` }} />
+                    ))}
                   </div>
+                  <p style={{ ...headingStyle(language === 'ko', 28, 18), margin: 0 }}>
+                    {language === 'ko' ? '꿈에서 지혜를 우려내는 중' : 'Whisking up wisdom from your dream'}
+                  </p>
+                  <style>{`@keyframes dream-wait { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1.2); opacity: 1; } }`}</style>
                 </div>
-              ) : (
-                <div className="modal-content" style={{maxWidth: '600px', display: 'flex', flexDirection: 'column', maxHeight: '90vh'}} onClick={(e) => e.stopPropagation()}>
-                  <div className="modal-header">
-                    <div className="flex justify-center">
-                      <h2 style={{color: '#7FB069', fontSize: '24px', fontWeight: '600', textAlign: 'center'}}>
-                        {t.dreamAnalysis}
-                      </h2>
-                    </div>
-                  </div>
-                  <div className="modal-body" style={{maxHeight: '60vh', overflowY: 'auto', padding: '24px'}}>
-                    <div className="analysis-content">
+              </SkyBackdrop>
+            ) : (
+              <SkyBackdrop>
+                <SkyContainer onClose={() => setShowResponse(false)}>
+                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <p style={{ ...headingStyle(language === 'ko', 40, 24), margin: '0 0 28px' }}>{t.dreamAnalysis}</p>
+
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
                       {dreamResponse.split('\n\n').map((section, index) => {
-                        const trimmedSection = section.trim();
-                        if (!trimmedSection) return null; // Skip empty sections
-                        
-                        if (trimmedSection.startsWith('DREAM SYMBOLS:')) {
-                          const content = trimmedSection.replace('DREAM SYMBOLS:', '').trim();
-                          if (!content) return null; // Skip if no content
-                          return (
-                            <div key={index} className="analysis-section">
-                              <h3 className="section-title">{t.dreamSymbols}</h3>
-                              <p className="section-text">{content}</p>
+                        const trimmed = section.trim();
+                        if (!trimmed) return null;
+                        const heads: [string, string][] = [
+                          ['DREAM SYMBOLS:', t.dreamSymbols],
+                          ['INNER MESSAGE:', t.innerMessage],
+                          ["TODAY'S PRACTICE:", t.todaysPractice],
+                          ['SOMETHING TO REFLECT ON:', t.somethingToReflect],
+                        ];
+                        const hit = heads.find(([key]) => trimmed.startsWith(key));
+                        const body = hit ? trimmed.slice(hit[0].length).trim() : trimmed;
+                        if (hit ? !body : trimmed.length <= 5) return null;
+                        return (
+                          <div key={index} style={{ width: '100%' }}>
+                            {hit && <div style={sectionLabel}>{hit[1]}</div>}
+                            <div style={glassCard}>
+                              <div style={{ fontSize: 15, lineHeight: 1.85, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left' }}>{body}</div>
                             </div>
-                          );
-                        } else if (trimmedSection.startsWith('INNER MESSAGE:')) {
-                          const content = trimmedSection.replace('INNER MESSAGE:', '').trim();
-                          if (!content) return null; // Skip if no content
-                          return (
-                            <div key={index} className="analysis-section">
-                              <h3 className="section-title">{t.innerMessage}</h3>
-                              <p className="section-text">{content}</p>
-                            </div>
-                          );
-                        } else if (trimmedSection.startsWith('TODAY\'S PRACTICE:')) {
-                          const content = trimmedSection.replace('TODAY\'S PRACTICE:', '').trim();
-                          if (!content) return null; // Skip if no content
-                          return (
-                            <div key={index} className="analysis-section">
-                              <h3 className="section-title">{t.todaysPractice}</h3>
-                              <p className="section-text">{content}</p>
-                            </div>
-                          );
-                        } else if (trimmedSection.startsWith('SOMETHING TO REFLECT ON:')) {
-                          const content = trimmedSection.replace('SOMETHING TO REFLECT ON:', '').trim();
-                          if (!content) return null; // Skip if no content
-                          return (
-                            <div key={index} className="analysis-section">
-                              <h3 className="section-title">{t.somethingToReflect}</h3>
-                              <p className="section-text">{content}</p>
-                            </div>
-                          );
-                        } else if (trimmedSection.length > 5) { // Only show if meaningful content
-                          return (
-                            <div key={index} className="analysis-section">
-                              <p className="section-text">{trimmedSection}</p>
-                            </div>
-                          );
-                        }
-                        return null;
+                          </div>
+                        );
                       }).filter(Boolean)}
                     </div>
-                  </div>
-                  <div className="modal-actions" style={{padding: '20px 24px', borderTop: '1px solid #e5e7eb', background: '#f9f9f9', display: 'flex', gap: '12px', justifyContent: 'center'}}>
+
                     {/*
                       The monthly limit notice used to be text with nowhere to go,
                       which put a dead end at the one moment someone is most
@@ -5470,37 +5486,20 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                       interpretation should not be interrupted with a sales button.
                     */}
                     {limitReached && (
-                      <button
-                        onClick={() => goTo('/pricing/')}
-                        className="btn-primary"
-                        style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
-                      >
-                        {language === 'ko' ? 'Pro 보기' : 'See Pro'}
-                      </button>
+                      <NextButton top={28} label={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>} onClick={() => goTo('/pricing/')} />
                     )}
-                    <button
-                      onClick={() => {
-                        setShowResponse(false);
-                      }}
-                      className="btn-secondary"
-                      style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
-                    >
-                      {language === 'ko' ? '닫기' : 'Close'}
-                    </button>
-                    <button
+                    <NextButton
+                      top={limitReached ? 14 : 32}
+                      label={language === 'ko' ? '저장' : 'Save to Journal'}
                       onClick={() => {
                         setShowResponse(false);
                         setShowHistory(true);
                       }}
-                      className="btn-primary"
-                      style={{padding: '10px 24px', fontSize: '14px', flex: '1'}}
-                    >
-                      {language === 'ko' ? '저장' : 'Save to Journal'}
-                    </button>
+                    />
                   </div>
-                </div>
-              )}
-            </div>
+                </SkyContainer>
+              </SkyBackdrop>
+            )
           )}
 
 
@@ -5579,6 +5578,14 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           user={user}
           language={language}
           onClose={() => setShowStreakPopup(false)}
+        />
+      )}
+
+      {/* Morning reminder — the in-app ask, before the system one */}
+      {notificationAskQueued && !showStreakPopup && !showMoodCardFlow && user && (
+        <NotificationPrompt
+          language={language}
+          onClose={() => setNotificationAskQueued(false)}
         />
       )}
 
@@ -5913,7 +5920,11 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClose={() => setShowMoodCardFlow(false)}
           user={user ?? null}
           onRequestLogin={onGuestAnalyze}
-          onEmotionLogged={() => { setShowStreakPopup(true); setDreamRefreshTrigger(t => t + 1); }}
+          onEmotionLogged={() => {
+            setShowStreakPopup(true);
+            setDreamRefreshTrigger(t => t + 1);
+            if (shouldOfferMorningReminder()) setNotificationAskQueued(true);
+          }}
         />
       )}
 
@@ -5923,64 +5934,70 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           onClick={() => setShowEmotionModal(false)}
           style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.35)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
+            // The home screen's own gradient (home-scene.css), so the picker reads
+            // as the same room. No frame and no scrim.
+            backgroundImage: 'var(--home-sky-day)',
+            backgroundColor: '#F4EEE5',
             zIndex: 20000,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '20px',
+            display: 'flex',
           }}
         >
+          <div className="home-scene__grain" aria-hidden="true" />
           <div
-            onClick={(e) => e.stopPropagation()}
             style={{
-              width: '90%', maxWidth: '360px',
-              background: '#EAF4EC',
-              borderRadius: '32px',
-              padding: '35px 25px 45px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.15)',
+              zIndex: 2,
+              width: '100%', height: '100%',
+              boxSizing: 'border-box',
+              padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 28px)',
               position: 'relative',
               textAlign: 'center',
-              maxHeight: 'calc(100vh - 40px)',
+              display: 'flex', flexDirection: 'column',
               overflowY: 'auto',
+              overscrollBehavior: 'contain',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
+            {/*
+              No visible close button. Tapping any empty part of the screen —
+              above or below the pebbles — closes the picker, and Escape does on
+              a keyboard. This one is only for screen readers, which cannot see
+              that the empty screen is the way out.
+            */}
             <button
               onClick={() => setShowEmotionModal(false)}
+              aria-label={language === 'ko' ? '닫기' : 'Close'}
               style={{
-                position: 'absolute', top: '20px', right: '20px',
-                width: '30px', height: '30px',
-                background: 'rgba(0,0,0,0.05)',
-                border: 'none', borderRadius: '50%',
-                cursor: 'pointer', fontSize: '14px',
-                color: '#4A5D4E', display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
+                position: 'absolute', width: 1, height: 1, margin: -1, padding: 0,
+                overflow: 'hidden', clip: 'rect(0 0 0 0)', border: 0, opacity: 0,
               }}
-            >✕</button>
+            />
 
             {/*
               * Instrument Serif on the heading only — the pebbles and their
-              * labels stay in the UI face. Korean keeps S-CoreDream because
+              * labels stay in the UI face. Korean keeps its own face because
               * Instrument Serif has no Hangul, and `html[lang="ko"] *` in
               * globals.css carries `!important`, so an inline face could not
               * take there anyway.
               */}
             <p style={{
-              fontSize: language === 'ko' ? '16px' : '26px',
+              fontSize: language === 'ko' ? '24px' : '40px',
               fontWeight: language === 'ko' ? 500 : 400,
-              color: '#4A5D4E', marginBottom: '40px', marginTop: '10px',
+              color: '#4A5D4E', marginBottom: '24px', marginTop: '10px',
               letterSpacing: language === 'ko' ? '-0.5px' : '0',
               fontFamily: language === 'ko'
-                ? "'S-CoreDream', sans-serif"
+                ? "'KoDisplay', 'Pretendard', serif"
                 : "var(--font-display), Georgia, serif",
             }}>
               {language === 'ko' ? '오늘 아침 기분' : 'Morning mood'}
             </p>
 
-            <div style={{
+            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '20px' }}>
+            <div onClick={(e) => e.stopPropagation()} style={{
+              width: '100%',
+              maxWidth: PICKER_LAYOUT.maxWidth,
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '20px 10px',
+              gridTemplateColumns: `repeat(${PICKER_LAYOUT.columns}, 1fr)`,
+              gap: PICKER_LAYOUT.gap,
               justifyItems: 'center',
             }}>
               {emotionList.map((emotion, idx) => (
@@ -5989,31 +6006,24 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   onClick={() => handleEmotionSelect(idx)}
                   style={{
                     display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: '10px',
+                    alignItems: 'center', gap: '14px',
                     cursor: 'pointer',
                     transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px) scale(1.05)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; }}
                 >
-                  <div style={{
-                    width: '56px', height: '56px',
-                    backgroundColor: emotion.color,
-                    borderRadius: emotion.borderRadius,
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.8)',
-                    boxShadow: '4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.9), inset 2px 2px 4px rgba(255,255,255,0.8)',
-                    transition: 'all 0.3s ease',
-                  }} />
+                  <AuraOrb emotionKey={emotion.key} index={idx} />
                   <span style={{
-                    fontSize: '11px', fontWeight: 500,
+                    fontSize: PICKER_LAYOUT.label, fontWeight: 500,
                     color: '#4A5D4E', opacity: 0.8,
-                    fontFamily: language === 'ko' ? "'S-CoreDream', sans-serif" : 'inherit',
+                    fontFamily: language === 'ko' ? "'Pretendard', sans-serif" : 'inherit',
                   }}>
-                    {emotion.label}
+                    {emotion.shown}
                   </span>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </div>
