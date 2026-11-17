@@ -2264,6 +2264,15 @@ Apple이 Next Steps에 적어준 문장이 그대로 설계도입니다:
 - **감정 이름은 한국어 화면에서도 영어**(Anxious, Fear, …)로 표시합니다. 화면 표시만 바꿨고, 꿈 기록에 저장되는 글자는 예전처럼 한국어입니다(`emotionShownLabel` vs `emotionLabel`).
 - **못 본 것:** 실기기 글꼴 렌더링, 긴 한국어 문장이 있는 화면(꿈 해석, 약관, 요금제), 한글 입력 중 글꼴, 앱 전체 화면에서 `word-break: keep-all`이 넘침을 만드는 곳이 없는지.
 
+### 웹사이트를 한 페이지로, 웹 앱 종료 (2026-11-17, `main`에 합침 — PR #23)
+
+`novakitz.com`의 `/`가 소개 페이지(`app/welcome`)로 바뀌었습니다. **웹 앱은 종료**(제품은 아이폰 앱). 피클(pickle.com/ko)의 구성을 참고해 앱의 하늘·유리 디자인으로 만들었고, 한국어/영어 전환이 있습니다. 웹에서만 `/`를 `/welcome`으로 다시 쓰는 규칙(`next.config.ts`, `beforeFiles`)이라 **앱 번들은 그대로**입니다.
+- App Store 링크: `https://apps.apple.com/app/id6800352279`(Apple ID 6800352279).
+- 그대로 남은 주소: `/pricing`, `/support`, `/legal/*`, `/archetype-test/*`(공유 링크), `/community`, `/profile`, `/auth/callback`, 모든 `/api/*`(앱이 부름 — **지우면 안 됨**).
+- 같이 `main`에 들어간 것: 새 디자인의 웹 페이지들, `delete-account`(이미 #22로 들어감), `analyze-dream`·`subscriptionServer` 수정.
+- **남은 일:** 카카오 챗봇(`?mode=dream` 등)과 이메일 2종의 링크는 웹 앱으로 가던 것이라 이제 소개 페이지로 갑니다 — 그 채널을 다시 쓰면 App Store 링크로 바꿀 것. 한국어 사이트의 폰 화면은 아직 영어 앱 화면. 합친 뒤 실제 사이트에서 폰·컴퓨터 확인은 윤아님이 하기로 함.
+- 되돌리기: PR #23의 Revert.
+
 ### 요금제 페이지 (2026-11-03, 푸시 완료)
 
 홈 하늘 배경, 유리 플랜 카드, 흰 알약 구매 버튼, 핑크 체크·Yearly 강조. 맨 위에 소개 글(McCartney 문장,

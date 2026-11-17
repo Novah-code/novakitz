@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     url: "https://www.novakitz.com/pricing",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.png?v=2",
         width: 1200,
         height: 630,
         alt: "Novakitz Pricing Plans",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Novakitz Pricing - Pro Inner Journal Plans",
     description: "Unlock AI-powered dream analysis with Novakitz Pro. Start free.",
-    images: ["/og-image.png"],
+    images: ["/og-image.png?v=2"],
   },
   alternates: {
     canonical: "https://www.novakitz.com/pricing",

@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.png?v=2",
         width: 1200,
         height: 630,
         alt: "Novakitz - AI Inner Journal",
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Novakitz - A Morning Ritual for Dreams and Moods",
     description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
-    images: ["/og-image.png"],
+    images: ["/og-image.png?v=2"],
     creator: "@novakitz",
   },
   // 검색 로봇 설정
@@ -129,17 +129,17 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico?v=6", sizes: "any" },
-      { url: "/icons/icon-192x192.png?v=6", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png?v=6", sizes: "512x512", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=6", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=6", sizes: "16x16", type: "image/png" }
+      { url: "/favicon.ico?v=7", sizes: "any" },
+      { url: "/icons/icon-192x192.png?v=7", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png?v=7", sizes: "512x512", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=7", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=7", sizes: "16x16", type: "image/png" }
     ],
     apple: [
-      { url: "/icons/icon-192x192.png?v=6", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-192x192.png?v=6", sizes: "192x192", type: "image/png" }
+      { url: "/icons/icon-192x192.png?v=7", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png?v=7", sizes: "192x192", type: "image/png" }
     ],
-    shortcut: "/icons/icon-192x192.png?v=6"
+    shortcut: "/icons/icon-192x192.png?v=7"
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -175,9 +175,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
         <link rel="dns-prefetch" href="https://wylrihmhfmgisgixnlrd.supabase.co" />
         <link rel="preconnect" href="https://generativelanguage.googleapis.com" />
-        <link rel="icon" href="/favicon.ico?v=6" sizes="any" />
-        <link rel="shortcut icon" href="/favicon.ico?v=6" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=6" />
+        <link rel="icon" href="/favicon.ico?v=7" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico?v=7" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png?v=7" />
       </head>
       <body className={`${inter.variable} ${roboto.variable} ${instrumentSerif.variable} font-sans antialiased`}>
         <div className="particles">
