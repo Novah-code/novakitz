@@ -58,6 +58,14 @@ const nextConfig: NextConfig = {
             },
           ];
         },
+        // The website is a single page now (2026-11-17): the web app is retired and the
+        // product is the iPhone app. `/` serves app/welcome while keeping the address.
+        // The app bundle never takes this branch — a static export has no rewrites, and
+        // inside the app `/` is still the app itself.
+        async rewrites() {
+          // beforeFiles: app/page.tsx still exists (the app's home), so a plain rewrite would lose to it.
+          return { beforeFiles: [{ source: '/', destination: '/welcome' }] };
+        },
       }),
   ...(isAppBuild
     ? {
