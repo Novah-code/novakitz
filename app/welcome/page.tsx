@@ -31,7 +31,6 @@ const T = {
     hero2: 'How you woke, and what you dreamed.',
     heroSub: 'A one-minute morning ritual\nfor your mood and your dreams.',
     appStore: 'Download on the App Store',
-    scroll: 'Scroll',
     introEyebrow: 'Meet Novakitz',
     introTitle: 'Mood and dream, in the same place',
     introBody: 'Open the app and two things are waiting: how you woke, and what you dreamed. Tap one, tap the other, close the app.',
@@ -75,7 +74,6 @@ const T = {
     hero2: '나만의 모닝 리추얼',
     heroSub: '1분 안에 기록하는 아침 무드와 어젯밤 꿈,\n쌓이면 보이는 나의 패턴',
     appStore: 'App Store에서 다운로드',
-    scroll: '아래로',
     introEyebrow: '소개합니다',
     introTitle: '기분과 꿈을 한곳에',
     introBody: '앱을 열면 두 가지가 기다리고 있어요. 어떻게 깨어났는지, 무슨 꿈을 꿨는지. 하나를 누르고, 다른 하나를 누르고, 앱을 닫으면 끝이에요.',
@@ -380,7 +378,6 @@ export default function Welcome() {
               <img className="lp-tulip" src="/site/tulip.webp" alt="" />
             </div>
           </div>
-          <div className="lp-scroll" aria-hidden="true">{t.scroll}</div>
         </section>
 
         {/* 2 — what it is, on real screens */}
@@ -539,7 +536,6 @@ html[lang="en"] .lp-sub { font-size: clamp(13px, 1.1vw, 14.5px); line-height: 1.
 .lp-sub { white-space: pre-line; margin: 14px 0 22px; max-width: 520px; font-size: clamp(14px, 1.3vw, 16px); line-height: 1.5; color: ${BASE}; }
 .lp-store { display: inline-flex; align-items: center; gap: 10px; background: ${INK}; color: #fff !important; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 15.5px; box-shadow: 0 10px 28px rgba(40,60,45,.22); transition: transform .2s; }
 .lp-store:hover { transform: translateY(-2px); }
-.lp-scroll { position: absolute; bottom: 22px; left: 0; right: 0; z-index: 2; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: ${LIGHT}; }
 
 .lp-section { max-width: 1100px; margin: 0 auto; padding: 120px 24px 0; text-align: center; }
 .lp-eyebrow { margin: 0 0 14px; font-size: 14px; font-weight: 600; letter-spacing: .5px; color: ${ROSE}; }
