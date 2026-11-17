@@ -15,8 +15,9 @@ import '../../src/styles/home-scene.css';
  * privacy block and a short FAQ — in the app's own sky, glass and fonts.
  */
 
-// TODO: paste the real App Store URL here once 윤아님 sends it.
-const APP_STORE_URL = '#download';
+// The App Store page (Apple ID 6800352279). No storefront or language in the path, so
+// Apple sends each visitor to their own country's page in their own language.
+const APP_STORE_URL = 'https://apps.apple.com/app/id6800352279';
 
 type Lang = 'en' | 'ko';
 
