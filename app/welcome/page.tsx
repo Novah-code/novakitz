@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import AuraOrb from '../../src/components/AuraOrb';
 import '../../src/styles/home-scene.css';
@@ -73,7 +73,7 @@ const T = {
     download: '다운로드',
     hero1: '두 번 탭하면 끝',
     hero2: '나만의 모닝 리추얼',
-    heroSub: '1분 안에 기록하는 아침 무드와 어젯밤 꿈, 쌓이면 보이는 나의 패턴',
+    heroSub: '1분 안에 기록하는 아침 무드와 어젯밤 꿈,\n쌓이면 보이는 나의 패턴',
     appStore: 'App Store에서 다운로드',
     scroll: '아래로',
     introEyebrow: '소개합니다',
@@ -170,8 +170,102 @@ const PETALS: Array<[number, number, number, number, number, number, number, num
 ];
 
 function Petals() {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  /*
+   * The petals get out of the way of the pointer, and scatter when the screen is tapped.
+   *
+   * Two layers per petal: the outer one carries the CSS fall (it never stops), the inner
+   * one carries what the pointer does to it. They are separate on purpose — both are
+   * transforms, and on one element the second would replace the first.
+   *
+   * Each frame a petal's place is read from the outer element, and the pointer pushes the
+   * inner one away from it the nearer it gets, easing back when the pointer leaves. The
+   * loop runs only while there is something to move, so an idle page costs nothing.
+   * Skipped entirely under `prefers-reduced-motion`.
+   */
+  useEffect(() => {
+    const root = rootRef.current;
+    const hero = root?.parentElement;
+    if (!root || !hero) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const outers = Array.from(root.querySelectorAll<HTMLElement>('.lp-petal'));
+    const inners = outers.map((o) => o.firstElementChild as HTMLElement);
+    const st = outers.map(() => ({ x: 0, y: 0, r: 0 }));
+    const pointer = { x: -9999, y: -9999, active: false };
+    let raf = 0;
+
+    const centre = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+    };
+
+    const frame = () => {
+      let moving = false;
+      outers.forEach((o, i) => {
+        const c = centre(o);
+        let tx = 0, ty = 0, tr = 0;
+        if (pointer.active) {
+          const dx = c.x - pointer.x, dy = c.y - pointer.y;
+          const d = Math.hypot(dx, dy) || 1;
+          const reach = 150 + c.w * 0.45;
+          if (d < reach) {
+            const f = Math.pow(1 - d / reach, 1.4);
+            tx = (dx / d) * f * 120;
+            ty = (dy / d) * f * 120;
+            tr = (dx >= 0 ? 1 : -1) * f * 55;
+          }
+        }
+        const s = st[i];
+        s.x += (tx - s.x) * 0.13;
+        s.y += (ty - s.y) * 0.13;
+        s.r += (tr - s.r) * 0.13;
+        if (Math.abs(s.x) > 0.2 || Math.abs(s.y) > 0.2 || Math.abs(s.r) > 0.2) moving = true;
+        inners[i].style.transform = `translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0) rotate(${s.r.toFixed(1)}deg)`;
+      });
+      raf = pointer.active || moving ? requestAnimationFrame(frame) : 0;
+    };
+    const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+    const onMove = (e: PointerEvent) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = true; wake(); };
+    const onLeave = () => { pointer.active = false; wake(); };
+    const onDown = (e: PointerEvent) => {
+      // A tap or click throws the nearby petals outward.
+      outers.forEach((o, i) => {
+        const c = centre(o);
+        const dx = c.x - e.clientX, dy = c.y - e.clientY;
+        const d = Math.hypot(dx, dy) || 1;
+        const reach = 300;
+        if (d < reach) {
+          const f = 1 - d / reach;
+          st[i].x += (dx / d) * f * 220;
+          st[i].y += (dy / d) * f * 220;
+          st[i].r += (dx >= 0 ? 1 : -1) * f * 160;
+        }
+      });
+      if (e.pointerType === 'touch') { pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = false; }
+      wake();
+    };
+    const onUp = (e: PointerEvent) => { if (e.pointerType === 'touch') { pointer.active = false; wake(); } };
+
+    hero.addEventListener('pointermove', onMove);
+    hero.addEventListener('pointerleave', onLeave);
+    hero.addEventListener('pointerdown', onDown);
+    hero.addEventListener('pointerup', onUp);
+    hero.addEventListener('pointercancel', onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      hero.removeEventListener('pointermove', onMove);
+      hero.removeEventListener('pointerleave', onLeave);
+      hero.removeEventListener('pointerdown', onDown);
+      hero.removeEventListener('pointerup', onUp);
+      hero.removeEventListener('pointercancel', onLeave);
+    };
+  }, []);
+
   return (
-    <div className="lp-petals" aria-hidden="true">
+    <div className="lp-petals" aria-hidden="true" ref={rootRef}>
       {PETALS.map(([left, size, dur, delay, sway, spin, c, op], i) => {
         const color = PETAL_COLORS[c];
         return (
@@ -189,16 +283,18 @@ function Petals() {
               ['--spin' as string]: `${spin}deg`,
             }}
           >
-            <svg viewBox="0 0 100 130" width="100%" height="100%">
-              <defs>
-                <radialGradient id={`pg${i}`} cx="50%" cy="52%" r="52%">
-                  <stop offset="0" stopColor={color} stopOpacity="0.95" />
-                  <stop offset="0.55" stopColor={color} stopOpacity="0.6" />
-                  <stop offset="1" stopColor={color} stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <path d="M50 4 C86 30 92 88 50 126 C8 88 14 30 50 4 Z" fill={`url(#pg${i})`} />
-            </svg>
+            <span className="lp-petal-in">
+              <svg viewBox="0 0 100 130" width="100%" height="100%">
+                <defs>
+                  <radialGradient id={`pg${i}`} cx="50%" cy="52%" r="52%">
+                    <stop offset="0" stopColor={color} stopOpacity="0.95" />
+                    <stop offset="0.55" stopColor={color} stopOpacity="0.6" />
+                    <stop offset="1" stopColor={color} stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <path d="M50 4 C86 30 92 88 50 126 C8 88 14 30 50 4 Z" fill={`url(#pg${i})`} />
+              </svg>
+            </span>
           </span>
         );
       })}
@@ -412,6 +508,7 @@ html[lang="ko"] .lp { font-family: 'Pretendard', -apple-system, sans-serif; word
 .lp-hero .home-scene__grain { z-index: 2; }
 .lp-hero-inner { z-index: 3; }
 .lp-petals { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; isolation: isolate; -webkit-mask-image: -webkit-radial-gradient(white, black); }
+.lp-petal-in { display: block; width: 100%; height: 100%; will-change: transform; }
 .lp-petal { position: absolute; top: -20%; display: block; will-change: transform; animation-name: lp-drift; animation-timing-function: linear; animation-iteration-count: infinite; }
 @keyframes lp-drift {
   0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
@@ -438,7 +535,7 @@ html[lang="ko"] .lp-h1.ko, html[lang="ko"] .lp-h1.ko span, html[lang="ko"] .lp-h
 .lp-h1.ko span:first-child { font-weight: 400; font-size: .4em; letter-spacing: -.3px; line-height: 1.3; }
 .lp-h1.ko span:last-child { font-weight: 520; font-size: 1.04em; letter-spacing: -1.5px; line-height: 1.15; }
 .lp-h1 + .lp-store { margin-top: 34px; }
-.lp-sub { margin: 22px 0 28px; max-width: 520px; font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: ${BASE}; }
+.lp-sub { white-space: pre-line; margin: 22px 0 28px; max-width: 520px; font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: ${BASE}; }
 .lp-store { display: inline-flex; align-items: center; gap: 10px; background: ${INK}; color: #fff !important; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 15.5px; box-shadow: 0 10px 28px rgba(40,60,45,.22); transition: transform .2s; }
 .lp-store:hover { transform: translateY(-2px); }
 .lp-scroll { position: absolute; bottom: 22px; left: 0; right: 0; z-index: 2; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: ${LIGHT}; }
