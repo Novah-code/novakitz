@@ -42,6 +42,8 @@ ln -s "$ROOT/node_modules" "$OUT/node_modules"
 echo "==> Stripping server-only and dynamic routes"
 rm -rf "$OUT/app/api" "$OUT/src/app/api"
 rm -rf "$OUT/app/archetype-test/shared" "$OUT/app/profile/shared"
+# The marketing page and its images belong to the website, not the packaged app.
+rm -rf "$OUT/app/welcome" "$OUT/public/site"
 
 # SEO surface belongs to the website, not the packaged app, and sitemap.ts is a
 # dynamic route handler that a static export refuses to pre-render.
