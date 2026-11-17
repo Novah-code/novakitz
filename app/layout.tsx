@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.png?v=2",
         width: 1200,
         height: 630,
         alt: "Novakitz - AI Inner Journal",
@@ -98,7 +98,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Novakitz - A Morning Ritual for Dreams and Moods",
     description: "Record how you woke up and the dream you still have, and read it back. One minute, every morning.",
-    images: ["/og-image.png"],
+    images: ["/og-image.png?v=2"],
     creator: "@novakitz",
   },
   // 검색 로봇 설정
