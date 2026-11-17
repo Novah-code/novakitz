@@ -532,10 +532,10 @@ html[lang="ko"] .lp-h1.ko, html[lang="ko"] .lp-h1.ko span, html[lang="ko"] .lp-h
 .lp-h1.ko span:last-child { font-style: normal; }
 /* Korean: "나만의 모닝 리추얼" is the headline; "두 번 탭하면 끝" is the small line above it. */
 .lp-h1.ko { line-height: 1.2; gap: .22em; }
-.lp-h1.ko span:first-child { font-weight: 400; font-size: .4em; letter-spacing: -.3px; line-height: 1.3; }
+.lp-h1.ko span:first-child { font-weight: 600; font-size: .4em; letter-spacing: -.3px; line-height: 1.3; }
 .lp-h1.ko span:last-child { font-weight: 520; font-size: 1.04em; letter-spacing: -1.5px; line-height: 1.15; }
 .lp-h1 + .lp-store { margin-top: 34px; }
-.lp-sub { white-space: pre-line; margin: 22px 0 28px; max-width: 520px; font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: ${BASE}; }
+.lp-sub { white-space: pre-line; margin: 22px 0 28px; max-width: 520px; font-size: clamp(14px, 1.3vw, 16px); line-height: 1.65; color: ${BASE}; }
 .lp-store { display: inline-flex; align-items: center; gap: 10px; background: ${INK}; color: #fff !important; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 15.5px; box-shadow: 0 10px 28px rgba(40,60,45,.22); transition: transform .2s; }
 .lp-store:hover { transform: translateY(-2px); }
 .lp-scroll { position: absolute; bottom: 22px; left: 0; right: 0; z-index: 2; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: ${LIGHT}; }
