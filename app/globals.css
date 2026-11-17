@@ -5,10 +5,12 @@
  * S-CoreDream on 2026-11-14: S-CoreDream is round and heavy, and next to the
  * thin serif the English screens use it read as a different app.
  *
- * KoDisplay is Gowun Batang Regular, cut down to the 2,350 everyday Hangul
- * syllables (KS X 1001), Latin and common punctuation — 200 KB instead of 8 MB.
- * It is for headings only, the Korean counterpart of Instrument Serif. A rare
- * syllable outside that set falls through to Pretendard rather than a box.
+ * KoDisplay is Noto Serif KR (variable, weights 300-600), cut down to the 2,350
+ * everyday Hangul syllables (KS X 1001), Latin and common punctuation — about 640 KB
+ * instead of 24 MB. It is for headings only, the Korean counterpart of Instrument
+ * Serif (Gowun Batang before 2026-11-14 evening; 윤아님 picked Noto Serif from a
+ * side-by-side of seven). A rare syllable outside that set falls through to
+ * Pretendard rather than a box.
  */
 @font-face {
     font-family: 'Pretendard';
@@ -19,8 +21,8 @@
 
 @font-face {
     font-family: 'KoDisplay';
-    font-weight: 400;
-    src: url('/fonts/GowunBatang-Regular.subset.woff2') format('woff2');
+    font-weight: 300 600;
+    src: url('/fonts/NotoSerifKR-VF.subset.woff2') format('woff2');
     font-display: swap;
 }
 
@@ -52,6 +54,7 @@ html[lang="ko"] * {
  * on its own; this one is more specific and also !important.
  */
 html[lang="ko"] [style*="KoDisplay"] {
+    font-weight: 340 !important;
     /* Latin letters (an emotion's English name, "Inner Journal") come from the English
        display face; Hangul, which it does not have, falls through to KoDisplay. */
     font-family: var(--font-display), 'KoDisplay', 'Pretendard', serif !important;

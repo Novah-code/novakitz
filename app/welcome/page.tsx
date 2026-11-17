@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import AuraOrb from '../../src/components/AuraOrb';
 import '../../src/styles/home-scene.css';
@@ -29,7 +29,7 @@ const T = {
     download: 'Download',
     hero1: 'Two taps.',
     hero2: 'How you woke, and what you dreamed.',
-    heroSub: 'A one-minute morning ritual for your mood and your dreams.',
+    heroSub: 'A one-minute morning ritual\nfor your mood and your dreams.',
     appStore: 'Download on the App Store',
     scroll: 'Scroll',
     introEyebrow: 'Meet Novakitz',
@@ -71,9 +71,9 @@ const T = {
     navPrivacy: '개인정보',
     navFaq: '질문',
     download: '다운로드',
-    hero1: '두 번 탭하면 끝.',
-    hero2: '오늘 아침의 기분, 간밤의 꿈.',
-    heroSub: '기분과 꿈을 1분에 기록하는 모닝 루틴.',
+    hero1: '두 번 탭하면 끝',
+    hero2: '나만의 모닝 리추얼',
+    heroSub: '1분 안에 기록하는 아침 무드와 어젯밤 꿈,\n쌓이면 보이는 나의 패턴',
     appStore: 'App Store에서 다운로드',
     scroll: '아래로',
     introEyebrow: '소개합니다',
@@ -131,6 +131,173 @@ function Phone({ src, alt, tilt = 0 }: { src: string; alt: string; tilt?: number
     <div className="lp-phone" style={{ transform: `rotate(${tilt}deg)` }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} loading="lazy" />
+    </div>
+  );
+}
+
+
+/*
+ * Petals drifting across the first screen, out of focus.
+ *
+ * Soft on purpose and without `filter: blur`: each petal is an SVG shape whose fill
+ * fades to nothing at its edge, so it looks blurred with no filter at all. (iOS lets a
+ * filtered, animated child spill out of a rounded parent that only has `overflow:
+ * hidden`; this layer is also masked to be safe.) Positions, sizes and timings are fixed
+ * lists, not random, so the server and the browser draw the same thing.
+ *
+ * Three depths: small and faint and slow at the back, large and softer and a little
+ * quicker at the front. Everything stops under `prefers-reduced-motion`.
+ */
+// The app's own mood colours plus the tulip's reds, so the petals read as the same family
+// as the orbs: rose, coral, peach, butter, mint, sky, lavender, orchid.
+const PETAL_COLORS = ['#E2566B', '#FF8F7A', '#F7A98B', '#FFC94D', '#8CCB92', '#7FB8DC', '#A99AE8', '#E58AC4'];
+// left %, size px, fall seconds, delay seconds (negative: already in flight), sway px, spin deg, colour, opacity
+const PETALS: Array<[number, number, number, number, number, number, number, number]> = [
+  [6, 54, 26, -4, 40, 200, 0, 0.55],
+  [14, 120, 34, -19, 70, -160, 5, 0.5],
+  [22, 38, 22, -11, 30, 240, 3, 0.5],
+  [31, 90, 30, -2, 60, 180, 6, 0.5],
+  [40, 46, 24, -15, 36, -220, 1, 0.5],
+  [49, 150, 38, -27, 80, 140, 4, 0.5],
+  [57, 62, 27, -8, 44, 260, 7, 0.5],
+  [66, 34, 21, -17, 26, -200, 2, 0.5],
+  [74, 104, 33, -23, 66, 170, 5, 0.5],
+  [82, 50, 25, -6, 38, -240, 0, 0.5],
+  [90, 130, 36, -13, 74, 150, 6, 0.5],
+  [95, 42, 23, -21, 30, 210, 3, 0.5],
+  [10, 70, 29, -25, 48, -180, 7, 0.5],
+  [60, 110, 35, -31, 70, 190, 1, 0.5],
+];
+
+function Petals() {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  /*
+   * The petals get out of the way of the pointer, and scatter when the screen is tapped.
+   *
+   * Two layers per petal: the outer one carries the CSS fall (it never stops), the inner
+   * one carries what the pointer does to it. They are separate on purpose — both are
+   * transforms, and on one element the second would replace the first.
+   *
+   * Each frame a petal's place is read from the outer element, and the pointer pushes the
+   * inner one away from it the nearer it gets, easing back when the pointer leaves. The
+   * loop runs only while there is something to move, so an idle page costs nothing.
+   * Skipped entirely under `prefers-reduced-motion`.
+   */
+  useEffect(() => {
+    const root = rootRef.current;
+    const hero = root?.parentElement;
+    if (!root || !hero) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const outers = Array.from(root.querySelectorAll<HTMLElement>('.lp-petal'));
+    const inners = outers.map((o) => o.firstElementChild as HTMLElement);
+    const st = outers.map(() => ({ x: 0, y: 0, r: 0 }));
+    const pointer = { x: -9999, y: -9999, active: false };
+    let raf = 0;
+
+    const centre = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+    };
+
+    const frame = () => {
+      let moving = false;
+      outers.forEach((o, i) => {
+        const c = centre(o);
+        let tx = 0, ty = 0, tr = 0;
+        if (pointer.active) {
+          const dx = c.x - pointer.x, dy = c.y - pointer.y;
+          const d = Math.hypot(dx, dy) || 1;
+          const reach = 150 + c.w * 0.45;
+          if (d < reach) {
+            const f = Math.pow(1 - d / reach, 1.4);
+            tx = (dx / d) * f * 120;
+            ty = (dy / d) * f * 120;
+            tr = (dx >= 0 ? 1 : -1) * f * 55;
+          }
+        }
+        const s = st[i];
+        s.x += (tx - s.x) * 0.13;
+        s.y += (ty - s.y) * 0.13;
+        s.r += (tr - s.r) * 0.13;
+        if (Math.abs(s.x) > 0.2 || Math.abs(s.y) > 0.2 || Math.abs(s.r) > 0.2) moving = true;
+        inners[i].style.transform = `translate3d(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px, 0) rotate(${s.r.toFixed(1)}deg)`;
+      });
+      raf = pointer.active || moving ? requestAnimationFrame(frame) : 0;
+    };
+    const wake = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+    const onMove = (e: PointerEvent) => { pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = true; wake(); };
+    const onLeave = () => { pointer.active = false; wake(); };
+    const onDown = (e: PointerEvent) => {
+      // A tap or click throws the nearby petals outward.
+      outers.forEach((o, i) => {
+        const c = centre(o);
+        const dx = c.x - e.clientX, dy = c.y - e.clientY;
+        const d = Math.hypot(dx, dy) || 1;
+        const reach = 300;
+        if (d < reach) {
+          const f = 1 - d / reach;
+          st[i].x += (dx / d) * f * 220;
+          st[i].y += (dy / d) * f * 220;
+          st[i].r += (dx >= 0 ? 1 : -1) * f * 160;
+        }
+      });
+      if (e.pointerType === 'touch') { pointer.x = e.clientX; pointer.y = e.clientY; pointer.active = false; }
+      wake();
+    };
+    const onUp = (e: PointerEvent) => { if (e.pointerType === 'touch') { pointer.active = false; wake(); } };
+
+    hero.addEventListener('pointermove', onMove);
+    hero.addEventListener('pointerleave', onLeave);
+    hero.addEventListener('pointerdown', onDown);
+    hero.addEventListener('pointerup', onUp);
+    hero.addEventListener('pointercancel', onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      hero.removeEventListener('pointermove', onMove);
+      hero.removeEventListener('pointerleave', onLeave);
+      hero.removeEventListener('pointerdown', onDown);
+      hero.removeEventListener('pointerup', onUp);
+      hero.removeEventListener('pointercancel', onLeave);
+    };
+  }, []);
+
+  return (
+    <div className="lp-petals" aria-hidden="true" ref={rootRef}>
+      {PETALS.map(([left, size, dur, delay, sway, spin, c, op], i) => {
+        const color = PETAL_COLORS[c];
+        return (
+          <span
+            key={i}
+            className="lp-petal"
+            style={{
+              left: `${left}%`,
+              width: size,
+              height: size * 1.3,
+              opacity: op,
+              animationDuration: `${dur}s`,
+              animationDelay: `${delay}s`,
+              ['--sway' as string]: `${sway}px`,
+              ['--spin' as string]: `${spin}deg`,
+            }}
+          >
+            <span className="lp-petal-in">
+              <svg viewBox="0 0 100 130" width="100%" height="100%">
+                <defs>
+                  <radialGradient id={`pg${i}`} cx="50%" cy="52%" r="52%">
+                    <stop offset="0" stopColor={color} stopOpacity="0.95" />
+                    <stop offset="0.55" stopColor={color} stopOpacity="0.6" />
+                    <stop offset="1" stopColor={color} stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <path d="M50 4 C86 30 92 88 50 126 C8 88 14 30 50 4 Z" fill={`url(#pg${i})`} />
+              </svg>
+            </span>
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -197,16 +364,21 @@ export default function Welcome() {
         {/* 1 — one sentence on the sky */}
         <section className="lp-hero">
           <div className="lp-hero-sky" aria-hidden="true" />
+          <Petals />
           <div className="home-scene__grain home-scene__grain--flat" aria-hidden="true" />
           <div className="lp-hero-inner">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="lp-tulip" src="/site/tulip.png" alt="" />
-            <h1 className={`lp-h1 ${ko ? 'ko' : ''}`}>
-              <span>{t.hero1}</span>
-              <span>{t.hero2}</span>
-            </h1>
-            <p className="lp-sub">{t.heroSub}</p>
-            {store}
+            <div className="lp-hero-text">
+              <h1 className={`lp-h1 ${ko ? 'ko' : ''}`}>
+                <span>{t.hero1}</span>
+                <span>{t.hero2}</span>
+              </h1>
+              {t.heroSub ? <p className="lp-sub">{t.heroSub}</p> : null}
+              {store}
+            </div>
+            <div className="lp-hero-art">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="lp-tulip" src="/site/tulip.webp" alt="" />
+            </div>
           </div>
           <div className="lp-scroll" aria-hidden="true">{t.scroll}</div>
         </section>
@@ -331,17 +503,40 @@ html[lang="ko"] .lp { font-family: 'Pretendard', -apple-system, sans-serif; word
 .lp-lang button.on { background: #fff; color: ${INK}; font-weight: 700; box-shadow: 0 1px 6px rgba(40,60,45,.14); }
 .lp-pill { background: ${INK}; color: #fff !important; font-size: 13.5px; font-weight: 600; padding: 10px 18px; border-radius: 999px; }
 
-.lp-hero { position: relative; margin: 76px 16px 0; min-height: calc(100vh - 92px); border-radius: 48px; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+.lp-hero { position: relative; margin: 76px 16px 0; min-height: calc(100vh - 92px); border-radius: 48px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .lp-hero-sky { position: absolute; inset: 0; background-image: var(--home-sky-day); background-color: #F4EEE5; }
-.lp-hero .home-scene__grain { z-index: 1; }
-.lp-hero-inner { position: relative; z-index: 2; padding: 56px 24px 88px; display: flex; flex-direction: column; align-items: center; }
-.lp-tulip { width: clamp(120px, 16vw, 190px); height: auto; margin-bottom: 18px; filter: drop-shadow(0 10px 24px rgba(120,40,50,.18)); }
-.lp-h1 { margin: 0; font-family: var(--font-display), Georgia, serif; font-weight: 400; font-size: clamp(40px, 6.4vw, 84px); line-height: 1.06; letter-spacing: -.5px; display: flex; flex-direction: column; text-wrap: balance; }
+.lp-hero .home-scene__grain { z-index: 2; }
+.lp-hero-inner { z-index: 3; }
+.lp-petals { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; isolation: isolate; -webkit-mask-image: -webkit-radial-gradient(white, black); }
+.lp-petal-in { display: block; width: 100%; height: 100%; will-change: transform; }
+.lp-petal { position: absolute; top: -20%; display: block; will-change: transform; animation-name: lp-drift; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes lp-drift {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  25%  { transform: translate3d(var(--sway), 30vh, 0) rotate(calc(var(--spin) * .25)); }
+  50%  { transform: translate3d(calc(var(--sway) * -.6), 62vh, 0) rotate(calc(var(--spin) * .5)); }
+  75%  { transform: translate3d(calc(var(--sway) * .9), 94vh, 0) rotate(calc(var(--spin) * .75)); }
+  100% { transform: translate3d(0, 128vh, 0) rotate(var(--spin)); }
+}
+@media (prefers-reduced-motion: reduce) { .lp-petal { animation: none; top: 30%; } .lp-tulip { animation: none; } }
+.lp-hero-inner { position: relative; z-index: 3; width: 100%; max-width: 1240px; margin: 0 auto; padding: 64px 40px 84px; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 24px; text-align: left; }
+.lp-hero-text { display: flex; flex-direction: column; align-items: flex-start; }
+.lp-hero-art { display: flex; justify-content: center; align-items: center; }
+.lp-tulip { width: min(122%, 760px, 80vh); max-width: none; height: auto; margin: -3% -11% -3% -11%; filter: drop-shadow(0 22px 36px rgba(120,40,50,.22)); animation: lp-breathe 8s ease-in-out infinite; }
+@keyframes lp-breathe { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-8px) scale(1.018); } }
+.lp-h1 { margin: 0; font-family: var(--font-display), Georgia, serif; font-weight: 400; font-size: clamp(40px, 5.6vw, 80px); line-height: 1.06; letter-spacing: -.5px; display: flex; flex-direction: column; text-wrap: balance; }
 .lp-h1 span:last-child { color: ${ROSE}; font-style: italic; }
-.lp-h1.ko, .lp-h2.ko { font-family: 'KoDisplay', 'Pretendard', serif; letter-spacing: -1px; line-height: 1.3; }
-.lp-h1.ko { font-size: clamp(34px, 5.2vw, 66px); }
+/* globals.css sets every element in Korean to Pretendard with !important, so a heading has to say !important too. */
+html[lang="ko"] .lp-h1.ko, html[lang="ko"] .lp-h1.ko span, html[lang="ko"] .lp-h2.ko, html[lang="ko"] .lp-card h3.ko, html[lang="ko"] .lp-dark-card h3.ko { font-family: 'KoDisplay', 'Pretendard', serif !important; }
+.lp-h1.ko, .lp-h2.ko { font-family: 'KoDisplay', 'Pretendard', serif; font-weight: 300; letter-spacing: -1px; line-height: 1.3; }
+.lp-h1.ko { font-size: clamp(32px, 4.6vw, 62px); }
 .lp-h1.ko span:last-child { font-style: normal; }
-.lp-sub { margin: 22px 0 28px; max-width: 520px; font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: ${BASE}; }
+/* Korean: "나만의 모닝 리추얼" is the headline; "두 번 탭하면 끝" is the small line above it. */
+.lp-h1.ko { line-height: 1.2; gap: .08em; }
+.lp-h1.ko span:first-child { font-weight: 600; font-size: .4em; letter-spacing: -.3px; line-height: 1.3; }
+.lp-h1.ko span:last-child { font-weight: 520; font-size: 1.04em; letter-spacing: -1.5px; line-height: 1.15; }
+.lp-h1 + .lp-store { margin-top: 26px; }
+html[lang="en"] .lp-sub { font-size: clamp(13px, 1.1vw, 14.5px); line-height: 1.25; }
+.lp-sub { white-space: pre-line; margin: 14px 0 22px; max-width: 520px; font-size: clamp(14px, 1.3vw, 16px); line-height: 1.5; color: ${BASE}; }
 .lp-store { display: inline-flex; align-items: center; gap: 10px; background: ${INK}; color: #fff !important; padding: 15px 26px; border-radius: 999px; font-weight: 600; font-size: 15.5px; box-shadow: 0 10px 28px rgba(40,60,45,.22); transition: transform .2s; }
 .lp-store:hover { transform: translateY(-2px); }
 .lp-scroll { position: absolute; bottom: 22px; left: 0; right: 0; z-index: 2; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: ${LIGHT}; }
@@ -366,7 +561,7 @@ html[lang="ko"] .lp { font-family: 'Pretendard', -apple-system, sans-serif; word
 .lp-card-art-shot { align-items: flex-start; }
 .lp-card-art-shot img { width: 56%; height: auto; border-radius: 18px 18px 0 0; margin-top: 22px; box-shadow: 0 10px 30px rgba(40,50,45,.25); }
 .lp-card h3 { margin: 0 0 8px; font-family: var(--font-display), Georgia, serif; font-weight: 400; font-size: 28px; line-height: 1.15; }
-.lp-card h3.ko, .lp-dark-card h3.ko { font-family: 'KoDisplay', 'Pretendard', serif; font-size: 20px; line-height: 1.4; }
+.lp-card h3.ko, .lp-dark-card h3.ko { font-family: 'KoDisplay', 'Pretendard', serif; font-weight: 400; font-size: 20px; line-height: 1.4; }
 .lp-card p { margin: 0; font-size: 15px; line-height: 1.7; color: ${BASE}; }
 
 .lp-split { display: grid; grid-template-columns: 1.1fr .9fr; gap: 56px; align-items: center; text-align: left; }
@@ -402,6 +597,10 @@ html[lang="ko"] .lp { font-family: 'Pretendard', -apple-system, sans-serif; word
   .lp-phone img { border-radius: 14px; }
   .lp-phones .lp-phone:nth-child(2) { margin-top: 20px; }
   .lp-hero { margin: 68px 10px 0; border-radius: 34px; }
+  .lp-hero-inner { grid-template-columns: 1fr; gap: 8px; padding: 36px 22px 84px; text-align: center; }
+  .lp-hero-art { order: -1; }
+  .lp-tulip { width: min(104%, 430px, 52vh); margin: -2% -2% 0 -2%; }
+  .lp-hero-text { align-items: center; }
   .lp-dark { margin: 88px 10px 0; border-radius: 34px; padding: 72px 20px; }
   .lp-nav { padding: 0 14px; }
   .lp-pill { display: none; }
