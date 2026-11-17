@@ -73,7 +73,7 @@ const T = {
     download: '다운로드',
     hero1: '두 번 탭하면 끝',
     hero2: '나만의 모닝 리추얼',
-    heroSub: '', // 윤아님: the Korean description line read as awkward, so Korean has none
+    heroSub: '1분 안에 기록하는 아침 무드와 어젯밤 꿈, 쌓이면 보이는 나의 패턴',
     appStore: 'App Store에서 다운로드',
     scroll: '아래로',
     introEyebrow: '소개합니다',
