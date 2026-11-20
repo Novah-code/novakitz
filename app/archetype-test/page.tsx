@@ -2,6 +2,7 @@
 
 import { goTo } from '../../src/lib/platform';
 import { useState, useEffect } from 'react';
+import { initialTestLanguage } from '../../src/lib/testLanguage';
 import ArchetypeShell, { Heading, Subline, Body, PillButton, glass } from '../../src/components/ArchetypeShell';
 import '../globals.css';
 import { INK, BASE, LIGHT, PINK } from '../../src/lib/skyUi';
@@ -11,10 +12,7 @@ export default function ArchetypeTestLanding() {
 
   useEffect(() => {
     // Load language from localStorage
-    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
+    setLanguage(initialTestLanguage());
   }, []);
 
   const handleLanguageChange = (newLang: 'ko' | 'en') => {

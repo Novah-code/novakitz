@@ -15,6 +15,7 @@ import {
 } from '../../../src/lib/archetypes';
 import { getGrowthStage } from '../../../src/lib/archetypeGrowth';
 import { supabase } from '../../../src/lib/supabase';
+import { initialTestLanguage } from '../../../src/lib/testLanguage';
 import ArchetypeShell, { Heading, Subline, Body, PillButton, glass } from '../../../src/components/ArchetypeShell';
 import { INK, BASE, LIGHT, PINK, ROSE, displayFont } from '../../../src/lib/skyUi';
 import ArchetypeShareCard from '../../../src/components/ArchetypeShareCard';
@@ -42,10 +43,7 @@ export default function ArchetypeResult() {
 
   useEffect(() => {
     // Load language from localStorage
-    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
+    setLanguage(initialTestLanguage());
 
     // Check if already unlocked
     const unlocked = localStorage.getItem('archetype_unlocked');

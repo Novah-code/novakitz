@@ -4,6 +4,7 @@ import { goTo } from '../../../src/lib/platform';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ARCHETYPE_QUIZ_QUESTIONS } from '../../../src/lib/archetypeQuiz';
+import { initialTestLanguage } from '../../../src/lib/testLanguage';
 import ArchetypeShell, { Heading, Progress, glass } from '../../../src/components/ArchetypeShell';
 import { INK, BASE, LIGHT, PINK, displayFont } from '../../../src/lib/skyUi';
 import '../../globals.css';
@@ -20,10 +21,7 @@ export default function ArchetypeQuiz() {
 
   useEffect(() => {
     // Load language from localStorage
-    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
+    setLanguage(initialTestLanguage());
 
     // Load any existing answers
     const savedAnswers = localStorage.getItem('guest_quiz_answers');
