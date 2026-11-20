@@ -77,7 +77,9 @@ export default function ArchetypeTestLanding() {
         ))}
       </div>
 
-      <PillButton onClick={startGuestTest}>{ko ? '무료로 시작하기' : 'Start for Free'}</PillButton>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <PillButton onClick={startGuestTest} fit>{ko ? '무료로 시작하기' : 'Start for Free'}</PillButton>
+      </div>
       <p style={{ textAlign: 'center', fontSize: 13, color: LIGHT, margin: '16px 0 0' }}>
         {ko ? '로그인 없이 바로 시작할 수 있어요' : 'No login required to start'}
       </p>
