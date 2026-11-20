@@ -175,7 +175,7 @@ export function Body({ children, style }: { children: ReactNode; style?: CSSProp
 }
 
 /** White pill with the round arrow, the same button the morning steps use. */
-export function PillButton({ children, onClick, disabled, arrow = true, quiet, submit }: { children: ReactNode; onClick: () => void; disabled?: boolean; arrow?: boolean; quiet?: boolean; submit?: boolean }) {
+export function PillButton({ children, onClick, disabled, arrow = true, quiet, submit, fit }: { children: ReactNode; onClick: () => void; disabled?: boolean; arrow?: boolean; quiet?: boolean; submit?: boolean; /** Only as wide as its text (and arrow) instead of the full column. */ fit?: boolean }) {
   return (
     <button
       type={submit ? 'submit' : 'button'}
@@ -189,7 +189,8 @@ export function PillButton({ children, onClick, disabled, arrow = true, quiet, s
         display: 'flex',
         alignItems: 'center',
         justifyContent: arrow ? 'space-between' : 'center',
-        gap: 20,
+        gap: fit ? 16 : 20,
+        ...(fit ? { width: 'auto' } : {}),
         opacity: disabled ? 0.45 : 1,
         cursor: disabled ? 'default' : 'pointer',
         ...(quiet ? { background: 'rgba(255,255,255,0.45)', boxShadow: 'none' } : {}),

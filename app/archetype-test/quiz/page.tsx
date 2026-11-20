@@ -1,10 +1,11 @@
 'use client';
 
 import { goTo } from '../../../src/lib/platform';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ARCHETYPE_QUIZ_QUESTIONS, getQuizProgress } from '../../../src/lib/archetypeQuiz';
-import ArchetypeShell, { Heading, PillButton, Progress, glass } from '../../../src/components/ArchetypeShell';
+import { ARCHETYPE_QUIZ_QUESTIONS } from '../../../src/lib/archetypeQuiz';
+import { initialTestLanguage } from '../../../src/lib/testLanguage';
+import ArchetypeShell, { Heading, Progress, glass } from '../../../src/components/ArchetypeShell';
 import { INK, BASE, LIGHT, PINK, displayFont } from '../../../src/lib/skyUi';
 import '../../globals.css';
 
@@ -14,19 +15,13 @@ export default function ArchetypeQuiz() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  // A tap picks the answer and moves on; this blocks a second tap during the short pause that shows the pick.
+  const advancing = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (advancing.current) clearTimeout(advancing.current); }, []);
 
   useEffect(() => {
-    // Check if guest dream was saved
-    const guestDream = localStorage.getItem('guest_dream');
-    if (!guestDream) {
-      goTo('/archetype-test/');
-    }
-
     // Load language from localStorage
-    const savedLanguage = localStorage.getItem('test_language') as 'ko' | 'en' | null;
-    if (savedLanguage) {
-      setLanguage(savedLanguage);
-    }
+    setLanguage(initialTestLanguage());
 
     // Load any existing answers
     const savedAnswers = localStorage.getItem('guest_quiz_answers');
@@ -36,38 +31,31 @@ export default function ArchetypeQuiz() {
   }, [router]);
 
   const question = ARCHETYPE_QUIZ_QUESTIONS[currentQuestion];
-  const progress = getQuizProgress(answers);
   const isLastQuestion = currentQuestion === ARCHETYPE_QUIZ_QUESTIONS.length - 1;
 
   const handleSelectOption = (optionIndex: number) => {
+    if (advancing.current) return;
     setSelectedOption(optionIndex);
-  };
 
-  const handleNext = () => {
-    if (selectedOption === null) {
-      alert(language === 'ko' ? '답변을 선택해주세요' : 'Please select an answer');
-      return;
-    }
-
-    // Save answer
-    const newAnswers = {
-      ...answers,
-      [question.id]: selectedOption
-    };
+    const newAnswers = { ...answers, [question.id]: optionIndex };
     setAnswers(newAnswers);
     localStorage.setItem('guest_quiz_answers', JSON.stringify(newAnswers));
 
-    if (isLastQuestion) {
-      // Go to results
-      goTo('/archetype-test/result/');
-    } else {
-      // Next question
-      setCurrentQuestion(currentQuestion + 1);
-      setSelectedOption(null);
-    }
+    advancing.current = setTimeout(() => {
+      advancing.current = null;
+      if (isLastQuestion) {
+        goTo('/archetype-test/result/');
+      } else {
+        const next = currentQuestion + 1;
+        setCurrentQuestion(next);
+        const saved = newAnswers[ARCHETYPE_QUIZ_QUESTIONS[next].id];
+        setSelectedOption(saved !== undefined ? saved : null);
+      }
+    }, 260);
   };
 
   const handlePrevious = () => {
+    if (advancing.current) return;
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
       // Load previous answer
@@ -139,12 +127,6 @@ export default function ArchetypeQuiz() {
             </button>
           );
         })}
-      </div>
-
-      <div style={{ marginTop: 28 }}>
-        <PillButton onClick={handleNext} disabled={selectedOption === null}>
-          {isLastQuestion ? (ko ? '결과 보기' : 'See Results') : (ko ? '다음 질문' : 'Next Question')}
-        </PillButton>
       </div>
 
       <p style={{ margin: '22px 0 0', textAlign: 'center', fontSize: 12.5, color: LIGHT }}>
