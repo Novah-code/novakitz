@@ -25,8 +25,7 @@ export default function ArchetypeTestLanding() {
     localStorage.removeItem('guest_dream');
     localStorage.removeItem('guest_quiz_answers');
     localStorage.removeItem('guest_result_id');
-    // Save language preference
-    localStorage.setItem('test_language', language);
+    // test_language is only written by the switch below, so an untouched test keeps following the app's language
     goTo('/archetype-test/quiz/');
   };
 

@@ -42,8 +42,10 @@ export default function ArchetypeResult() {
   const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
-    // Load language from localStorage
-    setLanguage(initialTestLanguage());
+    // Resolve the language once and hand it down: state set here is not visible to
+    // loadResult/saveResultToDatabase in this same pass, which saved every result as 'ko'.
+    const lang = initialTestLanguage();
+    setLanguage(lang);
 
     // Check if already unlocked
     const unlocked = localStorage.getItem('archetype_unlocked');
@@ -51,7 +53,7 @@ export default function ArchetypeResult() {
       setIsUnlocked(true);
     }
 
-    loadResult();
+    loadResult(lang);
     checkAuth();
   }, []);
 
@@ -60,7 +62,7 @@ export default function ArchetypeResult() {
     setIsLoggedIn(!!user);
   };
 
-  const loadResult = async () => {
+  const loadResult = async (lang: 'ko' | 'en') => {
     const answersStr = localStorage.getItem('guest_quiz_answers');
     if (!answersStr) {
       goTo('/archetype-test/');
@@ -72,7 +74,7 @@ export default function ArchetypeResult() {
     setResult(calculatedResult);
 
     // Save result to database for sharing
-    await saveResultToDatabase(calculatedResult, answers);
+    await saveResultToDatabase(calculatedResult, answers, lang);
   };
 
   const saveResultToDatabase = async (
@@ -81,7 +83,8 @@ export default function ArchetypeResult() {
       secondary: string | null;
       scores: Record<string, number>;
     },
-    answers: Record<string, number>
+    answers: Record<string, number>,
+    lang: 'ko' | 'en'
   ) => {
     // Check if already saved
     const savedId = localStorage.getItem('guest_result_id');
@@ -105,7 +108,7 @@ export default function ArchetypeResult() {
           archetype_scores: calculatedResult.scores,
           dream_content: dreamData?.content || '',
           quiz_answers: answers,
-          language: language,
+          language: lang,
         }),
       });
 
