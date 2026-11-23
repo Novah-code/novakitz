@@ -3,7 +3,7 @@
 import { goTo } from '../../../src/lib/platform';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { calculateArchetypeFromQuiz } from '../../../src/lib/archetypeQuiz';
+import { calculateArchetypeFromQuiz, ARCHETYPE_QUIZ_QUESTIONS } from '../../../src/lib/archetypeQuiz';
 import {
   getArchetypeName,
   getArchetypeDescription,
@@ -24,6 +24,7 @@ import '../../globals.css';
 export default function ArchetypeResult() {
   const router = useRouter();
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
+  const [ready, setReady] = useState(false);
   const [result, setResult] = useState<{
     primary: string;
     secondary: string | null;
@@ -46,6 +47,7 @@ export default function ArchetypeResult() {
     // loadResult/saveResultToDatabase in this same pass, which saved every result as 'ko'.
     const lang = initialTestLanguage();
     setLanguage(lang);
+    setReady(true);
 
     // Check if already unlocked
     const unlocked = localStorage.getItem('archetype_unlocked');
@@ -63,13 +65,22 @@ export default function ArchetypeResult() {
   };
 
   const loadResult = async (lang: 'ko' | 'en') => {
-    const answersStr = localStorage.getItem('guest_quiz_answers');
-    if (!answersStr) {
+    let answers: Record<string, number> = {};
+    try {
+      answers = JSON.parse(localStorage.getItem('guest_quiz_answers') || '{}');
+    } catch {
+      localStorage.removeItem('guest_quiz_answers');
+    }
+    const answered = ARCHETYPE_QUIZ_QUESTIONS.filter((q) => answers[q.id] !== undefined).length;
+    if (answered === 0) {
       goTo('/archetype-test/');
       return;
     }
-
-    const answers = JSON.parse(answersStr);
+    if (answered < ARCHETYPE_QUIZ_QUESTIONS.length) {
+      // Not finished: calculating now would hand out 'explorer' for an empty score and save it.
+      goTo('/archetype-test/quiz/');
+      return;
+    }
     const calculatedResult = calculateArchetypeFromQuiz(answers);
     setResult(calculatedResult);
 
@@ -220,6 +231,8 @@ export default function ArchetypeResult() {
   };
 
   const ko = language === 'ko';
+
+  if (!ready) return null;
 
   if (!result) {
     return (
@@ -377,6 +390,7 @@ export default function ArchetypeResult() {
           primaryColor={primaryColor}
           darkColor={primaryDarkColor}
           language={language}
+          resultId={savedResultId ?? undefined}
           onClose={() => setShowShareCard(false)}
         />
       )}

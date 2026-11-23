@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
               source: '/api/:path*',
               headers: [
                 { key: 'Access-Control-Allow-Origin', value: 'capacitor://localhost' },
-                { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, DELETE, OPTIONS' },
+                { key: 'Access-Control-Allow-Methods', value: 'GET, POST, PUT, PATCH, DELETE, OPTIONS' },
                 { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
                 { key: 'Access-Control-Max-Age', value: '86400' },
                 // Responses differ by origin, so caches must not share them.
