@@ -12,6 +12,7 @@ import '../../globals.css';
 export default function ArchetypeQuiz() {
   const router = useRouter();
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
+  const [ready, setReady] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -23,11 +24,20 @@ export default function ArchetypeQuiz() {
     // Load language from localStorage
     setLanguage(initialTestLanguage());
 
-    // Load any existing answers
-    const savedAnswers = localStorage.getItem('guest_quiz_answers');
-    if (savedAnswers) {
-      setAnswers(JSON.parse(savedAnswers));
+    // Pick up where the answers left off (coming back from the result, or a reload).
+    // The start button clears them, so a fresh run always begins at question 1.
+    try {
+      const saved: Record<string, number> = JSON.parse(localStorage.getItem('guest_quiz_answers') || '{}');
+      setAnswers(saved);
+      const firstOpen = ARCHETYPE_QUIZ_QUESTIONS.findIndex((q) => saved[q.id] === undefined);
+      const at = firstOpen === -1 ? ARCHETYPE_QUIZ_QUESTIONS.length - 1 : firstOpen;
+      setCurrentQuestion(at);
+      const mark = saved[ARCHETYPE_QUIZ_QUESTIONS[at].id];
+      setSelectedOption(mark !== undefined ? mark : null);
+    } catch {
+      localStorage.removeItem('guest_quiz_answers');
     }
+    setReady(true);
   }, [router]);
 
   const question = ARCHETYPE_QUIZ_QUESTIONS[currentQuestion];
@@ -40,6 +50,8 @@ export default function ArchetypeQuiz() {
     const newAnswers = { ...answers, [question.id]: optionIndex };
     setAnswers(newAnswers);
     localStorage.setItem('guest_quiz_answers', JSON.stringify(newAnswers));
+    // A changed answer makes the saved result row stale; the result page saves a fresh one.
+    localStorage.removeItem('guest_result_id');
 
     advancing.current = setTimeout(() => {
       advancing.current = null;
@@ -64,7 +76,7 @@ export default function ArchetypeQuiz() {
     }
   };
 
-  if (!question) {
+  if (!ready || !question) {
     return null;
   }
 

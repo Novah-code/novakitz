@@ -82,10 +82,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 });
     }
 
-    // Fetch guest result
+    // Fetch guest result. Only what the shared page shows: the row also holds the
+    // taker's email, dream text, answers and city, and the id travels in share links.
     const { data, error } = await supabase
       .from('guest_archetype_results')
-      .select('*')
+      .select('primary_archetype, secondary_archetype, archetype_scores, language, view_count, created_at')
       .eq('id', id)
       .single();
 

@@ -2394,3 +2394,16 @@ mood,dream,tracker,journal,reflection,meaning,affirmation,self care,habit,calm,s
   결과 카드 그림은 아직 열려 있습니다(AuraOrb 색 번짐 / 실제 일러스트 / 튤립 한 장).
 - 확인: 브라우저(430×932)에서 ko·en 모두 시작 → 15문항 → 결과. 실기기와 결과 저장
   (Supabase)은 확인하지 못했습니다.
+
+#### 에러헌터가 찾아서 고친 것 (같은 날)
+
+- 결과가 영어 사용자에게도 `language: 'ko'`로 저장되던 것(언어 state가 저장 호출보다 늦음) → 언어를 인자로 넘김.
+  `test_language`는 시작 버튼이 아니라 스위치를 누를 때만 저장.
+- 공유: 카드가 저장소에 없는 `/shared/archetype/<id>`를 만들고 `resultId`도 안 받았음 →
+  `https://www.novakitz.com/archetype-test/shared/<id>`로 고정(앱 안에서 `window.location`은 `capacitor://localhost`).
+- `GET /api/guest-results?id=`가 행 전체(이메일·꿈 글·답·도시)를 돌려줬음 → 공유 페이지가 쓰는 칼럼만.
+- CORS 허용 메서드에 `PATCH` 추가(앱에서 이메일로 결과 잠금 해제). **웹(Vercel) 배포 후에 효과가 있습니다.**
+- 퀴즈: 답이 있으면 이어서 시작, 답을 바꾸면 `guest_result_id` 삭제, 깨진 JSON 방어.
+  결과: 15문항이 안 끝났으면 퀴즈로 돌려보냄(전에는 빈 점수로 '탐험가'를 저장).
+- 첫 프레임 한국어 깜빡임: 언어를 정하기 전에는 아무것도 그리지 않음. 공유 카드 "My Archetype"의 한국어 라벨, 카카오 "10문항" → 15문항.
+- 확인하지 못한 것: 운영 Supabase의 RLS(UPDATE 정책 유무, email 칼럼 읽기 가능 여부), 실기기, 앱에서 실제 PATCH 응답.

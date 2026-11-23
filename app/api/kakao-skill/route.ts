@@ -241,7 +241,7 @@ function handleArchetypeTest(user: KakaoUser): KakaoSkillResponse {
   return buildResponse([
     textCard(
       '🧠 나의 무의식 아키타입은?',
-      'Carl Jung의 12 아키타입 이론을 기반으로\n내 무의식 속 숨겨진 원형을 발견해보세요.\n\n✨ 10문항 · 약 3분 소요',
+      'Carl Jung의 12 아키타입 이론을 기반으로\n내 무의식 속 숨겨진 원형을 발견해보세요.\n\n✨ 15문항 · 약 3분 소요',
       [{ action: 'webLink', label: '테스트 시작하기', webLinkUrl: `${baseUrl}/archetype-test?ref=kakao&uid=${user.id}` }]
     ),
   ]);

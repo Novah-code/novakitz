@@ -26,10 +26,11 @@ export default function ArchetypeShareCard({
   // Clean archetype name (remove English part for Korean)
   const cleanName = language === 'ko' ? archetypeName.split(' (')[0] : archetypeName;
 
-  // Generate share URL
+  // Always the public site: inside the app window.location is capacitor://localhost,
+  // which nobody else can open, and the personal page only exists on the web build.
   const shareUrl = resultId
-    ? `${window.location.origin}/shared/archetype/${resultId}`
-    : window.location.href;
+    ? `https://www.novakitz.com/archetype-test/shared/${resultId}`
+    : 'https://www.novakitz.com/archetype-test';
 
   const shareText = language === 'ko'
     ? `${cleanName}\n${tagline}\n\n나의 무의식 아키타입을 발견했어요!`
@@ -153,7 +154,7 @@ export default function ArchetypeShareCard({
               textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
             }}
           >
-            {language === 'ko' ? 'My Archetype' : 'My Archetype'}
+            {language === 'ko' ? '나의 아키타입' : 'My Archetype'}
           </div>
 
           <div

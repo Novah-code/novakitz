@@ -9,10 +9,12 @@ import { INK, BASE, LIGHT, PINK } from '../../src/lib/skyUi';
 
 export default function ArchetypeTestLanding() {
   const [language, setLanguage] = useState<'ko' | 'en'>('ko');
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     // Load language from localStorage
     setLanguage(initialTestLanguage());
+    setReady(true);
   }, []);
 
   const handleLanguageChange = (newLang: 'ko' | 'en') => {
@@ -25,12 +27,14 @@ export default function ArchetypeTestLanding() {
     localStorage.removeItem('guest_dream');
     localStorage.removeItem('guest_quiz_answers');
     localStorage.removeItem('guest_result_id');
-    // Save language preference
-    localStorage.setItem('test_language', language);
+    // test_language is only written by the switch below, so an untouched test keeps following the app's language
     goTo('/archetype-test/quiz/');
   };
 
   const ko = language === 'ko';
+
+  // Until the language is known, draw nothing rather than a frame in Korean for an English phone.
+  if (!ready) return null;
 
   const features = ko
     ? ['12가지 아키타입 분석', '개인화된 무의식 프로파일', '친구와 결과 공유하기', '소요 시간: 약 3분']
