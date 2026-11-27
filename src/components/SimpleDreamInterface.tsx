@@ -53,6 +53,8 @@ interface SimpleDreamInterfaceProps {
    * invites leaving it.
    */
   onImmersiveChange?: (immersive: boolean) => void;
+  /** Bumped by the tab bar's "+"; each change opens the dream form. */
+  openDreamRequest?: number;
 }
 
 /*
@@ -240,7 +242,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange, openDreamRequest = 0 }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -264,6 +266,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     console.log('SimpleDreamInterface: initialShowHistory changed to:', initialShowHistory);
     setShowHistory(initialShowHistory);
   }, [initialShowHistory]);
+
+  // The tab bar's "+": open the dream form, the same one the Dream button opens.
+  // Skips the first run (0 = never tapped) so mounting does not open it.
+  useEffect(() => {
+    if (openDreamRequest > 0) setShowInput(true);
+  }, [openDreamRequest]);
 
   // Update html lang attribute when language changes
   useEffect(() => {

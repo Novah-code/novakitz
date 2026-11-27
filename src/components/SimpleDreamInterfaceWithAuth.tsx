@@ -38,6 +38,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string; name: string }>({ url: null, initial: '', name: '' });
   // True while the home screen is in a full-screen step (see SimpleDreamInterface).
   const [immersive, setImmersive] = useState(false);
+  // The tab bar's "+": bumped each tap, the home screen opens the dream form when it changes.
+  const [dreamRequest, setDreamRequest] = useState(0);
 
   /*
    * The drawer's panels are one at a time.
@@ -566,6 +568,13 @@ export default function SimpleDreamInterfaceWithAuth() {
     handleGuestAction(() => openPanel(tab === 'journal' ? 'calendar' : 'insights'));
   };
 
+  const openDreamForm = () => {
+    setMenuOpen(false);
+    setCalendarSelectedDate(null);
+    openPanel(null);
+    setDreamRequest((n) => n + 1);
+  };
+
   const selectSub = (sub: SubId) => {
     setCalendarSelectedDate(null);
     openPanel(sub);
@@ -673,7 +682,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         />
       )}
 
-      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} />
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} openDreamRequest={dreamRequest} />
 
       {/* Dream Insights Modal */}
       {showInsights && user && (
@@ -979,6 +988,8 @@ export default function SimpleDreamInterfaceWithAuth() {
             sub={activeSub}
             onSelectTab={selectTab}
             onSelectSub={selectSub}
+            onPlus={openDreamForm}
+            onProfile={() => { setMenuOpen(false); setShowSettings(true); }}
           />
         </>
       )}

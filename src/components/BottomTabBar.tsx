@@ -21,6 +21,12 @@
  * above the bar to move between the pair. Merging them properly can follow once
  * the navigation has been on a phone for a while.
  *
+ * Since 2026-11-27 the bar has two more things in it, neither a place: a raised
+ * "+" in the middle (write a dream — the same form as the home's Dream button)
+ * and Profile at the right end (opens the settings sheet, which the gear at the
+ * top right also opens). Labels were dropped; every button still has an
+ * aria-label for VoiceOver.
+ *
  * Inline styles only: Tailwind is installed but not imported here (§16).
  */
 
@@ -35,7 +41,9 @@ const CAPSULE_GAP = 10;
  * Space the bar reserves above the home indicator: the capsule, the gap under
  * it, and a little air on top. The panels shrink by this.
  */
-export const TAB_BAR_HEIGHT = CAPSULE_HEIGHT + CAPSULE_GAP + 10;
+/** How far the raised "+" stands above the capsule. */
+const PLUS_RISE = 18;
+export const TAB_BAR_HEIGHT = CAPSULE_HEIGHT + CAPSULE_GAP + 10 + PLUS_RISE;
 /** Height the floating switch takes when it is showing, including its gap. */
 export const SUB_SWITCH_SPACE = 56;
 /**
@@ -51,11 +59,15 @@ interface BottomTabBarProps {
   sub: SubId | null;
   onSelectTab: (tab: TabId) => void;
   onSelectSub: (sub: SubId) => void;
+  /** The raised "+": open the dream form. */
+  onPlus: () => void;
+  /** The last slot: open the settings sheet. */
+  onProfile: () => void;
 }
 
 const LABELS = {
-  en: { today: 'Today', journal: 'Journal', insights: 'Insights', history: 'Entries', calendar: 'Calendar', reflection: 'Reflection', monthly: 'Monthly' },
-  ko: { today: '오늘', journal: '저널', insights: '인사이트', history: '기록', calendar: '달력', reflection: '리플렉션', monthly: '월간 리뷰' },
+  en: { today: 'Today', journal: 'Journal', insights: 'Insights', plus: 'Write a dream', profile: 'Profile', history: 'Entries', calendar: 'Calendar', reflection: 'Reflection', monthly: 'Monthly' },
+  ko: { today: '오늘', journal: '저널', insights: '인사이트', plus: '꿈 기록하기', profile: '프로필', history: '기록', calendar: '달력', reflection: '리플렉션', monthly: '월간 리뷰' },
 } as const;
 
 const INK = '#2E3C33';
@@ -91,10 +103,19 @@ function Icon({ tab }: { tab: TabId }) {
   );
 }
 
-export default function BottomTabBar({ language, active, sub, onSelectTab, onSelectSub }: BottomTabBarProps) {
+function ProfileIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" />
+      <circle cx="12" cy="10" r="2.6" />
+      <path d="M6.8 17.4c1.2-2 3-2.8 5.2-2.8s4 .8 5.2 2.8" />
+    </svg>
+  );
+}
+
+export default function BottomTabBar({ language, active, sub, onSelectTab, onSelectSub, onPlus, onProfile }: BottomTabBarProps) {
   const t = LABELS[language];
 
-  const tabs: TabId[] = ['today', 'journal', 'insights'];
   const switchAtTop = active === 'journal';
 
   // Only the two tabs that hold a pair of screens get the floating switch.
@@ -104,6 +125,41 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
       : active === 'insights'
         ? [{ id: 'insights', label: t.reflection }, { id: 'monthly', label: t.monthly }]
         : null;
+
+  const slot = {
+    flex: 1,
+    minWidth: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: `${(CAPSULE_HEIGHT - 12) / 2}px`,
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    WebkitTapHighlightColor: 'transparent',
+    transition: 'background 0.25s, box-shadow 0.25s, color 0.2s',
+  } as const;
+
+  const renderTab = (tab: TabId) => {
+    const on = active === tab;
+    return (
+      <button
+        key={tab}
+        type="button"
+        onClick={() => onSelectTab(tab)}
+        aria-label={t[tab]}
+        aria-current={on ? 'page' : undefined}
+        style={{
+          ...slot,
+          color: on ? INK : SAGE,
+          border: on ? '1px solid rgba(255,255,255,0.9)' : '1px solid transparent',
+          background: on ? 'rgba(255,255,255,0.96)' : 'transparent',
+          boxShadow: on ? '0 3px 10px rgba(40, 60, 45, 0.14), inset 0 1px 0 rgba(255,255,255,1)' : 'none',
+        }}
+      >
+        <Icon tab={tab} />
+      </button>
+    );
+  };
 
   return (
     <>
@@ -231,11 +287,11 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
           style={{
             pointerEvents: 'auto',
             display: 'flex',
-            gap: '4px',
+            gap: '0px',
             width: '100%',
             maxWidth: '420px',
             height: `${CAPSULE_HEIGHT}px`,
-            padding: '6px',
+            padding: '6px 4px',
             boxSizing: 'border-box',
             borderRadius: `${CAPSULE_HEIGHT / 2}px`,
             background: 'linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(244,241,231,0.62) 100%)',
@@ -246,43 +302,46 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
               '0 12px 32px rgba(40, 60, 45, 0.20), 0 2px 6px rgba(40, 60, 45, 0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.10)',
           }}
         >
-          {tabs.map((tab) => {
-            const on = active === tab;
-            return (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => onSelectTab(tab)}
-                aria-current={on ? 'page' : undefined}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '3px',
-                  border: on ? '1px solid rgba(255,255,255,0.9)' : '1px solid transparent',
-                  borderRadius: `${(CAPSULE_HEIGHT - 12) / 2}px`,
-                  cursor: 'pointer',
-                  color: on ? INK : SAGE,
-                  background: on
-                    ? 'rgba(255,255,255,0.96)'
-                    : 'transparent',
-                  boxShadow: on
-                    ? '0 3px 10px rgba(40, 60, 45, 0.14), inset 0 1px 0 rgba(255,255,255,1)'
-                    : 'none',
-                  fontFamily: 'inherit',
-                  WebkitTapHighlightColor: 'transparent',
-                  transition: 'background 0.25s, box-shadow 0.25s, color 0.2s',
-                }}
-              >
-                <Icon tab={tab} />
-                <span style={{ fontSize: '10.5px', fontWeight: on ? 600 : 500, letterSpacing: '0.04em', opacity: on ? 1 : 0.85 }}>
-                  {t[tab]}
-                </span>
-              </button>
-            );
-          })}
+          {(['today', 'journal'] as TabId[]).map(renderTab)}
+
+          {/* The raised "+": a dream is gone within minutes, so the door to writing one stays in reach on every tab. */}
+          <div style={{ flex: 'none', width: 66, display: 'flex', justifyContent: 'center', alignSelf: 'flex-start', marginTop: -(PLUS_RISE - 2) }}>
+            <button
+              type="button"
+              onClick={onPlus}
+              aria-label={t.plus}
+              style={{
+                width: 58,
+                height: 58,
+                padding: 0,
+                borderRadius: '50%',
+                border: '2px solid rgba(255,255,255,0.85)',
+                background: 'linear-gradient(160deg, #F4B7CB, #EDA3BC)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                boxShadow: '0 10px 22px rgba(205,120,152,0.45), inset 0 1px 0 rgba(255,255,255,0.6)',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+          </div>
+
+          {renderTab('insights')}
+
+          <button
+            type="button"
+            onClick={onProfile}
+            aria-label={t.profile}
+            style={{ ...slot, color: SAGE, border: '1px solid transparent', background: 'transparent' }}
+          >
+            <ProfileIcon />
+          </button>
         </div>
       </nav>
     </>
