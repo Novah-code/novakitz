@@ -1516,10 +1516,11 @@ export function MoodCardJournalView({
 
 // The shared pieces of the sky screens, for the other full-screen panels.
 /*
- * Waiting for the reading, on the sky: the mood's own aura breathing slowly, no words
- * line under it (the line was later dropped, 2026-11-27). Replaces a dark scrim with three dots (no words, and the screen
- * went dark in the middle of a bright flow) and the matcha picture (a different
- * drawing style from the rest of the app). One loader for both ways in.
+ * Waiting for the reading, on the sky: the mood's own aura breathing slowly and
+ * nothing else on screen (a line of text was tried and dropped, 2026-11-27).
+ * Replaces a dark scrim with three dots (the screen went dark in the middle of a
+ * bright flow) and the matcha picture (a different drawing style from the rest
+ * of the app). One loader for both ways in.
  */
 const AuraLoading = ({ emotionKey, isKo }: { emotionKey: string; isKo: boolean }) => (
   <SkyBackdrop>
