@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import SceneArt from './SceneArt';
 import { useTimeOfDay } from '../lib/useTimeOfDay';
 import '../styles/home-scene.css';
@@ -36,6 +36,22 @@ const BLOOM_SOURCES = {
  */
 const TULIP_SOURCE = '/scenes/tulip-day.png';
 
+/*
+ * Petals drifting down behind the flower. Pastel only, soft, few. Each one is a
+ * CSS animation on transform and opacity, nothing is measured or redrawn in
+ * script. Negative delays so the screen is already mid-fall when it opens.
+ */
+const PETALS = [
+  { x: '8%',  s: 16, d: 19, delay: -4,  drift: 46,  spin: 220, c: '#F4B7CB', o: 0.7 },
+  { x: '22%', s: 11, d: 24, delay: -15, drift: -38, spin: -180, c: '#E6D7F5', o: 0.75 },
+  { x: '35%', s: 20, d: 21, delay: -9,  drift: 60,  spin: 260, c: '#EDA3BC', o: 0.55 },
+  { x: '52%', s: 13, d: 26, delay: -20, drift: -52, spin: -240, c: '#F6E2B3', o: 0.8 },
+  { x: '66%', s: 18, d: 20, delay: -2,  drift: 40,  spin: 200, c: '#F6C9D6', o: 0.65 },
+  { x: '78%', s: 12, d: 23, delay: -12, drift: -44, spin: -210, c: '#E6D7F5', o: 0.7 },
+  { x: '90%', s: 17, d: 25, delay: -7,  drift: -58, spin: 240, c: '#F4B7CB', o: 0.6 },
+  { x: '44%', s: 10, d: 28, delay: -22, drift: 36,  spin: -160, c: '#F6E2B3', o: 0.7 },
+] as const;
+
 interface HomeSceneProps {
   /**
    * The disc keeps the orb's press semantics: a short tap opens the emotion
@@ -64,6 +80,19 @@ export default function HomeScene({
 
       <div className="home-scene__glow" aria-hidden="true" />
 
+      <div className="home-scene__petals" aria-hidden="true">
+        {PETALS.map((p, i) => (
+          <i
+            key={i}
+            className="home-scene__petal"
+            style={{
+              '--x': p.x, '--s': `${p.s}px`, '--d': `${p.d}s`, '--delay': `${p.delay}s`,
+              '--drift': `${p.drift}px`, '--spin': `${p.spin}deg`, '--c': p.c, '--o': p.o,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+
       <button
         type="button"
         className="home-scene__portal"
@@ -76,12 +105,16 @@ export default function HomeScene({
       >
         {!tulipMissing ? (
           <span className="home-scene__flower">
-            <img
-              className="home-scene__flower-art"
-              src={TULIP_SOURCE}
-              alt=""
-              onError={() => setTulipMissing(true)}
-            />
+            {/* Opens (wrapper), sways from the stem (this), breathes and catches light (the image and its sheen). */}
+            <span className="home-scene__sway">
+              <img
+                className="home-scene__flower-art"
+                src={TULIP_SOURCE}
+                alt=""
+                onError={() => setTulipMissing(true)}
+              />
+              <span className="home-scene__sheen" aria-hidden="true" />
+            </span>
           </span>
         ) : (
         <span className="home-scene__disc">
