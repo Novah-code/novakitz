@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import { loadStreak } from '../lib/streak';
 import { emotionByKey, emotionShownLabel } from '../lib/emotions';
+import { useScrollMotion } from '../lib/scrollMotion';
 
 interface DreamInsightsProps {
   user: User;
@@ -130,6 +131,7 @@ function getSymbolInfo(keyword: string, category: string): { Icon: IconComponent
 
 export default function DreamInsights({ user, language = 'en', onClose, isPremium = false, onOpenMonthlyReview }: DreamInsightsProps) {
   const ko = language === 'ko';
+  const scrollRef = useScrollMotion();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DreamStats | null>(null);
 
@@ -446,10 +448,11 @@ export default function DreamInsights({ user, language = 'en', onClose, isPremiu
           >
             <XIcon size={20} />
           </button>
+          <div className="sm-bar" aria-hidden="true"><span data-sm-bar /></div>
         </div>
 
         {/* ── Scrollable Body ── */}
-        <div className="di-scroll" style={{ overflowY: 'auto', padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+        <div className="di-scroll" ref={scrollRef} style={{ overflowY: 'auto', padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
           {/* Title */}
           <div>
