@@ -122,6 +122,9 @@ async function packageFor(plan: PlanId): Promise<PurchasesPackage | null> {
 export type PlanPricing = {
   /** The store's own formatted price, in the buyer's currency. */
   priceString: string;
+  /** The same price as a number, and its currency (ISO code), for working out a discount. */
+  amount: number;
+  currencyCode: string;
   /**
    * The introductory offer, and only when this account can actually claim it.
    * Null covers three different situations that all want the same treatment:
@@ -185,6 +188,8 @@ export async function loadPricing(plans: PlanId[]): Promise<Partial<Record<PlanI
 
       result[plan] = {
         priceString: product.priceString,
+        amount: product.price,
+        currencyCode: product.currencyCode,
         intro:
           eligible && product.introPrice
             ? {

@@ -76,12 +76,15 @@ export default function HomeScene({
       >
         {!tulipMissing ? (
           <span className="home-scene__flower">
-            <img
-              className="home-scene__flower-art"
-              src={TULIP_SOURCE}
-              alt=""
-              onError={() => setTulipMissing(true)}
-            />
+            {/* Opens (wrapper), sways from the stem (this), breathes (the image). */}
+            <span className="home-scene__sway">
+              <img
+                className="home-scene__flower-art"
+                src={TULIP_SOURCE}
+                alt=""
+                onError={() => setTulipMissing(true)}
+              />
+            </span>
           </span>
         ) : (
         <span className="home-scene__disc">

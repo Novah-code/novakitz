@@ -265,6 +265,25 @@
   pointer-events: none;
 }
 
+/*
+ * Sways from the base of the stem: the origin sits below the portal, where the
+ * stem ends, so the head travels in a slow arc and the stem stays put. A little
+ * lift on the way, like a flower in a draught.
+ */
+.home-scene__sway {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-origin: 50% 115%;
+  animation: home-scene-sway 11s ease-in-out 1700ms infinite;
+}
+
+@keyframes home-scene-sway {
+  0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+  30% { transform: rotate(0.5deg) translateY(-5px); }
+  62% { transform: rotate(1.8deg) translateY(-2px); }
+}
+
 @keyframes home-scene-flower-breathe {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50% { transform: translate(-50%, -50%) scale(1.022); }
@@ -333,7 +352,8 @@
   .home-scene__bloom,
   .home-scene__bloom-art,
   .home-scene__flower,
-  .home-scene__flower-art {
+  .home-scene__flower-art,
+  .home-scene__sway {
     animation: none;
   }
   .home-scene {
