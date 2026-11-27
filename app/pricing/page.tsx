@@ -140,6 +140,35 @@ export default function PricingPage() {
   const ko = language === 'ko';
 
   /*
+   * The struck-through price and the "% Off" next to the yearly plan.
+   *
+   * They were a written "$71.88" and "30% Off", true only in dollars: a phone
+   * on the Korean store read "$71.88" beside ₩77,000, which is two currencies
+   * on one line and a discount nobody had worked out. Now both come from the
+   * store's own numbers — twelve months of the monthly plan against the yearly
+   * price, in whatever currency the store charges. If the store says there is no
+   * saving, nothing is drawn. Off-native there are no store numbers, so the
+   * written dollar figures stand, as the prices do.
+   */
+  const yearlySaving = (() => {
+    const m = pricing.premium;
+    const y = pricing.yearly;
+    if (!m && !y) return { compareAt: '$71.88', percent: 30 };
+    if (!m || !y || m.currencyCode !== y.currencyCode) return null;
+    const full = m.amount * 12;
+    if (!(full > y.amount)) return null;
+    const percent = Math.round((1 - y.amount / full) * 100);
+    if (percent < 1) return null;
+    let compareAt: string;
+    try {
+      compareAt = new Intl.NumberFormat(ko ? 'ko-KR' : 'en-US', { style: 'currency', currency: y.currencyCode }).format(full);
+    } catch {
+      return null;
+    }
+    return { compareAt, percent };
+  })();
+
+  /*
    * A purchase deserves a moment, not a toast.
    *
    * A corner toast for three seconds is what this had, and for the one
@@ -426,12 +455,16 @@ export default function PricingPage() {
               <p style={{ fontSize: 13, color: P.light, margin: '0 0 24px' }}>{ko ? '연간 구독' : 'Annual subscription'}</p>
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 44, fontWeight: 700, color: P.ink, letterSpacing: -1, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 16, color: P.light, textDecoration: 'line-through', opacity: 0.7 }}>$71.88</span>
+                  {yearlySaving && (
+                    <span style={{ fontSize: 16, color: P.light, textDecoration: 'line-through', opacity: 0.7 }}>{yearlySaving.compareAt}</span>
+                  )}
                   {pricing.yearly?.priceString ?? '$49.99'}
                 </div>
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 14, color: P.light }}>{ko ? '연간 결제' : 'per year'}</span>
-                  <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(237,163,188,0.25)', color: P.rose, borderRadius: 8, fontWeight: 700 }}>30% Off</span>
+                  {yearlySaving && (
+                    <span style={{ ...M, fontSize: 10, padding: '2px 8px', background: 'rgba(237,163,188,0.25)', color: P.rose, borderRadius: 8, fontWeight: 700 }}>{ko ? `${yearlySaving.percent}% 할인` : `${yearlySaving.percent}% Off`}</span>
+                  )}
                 </div>
                 {/*
                   The offer that was configured in August and that nobody was
