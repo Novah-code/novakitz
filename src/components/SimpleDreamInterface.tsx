@@ -7,7 +7,6 @@ import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
-import HomeActions from './HomeActions';
 import TodayMoodCard from './TodayMoodCard';
 import { localDate } from '../lib/streak';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
@@ -4265,9 +4264,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           )}
 
           {/*
-            The circle's two doors as two buttons you can see. The circle itself
-            keeps both gestures — tap for mood, hold for a dream — for anyone who
-            already uses them. See HomeActions.
+            Today's mood card. The Mood and Dream buttons that used to sit under
+            it are gone (2026-11-27): the flower still opens the mood cards, and
+            the "+" in the tab bar opens the dream form. The flower keeps both
+            gestures — tap for mood, hold for a dream.
           */}
           {!showInput && !showResponse && !showHistory && !showEmotionModal && !showMoodCardFlow && (
             <>
@@ -4278,11 +4278,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   onChange={() => setShowEmotionModal(true)}
                 />
               )}
-              <HomeActions
-                language={language}
-                onMood={() => setShowEmotionModal(true)}
-                onDream={() => setShowInput(true)}
-              />
             </>
           )}
 

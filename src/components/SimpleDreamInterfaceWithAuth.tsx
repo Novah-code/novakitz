@@ -546,7 +546,8 @@ export default function SimpleDreamInterfaceWithAuth() {
    * cannot drift from what is actually on screen.
    */
   const activeTab: TabId =
-    showHistory || showCalendar ? 'journal'
+    showHistory ? 'history'
+    : showCalendar ? 'calendar'
     : showInsights || showMonthlyReport ? 'insights'
     : 'today';
   const activeSub: SubId | null =
@@ -565,7 +566,7 @@ export default function SimpleDreamInterfaceWithAuth() {
       return;
     }
     // Guests tapping a place that needs an account get the sign-in panel.
-    handleGuestAction(() => openPanel(tab === 'journal' ? 'calendar' : 'insights'));
+    handleGuestAction(() => openPanel(tab));
   };
 
   const openDreamForm = () => {
@@ -989,7 +990,6 @@ export default function SimpleDreamInterfaceWithAuth() {
             onSelectTab={selectTab}
             onSelectSub={selectSub}
             onPlus={openDreamForm}
-            onProfile={() => { setMenuOpen(false); setShowSettings(true); }}
           />
         </>
       )}

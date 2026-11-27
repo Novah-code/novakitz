@@ -21,16 +21,18 @@
  * above the bar to move between the pair. Merging them properly can follow once
  * the navigation has been on a phone for a while.
  *
- * Since 2026-11-27 the bar has two more things in it, neither a place: a raised
- * "+" in the middle (write a dream — the same form as the home's Dream button)
- * and Profile at the right end (opens the settings sheet, which the gear at the
- * top right also opens). Labels were dropped; every button still has an
- * aria-label for VoiceOver.
+ * Since 2026-11-27 the bar is Today · Calendar · (+) · Entries · Insights. The
+ * raised "+" writes a dream (the home's own Mood and Dream buttons were removed
+ * with it; the flower is still the way into the mood cards). Journal was split
+ * into Calendar and Entries, which also took away the Calendar | Entries switch
+ * that sat at the top and ran into the "Inner Journal" title on a phone.
+ * Profile has no tab: the gear at the top right opens settings. Labels were
+ * dropped; every button still has an aria-label for VoiceOver.
  *
  * Inline styles only: Tailwind is installed but not imported here (§16).
  */
 
-export type TabId = 'today' | 'journal' | 'insights';
+export type TabId = 'today' | 'calendar' | 'history' | 'insights';
 export type SubId = 'history' | 'calendar' | 'insights' | 'monthly';
 
 /** Height of the capsule itself. */
@@ -61,13 +63,11 @@ interface BottomTabBarProps {
   onSelectSub: (sub: SubId) => void;
   /** The raised "+": open the dream form. */
   onPlus: () => void;
-  /** The last slot: open the settings sheet. */
-  onProfile: () => void;
 }
 
 const LABELS = {
-  en: { today: 'Today', journal: 'Journal', insights: 'Insights', plus: 'Write a dream', profile: 'Profile', history: 'Entries', calendar: 'Calendar', reflection: 'Reflection', monthly: 'Monthly' },
-  ko: { today: '오늘', journal: '저널', insights: '인사이트', plus: '꿈 기록하기', profile: '프로필', history: '기록', calendar: '달력', reflection: '리플렉션', monthly: '월간 리뷰' },
+  en: { today: 'Today', journal: 'Journal', insights: 'Insights', plus: 'Write a dream', history: 'Entries', calendar: 'Calendar', reflection: 'Reflection', monthly: 'Monthly' },
+  ko: { today: '오늘', journal: '저널', insights: '인사이트', plus: '꿈 기록하기', history: '기록', calendar: '달력', reflection: '리플렉션', monthly: '월간 리뷰' },
 } as const;
 
 const INK = '#2E3C33';
@@ -86,7 +86,15 @@ function Icon({ tab }: { tab: TabId }) {
       </svg>
     );
   }
-  if (tab === 'journal') {
+  if (tab === 'calendar') {
+    return (
+      <svg {...common}>
+        <rect x="4.5" y="6" width="15" height="13.5" rx="2.5" />
+        <path d="M4.5 10.5h15M8.5 4v3.5M15.5 4v3.5" />
+      </svg>
+    );
+  }
+  if (tab === 'history') {
     return (
       <svg {...common}>
         <path d="M6 4.5h10.5a1.5 1.5 0 0 1 1.5 1.5v13.5H7.5A1.5 1.5 0 0 1 6 18V4.5Z" />
@@ -103,28 +111,15 @@ function Icon({ tab }: { tab: TabId }) {
   );
 }
 
-function ProfileIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="10" r="2.6" />
-      <path d="M6.8 17.4c1.2-2 3-2.8 5.2-2.8s4 .8 5.2 2.8" />
-    </svg>
-  );
-}
-
-export default function BottomTabBar({ language, active, sub, onSelectTab, onSelectSub, onPlus, onProfile }: BottomTabBarProps) {
+export default function BottomTabBar({ language, active, sub, onSelectTab, onSelectSub, onPlus }: BottomTabBarProps) {
   const t = LABELS[language];
 
-  const switchAtTop = active === 'journal';
 
-  // Only the two tabs that hold a pair of screens get the floating switch.
+  // Only Insights still holds a pair of screens, so only it gets the floating switch.
   const pair: Array<{ id: SubId; label: string }> | null =
-    active === 'journal'
-      ? [{ id: 'calendar', label: t.calendar }, { id: 'history', label: t.history }]
-      : active === 'insights'
-        ? [{ id: 'insights', label: t.reflection }, { id: 'monthly', label: t.monthly }]
-        : null;
+    active === 'insights'
+      ? [{ id: 'insights', label: t.reflection }, { id: 'monthly', label: t.monthly }]
+      : null;
 
   const slot = {
     flex: 1,
@@ -179,7 +174,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
         screen (its Mood and Dream buttons) showing through the gap the panels
         leave above the bar.
       */}
-      {pair && (
+      {active !== 'today' && (
         <div
           aria-hidden="true"
           style={{
@@ -215,9 +210,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             position: 'fixed',
             left: '50%',
             transform: 'translateX(-50%)',
-            ...(switchAtTop
-              ? { top: 'calc(env(safe-area-inset-top, 0px) + 12px)' }
-              : { bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 4}px)` }),
+            bottom: `calc(env(safe-area-inset-bottom, 0px) + ${TAB_BAR_HEIGHT + 4}px)`,
             zIndex: 10003,
             display: 'flex',
             gap: '2px',
@@ -242,10 +235,9 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                 style={{
                   border: 'none',
                   cursor: 'pointer',
-                  padding: switchAtTop ? '0 18px' : '7px 16px',
-                  height: switchAtTop ? 34 : undefined,
+                  padding: '7px 16px',
                   borderRadius: '999px',
-                  fontSize: switchAtTop ? '13.5px' : '12.5px',
+                  fontSize: '12.5px',
                   fontWeight: on ? 600 : 500,
                   letterSpacing: '0.01em',
                   color: on ? '#2E3C33' : SAGE,
@@ -302,7 +294,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
               '0 12px 32px rgba(40, 60, 45, 0.20), 0 2px 6px rgba(40, 60, 45, 0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(92,112,97,0.10)',
           }}
         >
-          {(['today', 'journal'] as TabId[]).map(renderTab)}
+          {(['today', 'calendar'] as TabId[]).map(renderTab)}
 
           {/* The raised "+": a dream is gone within minutes, so the door to writing one stays in reach on every tab. */}
           <div style={{ flex: 'none', width: 66, display: 'flex', justifyContent: 'center', alignSelf: 'flex-start', marginTop: -(PLUS_RISE - 2) }}>
@@ -316,13 +308,13 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
                 padding: 0,
                 borderRadius: '50%',
                 border: '2px solid rgba(255,255,255,0.85)',
-                background: 'linear-gradient(160deg, #F4B7CB, #EDA3BC)',
-                color: '#fff',
+                background: 'linear-gradient(160deg, #FBE3EC, #F6CCDB)',
+                color: '#B9657F',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                boxShadow: '0 10px 22px rgba(205,120,152,0.45), inset 0 1px 0 rgba(255,255,255,0.6)',
+                boxShadow: '0 8px 18px rgba(205,120,152,0.28), inset 0 1px 0 rgba(255,255,255,0.8)',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -332,16 +324,7 @@ export default function BottomTabBar({ language, active, sub, onSelectTab, onSel
             </button>
           </div>
 
-          {renderTab('insights')}
-
-          <button
-            type="button"
-            onClick={onProfile}
-            aria-label={t.profile}
-            style={{ ...slot, color: SAGE, border: '1px solid transparent', background: 'transparent' }}
-          >
-            <ProfileIcon />
-          </button>
+          {(['history', 'insights'] as TabId[]).map(renderTab)}
         </div>
       </nav>
     </>
