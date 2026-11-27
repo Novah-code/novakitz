@@ -284,56 +284,6 @@
   62% { transform: rotate(1.8deg) translateY(-2px); }
 }
 
-/* A band of light that crosses the petals now and then. Masked to the tulip's own shape. */
-.home-scene__sheen {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 156%;
-  height: 156%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  -webkit-mask: url('/scenes/tulip-day.png') center / contain no-repeat;
-  mask: url('/scenes/tulip-day.png') center / contain no-repeat;
-  background: linear-gradient(105deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 60%);
-  background-size: 300% 100%;
-  background-position: 130% 0;
-  mix-blend-mode: soft-light;
-  animation: home-scene-sheen 9s ease-in-out 2200ms infinite;
-}
-
-@keyframes home-scene-sheen {
-  0% { background-position: 130% 0; }
-  45%, 100% { background-position: -30% 0; }
-}
-
-.home-scene__petals {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.home-scene__petal {
-  position: absolute;
-  top: -6%;
-  left: var(--x);
-  width: var(--s);
-  height: calc(var(--s) * 1.45);
-  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
-  background: var(--c);
-  opacity: 0;
-  animation: home-scene-petal var(--d) linear var(--delay) infinite;
-}
-
-@keyframes home-scene-petal {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
-  8% { opacity: var(--o); }
-  92% { opacity: var(--o); }
-  100% { transform: translate3d(var(--drift), 112vh, 0) rotate(var(--spin)); opacity: 0; }
-}
-
 @keyframes home-scene-flower-breathe {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50% { transform: translate(-50%, -50%) scale(1.022); }
@@ -403,11 +353,9 @@
   .home-scene__bloom-art,
   .home-scene__flower,
   .home-scene__flower-art,
-  .home-scene__sway,
-  .home-scene__sheen {
+  .home-scene__sway {
     animation: none;
   }
-  .home-scene__petals { display: none; }
   .home-scene {
     transition: none;
   }
