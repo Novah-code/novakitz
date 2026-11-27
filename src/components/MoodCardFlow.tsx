@@ -1113,33 +1113,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   // ==============================
   // STEP: analyzing (loading)
   // ==============================
-  if (step === 'analyzing') return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      background: 'rgba(0,0,0,0.4)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      zIndex: 21000,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: '10px', height: '10px',
-            borderRadius: '50%',
-            background: '#EAF4EC',
-            animation: `pulse-dot 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }} />
-        ))}
-      </div>
-      <style>{`
-        @keyframes pulse-dot {
-          0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-          40% { transform: scale(1.2); opacity: 1; }
-        }
-      `}</style>
-    </div>
-  );
+  if (step === 'analyzing') return <AuraLoading emotionKey={emotionKeyFromLabel(selectedEmotion) ?? 'peaceful'} isKo={isKo} />;
 
   // ==============================
   // STEP: ego-sleep / ego-stress / ego-free — condition check-in
@@ -1535,4 +1509,24 @@ export function MoodCardJournalView({
 }
 
 // The shared pieces of the sky screens, for the other full-screen panels.
-export { SkyBackdrop, Container as SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl };
+/*
+ * Waiting for the reading, on the sky: the mood's own aura breathing slowly, one
+ * line under it. Replaces a dark scrim with three dots (no words, and the screen
+ * went dark in the middle of a bright flow) and the matcha picture (a different
+ * drawing style from the rest of the app). One loader for both ways in.
+ */
+const AuraLoading = ({ emotionKey, isKo }: { emotionKey: string; isKo: boolean }) => (
+  <SkyBackdrop>
+    <div role="status" aria-live="polite" style={{ position: 'relative', zIndex: 2, alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 24 }}>
+      <div style={{ animation: 'aura-breathe 4.2s ease-in-out infinite' }}>
+        <AuraOrb emotionKey={emotionKey} size={170} />
+      </div>
+      <p style={{ ...headingStyle(isKo, 26, 18), margin: '34px 0 0', textAlign: 'center' }}>
+        {isKo ? '꿈을 읽고 있어요' : 'Reading your dream'}
+      </p>
+      <style>{`@keyframes aura-breathe { 0%, 100% { transform: scale(0.92); opacity: 0.82; } 50% { transform: scale(1.06); opacity: 1; } } @media (prefers-reduced-motion: reduce) { [style*="aura-breathe"] { animation: none !important; } }`}</style>
+    </div>
+  </SkyBackdrop>
+);
+
+export { AuraLoading, SkyBackdrop, Container as SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl };
