@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
+import { speechSupported, startListening, speechFailureText, type SpeechSession } from '../lib/speech';
 import { canAnalyzeDream, recordAIUsage } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
 import { addSingleAffirmation } from '../lib/affirmations';
@@ -566,12 +566,15 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   const sceneRecognitionRef = useRef<SpeechSession | null>(null);
   const egoRecognitionRef = useRef<SpeechSession | null>(null);
 
+  const [voiceNote, setVoiceNote] = useState('');
   const startSceneVoice = async () => {
+    setVoiceNote('');
     setIsRecordingScene(true);
     sceneRecognitionRef.current = await startListening({
       language,
       onResult: (text) => setSceneText(text),
       onEnd: () => setIsRecordingScene(false),
+      onError: (reason) => setVoiceNote(speechFailureText(reason, language)),
     });
   };
 
@@ -1087,6 +1090,9 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               {isKo ? '말로 기록하기' : 'Speak it instead'}
             </button>
           )}
+          {voiceNote && !isRecordingScene && (
+            <p role="alert" style={{ margin: '10px 4px 0', fontSize: 13, lineHeight: 1.5, color: '#C27A8C', textAlign: 'center' }}>{voiceNote}</p>
+          )}
 
           {/* Optional tags: where and who. Nothing here is required. */}
           {([
@@ -1510,8 +1516,8 @@ export function MoodCardJournalView({
 
 // The shared pieces of the sky screens, for the other full-screen panels.
 /*
- * Waiting for the reading, on the sky: the mood's own aura breathing slowly, one
- * line under it. Replaces a dark scrim with three dots (no words, and the screen
+ * Waiting for the reading, on the sky: the mood's own aura breathing slowly, no words
+ * line under it (the line was later dropped, 2026-11-27). Replaces a dark scrim with three dots (no words, and the screen
  * went dark in the middle of a bright flow) and the matcha picture (a different
  * drawing style from the rest of the app). One loader for both ways in.
  */
@@ -1521,9 +1527,8 @@ const AuraLoading = ({ emotionKey, isKo }: { emotionKey: string; isKo: boolean }
       <div style={{ animation: 'aura-breathe 4.2s ease-in-out infinite' }}>
         <AuraOrb emotionKey={emotionKey} size={170} />
       </div>
-      <p style={{ ...headingStyle(isKo, 26, 18), margin: '34px 0 0', textAlign: 'center' }}>
-        {isKo ? '꿈을 읽고 있어요' : 'Reading your dream'}
-      </p>
+      {/* No words on screen; VoiceOver still hears one. */}
+      <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>{isKo ? '꿈을 읽고 있어요' : 'Reading your dream'}</span>
       <style>{`@keyframes aura-breathe { 0%, 100% { transform: scale(0.92); opacity: 0.82; } 50% { transform: scale(1.06); opacity: 1; } } @media (prefers-reduced-motion: reduce) { [style*="aura-breathe"] { animation: none !important; } }`}</style>
     </div>
   </SkyBackdrop>

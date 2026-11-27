@@ -24,7 +24,7 @@ import DreamAnalysisCards from './DreamAnalysisCards';
 import MoodCardFlow, { MoodCardJournalView, AuraLoading, SkyBackdrop, SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
-import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
+import { speechSupported, startListening, speechFailureText, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
 import { EMOTIONS, emotionLabel, emotionShownLabel } from '../lib/emotions';
 import AuraOrb from './AuraOrb';
@@ -1320,6 +1320,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       language,
       onResult: (text) => setDreamText(text),
       onEnd: () => setIsRecording(false),
+      onError: (reason) => window.alert(speechFailureText(reason, language)),
     });
   };
 
