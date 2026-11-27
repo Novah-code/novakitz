@@ -21,10 +21,10 @@ import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
 import HomeScene from './HomeScene';
 import DreamAnalysisCards from './DreamAnalysisCards';
-import MoodCardFlow, { MoodCardJournalView, SkyBackdrop, SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl } from './MoodCardFlow';
+import MoodCardFlow, { MoodCardJournalView, AuraLoading, SkyBackdrop, SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
-import { speechSupported, startListening, type SpeechSession } from '../lib/speech';
+import { speechSupported, startListening, speechFailureText, type SpeechSession } from '../lib/speech';
 import ConfirmDialog from './ConfirmDialog';
 import { EMOTIONS, emotionLabel, emotionShownLabel } from '../lib/emotions';
 import AuraOrb from './AuraOrb';
@@ -1320,6 +1320,7 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
       language,
       onResult: (text) => setDreamText(text),
       onEnd: () => setIsRecording(false),
+      onError: (reason) => window.alert(speechFailureText(reason, language)),
     });
   };
 
@@ -5438,21 +5439,7 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
 
           {showResponse && (
             isLoading ? (
-              /* Waiting for the reading, on the sky. */
-              <SkyBackdrop>
-                <div style={{ position: 'relative', zIndex: 2, alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 24 }}>
-                  <div style={{ width: 150, aspectRatio: '1197/1669', backgroundImage: 'url(/matcha-frame1.png?v=8)', backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
-                  <div style={{ display: 'flex', gap: 8, margin: '26px 0 18px' }}>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: '#EDA3BC', animation: `dream-wait 1.2s ease-in-out ${i * 0.15}s infinite` }} />
-                    ))}
-                  </div>
-                  <p style={{ ...headingStyle(language === 'ko', 28, 18), margin: 0 }}>
-                    {language === 'ko' ? '꿈에서 지혜를 우려내는 중' : 'Whisking up wisdom from your dream'}
-                  </p>
-                  <style>{`@keyframes dream-wait { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1.2); opacity: 1; } }`}</style>
-                </div>
-              </SkyBackdrop>
+              <AuraLoading emotionKey={todayEmotion ?? 'peaceful'} isKo={language === 'ko'} />
             ) : (
               <SkyBackdrop>
                 <SkyContainer onClose={() => setShowResponse(false)}>
