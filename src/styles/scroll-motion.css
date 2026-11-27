@@ -1,0 +1,34 @@
+/* See src/lib/scrollMotion.ts. Blocks are hidden only by script (class sm-hidden). */
+.sm-hidden {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.di-scroll > *,
+.mdr-scroll > * {
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sm-hidden { opacity: 1; transform: none; }
+}
+
+.sm-bar {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+  pointer-events: none;
+}
+.sm-bar > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #F4B7CB, #EDA3BC);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.12s linear;
+}

@@ -7,7 +7,6 @@ import { supabase } from '../lib/supabase';
 import { offlineStorage, isOnline } from '../lib/offlineStorage';
 import { canAnalyzeDream, recordAIUsage, getRemainingAIInterpretations } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
-import HomeActions from './HomeActions';
 import TodayMoodCard from './TodayMoodCard';
 import { localDate } from '../lib/streak';
 import { uploadDreamImage, updateDreamImage, deleteDreamImage } from '../lib/imageStorage';
@@ -21,6 +20,7 @@ import OfflineIndicator from './OfflineIndicator';
 import DailyCheckin from './DailyCheckin';
 import AffirmationsDisplay from './AffirmationsDisplay';
 import HomeScene from './HomeScene';
+import DreamAnalysisCards from './DreamAnalysisCards';
 import MoodCardFlow, { MoodCardJournalView, SkyBackdrop, SkyContainer, NextButton, headingStyle, stepBody, glassCard, sectionLabel, roundControl } from './MoodCardFlow';
 import PremiumPromptModal from './PremiumPromptModal';
 import Toast, { ToastType } from './Toast';
@@ -52,6 +52,8 @@ interface SimpleDreamInterfaceProps {
    * invites leaving it.
    */
   onImmersiveChange?: (immersive: boolean) => void;
+  /** Bumped by the tab bar's "+"; each change opens the dream form. */
+  openDreamRequest?: number;
 }
 
 /*
@@ -239,7 +241,7 @@ const translations = {
   }
 };
 
-export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange }: SimpleDreamInterfaceProps) {
+export default function SimpleDreamInterface({ user, language = 'en', initialShowHistory = false, onHistoryClose, onGuestAnalyze, onImmersiveChange, openDreamRequest = 0 }: SimpleDreamInterfaceProps) {
   const t = translations[language];
   const [isLoading, setIsLoading] = useState(false);
   const [dreamResponse, setDreamResponse] = useState('');
@@ -263,6 +265,12 @@ export default function SimpleDreamInterface({ user, language = 'en', initialSho
     console.log('SimpleDreamInterface: initialShowHistory changed to:', initialShowHistory);
     setShowHistory(initialShowHistory);
   }, [initialShowHistory]);
+
+  // The tab bar's "+": open the dream form, the same one the Dream button opens.
+  // Skips the first run (0 = never tapped) so mounting does not open it.
+  useEffect(() => {
+    if (openDreamRequest > 0) setShowInput(true);
+  }, [openDreamRequest]);
 
   // Update html lang attribute when language changes
   useEffect(() => {
@@ -4256,9 +4264,10 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
           )}
 
           {/*
-            The circle's two doors as two buttons you can see. The circle itself
-            keeps both gestures — tap for mood, hold for a dream — for anyone who
-            already uses them. See HomeActions.
+            Today's mood card. The Mood and Dream buttons that used to sit under
+            it are gone (2026-11-27): the flower still opens the mood cards, and
+            the "+" in the tab bar opens the dream form. The flower keeps both
+            gestures — tap for mood, hold for a dream.
           */}
           {!showInput && !showResponse && !showHistory && !showEmotionModal && !showMoodCardFlow && (
             <>
@@ -4269,11 +4278,6 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   onChange={() => setShowEmotionModal(true)}
                 />
               )}
-              <HomeActions
-                language={language}
-                onMood={() => setShowEmotionModal(true)}
-                onDream={() => setShowInput(true)}
-              />
             </>
           )}
 
@@ -5455,46 +5459,47 @@ Intention3: Spend 5 minutes in the evening connecting with yourself through medi
                   <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <p style={{ ...headingStyle(language === 'ko', 40, 24), margin: '0 0 28px' }}>{t.dreamAnalysis}</p>
 
-                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
-                      {dreamResponse.split('\n\n').map((section, index) => {
-                        const trimmed = section.trim();
-                        if (!trimmed) return null;
+                    <DreamAnalysisCards
+                      language={language}
+                      items={(() => {
                         const heads: [string, string][] = [
                           ['DREAM SYMBOLS:', t.dreamSymbols],
                           ['INNER MESSAGE:', t.innerMessage],
                           ["TODAY'S PRACTICE:", t.todaysPractice],
                           ['SOMETHING TO REFLECT ON:', t.somethingToReflect],
                         ];
-                        const hit = heads.find(([key]) => trimmed.startsWith(key));
-                        const body = hit ? trimmed.slice(hit[0].length).trim() : trimmed;
-                        if (hit ? !body : trimmed.length <= 5) return null;
-                        return (
-                          <div key={index} style={{ width: '100%' }}>
-                            {hit && <div style={sectionLabel}>{hit[1]}</div>}
-                            <div style={glassCard}>
-                              <div style={{ fontSize: 15, lineHeight: 1.85, color: '#4A5D4E', whiteSpace: 'pre-line', textAlign: 'left' }}>{body}</div>
-                            </div>
-                          </div>
-                        );
-                      }).filter(Boolean)}
-                    </div>
-
-                    {/*
-                      The monthly limit notice used to be text with nowhere to go,
-                      which put a dead end at the one moment someone is most
-                      willing to pay. Only shown for that notice — an ordinary
-                      interpretation should not be interrupted with a sales button.
-                    */}
-                    {limitReached && (
-                      <NextButton top={28} label={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>} onClick={() => goTo('/pricing/')} />
-                    )}
-                    <NextButton
-                      top={limitReached ? 14 : 32}
-                      label={language === 'ko' ? '저장' : 'Save to Journal'}
-                      onClick={() => {
-                        setShowResponse(false);
-                        setShowHistory(true);
-                      }}
+                        const out: { title?: string; body: string }[] = [];
+                        dreamResponse.split('\n\n').forEach((section) => {
+                          const trimmed = section.trim();
+                          if (!trimmed) return;
+                          const hit = heads.find(([key]) => trimmed.startsWith(key));
+                          const body = hit ? trimmed.slice(hit[0].length).trim() : trimmed;
+                          if (hit ? !body : trimmed.length <= 5) return;
+                          out.push({ title: hit ? hit[1] : undefined, body });
+                        });
+                        return out;
+                      })()}
+                      footer={
+                        <>
+                            {/*
+                              The monthly limit notice used to be text with nowhere to go,
+                              which put a dead end at the one moment someone is most
+                              willing to pay. Only shown for that notice — an ordinary
+                              interpretation should not be interrupted with a sales button.
+                            */}
+                            {limitReached && (
+                              <NextButton top={28} label={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>{language === 'ko' ? 'Pro 잠금 해제' : 'Unlock Pro'}</span>} onClick={() => goTo('/pricing/')} />
+                            )}
+                            <NextButton
+                              top={limitReached ? 14 : 32}
+                              label={language === 'ko' ? '저장' : 'Save to Journal'}
+                              onClick={() => {
+                                setShowResponse(false);
+                                setShowHistory(true);
+                              }}
+                            />
+                        </>
+                      }
                     />
                   </div>
                 </SkyContainer>

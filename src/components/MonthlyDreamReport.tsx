@@ -7,6 +7,7 @@ import { User } from '@supabase/supabase-js';
 import { getUserPlanInfo } from '../lib/subscription';
 import { isPremiumNow } from '../lib/premium';
 import { authHeader } from '../lib/authHeader';
+import { useScrollMotion } from '../lib/scrollMotion';
 
 interface MonthlyReportProps {
   user: User | null;
@@ -80,6 +81,7 @@ const ARCHETYPE_INFO: Record<string, { name: string; koName: string; category: s
 };
 
 export default function MonthlyDreamReport({ user, language = 'ko', onClose }: MonthlyReportProps) {
+  const scrollRef = useScrollMotion();
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(0);
@@ -487,10 +489,11 @@ export default function MonthlyDreamReport({ user, language = 'ko', onClose }: M
             <IconX size={20} />
           </button>
         )}
+        <div className="sm-bar" aria-hidden="true"><span data-sm-bar /></div>
       </div>
 
       {/* ── Scrollable body ── */}
-      <div className="mdr-scroll" style={{ overflowY: 'auto', padding: '24px 20px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div className="mdr-scroll" ref={scrollRef} style={{ overflowY: 'auto', padding: '24px 20px 48px', display: 'flex', flexDirection: 'column', gap: 28 }}>
 
         {/* 1. Narrative */}
         <section style={{ textAlign: 'center', paddingTop: 8 }}>

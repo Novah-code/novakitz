@@ -38,6 +38,8 @@ export default function SimpleDreamInterfaceWithAuth() {
   const [avatarInfo, setAvatarInfo] = useState<{ url: string | null; initial: string; name: string }>({ url: null, initial: '', name: '' });
   // True while the home screen is in a full-screen step (see SimpleDreamInterface).
   const [immersive, setImmersive] = useState(false);
+  // The tab bar's "+": bumped each tap, the home screen opens the dream form when it changes.
+  const [dreamRequest, setDreamRequest] = useState(0);
 
   /*
    * The drawer's panels are one at a time.
@@ -544,7 +546,8 @@ export default function SimpleDreamInterfaceWithAuth() {
    * cannot drift from what is actually on screen.
    */
   const activeTab: TabId =
-    showHistory || showCalendar ? 'journal'
+    showHistory ? 'history'
+    : showCalendar ? 'calendar'
     : showInsights || showMonthlyReport ? 'insights'
     : 'today';
   const activeSub: SubId | null =
@@ -563,7 +566,14 @@ export default function SimpleDreamInterfaceWithAuth() {
       return;
     }
     // Guests tapping a place that needs an account get the sign-in panel.
-    handleGuestAction(() => openPanel(tab === 'journal' ? 'calendar' : 'insights'));
+    handleGuestAction(() => openPanel(tab));
+  };
+
+  const openDreamForm = () => {
+    setMenuOpen(false);
+    setCalendarSelectedDate(null);
+    openPanel(null);
+    setDreamRequest((n) => n + 1);
   };
 
   const selectSub = (sub: SubId) => {
@@ -673,7 +683,7 @@ export default function SimpleDreamInterfaceWithAuth() {
         />
       )}
 
-      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} />
+      <SimpleDreamInterface user={user} language={language} initialShowHistory={showHistory} onHistoryClose={() => setShowHistory(false)} onGuestAnalyze={() => setIsGuestMode(true)} onImmersiveChange={setImmersive} openDreamRequest={dreamRequest} />
 
       {/* Dream Insights Modal */}
       {showInsights && user && (
@@ -979,6 +989,7 @@ export default function SimpleDreamInterfaceWithAuth() {
             sub={activeSub}
             onSelectTab={selectTab}
             onSelectSub={selectSub}
+            onPlus={openDreamForm}
           />
         </>
       )}
