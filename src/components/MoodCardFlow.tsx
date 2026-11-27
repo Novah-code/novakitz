@@ -22,7 +22,7 @@ interface MoodCardFlowProps {
   onEmotionLogged?: () => void;
 }
 
-type FlowStep = 'blurred' | 'record-place' | 'record-person' | 'record-scene' | 'analyzing' | 'revealed' | 'ego-sleep' | 'ego-stress' | 'ego-free';
+type FlowStep = 'blurred' | 'record-scene' | 'analyzing' | 'revealed' | 'ego-sleep' | 'ego-stress' | 'ego-free';
 
 // ── Novakitz Unconscious Archive: 20 Archetype Cards
 type ArcanaCard = { name: string; kr: string; arcana: string; theme: 1|2|3|4; from: string; mid: string; to: string };
@@ -139,6 +139,25 @@ const personOptions: { label: string; en: string; color: string; svg: (s: string
     svg: (s) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="9" r="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg> },
   { label: '나 혼자 (없음)', en: 'Just Me', color: '#8A98A8',
     svg: (s) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+];
+
+/*
+ * The place and person chips used to be two required screens before the dream
+ * itself: eight places and seven people, and "Next" stayed dimmed until one was
+ * picked. They are optional tags under the text now, four each, borrowing the
+ * old options' icons and colours.
+ */
+const placeQuick = [
+  { ...placeOptions[0], label: '집 / 방', en: 'Home' },
+  { ...placeOptions[3], label: '야외 / 자연', en: 'Outdoors' },
+  { ...placeOptions[1], label: '학교 / 직장', en: 'School / Work' },
+  { ...placeOptions[6], label: '낯선 곳', en: 'Somewhere strange' },
+];
+const personQuick = [
+  { ...personOptions[2], label: '아는 사람', en: 'Someone I know' },
+  { ...personOptions[3], label: '모르는 사람', en: 'A stranger' },
+  { ...personOptions[5], label: '동물 / 비현실적 존재', en: 'Animal / unreal' },
+  { ...personOptions[6], label: '나 혼자', en: 'Just me' },
 ];
 
 // ── Emotion → Arcana card pool mapping
@@ -915,7 +934,7 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
             {/* The two doors, as glass pills with the white round control — same as the home buttons. */}
             {([
               { key: 'dream', label: isKo ? '꿈 기억나요?' : 'Remember a dream?', primary: true,
-                go: () => { setIsEgoMode(false); setStep('record-place'); },
+                go: () => { setIsEgoMode(false); setStep('record-scene'); },
                 icon: <polyline points="9 18 15 12 9 6" /> },
               { key: 'mood', label: isKo ? '무드만 확인' : 'Check your mood', primary: false,
                 go: () => { setIsEgoMode(true); setStep('ego-sleep'); },
@@ -973,153 +992,32 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
   );
 
   // ==============================
-  // STEP: record-place
-  // ==============================
-  if (step === 'record-place') return (
-    <SkyBackdrop>
-      <Container onBack={() => setStep('blurred')} onClose={onClose}>
-        <div style={stepBody}>
-          <ProgressBar pct={33} />
-          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
-            {isKo ? '어떤 장소였나요?' : 'Where was it?'}
-          </p>
-          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
-            {isKo ? '여러 개 선택할 수 있어요' : 'You can select multiple'}
-          </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: '20px' }}>
-            {placeOptions.map((opt) => {
-              const label = isKo ? opt.label : opt.en;
-              return (
-                <Chip
-                  key={opt.label}
-                  label={label}
-                  svg={opt.svg}
-                  color={opt.color}
-                  selected={selectedPlaces.includes(label) && !showCustomPlace}
-                  onClick={() => togglePlace(label)}
-                />
-              );
-            })}
-            <Chip
-              label={isKo ? '기타 (직접 입력)' : 'Other'}
-              svg={(s) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>}
-              selected={showCustomPlace}
-              onClick={() => { setShowCustomPlace(v => !v); }}
-            />
-          </div>
-
-          {showCustomPlace && (
-            <input
-              autoFocus
-              value={customPlace}
-              onChange={e => setCustomPlace(e.target.value)}
-              placeholder={isKo ? '어떤 장소였는지 입력해주세요' : 'Describe the place...'}
-              style={{
-                width: '100%', padding: '12px 14px',
-                background: 'rgba(255,255,255,0.8)',
-                border: '1.5px solid rgba(46,60,51,0.30)', borderRadius: '12px',
-                fontSize: '14px', color: '#4A5D4E',
-                fontFamily: 'inherit', outline: 'none',
-                boxSizing: 'border-box', marginBottom: '16px',
-              }}
-            />
-          )}
-
-          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('record-person')} disabled={selectedPlaces.length === 0 && !customPlace} />
-        </div>
-      </Container>
-    </SkyBackdrop>
-  );
-
-  // ==============================
-  // STEP: record-person
-  // ==============================
-  if (step === 'record-person') return (
-    <SkyBackdrop>
-      <Container onBack={() => setStep('record-place')} onClose={onClose}>
-        <div style={stepBody}>
-          <ProgressBar pct={66} />
-          <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
-            {isKo ? '누가 나왔나요?' : 'Who appeared?'}
-          </p>
-          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
-            {isKo ? '여러 명 선택할 수 있어요' : 'You can select multiple'}
-          </p>
-
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', justifyContent: 'center', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: '20px' }}>
-            {personOptions.map((opt) => {
-              const label = isKo ? opt.label : opt.en;
-              return (
-                <Chip
-                  key={opt.label}
-                  label={label}
-                  svg={opt.svg}
-                  color={opt.color}
-                  selected={selectedPersons.includes(label) && !showCustomPerson}
-                  onClick={() => togglePerson(label)}
-                />
-              );
-            })}
-            <Chip
-              label={isKo ? '기타 (직접 입력)' : 'Other'}
-              svg={(s) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={s} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>}
-              selected={showCustomPerson}
-              onClick={() => { setShowCustomPerson(v => !v); }}
-            />
-          </div>
-
-          {showCustomPerson && (
-            <input
-              autoFocus
-              value={customPerson}
-              onChange={e => setCustomPerson(e.target.value)}
-              placeholder={isKo ? '어떤 존재였는지 입력해주세요' : 'Describe who appeared...'}
-              style={{
-                width: '100%', padding: '12px 14px',
-                background: 'rgba(255,255,255,0.8)',
-                border: '1.5px solid rgba(46,60,51,0.30)', borderRadius: '12px',
-                fontSize: '14px', color: '#4A5D4E',
-                fontFamily: 'inherit', outline: 'none',
-                boxSizing: 'border-box', marginBottom: '16px',
-              }}
-            />
-          )}
-
-          <NextButton label={isKo ? '다음' : 'Next'} onClick={() => setStep('record-scene')} disabled={selectedPersons.length === 0 && !customPerson} />
-        </div>
-      </Container>
-    </SkyBackdrop>
-  );
-
-  // ==============================
   // STEP: record-scene
   // ==============================
   if (step === 'record-scene') return (
     <SkyBackdrop>
-      <Container onBack={() => setStep('record-person')} onClose={onClose}>
+      <Container onBack={() => setStep('blurred')} onClose={onClose}>
         <div style={stepBody}>
-          <ProgressBar pct={100} />
           <p style={{ ...headingStyle(isKo, 36, 22), marginBottom: '12px' }}>
-            {isKo ? '무엇을 하고 있었나요?' : 'What were you doing?'}
+            {isKo ? '무엇이 기억나나요?' : 'What do you remember?'}
           </p>
-          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '28px' }}>
-            {isKo ? '핵심 장면을 짧게 적어주세요' : 'Briefly describe the key scene'}
+          <p style={{ fontSize: '14px', color: '#7d8f82', textAlign: 'center', marginBottom: '20px' }}>
+            {isKo ? '몇 단어만 적어도 괜찮아요' : 'A few words are enough'}
           </p>
 
-          <div style={{ position: 'relative', marginTop: 'clamp(32px, 8vh, 80px)', marginBottom: 0 }}>
+          <div style={{ position: 'relative', marginTop: 'clamp(8px, 2vh, 20px)', marginBottom: 0 }}>
             <textarea
-              value={isRecordingScene ? (isKo ? '음성 인식 중...' : 'Listening...') : sceneText}
+              value={sceneText}
               onChange={e => setSceneText(e.target.value)}
               placeholder={isKo
                 ? '예: 누군가에게 쫓기다가 갑자기 하늘을 날았다.'
                 : 'e.g. I was being chased, then suddenly I could fly.'}
               disabled={isRecordingScene}
               style={{
-                width: '100%', height: '280px',
+                width: '100%', height: '170px',
                 background: 'rgba(255,255,255,0.65)',
                 border: '1.5px solid rgba(255,255,255,0.9)',
-                borderRadius: '14px', padding: '14px', paddingBottom: '44px',
+                borderRadius: '14px', padding: '14px',
                 fontSize: '14px', color: '#4A5D4E',
                 fontFamily: 'inherit', outline: 'none',
                 resize: 'none', boxSizing: 'border-box',
@@ -1128,38 +1026,85 @@ export default function MoodCardFlow({ selectedEmotion, language, onClose, user,
               onFocus={e => { e.target.style.borderColor = 'rgba(46,60,51,0.30)'; }}
               onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.9)'; }}
             />
-            {canUseVoice && (
-            <button
-              type="button"
-              onClick={() => {
-                if (isRecordingScene) { sceneRecognitionRef.current?.stop(); }
-                else startSceneVoice();
-              }}
-              style={{
-                position: 'absolute', bottom: '10px', right: '10px',
-                width: '32px', height: '32px', borderRadius: '50%',
-                border: 'none',
-                background: isRecordingScene ? 'rgba(255,68,68,0.12)' : 'rgba(255,255,255,0.85)',
-                color: isRecordingScene ? '#ff4444' : '#4A5D4E',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s',
-              }}
-              title={isRecordingScene ? (isKo ? '녹음 중지' : 'Stop') : (isKo ? '음성 입력' : 'Voice input')}
-            >
-              {isRecordingScene ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="22"/>
-                </svg>
-              )}
-            </button>
+
+            {/*
+              Voice, as its own state rather than a small icon: while it listens the
+              text box gives way to a pulsing aura, a "listening" line and what has
+              been heard so far, with one round button to finish. The words land in
+              the text box afterwards, where they can still be edited.
+            */}
+            {isRecordingScene && (
+              <div
+                role="status"
+                aria-live="polite"
+                style={{
+                  position: 'absolute', inset: 0, borderRadius: 14, zIndex: 2,
+                  background: 'linear-gradient(180deg, #FFFFFF 0%, #F8F4EC 100%)',
+                  border: '1.5px solid rgba(255,255,255,0.95)',
+                  boxShadow: '0 8px 24px rgba(40,60,45,0.12)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 18px', gap: 6,
+                }}
+              >
+                <div style={{ position: 'relative', width: 70, height: 70, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-hidden="true">
+                  {[0, 1, 2].map((n) => (
+                    <span key={n} style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(237,163,188,0.35)', animation: `voice-pulse 2.1s ease-out ${n * 0.7}s infinite` }} />
+                  ))}
+                  <span style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(180deg,#F6B7CB,#EDA3BC)', boxShadow: '0 2px 10px rgba(194,122,140,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /></svg>
+                  </span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#2E3C33' }}>{isKo ? '듣고 있어요' : 'Listening'}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.5, color: '#7d8f82', textAlign: 'center', maxHeight: 40, overflow: 'hidden', width: '100%' }}>
+                  {sceneText || (isKo ? '기억나는 대로 편하게 말해 주세요' : 'Say it however it comes back to you')}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => sceneRecognitionRef.current?.stop()}
+                  style={{ marginTop: 2, height: 36, padding: '0 18px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.9)', background: '#fff', boxShadow: '0 2px 10px rgba(40,60,45,0.14)', color: '#C27A8C', fontFamily: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                  {isKo ? '끝내기' : 'Done'}
+                </button>
+                <style>{'@keyframes voice-pulse { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(1.25); opacity: 0; } } @media (prefers-reduced-motion: reduce) { [style*="voice-pulse"] { animation: none !important; opacity: 0.4 } }'}</style>
+              </div>
             )}
           </div>
 
-          <NextButton label={isKo ? '카드 열기' : 'Reveal card'} onClick={handleFinishRecord} />
+          {canUseVoice && !isRecordingScene && (
+            <button
+              type="button"
+              onClick={startSceneVoice}
+              style={{
+                marginTop: 12, width: '100%', height: 48, borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.9)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(246,243,234,0.66) 100%)',
+                boxShadow: '0 4px 14px rgba(40,60,45,0.1)',
+                color: '#2E3C33', fontFamily: 'inherit', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+              }}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /></svg>
+              {isKo ? '말로 기록하기' : 'Speak it instead'}
+            </button>
+          )}
+
+          {/* Optional tags: where and who. Nothing here is required. */}
+          {([
+            { key: 'where', title: isKo ? '어디였나요? (선택)' : 'Where? (optional)', opts: placeQuick, picked: selectedPlaces, toggle: togglePlace },
+            { key: 'who', title: isKo ? '누가 나왔나요? (선택)' : 'Who? (optional)', opts: personQuick, picked: selectedPersons, toggle: togglePerson },
+          ] as const).map((g) => (
+            <div key={g.key} style={{ marginTop: 18 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: isKo ? 0.4 : 1.4, color: '#7d8f82', textTransform: isKo ? 'none' : 'uppercase', marginBottom: 10 }}>{g.title}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {g.opts.map((opt) => {
+                  const label = isKo ? opt.label : opt.en;
+                  return <Chip key={opt.en} label={label} svg={opt.svg} color={opt.color} selected={g.picked.includes(label)} onClick={() => g.toggle(label)} />;
+                })}
+              </div>
+            </div>
+          ))}
+
+          <NextButton label={isKo ? '카드 열기' : 'Reveal my card'} onClick={handleFinishRecord} />
         </div>
       </Container>
     </SkyBackdrop>
