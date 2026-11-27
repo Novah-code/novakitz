@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     const { dreamText, language = 'en', useRecentDreams = false } = await request.json();
 
     let finalDreamText = dreamText;
-    let affirmationCount = 1;
+    // One a day, for everyone (2026-11-27). It was three, shown as a checklist; one
+    // sentence reads as a ritual rather than a to-do. Affirmations are free for all
+    // accounts (see the pricing page), so this is not tied to the plan.
+    const affirmationCount = 1;
 
-    // Get user's plan to determine number of affirmations
     const plan = await getUserPlan(userId);
-    affirmationCount = 3;
     console.log('🔍 [API] Affirmation generation - User plan:', {
       userId,
       fullPlanObject: plan,
@@ -38,7 +39,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Handle recent dreams mode (for no-dream days)
-    // Free users get 1 affirmation, premium users get 3
     if (useRecentDreams) {
       console.log('🔍 [API] Recent dreams mode:', {
         planSlug: plan.planSlug,
@@ -101,15 +101,13 @@ export async function POST(request: NextRequest) {
 위 꿈에서 핵심 장면이나 감정을 반영한 확언 ${affirmationCount}개를 만들어주세요. 꿈 내용을 직접 언급하며 현재형으로 작성하세요.
 
 형식:
-1. [확언]
-${affirmationCount === 3 ? '2. [확언]\n3. [확언]' : ''}`
+1. [확언]`
       : `Dream: "${finalDreamText}"
 
-Create ${affirmationCount} affirmation${affirmationCount > 1 ? 's' : ''} that directly reference key scenes or emotions from this dream. Use present tense.
+Create ${affirmationCount} affirmation that directly references key scenes or emotions from this dream. Use present tense.
 
 Format:
-1. [affirmation]
-${affirmationCount === 3 ? '2. [affirmation]\n3. [affirmation]' : ''}`;
+1. [affirmation]`;
 
     // Use Gemini API with server-side key
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY;
